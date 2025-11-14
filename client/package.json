@@ -1,0 +1,19 @@
+{
+  "name": "punto-de-venta-client",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend POS con React y Vite",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "jspdf": "^2.5.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.8"
+  }
+}
