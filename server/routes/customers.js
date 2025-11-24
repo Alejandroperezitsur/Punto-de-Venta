@@ -22,9 +22,9 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { name, phone, email } = req.body;
+  const { name, phone, email, rfc } = req.body;
   try {
-    const result = await db.run('INSERT INTO customers (name, phone, email) VALUES (?, ?, ?)', [name, phone || null, email || null]);
+    const result = await db.run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', [name, phone || null, email || null, rfc || null]);
     const row = await db.get('SELECT * FROM customers WHERE id = ?', [result.id]);
     res.status(201).json(row);
   } catch (e) {
@@ -33,11 +33,11 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-  const { name, phone, email } = req.body;
+  const { name, phone, email, rfc } = req.body;
   try {
     const current = await db.get('SELECT * FROM customers WHERE id = ?', [req.params.id]);
     if (!current) return res.status(404).json({ error: 'No encontrado' });
-    await db.run('UPDATE customers SET name = ?, phone = ?, email = ? WHERE id = ?', [name ?? current.name, (phone ?? current.phone) || null, (email ?? current.email) || null, req.params.id]);
+    await db.run('UPDATE customers SET name = ?, phone = ?, email = ?, rfc = ? WHERE id = ?', [name ?? current.name, (phone ?? current.phone) || null, (email ?? current.email) || null, (rfc ?? current.rfc) || null, req.params.id]);
     const row = await db.get('SELECT * FROM customers WHERE id = ?', [req.params.id]);
     res.json(row);
   } catch (e) {

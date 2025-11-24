@@ -49,6 +49,12 @@ function init() {
     phone TEXT,
     email TEXT
   )`);
+  try {
+    const cols = all('PRAGMA table_info(customers)')
+    if (!cols.find(c => c.name === 'rfc')) {
+      run('ALTER TABLE customers ADD COLUMN rfc TEXT')
+    }
+  } catch {}
   db.exec(`CREATE TABLE IF NOT EXISTS sales (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id INTEGER,
@@ -78,6 +84,12 @@ function init() {
     created_at TEXT NOT NULL,
     FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE
   )`);
+  try {
+    const cols = all('PRAGMA table_info(payments)')
+    if (!cols.find(c => c.name === 'user_id')) {
+      run('ALTER TABLE payments ADD COLUMN user_id INTEGER')
+    }
+  } catch {}
 
   db.exec(`CREATE TABLE IF NOT EXISTS receivables (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,6 +101,15 @@ function init() {
     created_at TEXT NOT NULL,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS receivable_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    receivable_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (receivable_id) REFERENCES receivables(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
   )`);
   db.exec(`CREATE TABLE IF NOT EXISTS inventory_movements (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -158,13 +179,13 @@ function init() {
   run('INSERT OR IGNORE INTO products (name, sku, price, cost, stock, category_id) VALUES (?, ?, ?, ?, ?, ?)', ['Bolígrafo Azul', 'BOL-AZ', 7.00, 2.00, 300, catGeneral]);
 
   if (!get('SELECT id FROM customers WHERE email = ?', ['juan.perez@example.com'])) {
-    run('INSERT INTO customers (name, phone, email) VALUES (?, ?, ?)', ['Juan Pérez', '555-111-2222', 'juan.perez@example.com']);
+    run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', ['Juan Pérez', '555-111-2222', 'juan.perez@example.com', 'JUAP800101XXX']);
   }
   if (!get('SELECT id FROM customers WHERE email = ?', ['maria.lopez@example.com'])) {
-    run('INSERT INTO customers (name, phone, email) VALUES (?, ?, ?)', ['María López', '555-333-4444', 'maria.lopez@example.com']);
+    run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', ['María López', '555-333-4444', 'maria.lopez@example.com', 'MALO810202YYY']);
   }
   if (!get('SELECT id FROM customers WHERE email = ?', ['compras@xyz.com'])) {
-    run('INSERT INTO customers (name, phone, email) VALUES (?, ?, ?)', ['Empresa XYZ', '555-777-8888', 'compras@xyz.com']);
+    run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', ['Empresa XYZ', '555-777-8888', 'compras@xyz.com', 'XYZ010203ZZZ']);
   }
 }
 

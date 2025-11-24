@@ -55,6 +55,32 @@ app.get('/api/reports/customers', (req, res) => {
   res.json(rows);
 });
 
+app.get('/api/reports/demo-summary', (req, res) => {
+  try {
+    const from = req.query.from ? new Date(req.query.from).toISOString() : new Date('1970-01-01').toISOString();
+    const to = req.query.to ? new Date(req.query.to).toISOString() : new Date().toISOString();
+    const setting = db.get('SELECT value FROM settings WHERE key = ?', ['demo_sales']);
+    let ids = [];
+    try {
+      const parsed = JSON.parse(setting?.value || '[]');
+      if (Array.isArray(parsed)) ids = parsed;
+      else if (parsed && typeof parsed === 'object' && Array.isArray(parsed.ids)) ids = parsed.ids;
+    } catch {}
+    let demo = { count: 0, total: 0 };
+    let real = { count: 0, total: 0 };
+    if (ids.length > 0) {
+      const placeholders = ids.map(() => '?').join(',');
+      demo = db.get(`SELECT COUNT(*) AS count, SUM(total) AS total FROM sales WHERE id IN (${placeholders}) AND created_at BETWEEN ? AND ?`, [...ids, from, to]);
+      real = db.get(`SELECT COUNT(*) AS count, SUM(total) AS total FROM sales WHERE id NOT IN (${placeholders}) AND created_at BETWEEN ? AND ?`, [...ids, from, to]);
+    } else {
+      real = db.get('SELECT COUNT(*) AS count, SUM(total) AS total FROM sales WHERE created_at BETWEEN ? AND ?', [from, to]);
+    }
+    res.json({ demo, real });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   db.init();

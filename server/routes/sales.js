@@ -2,9 +2,27 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { auth } = require('./auth');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'pos-dev-secret';
 
 function nowISO() {
   return new Date().toISOString();
+}
+
+async function deleteSaleWithReversal(sale_id) {
+  const sale = await db.get('SELECT * FROM sales WHERE id = ?', [sale_id])
+  if (!sale) return false
+  const items = await db.all('SELECT * FROM sale_items WHERE sale_id = ?', [sale_id])
+  for (const it of items) {
+    const product = await db.get('SELECT * FROM products WHERE id = ?', [it.product_id])
+    if (!product) continue
+    const newStock = +(product.stock + it.quantity).toFixed(3)
+    await db.run('UPDATE products SET stock = ? WHERE id = ?', [newStock, it.product_id])
+    await db.run('DELETE FROM inventory_movements WHERE product_id = ? AND reason = ?', [it.product_id, `Venta #${sale_id}`])
+  }
+  await db.run('DELETE FROM cash_movements WHERE reference = ?', [`Venta #${sale_id}`])
+  await db.run('DELETE FROM sales WHERE id = ?', [sale_id])
+  return true
 }
 
 router.get('/', async (req, res) => {
@@ -20,8 +38,10 @@ router.get('/:id', async (req, res) => {
   try {
     const sale = await db.get('SELECT * FROM sales WHERE id = ?', [req.params.id]);
     if (!sale) return res.status(404).json({ error: 'No encontrado' });
-    const items = await db.all('SELECT * FROM sale_items WHERE sale_id = ?', [req.params.id]);
-    res.json({ ...sale, items });
+    const items = await db.all('SELECT si.*, p.name AS product_name FROM sale_items si JOIN products p ON si.product_id = p.id WHERE si.sale_id = ?', [req.params.id]);
+    const payments = await db.all('SELECT p.method, p.amount, u.username FROM payments p LEFT JOIN users u ON u.id = p.user_id WHERE p.sale_id = ?', [req.params.id]);
+    const customer = sale.customer_id ? await db.get('SELECT name, phone, email, rfc FROM customers WHERE id = ?', [sale.customer_id]) : null;
+    res.json({ ...sale, customer_name: customer?.name || null, customer_phone: customer?.phone || null, customer_email: customer?.email || null, customer_rfc: customer?.rfc || null, items, payments });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -71,8 +91,14 @@ router.post('/', async (req, res) => {
     const sale = await db.get('SELECT * FROM sales WHERE id = ?', [sale_id]);
     const saleItems = await db.all('SELECT * FROM sale_items WHERE sale_id = ?', [sale_id]);
     const payList = Array.isArray(payments) && payments.length ? payments : [{ method: payment_method, amount: total }];
+    let userId = null;
+    try {
+      const h = req.headers.authorization || '';
+      const m = h.match(/^Bearer\s+(.*)$/);
+      if (m) { const payload = jwt.verify(m[1], JWT_SECRET); userId = payload.uid }
+    } catch {}
     for (const p of payList) {
-      await db.run('INSERT INTO payments (sale_id, method, amount, created_at) VALUES (?, ?, ?, ?)', [sale_id, p.method, p.amount, created_at]);
+      await db.run('INSERT INTO payments (sale_id, method, amount, created_at, user_id) VALUES (?, ?, ?, ?, ?)', [sale_id, p.method, p.amount, created_at, userId]);
     }
     if (payList.some(p => p.method === 'credit')) {
       if (!customer_id) return res.status(400).json({ error: 'Crédito requiere cliente' });
@@ -86,10 +112,44 @@ router.post('/', async (req, res) => {
         await db.run('INSERT INTO cash_movements (session_id, type, reference, amount, created_at) VALUES (?, ?, ?, ?, ?)', [session.id, 'sale', `Venta #${sale_id}`, cashAmount, created_at]);
       }
     } catch {}
-    res.status(201).json({ ...sale, items: saleItems });
+    const customer = sale.customer_id ? await db.get('SELECT name, phone, email, rfc FROM customers WHERE id = ?', [sale.customer_id]) : null;
+    res.status(201).json({ ...sale, customer_name: customer?.name || null, customer_phone: customer?.phone || null, customer_email: customer?.email || null, customer_rfc: customer?.rfc || null, items: saleItems });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
 });
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const sale_id = +req.params.id
+    const ok = await deleteSaleWithReversal(sale_id)
+    if (!ok) return res.status(404).json({ error: 'No encontrado' })
+    res.json({ ok })
+  } catch (e) {
+    res.status(400).json({ error: e.message })
+  }
+})
+
+router.post('/reset-demo', async (req, res) => {
+  try {
+    const s = await db.all('SELECT key, value FROM settings')
+    const map = Object.fromEntries(s.map(r => [r.key, r.value]))
+    let ids = []
+    try {
+      const parsed = JSON.parse(map.demo_sales || '[]')
+      if (Array.isArray(parsed)) ids = parsed
+      else if (parsed && typeof parsed === 'object' && Array.isArray(parsed.ids)) ids = parsed.ids
+    } catch {}
+    let count = 0
+    for (const id of ids) {
+      const ok = await deleteSaleWithReversal(+id)
+      if (ok) count++
+    }
+    await db.run('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value', ['demo_sales', JSON.stringify({ ids: [], labels: [] })])
+    res.json({ ok: true, deleted: count, ids })
+  } catch (e) {
+    res.status(400).json({ error: e.message })
+  }
+})
 
 module.exports = router;
