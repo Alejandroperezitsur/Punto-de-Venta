@@ -1220,6 +1220,7 @@ function Ventas() {
   const [productFilter, setProductFilter] = useState('')
   const [skuInput, setSkuInput] = useState('')
   const [cart, setCart] = useState([])
+  const [productQtyMap, setProductQtyMap] = useState({})
   const productSearchRef = useRef(null)
   const skuRef = useRef(null)
   const discountRef = useRef(null)
@@ -1229,6 +1230,8 @@ function Ventas() {
   const customerRef = useRef(null)
   const newProdNameRef = useRef(null)
   const newClientNameRef = useRef(null)
+  const [newProdAutoAdd, setNewProdAutoAdd] = useState(() => { try { return localStorage.getItem('autoAddProduct') !== '0' } catch { return true } })
+  const [newClientSelectCurrent, setNewClientSelectCurrent] = useState(() => { try { return localStorage.getItem('selectNewClient') !== '0' } catch { return true } })
   const [customers, setCustomers] = useState([])
   const [customerQuery, setCustomerQuery] = useState('')
   const [receivablesSummary, setReceivablesSummary] = useState(null)
@@ -1268,11 +1271,12 @@ function Ventas() {
   const [newClientOpen, setNewClientOpen] = useState(false)
   const [newClient, setNewClient] = useState({ name: '', phone: '', email: '', rfc: '' })
   const [newSaving, setNewSaving] = useState(false)
+  const [productsLoading, setProductsLoading] = useState(false)
 
   useEffect(() => { api('/settings').then(s => { setCurrency(s.currency || 'MXN'); setTaxRate(+s.tax_rate || 0.16); setBusinessName(s.business_name || ''); setBusinessRFC(s.business_rfc || ''); setBusinessPhone(s.business_phone || ''); setBusinessEmail(s.business_email || ''); setBusinessAddress(s.business_address || ''); setLogoDataUrl(s.logo_data_url || ''); setTicketWidth(parseInt(s.ticket_width || '80')); setLogoSize(parseInt(s.ticket_logo_size_mm || '20')); setAutoScan(String(s.auto_scan || '') === '1'); setTicketFooter(s.ticket_footer || ''); setTicketQrDataUrl(s.ticket_qr_data_url || ''); setTicketQrCaption(s.ticket_qr_caption || ''); setTicketQr2DataUrl(s.ticket_qr2_data_url || ''); setTicketQr2Caption(s.ticket_qr2_caption || ''); setTicketQrSize(parseInt(s.ticket_qr_size_mm || String((parseInt(s.ticket_width || '80') <= 58) ? 26 : 32))); setCreditTicketShowContact2(String(s.credit_ticket_show_contact || '1') === '1'); setCreditTicketShowRFC2(String(s.credit_ticket_show_rfc || '1') === '1'); setTicketBodySize2(parseInt(s.ticket_font_body_size || '10')); setTicketLineGap2(parseInt(s.ticket_line_gap_mm || '5')); setTicketHeaderSize2(parseInt(s.ticket_font_header_size || '12')); setTicketCompact2(String(s.ticket_compact_mode || '0') === '1') }) }, [])
   const fmt = useMemo(() => new Intl.NumberFormat(undefined, { style: 'currency', currency }), [currency])
 
-  const loadProducts = async () => setProducts(await api('/products'))
+  const loadProducts = async () => { try { setProductsLoading(true); const list = await api('/products'); setProducts(list) } catch { setProducts([]) } finally { setProductsLoading(false) } }
   useEffect(() => { loadProducts() }, [])
   const loadCustomers = async () => setCustomers(await api('/customers'))
   useEffect(() => { loadCustomers() }, [])
@@ -1298,10 +1302,13 @@ function Ventas() {
     if (p) addToCart(p)
   }
   useEffect(() => { if (!autoScan) return; if (!skuInput) return; if (scanTimerRef.current) clearTimeout(scanTimerRef.current); scanTimerRef.current = setTimeout(() => { addBySku(skuInput); setSkuInput('') }, 300); return () => { if (scanTimerRef.current) { clearTimeout(scanTimerRef.current); scanTimerRef.current = null } } }, [skuInput, autoScan])
+  useEffect(() => { try { productSearchRef.current?.focus() } catch {} }, [])
   useEffect(() => { try { const q = localStorage.getItem('productFilter') || ''; if (q) setProductFilter(q) } catch {} }, [])
   useEffect(() => { try { localStorage.setItem('productFilter', productFilter || '') } catch {} }, [productFilter])
   useEffect(() => { try { if (newProdOpen) setTimeout(() => newProdNameRef.current?.focus(), 0) } catch {} }, [newProdOpen])
   useEffect(() => { try { if (newClientOpen) setTimeout(() => newClientNameRef.current?.focus(), 0) } catch {} }, [newClientOpen])
+  useEffect(() => { try { localStorage.setItem('autoAddProduct', newProdAutoAdd ? '1' : '0') } catch {} }, [newProdAutoAdd])
+  useEffect(() => { try { localStorage.setItem('selectNewClient', newClientSelectCurrent ? '1' : '0') } catch {} }, [newClientSelectCurrent])
 
   useEffect(() => {
     const onKey = (e) => {
@@ -1328,18 +1335,18 @@ function Ventas() {
     setNewSaving(true)
     try {
       const created = await api('/products', { method: 'POST', body: JSON.stringify({ name, sku: String(f.sku || '').trim(), price: +parseFloat(f.price || 0), stock: +parseFloat(f.stock || 0) }) })
-      if (created && created.id) { addToCart(created) }
+      if (created && created.id) { if (newProdAutoAdd) addToCart(created) }
       else {
         try {
           const list = await api('/products')
           const found = list.find(p => (String(p.sku || '').toLowerCase() === String(f.sku || '').toLowerCase()) || (String(p.name || '') === name))
-          if (found) addToCart(found)
+          if (found && newProdAutoAdd) addToCart(found)
         } catch {}
       }
       setNewProd({ name: '', sku: '', price: 0, stock: 0 })
       setNewProdOpen(false)
       await loadProducts()
-      try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Producto agregado al carrito' })) } catch {}
+      try { window.dispatchEvent(new CustomEvent('app-message', { detail: newProdAutoAdd ? 'Producto agregado al carrito' : 'Producto agregado' })) } catch {}
     } catch (e) {
       try { window.dispatchEvent(new CustomEvent('app-error', { detail: String(e?.message || 'Error') })) } catch {}
     } finally { setNewSaving(false) }
@@ -1357,11 +1364,12 @@ function Ventas() {
     if (rfc && !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(rfc)) { try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'RFC inválido' })) } catch {}; return }
     setNewSaving(true)
     try {
-      await api('/customers', { method: 'POST', body: JSON.stringify({ name, email: email || null, phone: phone || null, rfc: rfc || null }) })
+      const created = await api('/customers', { method: 'POST', body: JSON.stringify({ name, email: email || null, phone: phone || null, rfc: rfc || null }) })
       setNewClient({ name: '', phone: '', email: '', rfc: '' })
       setNewClientOpen(false)
       await loadCustomers()
-      try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Cliente agregado' })) } catch {}
+      if (created && created.id && newClientSelectCurrent) { setCustomerId(String(created.id)); setCustomerTouched(true) }
+      try { window.dispatchEvent(new CustomEvent('app-message', { detail: (created && created.id && newClientSelectCurrent) ? 'Cliente agregado y seleccionado' : 'Cliente agregado' })) } catch {}
     } catch (e) {
       try { window.dispatchEvent(new CustomEvent('app-error', { detail: String(e?.message || 'Error') })) } catch {}
     } finally { setNewSaving(false) }
@@ -1498,10 +1506,32 @@ function Ventas() {
                     <td>{p.id}</td>
                     <td>{(() => { const q = productFilter.trim().toLowerCase(); const name = String(p.name || ''); if (!q) return name; const idx = name.toLowerCase().indexOf(q); if (idx < 0) return name; const pre = name.slice(0, idx); const match = name.slice(idx, idx + q.length); const post = name.slice(idx + q.length); return (<span>{pre}<span style={{ backgroundColor: 'rgba(255, 234, 0, 0.45)' }}>{match}</span>{post}</span>) })()}</td>
                     <td className="right">{fmt.format(p.price)}</td>
-                    <td className="right hide-sm">{p.stock}</td>
-                    <td><button className="btn" onClick={(e) => addToCart(p, e.shiftKey ? 5 : 1)} title="Agregar al carrito (Shift agrega 5)">Agregar</button></td>
+                    <td className="right hide-sm">{p.stock} {p.stock <= 0 ? (<span className="badge badge-accent" style={{ marginLeft: 6 }}>Sin stock</span>) : null}</td>
+                    <td>
+                      <div className="row" style={{ justifyContent: 'flex-end', gap: 4 }}>
+                        <button className="btn btn-mini" onClick={() => setProductQtyMap({ ...productQtyMap, [p.id]: Math.max(1, (productQtyMap[p.id] ?? 1) - 1) })} title="Reducir cantidad">-</button>
+                        <input type="number" min="1" step="1" value={productQtyMap[p.id] ?? 1} onChange={e => setProductQtyMap({ ...productQtyMap, [p.id]: Math.max(1, parseInt(e.target.value || '1')) })} style={{ maxWidth: 70 }} title="Cantidad a agregar" />
+                        <button className="btn btn-mini" onClick={() => setProductQtyMap({ ...productQtyMap, [p.id]: (productQtyMap[p.id] ?? 1) + 1 })} title="Aumentar cantidad">+</button>
+                        <button className="btn" onClick={(e) => addToCart(p, e.shiftKey ? 5 : (productQtyMap[p.id] ?? 1))} title="Agregar al carrito (Shift agrega 5)">Agregar</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
+                {productsLoading && (
+                  <tr><td colSpan="5">
+                    <div className="row" style={{ alignItems: 'center', gap: 10 }}>
+                      <div className="spinner" />
+                      <span className="muted">Cargando productos...</span>
+                    </div>
+                    <div className="row" style={{ marginTop: 8, gap: 6 }}>
+                      <div className="skeleton-line" style={{ width: '25%' }} />
+                      <div className="skeleton-line" style={{ width: '45%' }} />
+                      <div className="skeleton-line" style={{ width: '15%' }} />
+                      <div className="skeleton-line" style={{ width: '15%' }} />
+                    </div>
+                  </td></tr>
+                )}
+                {(() => { const q = productFilter.trim().toLowerCase(); const list = products.filter(p => { if (!q) return true; return (p.name?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q)) }); return list.length === 0 ? (<tr><td colSpan="5">Sin resultados <button className="btn btn-ghost" onClick={() => setProductFilter('')}>Limpiar</button></td></tr>) : null })()}
               </tbody>
             </table>
           </div>
@@ -1510,20 +1540,37 @@ function Ventas() {
           <div className="card" style={{ marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <h3>Carrito</h3>
-              {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Ayuda del carrito" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Carrito', text: 'Usa + y - para ajustar cantidades, Quitar para eliminar un ítem. Subtotal e IVA se calculan automáticamente.' } })) } catch {} }}><IconInfo /></button>}
+              <div className="row" style={{ gap: 6 }}>
+                <button className="btn btn-ghost" onClick={() => { if (cart.length === 0) return; const ok = window.confirm('¿Vaciar carrito completo?'); if (!ok) return; setCart([]); try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Carrito vaciado' })) } catch {} }} title="Eliminar todos los ítems">Vaciar carrito</button>
+                {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Ayuda del carrito" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Carrito', text: 'Usa + y - para ajustar cantidades, Quitar para eliminar un ítem. Subtotal e IVA se calculan automáticamente.' } })) } catch {} }}><IconInfo /></button>}
+              </div>
+            </div>
+            {(() => { const pending = Math.max(0, totals.total - payTotal); const label = pending > 0 ? `Pendiente: ${fmt.format(pending)}` : 'Completado'; return (
+              <div className="row" style={{ justifyContent: 'space-between', marginTop: 6 }}>
+                <span className="muted">Total: {fmt.format(totals.total)}</span>
+                <span className={pending > 0 ? 'badge badge-accent' : 'badge badge-primary'}>{label}</span>
+              </div>
+            ) })()}
+            <div className="row" style={{ justifyContent: 'space-between', marginTop: 6 }}>
+              <span className="muted">Subtotal: {fmt.format(totals.subtotal)} · IVA: {fmt.format(totals.tax)} · Descuento: {fmt.format(totals.discount)}</span>
             </div>
             <table className="table">
               <thead><tr><th>Producto</th><th>Cant</th><th className="right">Precio</th><th></th></tr></thead>
               <tbody>
+                {cart.length === 0 && (
+                  <tr>
+                    <td colSpan="4">Carrito vacío <button className="btn btn-ghost" onClick={() => { try { skuRef.current?.focus() } catch {} }} title="Ir al campo de escaneo">Agregar producto</button></td>
+                  </tr>
+                )}
                 {cart.map((i, idx) => (
                   <tr key={idx}>
                     <td>{i.name}</td>
                     <td className="right">{i.quantity}</td>
                     <td className="right">{fmt.format(i.unit_price * i.quantity)}</td>
                     <td className="right">
-                      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                        <button className="btn" onClick={() => setCart(cart.map((x,ii)=> ii===idx?{...x,quantity:x.quantity+1}:x))} title="Aumentar cantidad">+</button>
-                        <button className="btn" onClick={() => setCart(cart.map((x,ii)=> ii===idx?{...x,quantity:Math.max(1,x.quantity-1)}:x))} title="Reducir cantidad">-</button>
+                      <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                        <button className="btn btn-mini" onClick={() => setCart(cart.map((x,ii)=> ii===idx?{...x,quantity:x.quantity+1}:x))} title="Aumentar cantidad">+</button>
+                        <button className="btn btn-mini" onClick={() => setCart(cart.map((x,ii)=> ii===idx?{...x,quantity:Math.max(1,x.quantity-1)}:x))} title="Reducir cantidad">-</button>
                         <button className="btn btn-ghost" onClick={() => setCart(cart.filter((_,ii)=> ii!==idx))} title="Quitar del carrito">Quitar</button>
                       </div>
                     </td>
@@ -1531,23 +1578,20 @@ function Ventas() {
                 ))}
               </tbody>
             </table>
-            <div style={{ marginTop: 8, fontWeight: 600 }}>Subtotal: {fmt.format(totals.subtotal)}</div>
-            <div>IVA: {fmt.format(totals.tax)}</div>
             <div>
               <label title="Aplica un descuento total">Descuento</label>
               <input ref={discountRef} type="number" step="0.01" value={discount} onChange={e => setDiscount(e.target.value)} style={{ maxWidth: 140, marginLeft: 8 }} title="Descuento total de la venta" placeholder="Ej. 10 o 10.50" />
               {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px', marginLeft: 8 }} title="Sobre descuentos" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Descuento', text: 'El descuento se aplica al total con IVA. Usa Alt+D para enfocar este campo.' } })) } catch {} }}><IconInfo /></button>}
             </div>
-            {totals.discount > 0 && <div>Descuento aplicado: {fmt.format(totals.discount)}</div>}
             <div style={{ fontWeight: 700 }}>Total: {fmt.format(totals.total)}</div>
           </div>
-          <div className="card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <h4>Pagos</h4>
-              {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Cómo registrar pagos" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Pagos', text: 'Agrega uno o más métodos (efectivo, tarjeta, transferencia, crédito). Usa los botones para completar pendiente en efectivo o crédito.' } })) } catch {} }}><IconInfo /></button>}
-            </div>
-            {!creditAllowed && <div className="accent" style={{ marginBottom: 6 }}>Crédito deshabilitado por adeudos</div>}
-            <table className="table">
+        <div className="card">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h4>Pagos</h4>
+            {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Cómo registrar pagos" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Pagos', text: 'Agrega uno o más métodos (efectivo, tarjeta, transferencia, crédito). Usa los botones para completar pendiente en efectivo o crédito.' } })) } catch {} }}><IconInfo /></button>}
+          </div>
+          {!creditAllowed && <div className="accent" style={{ marginBottom: 6 }}>Crédito deshabilitado por adeudos</div>}
+          <table className="table">
               <thead><tr><th>Método</th><th className="right">Monto</th><th></th></tr></thead>
               <tbody>
                 {payments.map((p, idx) => (
@@ -1567,9 +1611,12 @@ function Ventas() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+          </table>
+          <div className="row" style={{ gap: 8 }}>
             <button className="btn" onClick={() => setPayments([...payments, { method: 'cash', amount: 0 }])} title="Agregar un nuevo pago">Agregar pago</button>
-            <div style={{ marginTop: 8 }}>Pagado: {fmt.format(payTotal)}</div>
+            <button className="btn btn-ghost" onClick={() => setPayments([{ method: 'cash', amount: 0 }])} title="Quitar todos los métodos de pago">Limpiar pagos</button>
+          </div>
+          <div style={{ marginTop: 8 }}>Pagado: {fmt.format(payTotal)}</div>
             {(() => { const cred = payments.reduce((a,p)=> a + (p.method==='credit' ? (p.amount||0) : 0), 0); return cred > 0 ? <div className="muted">Crédito previsto: {fmt.format(cred)}</div> : null })()}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span>Pendiente: {fmt.format(Math.max(0, totals.total - payTotal))}</span>
@@ -1633,7 +1680,7 @@ function Ventas() {
               } catch { return null } })()}
               {(hasCredit && customerTouched && !customerValid) && <div className="accent" style={{ marginTop: 6 }}>Crédito requiere ID cliente válido</div>}
               {receivablesSummary && (receivablesSummary.total_due || 0) > 0 && (
-                <div className="accent" style={{ marginTop: 6, border: '1px solid var(--accent)', borderRadius: 6, padding: '6px 8px' }}>
+                <div className="accent" style={{ marginTop: 6, border: '1px solid var(--accent)', borderRadius: 6, padding: '6px 8px' }} title="El cliente tiene adeudos, el crédito se deshabilita hasta liquidar">
                   Cliente con adeudos: {receivablesSummary.count} · {fmt.format(receivablesSummary.total_due || 0)} · Crédito deshabilitado
                   <div style={{ marginTop: 6, display: 'flex', gap: 8, alignItems: 'center' }}>
                     <button className="btn" onClick={() => setShowReceivables(v => !v)} title="Ver u ocultar adeudos del cliente">{showReceivables ? 'Ocultar adeudos' : 'Ver adeudos'}</button>
@@ -1718,6 +1765,10 @@ function Ventas() {
               <input placeholder="Precio" type="number" step="0.01" value={newProd.price} onChange={e => setNewProd({ ...newProd, price: +e.target.value })} title="Precio unitario" />
               <input placeholder="Stock" type="number" step="0.001" value={newProd.stock} onChange={e => setNewProd({ ...newProd, stock: +e.target.value })} title="Inventario disponible" />
             </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }} title="Agregar automáticamente al carrito al guardar">
+              <input type="checkbox" checked={newProdAutoAdd} onChange={e => setNewProdAutoAdd(e.target.checked)} />
+              Agregar al carrito automáticamente
+            </label>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setNewProdOpen(false)}>Cancelar</button>
               <button className="btn" onClick={saveNewProduct} disabled={newSaving} title="Guardar producto">{newSaving ? 'Guardando...' : 'Guardar'}</button>
@@ -1735,6 +1786,10 @@ function Ventas() {
               <input placeholder="Email" value={newClient.email} onChange={e => setNewClient({ ...newClient, email: e.target.value })} title="Correo electrónico" />
               <input placeholder="RFC" maxLength={13} value={newClient.rfc} onChange={e => setNewClient({ ...newClient, rfc: e.target.value })} title="RFC (opcional)" />
             </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }} title="Seleccionar automáticamente el cliente en ventas">
+              <input type="checkbox" checked={newClientSelectCurrent} onChange={e => setNewClientSelectCurrent(e.target.checked)} />
+              Seleccionar como cliente actual
+            </label>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setNewClientOpen(false)}>Cancelar</button>
               <button className="btn" onClick={saveNewClient} disabled={newSaving} title="Guardar cliente">{newSaving ? 'Guardando...' : 'Guardar'}</button>
@@ -1771,9 +1826,21 @@ function Config({ dark, contrast }) {
   const [renameValue, setRenameValue] = useState('')
   const [simpleMode, setSimpleMode] = useState(true)
   const [helpMode, setHelpMode] = useState(true)
+  const [compactUi, setCompactUi] = useState(() => { try { return localStorage.getItem('ui-compact') === '1' } catch { return false } })
   const [compactIndex, setCompactIndex] = useState(false)
   const [activeSection, setActiveSection] = useState('cfg-identidad')
   const scrollTo = (id) => { try { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }) } catch {} }
+  useEffect(() => {
+    try {
+      if (compactUi) {
+        document.documentElement.setAttribute('data-compact', '1')
+        localStorage.setItem('ui-compact', '1')
+      } else {
+        document.documentElement.removeAttribute('data-compact')
+        localStorage.removeItem('ui-compact')
+      }
+    } catch {}
+  }, [compactUi])
 
   const themeProfileMap = useMemo(() => { try { return JSON.parse(settings.theme_profiles || '{}') } catch { return {} } }, [settings.theme_profiles])
   const filteredProfileNames = useMemo(() => {
@@ -2351,6 +2418,10 @@ function Config({ dark, contrast }) {
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} title="Muestra íconos de ayuda junto a los controles">
             <input type="checkbox" checked={helpMode} onChange={e => setHelpMode(e.target.checked)} />
             Ayuda contextual
+          </label>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} title="Reduce espaciados y tamaños para ver más contenido">
+            <input type="checkbox" checked={compactUi} onChange={e => setCompactUi(e.target.checked)} />
+            Vista compacta
           </label>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

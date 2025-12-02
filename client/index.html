@@ -137,6 +137,7 @@
         cursor: pointer;
         transition: all .2s ease;
       }
+      .btn.btn-mini { padding: 6px 10px; }
       .btn:hover { box-shadow: 0 8px 24px rgba(2,6,23,0.08); transform: translateY(-1px); }
       .btn:disabled { opacity: .6; cursor: not-allowed; }
       .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
@@ -166,6 +167,11 @@
       .modal { max-width: 760px; width: calc(100% - 32px); }
       .modal h3 { margin: 0 0 8px 0; }
       .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+      .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .skeleton-line { height: 12px; background: linear-gradient(90deg, #e9eef5 25%, #f2f5fa 37%, #e9eef5 63%); border-radius: 6px; }
+      .skeleton-line { background-size: 400% 100%; animation: shimmer 1.2s ease-in-out infinite; }
+      @keyframes shimmer { 0% { background-position: 0% 0; } 100% { background-position: 100% 0; } }
       @media (max-width: 680px) {
         .grid-2 { grid-template-columns: 1fr; }
         .toolbar .tab span { display: none; }
