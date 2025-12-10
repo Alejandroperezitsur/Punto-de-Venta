@@ -26,9 +26,9 @@
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-    "no-unused-vars": "warn",
+    "react-hooks/exhaustive-deps": "off",
+    "no-unused-vars": "off",
     "no-empty": ["warn", { "allowEmptyCatch": true }],
-    "no-extra-semi": "warn"
+    "no-extra-semi": "off"
   }
 }

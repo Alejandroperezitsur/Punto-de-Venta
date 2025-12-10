@@ -1,37 +1,32 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useEffect, useMemo, useState, useRef, Suspense } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
+const Audits = React.lazy(() => import('./views/Audits'))
+const Metrics = React.lazy(() => import('./views/Metrics'))
+const BusinessSettings = React.lazy(() => import('./views/BusinessSettings'))
 import jsPDF from 'jspdf'
+import { api } from './lib/api'
+import Button from './components/ui/Button'
+import Input from './components/ui/Input'
+import Card from './components/ui/Card'
+import Table from './components/ui/Table'
+import Modal from './components/ui/Modal'
+import Skeleton from './components/ui/Skeleton'
+import Breadcrumbs from './components/ui/Breadcrumbs'
+import './styles/theme.css'
+import './styles/animations.css'
 
-const API = 'http://localhost:3001/api'
-
-async function api(path, options) {
-  let res
-  try {
-    const token = localStorage.getItem('token') || ''
-    const baseHeaders = { 'Content-Type': 'application/json', 'Accept': 'application/json' }
-    const headers = token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders
-    res = await fetch(`${API}${path}`, { headers, ...options })
-  } catch (e) {
-    try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'Error de red' })) } catch {}
-    throw e
-  }
-  if (!res.ok) {
-    let msg = 'Error'
-    const ct = res.headers.get('content-type') || ''
-    if (ct.includes('application/json')) {
-      try {
-        const data = await res.json()
-        msg = typeof data === 'string' ? data : (data.error || JSON.stringify(data))
-      } catch {
-        msg = await res.text()
-      }
-    } else {
-      msg = await res.text()
-    }
-    try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })) } catch {}
-    throw new Error(msg)
-  }
-  return res.json()
-}
+try {
+  const t = localStorage.getItem('theme') || 'light'
+  document.documentElement.setAttribute('data-theme', t)
+  const p = localStorage.getItem('brand_color')
+  if (p) document.documentElement.style.setProperty('--primary', p)
+  const acc = localStorage.getItem('brand_accent')
+  if (acc) document.documentElement.style.setProperty('--accent', acc)
+  const rad = localStorage.getItem('radius')
+  if (rad) document.documentElement.style.setProperty('--radius', `${parseInt(rad, 10)}px`)
+  const bg = localStorage.getItem('bg_image')
+  if (bg) document.body.style.backgroundImage = `url(${bg})`
+} catch {}
 
 function IconVentas() {
   return (
@@ -82,6 +77,8 @@ function Toolbar({ tab, setTab, onToggleTheme, dark, brandName, logoSrc, cashOpe
   const lastMenuRef = useRef(null)
   const [lastMenuAnim, setLastMenuAnim] = useState(false)
   const [lastPulse, setLastPulse] = useState(false)
+  const [shadow, setShadow] = useState(false)
+  const [motto, setMotto] = useState('')
   useEffect(() => {
     if (!lastMenuOpen) return
     const onDown = (e) => { try { if (lastMenuRef.current && !lastMenuRef.current.contains(e.target)) setLastMenuOpen(false) } catch {} }
@@ -91,9 +88,16 @@ function Toolbar({ tab, setTab, onToggleTheme, dark, brandName, logoSrc, cashOpe
     return () => { document.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey) }
   }, [lastMenuOpen])
   useEffect(() => { if (lastMenuOpen) { const t = setTimeout(() => setLastMenuAnim(true), 0); return () => { clearTimeout(t); setLastMenuAnim(false) } } else { setLastMenuAnim(false) } }, [lastMenuOpen])
+  useEffect(() => {
+    const onScroll = () => { setShadow(window.scrollY > 2) }
+    window.addEventListener('scroll', onScroll)
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  useEffect(() => { try { setMotto(localStorage.getItem('business_motto') || '') } catch {} }, [])
   return (
-    <div className="toolbar">
-      <div className="brand">{logoSrc ? <img className="logo" src={logoSrc} alt="logo" /> : <svg className="logo" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm2 4h12v2H6zm3 4h6v2H9z"/></svg>}{brandName || 'Punto de Venta'}</div>
+    <div className={`toolbar ${shadow ? 'shadow' : ''}`}>
+      <div className="brand" title={motto || undefined}>{logoSrc ? <img className="logo" src={logoSrc} alt="logo" /> : <svg className="logo" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm2 4h12v2H6zm3 4h6v2H9z"/></svg>}{brandName || 'Punto de Venta'}</div>
       <div className="spacer" />
       {tabs.map(([key, label]) => (
         <button key={key} className={`tab ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)} title={label}>
@@ -138,6 +142,12 @@ function Toolbar({ tab, setTab, onToggleTheme, dark, brandName, logoSrc, cashOpe
         ) })()}
         <span style={{ marginRight: 8, padding: '4px 8px', borderRadius: 8, background: cashOpen ? 'var(--accent, #e53935)' : '#eee', color: cashOpen ? '#fff' : '#333' }} title="Estado de caja y saldo estimado">{cashOpen ? `Caja abierta${typeof cashEstimate === 'number' ? ` · ${cashEstimate.toLocaleString(undefined, { style: 'currency', currency: 'MXN' })}` : ''}` : 'Caja cerrada'}</span>
         <button className="btn" onClick={onRefreshCash} title="Actualizar estado de caja">Refrescar caja</button>
+        <select title="Tema" onChange={e=>{ try { const v=e.target.value; localStorage.setItem('theme', v); document.documentElement.setAttribute('data-theme', v) } catch {} }} style={{ marginRight: 8 }}>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="business">Business</option>
+          <option value="soft">Soft</option>
+        </select>
         <button className="btn" onClick={onToggleTheme} title="Alternar tema claro/oscuro">{dark ? 'Claro' : 'Oscuro'}</button>
       </div>
     </div>
@@ -747,10 +757,11 @@ function Reportes() {
   return (
     <div className="container view">
       <h2>Reportes</h2>
+      <Breadcrumbs items={["Administración","Reportes"]} />
       <div className="row" style={{ justifyContent: 'flex-end', marginBottom: 8 }}>
-        <button className="btn btn-ghost" title="Guía de reportes" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Ayuda de Reportes', text: 'Genera resúmenes y exporta ventas a Excel. Usa filtros de fecha y cliente para delimitar. Atajos: Alt+O abre caja, Alt+C cierra caja, Alt+X exporta todo, Alt+F exporta lo filtrado.' } })) } catch {} }}>Ayuda</button>
+        <Button variant="ghost" title="Guía de reportes" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Ayuda de Reportes', text: 'Genera resúmenes y exporta ventas a Excel. Usa filtros de fecha y cliente para delimitar. Atajos: Alt+O abre caja, Alt+C cierra caja, Alt+X exporta todo, Alt+F exporta lo filtrado.' } })) } catch {} }}>Ayuda</Button>
       </div>
-      <div className="card" style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, justifyContent: 'space-between' }}>
+      <Card style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, justifyContent: 'space-between' }}>
         <div style={{ display: 'grid', gap: 6 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <select value={range} onChange={e => { const v = e.target.value; setRange(v); localStorage.setItem('last-demo-range', v); if (v !== 'custom') { localStorage.removeItem('last-demo-from'); localStorage.removeItem('last-demo-to'); } load(computeRange(v)) }} title="Selecciona el rango de fechas">
@@ -779,11 +790,11 @@ function Reportes() {
           {(() => { const f = last?.from; const t = last?.to; if (!f || !t) return null; const fmt = (iso, showTime) => { const d = new Date(iso); const pad = (n) => String(n).padStart(2, '0'); const dd = pad(d.getDate()); const mm = pad(d.getMonth() + 1); const yyyy = d.getFullYear(); const hh = pad(d.getHours()); const mi = pad(d.getMinutes()); const dateStr = (dateFmt === 'mm/dd/yyyy') ? `${mm}/${dd}/${yyyy}` : (dateFmt === 'yyyy-mm-dd') ? `${yyyy}-${mm}-${dd}` : `${dd}/${mm}/${yyyy}`; if (!showTime) return dateStr; if (time24) return `${dateStr} ${hh}:${mi}`; const h12 = d.getHours() % 12 || 12; const ampm = d.getHours() < 12 ? 'AM' : 'PM'; return `${dateStr} ${h12}:${mi} ${ampm}` }; const df = fmt(f, range === 'hoy'); const dt = fmt(t, range === 'hoy'); const label = (range === 'hoy' ? 'Hoy' : range === 'semana' ? '7 días' : range === 'mes' ? 'Mes actual' : range === 'custom' ? 'Personalizado' : 'Todo'); return (<div className="muted">Rango aplicado: {label} · {df} – {dt}</div>) })()}
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn" onClick={exportAll} title="Exporta CSV de resumen, clientes y productos">Exportar todo</button>
-          <button className="btn" onClick={exportAllExcel} title="Exporta todo en formato Excel">Exportar todo (Excel)</button>
-          <button className="btn" onClick={exportSalesDetail} title="Exporta detalle de cada venta">Exportar ventas (detalle)</button>
-          {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Ayuda de exportación" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Exportación', text: 'Usa Exportar todo para un resumen general. Exportar ventas (detalle) incluye ítems y pagos por venta.' } })) } catch {} }}><IconInfo /></button>}
-          <button className="btn" onClick={openResetConfirm} title="Limpiar filtros, rango y orden" style={{ background: 'var(--accent, #e53935)', color: '#fff' }}>
+          <Button onClick={exportAll} title="Exporta CSV de resumen, clientes y productos">Exportar todo</Button>
+          <Button onClick={exportAllExcel} title="Exporta todo en formato Excel">Exportar todo (Excel)</Button>
+          <Button onClick={exportSalesDetail} title="Exporta detalle de cada venta">Exportar ventas (detalle)</Button>
+          {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Ayuda de exportación" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Exportación', text: 'Usa Exportar todo para un resumen general. Exportar ventas (detalle) incluye ítems y pagos por venta.' } })) } catch {} }}><IconInfo /></Button>}
+          <Button onClick={openResetConfirm} title="Limpiar filtros, rango y orden" style={{ background: 'var(--accent, #e53935)', color: '#fff' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                 <path d="M12 3 L3 21 H21 Z" fill="none" stroke="#fff" strokeWidth="2" strokeLinejoin="round" />
@@ -792,67 +803,64 @@ function Reportes() {
               </svg>
               <span>Restablecer vista</span>
             </span>
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <div className="card">
+        <Card>
           <h4>Resumen</h4>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button className="btn" onClick={exportSummary} title="Exportar resumen como CSV">Exportar CSV</button>
+            <Button onClick={exportSummary} title="Exportar resumen como CSV">Exportar CSV</Button>
           </div>
           <div style={{ marginTop: 8 }}>
             <div>Ventas: {summary.count}</div>
             <div>Total: {fmt.format(summary.total || 0)}</div>
           </div>
-        </div>
-        <div className="card">
+        </Card>
+        <Card>
           <h4>Por cliente</h4>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button className="btn" onClick={exportCustomers} title="Exportar tabla de clientes como CSV">Exportar CSV</button>
+            <Button onClick={exportCustomers} title="Exportar tabla de clientes como CSV">Exportar CSV</Button>
           </div>
-          <table className="table" style={{ marginTop: 8 }}>
-            <thead><tr><th>Cliente</th><th className="right">Ventas</th><th className="right">Total</th></tr></thead>
-            <tbody>
-              {customers.map(c => (
-                <tr key={c.customer_id || 'nc'}>
-                  <td>{c.name || 'Sin cliente'}</td>
-                  <td className="right">{c.count}</td>
-                  <td className="right">{fmt.format(c.total || 0)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <Table
+            columns={[
+              { title: 'Cliente', render: (c) => (c.name || 'Sin cliente') },
+              { title: 'Ventas', render: (c) => (<span className="right">{c.count}</span>) },
+              { title: 'Total', render: (c) => (<span className="right">{fmt.format(c.total || 0)}</span>) }
+            ]}
+            rows={customers}
+            filterable={true}
+            pageSize={20}
+          />
+        </Card>
       </div>
-      <div className="card" style={{ marginTop: 12 }}>
+      <Card style={{ marginTop: 12 }}>
         <h4>Por producto</h4>
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn" onClick={exportProducts}>Exportar CSV</button>
+          <Button onClick={exportProducts}>Exportar CSV</Button>
         </div>
-        <table className="table" style={{ marginTop: 8 }}>
-          <thead><tr><th>ID</th><th>Producto</th><th className="right">Cant</th><th className="right">Total</th></tr></thead>
-          <tbody>
-            {products.map(p => (
-              <tr key={p.product_id}>
-                <td>{p.product_id}</td>
-                <td>{p.name}</td>
-                <td className="right">{p.qty}</td>
-                <td className="right">{fmt.format(p.total || 0)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="card" style={{ marginTop: 12 }}>
+        <Table
+          columns={[
+            { title: 'ID', key: 'product_id' },
+            { title: 'Producto', key: 'name' },
+            { title: 'Cant', render: (r) => (<span className="right">{r.qty}</span>) },
+            { title: 'Total', render: (r) => (<span className="right">{fmt.format(r.total || 0)}</span>) }
+          ]}
+          rows={products}
+          filterable={true}
+          pageSize={20}
+          stickyFirst={true}
+        />
+      </Card>
+      <Card style={{ marginTop: 12 }}>
         <h4>Caja</h4>
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px', marginTop: 6 }} title="Ayuda de caja" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Caja', text: 'Abre una sesión de caja para registrar depósitos, retiros y ventas en efectivo. Puedes cerrar la caja desde aquí o con Alt+C en esta pestaña.' } })) } catch {} }}><IconInfo /></button>}
-        {cashLoading && <div className="muted">Cargando...</div>}
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px', marginTop: 6 }} title="Ayuda de caja" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Caja', text: 'Abre una sesión de caja para registrar depósitos, retiros y ventas en efectivo. Puedes cerrar la caja desde aquí o con Alt+C en esta pestaña.' } })) } catch {} }}><IconInfo /></Button>}
+        {cashLoading && <Skeleton lines={2} />}
         {!cashLoading && cashError && <div className="accent">{cashError}</div>}
         {!cashLoading && !cashError && !cashSession && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <input placeholder="Saldo inicial" type="number" step="0.01" value={openingBalance} onChange={e => setOpeningBalance(e.target.value)} style={{ maxWidth: 160 }} title="Monto inicial de la caja" />
-            <button className="btn" onClick={openCash} title="Abrir sesión de caja">Abrir caja</button>
+            <Button onClick={openCash} title="Abrir sesión de caja">Abrir caja</Button>
           </div>
         )}
         {!cashLoading && !cashError && cashSession && (
@@ -869,25 +877,25 @@ function Reportes() {
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
               <input placeholder="Depósito" type="number" step="0.01" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} style={{ maxWidth: 140 }} title="Monto a depositar" />
-              <button className="btn" onClick={depositCash} title="Registrar depósito">Depositar</button>
+              <Button onClick={depositCash} title="Registrar depósito">Depositar</Button>
               <input placeholder="Retiro" type="number" step="0.01" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} style={{ maxWidth: 140 }} title="Monto a retirar" />
-              <button className="btn" onClick={withdrawCash} title="Registrar retiro">Retirar</button>
+              <Button onClick={withdrawCash} title="Registrar retiro">Retirar</Button>
               <div className="spacer" />
-              <button className="btn btn-ghost" onClick={closeCash} title="Cerrar sesión de caja">Cerrar caja</button>
+              <Button variant="ghost" onClick={closeCash} title="Cerrar sesión de caja">Cerrar caja</Button>
             </div>
-            <table className="table" style={{ marginTop: 8 }}>
-              <thead><tr><th>Tipo</th><th>Referencia</th><th className="right">Monto</th><th>Fecha</th></tr></thead>
-              <tbody>
-                {cashMovements.map(m => (
-                  <tr key={m.id}><td>{m.type}</td><td>{m.reference || '-'}</td><td className="right">{fmt.format(m.amount || 0)}</td><td>{formatDate(m.created_at)}</td></tr>
-                ))}
-                {cashMovements.length === 0 && <tr><td colSpan="4">Sin movimientos</td></tr>}
-              </tbody>
-            </table>
+            <Table
+              columns={[
+                { title: 'Tipo', key: 'type' },
+                { title: 'Referencia', render: (m) => (m.reference || '-') },
+                { title: 'Monto', render: (m) => (<span className="right">{fmt.format(m.amount || 0)}</span>) },
+                { title: 'Fecha', render: (m) => formatDate(m.created_at) }
+              ]}
+              rows={cashMovements}
+            />
           </div>
         )}
-      </div>
-      <div className="card" style={{ marginTop: 12 }}>
+      </Card>
+      <Card style={{ marginTop: 12 }}>
         <h4>Ventas recientes</h4>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 6 }}>
           <span className="muted">Rango</span>
@@ -900,8 +908,8 @@ function Reportes() {
           </select>
           {recentRange === 'custom' && (
             <>
-              <input type="date" value={recentFrom} onChange={e => setRecentFrom(e.target.value)} />
-              <input type="date" value={recentTo} onChange={e => setRecentTo(e.target.value)} />
+              <Input type="date" value={recentFrom} onChange={e => setRecentFrom(e.target.value)} title="Fecha inicio" />
+              <Input type="date" value={recentTo} onChange={e => setRecentTo(e.target.value)} title="Fecha fin" />
             </>
           )}
         </div>
@@ -913,10 +921,10 @@ function Reportes() {
             <option value="transfer">Transferencia</option>
             <option value="credit">Crédito</option>
           </select>
-      <input placeholder="Cliente (ID o nombre)" value={filterCustomer} onChange={e => setFilterCustomer(e.target.value)} title="Filtra por cliente" />
-          <button className="btn" onClick={exportFilteredSalesDetail}>Exportar filtradas</button>
-          <button className="btn" onClick={exportTotalsByMethod}>Exportar totales método</button>
-          <button className="btn" onClick={exportFilteredSalesExcel}>Exportar filtradas (Excel)</button>
+          <Input placeholder="Cliente (ID o nombre)" value={filterCustomer} onChange={e => setFilterCustomer(e.target.value)} title="Filtra por cliente" />
+          <Button onClick={exportFilteredSalesDetail}>Exportar filtradas</Button>
+          <Button onClick={exportTotalsByMethod}>Exportar totales método</Button>
+          <Button onClick={exportFilteredSalesExcel}>Exportar filtradas (Excel)</Button>
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={onlyCredit} onChange={e => setOnlyCredit(e.target.checked)} />Solo crédito</label>
         </div>
         <div className="muted" style={{ marginTop: 6 }}>
@@ -925,83 +933,71 @@ function Reportes() {
         <div className="muted" style={{ marginTop: 6 }}>
           {(() => { const keys = Object.keys(totalsByMethod); if (totalsLoading) return 'Calculando...'; if (!keys.length) return 'Sin totales por método'; return keys.map(k => `${k}: ${fmtMoney.format(totalsByMethod[k] || 0)}`).join(' · ') })()}
         </div>
-        <table className="table" style={{ marginTop: 8 }}>
-          <thead><tr>
-            <th style={{ cursor: 'pointer' }} onClick={() => onSort('id')} title="Ordenar por ID">ID {sortKey === 'id' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-            <th style={{ cursor: 'pointer' }} onClick={() => onSort('date')} title="Ordenar por fecha">Fecha {sortKey === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-            {!time24 && <th className="hide-sm" style={{ cursor: 'pointer' }} onClick={() => onSort('time')} title="Ordenar por hora">Hora {sortKey === 'time' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>}
-            <th style={{ cursor: 'pointer' }} onClick={() => onSort('customer')} title="Ordenar por cliente">Cliente {sortKey === 'customer' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-            <th className="hide-sm" style={{ cursor: 'pointer' }} onClick={() => onSort('method')} title="Ordenar por método">Método {sortKey === 'method' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-            <th className="right" style={{ cursor: 'pointer' }} onClick={() => onSort('total')} title="Ordenar por total">Total {sortKey === 'total' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</th>
-            <th></th>
-          </tr></thead>
-          <tbody>
-            {sortedSalesFinal.map(s => (
-              <tr key={s.id}>
-                <td>{s.id}</td>
-                <td>{formatDate(s.created_at)}</td>
-                {!time24 && <td className="hide-sm">{formatTime(s.created_at)}</td>}
-                <td>{(() => { const c = customersFull.find(c => String(c.id) === String(s.customer_id)); return c?.name || (s.customer_id || '-') })()}</td>
-                <td className="hide-sm">{s.payment_method || '-'}{creditSaleIds[s.id] ? <span className="badge badge-accent" style={{ marginLeft: 6 }}>CRÉDITO</span> : null}</td>
-                <td className="right">{fmtMoney.format(s.total || 0)}</td>
-                <td className="right cell-nowrap">
-                  <button className="btn" onClick={() => reprint(s.id)} title="Reimprimir ticket en PDF">Ticket PDF</button>
-                  <button className="btn" onClick={() => openPayments(s.id)} title="Ver pagos de la venta">Pagos</button>
-                  <button className="btn btn-accent" onClick={() => removeSale(s.id)} title="Eliminar venta">Eliminar</button>
-                </td>
-              </tr>
-            ))}
-            {filteredSalesFinal.length === 0 && <tr><td colSpan={(!time24 ? 6 : 5)}>Sin ventas en el rango</td></tr>}
-          </tbody>
-        </table>
-        {payModalId && (
-          <div className="modal-overlay" onClick={closePayments}>
-            <div className="card modal" onClick={e => e.stopPropagation()}>
-              <h3>Pagos venta #{payModalId}</h3>
-              {payModalLoading && <div className="muted">Cargando...</div>}
-              {!payModalLoading && payModalData && (
-                <>
-                  <div className="muted">Fecha: {formatDate(payModalData.created_at)}</div>
-                  <table className="table" style={{ marginTop: 8 }}>
-                    <thead><tr><th>Método</th><th>Usuario</th><th className="right">Monto</th></tr></thead>
-                    <tbody>
-                      {Array.isArray(payModalData.payments) && payModalData.payments.length > 0 ? payModalData.payments.map((p, i) => (
-                        <tr key={i}><td>{p.method}</td><td>{p.username || '-'}</td><td className="right">{fmtMoney.format(p.amount || 0)}</td></tr>
-                      )) : <tr><td colSpan="3">Sin pagos</td></tr>}
-                    </tbody>
-                  </table>
-                  <div className="modal-actions">
-                    <button className="btn" onClick={closePayments}>Cerrar</button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-        {resetConfirmOpen && (
-          <div className="modal-overlay" onClick={closeResetConfirm}>
-            <div className="card modal" onClick={e => e.stopPropagation()}>
-              <h3>Restablecer vista</h3>
-              <div className="row" style={{ alignItems: 'flex-start', gap: 8 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M12 3 L3 21 H21 Z" fill="none" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinejoin="round" />
-                  <path d="M12 9 V14" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="12" cy="17" r="1.5" fill="var(--accent, #e53935)" />
-                </svg>
-                <div style={{ whiteSpace: 'pre-line' }}>{resetConfirmText}</div>
-              </div>
-              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
-                <input type="checkbox" checked={resetConfirmSkip} onChange={e => setResetConfirmSkip(e.target.checked)} />
-                No volver a preguntar
-              </label>
+        <div style={{ marginTop: 8 }}>
+          <Table
+            columns={(() => {
+              const cols = [
+                { title: (<span style={{ cursor: 'pointer' }} onClick={() => onSort('id')} title="Ordenar por ID">ID {sortKey === 'id' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>), key: 'id' },
+                { title: (<span style={{ cursor: 'pointer' }} onClick={() => onSort('date')} title="Ordenar por fecha">Fecha {sortKey === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>), render: (s) => formatDate(s.created_at) },
+              ]
+              if (!time24) cols.push({ title: (<span className="hide-sm" style={{ cursor: 'pointer' }} onClick={() => onSort('time')} title="Ordenar por hora">Hora {sortKey === 'time' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>), render: (s) => (<span className="hide-sm">{formatTime(s.created_at)}</span>) })
+              cols.push({ title: (<span style={{ cursor: 'pointer' }} onClick={() => onSort('customer')} title="Ordenar por cliente">Cliente {sortKey === 'customer' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>), render: (s) => { const c = customersFull.find(c => String(c.id) === String(s.customer_id)); return c?.name || (s.customer_id || '-') } })
+              cols.push({ title: (<span className="hide-sm" style={{ cursor: 'pointer' }} onClick={() => onSort('method')} title="Ordenar por método">Método {sortKey === 'method' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>), render: (s) => (<span className="hide-sm">{s.payment_method || '-'}{creditSaleIds[s.id] ? <span className="badge badge-accent" style={{ marginLeft: 6 }}>CRÉDITO</span> : null}</span>) })
+              cols.push({ title: (<span className="right" style={{ cursor: 'pointer' }} onClick={() => onSort('total')} title="Ordenar por total">Total {sortKey === 'total' ? (sortDir === 'asc' ? '▲' : '▼') : ''}</span>), render: (s) => (<span className="right">{fmtMoney.format(s.total || 0)}</span>) })
+              cols.push({ title: '', render: (s) => (
+                <div className="right cell-nowrap">
+                  <Button onClick={() => reprint(s.id)} title="Reimprimir ticket en PDF">Ticket PDF</Button>
+                  <Button onClick={() => openPayments(s.id)} title="Ver pagos de la venta">Pagos</Button>
+                  <Button style={{ background: 'var(--accent, #e53935)', color: '#fff' }} onClick={() => removeSale(s.id)} title="Eliminar venta">Eliminar</Button>
+                </div>
+              ) })
+              return cols
+            })()}
+            rows={sortedSalesFinal}
+            filterable={true}
+            pageSize={20}
+            stickyFirst={true}
+          />
+          {filteredSalesFinal.length === 0 && <div className="muted">Sin ventas en el rango</div>}
+        </div>
+        <Modal open={!!payModalId} title={`Pagos venta #${payModalId || ''}`} onClose={closePayments}>
+          {payModalLoading && <div className="muted">Cargando...</div>}
+          {!payModalLoading && payModalData && (
+            <>
+              <div className="muted">Fecha: {formatDate(payModalData.created_at)}</div>
+              <Table
+                columns={[
+                  { title: 'Método', key: 'method' },
+                  { title: 'Usuario', render: (p) => (p.username || '-') },
+                  { title: 'Monto', render: (p) => (<span className="right">{fmtMoney.format(p.amount || 0)}</span>) }
+                ]}
+                rows={(Array.isArray(payModalData.payments) ? payModalData.payments : [])}
+              />
               <div className="modal-actions">
-                <button className="btn btn-ghost" onClick={closeResetConfirm}>Cancelar</button>
-                <button className="btn" style={{ background: 'var(--accent, #e53935)', color: '#fff' }} onClick={resetReportsView}>Restablecer</button>
+                <Button onClick={closePayments}>Cerrar</Button>
               </div>
-            </div>
+            </>
+          )}
+        </Modal>
+        <Modal open={resetConfirmOpen} title="Restablecer vista" onClose={closeResetConfirm}>
+          <div className="row" style={{ alignItems: 'flex-start', gap: 8 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3 L3 21 H21 Z" fill="none" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinejoin="round" />
+              <path d="M12 9 V14" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinecap="round" />
+              <circle cx="12" cy="17" r="1.5" fill="var(--accent, #e53935)" />
+            </svg>
+            <div style={{ whiteSpace: 'pre-line' }}>{resetConfirmText}</div>
           </div>
-        )}
-      </div>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
+            <input type="checkbox" checked={resetConfirmSkip} onChange={e => setResetConfirmSkip(e.target.checked)} />
+            No volver a preguntar
+          </label>
+          <div className="modal-actions">
+            <Button variant="ghost" onClick={closeResetConfirm}>Cancelar</Button>
+            <Button style={{ background: 'var(--accent, #e53935)', color: '#fff' }} onClick={resetReportsView}>Restablecer</Button>
+          </div>
+        </Modal>
+      </Card>
     </div>
   )
 }
@@ -1010,6 +1006,7 @@ function Productos() {
   const [list, setList] = useState([])
   const [form, setForm] = useState({ name: '', sku: '', price: 0, stock: 0 })
   const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(false)
   const showHelp = (() => { try { return localStorage.getItem('config-help-mode') !== '0' } catch { return true } })()
   const [currency, setCurrency] = useState('MXN')
   const [delProductId, setDelProductId] = useState(null)
@@ -1019,7 +1016,7 @@ function Productos() {
   useEffect(() => { api('/settings').then(s => setCurrency(s.currency || 'MXN')) }, [])
   const fmt = useMemo(() => new Intl.NumberFormat(undefined, { style: 'currency', currency }), [currency])
 
-  const load = async () => setList(await api('/products'))
+  const load = async () => { try { setListLoading(true); const rows = await api('/products'); setList(rows) } catch { setList([]) } finally { setListLoading(false) } }
   useEffect(() => { load() }, [])
 
   const save = async () => {
@@ -1040,64 +1037,55 @@ function Productos() {
   return (
     <div className="container view">
       <h2>Productos</h2>
+      <Breadcrumbs items={["Administración","Productos"]} />
       <div className="row" style={{ justifyContent: 'flex-end', marginBottom: 8 }}>
-        <button className="btn" onClick={startAddProduct} title="Agregar un nuevo producto">Agregar producto</button>
-        {showHelp && <button className="btn btn-ghost" title="Guía de productos" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Ayuda de Productos', text: 'Busca productos, edita precios y stock, o agrega nuevos artículos. Usa el campo de búsqueda para filtrar por nombre o SKU. Los cambios se guardan en la base y se reflejan en Ventas.' } })) } catch {} }}>Ayuda</button>}
+        <Button onClick={startAddProduct} title="Agregar un nuevo producto">Agregar producto</Button>
+        {showHelp && <Button variant="ghost" title="Guía de productos" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Ayuda de Productos', text: 'Busca productos, edita precios y stock, o agrega nuevos artículos. Usa el campo de búsqueda para filtrar por nombre o SKU. Los cambios se guardan en la base y se reflejan en Ventas.' } })) } catch {} }}>Ayuda</Button>}
       </div>
-      <div id="prod-form" className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
-        <input ref={nameRef} placeholder="Nombre" title="Nombre del producto" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre nombre" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Nombre del producto', text: 'El nombre aparece en Ventas y en el ticket. Usa un nombre claro y corto.' } })) } catch {} }}><IconInfo /></button>}
-        <input placeholder="SKU" title="Código interno o de barras" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre SKU" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'SKU', text: 'El SKU permite agregar productos rápidamente por código o escaneo.' } })) } catch {} }}><IconInfo /></button>}
-        <input placeholder="Precio" title="Precio unitario" type="number" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: +e.target.value })} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre precio" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Precio', text: 'Es el precio por unidad. Se usa para calcular el total en el carrito.' } })) } catch {} }}><IconInfo /></button>}
-        <input placeholder="Stock" title="Inventario disponible" type="number" step="0.001" value={form.stock} onChange={e => setForm({ ...form, stock: +e.target.value })} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre stock" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Stock', text: 'Cantidad disponible. Las ventas disminuyen el stock automáticamente.' } })) } catch {} }}><IconInfo /></button>}
+      <Card id="prod-form" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
+        <Input inputRef={nameRef} placeholder="Nombre" title="Nombre del producto" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre nombre" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Nombre del producto', text: 'El nombre aparece en Ventas y en el ticket. Usa un nombre claro y corto.' } })) } catch {} }}><IconInfo /></Button>}
+        <Input placeholder="SKU" title="Código interno o de barras" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre SKU" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'SKU', text: 'El SKU permite agregar productos rápidamente por código o escaneo.' } })) } catch {} }}><IconInfo /></Button>}
+        <Input placeholder="Precio" title="Precio unitario" type="number" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: +e.target.value })} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre precio" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Precio', text: 'Es el precio por unidad. Se usa para calcular el total en el carrito.' } })) } catch {} }}><IconInfo /></Button>}
+        <Input placeholder="Stock" title="Inventario disponible" type="number" step="0.001" value={form.stock} onChange={e => setForm({ ...form, stock: +e.target.value })} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre stock" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Stock', text: 'Cantidad disponible. Las ventas disminuyen el stock automáticamente.' } })) } catch {} }}><IconInfo /></Button>}
         <div style={{ gridColumn: 'span 4', display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn btn-primary" onClick={save} disabled={loading} title="Guardar nuevo producto">Guardar</button>
+          <Button variant="primary" onClick={save} disabled={loading} title="Guardar nuevo producto">Guardar</Button>
         </div>
-      </div>
-      <table className="table" style={{ marginTop: 12 }}>
-        <thead>
-          <tr>
-            <th>ID</th><th>Nombre</th><th>SKU</th><th className="right">Precio</th><th className="right">Stock</th><th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.map(p => (
-            <tr key={p.id}>
-              <td>{p.id}</td>
-              <td>{p.name}</td>
-              <td>{p.sku}</td>
-              <td className="right">{fmt.format(p.price)}</td>
-              <td className="right">{p.stock}</td>
-              <td><button className="btn btn-ghost" onClick={() => remove(p.id)} title="Eliminar producto">Eliminar</button></td>
-            </tr>
-          ))}
-          {list.length === 0 && (
-            <tr><td colSpan="6">No hay productos. Agrega un producto arriba.</td></tr>
-          )}
-        </tbody>
-      </table>
-      {delProductId && (
-        <div className="modal-overlay" onClick={() => { setDelProductId(null); setDelProductName('') }}>
-          <div className="card modal" onClick={e => e.stopPropagation()}>
-            <h3>Eliminar producto</h3>
-            <div className="row" style={{ alignItems: 'flex-start', gap: 8 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 3 L3 21 H21 Z" fill="none" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M12 9 V14" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="12" cy="17" r="1.5" fill="var(--accent, #e53935)" />
-              </svg>
-              <div>¿Seguro que deseas eliminar {delProductName ? `"${delProductName}"` : 'este producto'}? Esta acción no se puede deshacer.</div>
-            </div>
-            <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => { setDelProductId(null); setDelProductName('') }}>Cancelar</button>
-              <button className="btn" style={{ background: 'var(--accent, #e53935)', color: '#fff' }} onClick={async () => { try { await api(`/products/${delProductId}`, { method: 'DELETE' }); await load(); try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Producto eliminado' })) } catch {} } catch {} finally { setDelProductId(null); setDelProductName('') } }}>Eliminar</button>
-            </div>
-          </div>
-        </div>
+      </Card>
+      {listLoading && (
+        <Card style={{ marginTop: 8 }}>
+          <Skeleton lines={3} />
+        </Card>
       )}
+      {!listLoading && (
+        <Card style={{ marginTop: 12 }}>
+          <Table columns={[
+            { title: 'ID', key: 'id' },
+            { title: 'Nombre', key: 'name' },
+            { title: 'SKU', key: 'sku' },
+            { title: 'Precio', render: r => (<span className="right">{fmt.format(r.price)}</span>) },
+            { title: 'Stock', render: r => (<span className="right">{r.stock}</span>) },
+            { title: '', render: r => (<Button variant="ghost" onClick={() => remove(r.id)} title="Eliminar producto">Eliminar</Button>) },
+          ]} rows={list} filterable={true} pageSize={20} stickyFirst={true} />
+        </Card>
+      )}
+      <Modal open={!!delProductId} title="Eliminar producto" onClose={() => { setDelProductId(null); setDelProductName('') }}>
+        <div className="row" style={{ alignItems: 'flex-start', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 3 L3 21 H21 Z" fill="none" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M12 9 V14" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="12" cy="17" r="1.5" fill="var(--accent, #e53935)" />
+          </svg>
+          <div>¿Seguro que deseas eliminar {delProductName ? `"${delProductName}"` : 'este producto'}? Esta acción no se puede deshacer.</div>
+        </div>
+        <div className="modal-actions">
+          <Button variant="ghost" onClick={() => { setDelProductId(null); setDelProductName('') }}>Cancelar</Button>
+          <Button onClick={async () => { try { await api(`/products/${delProductId}`, { method: 'DELETE' }); await load(); try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Producto eliminado' })) } catch {} } catch {} finally { setDelProductId(null); setDelProductName('') } }} style={{ background: 'var(--accent, #e53935)', color: '#fff' }}>Eliminar</Button>
+        </div>
+      </Modal>
     </div>
   )
 }
@@ -1149,68 +1137,61 @@ function Clientes() {
   return (
     <div className="container view">
       <h2>Clientes</h2>
+      <Breadcrumbs items={["Administración","Clientes"]} />
       <div className="row" style={{ justifyContent: 'flex-end', marginBottom: 8 }}>
-        <button className="btn" onClick={() => { try { document.getElementById('cli-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); nameRef.current?.focus() } catch {} }} title="Agregar un nuevo cliente">Agregar cliente</button>
-        {showHelp && <button className="btn btn-ghost" title="Guía de clientes" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Ayuda de Clientes', text: 'Consulta y gestiona clientes. Busca por nombre, ID o RFC. Visualiza contacto y RFC, y revisa adeudos. Para registrar pagos de adeudos, inicia sesión en Configuración.' } })) } catch {} }}>Ayuda</button>}
+        <Button onClick={() => { try { document.getElementById('cli-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); nameRef.current?.focus() } catch {} }} title="Agregar un nuevo cliente">Agregar cliente</Button>
+        {showHelp && <Button variant="ghost" title="Guía de clientes" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Ayuda de Clientes', text: 'Consulta y gestiona clientes. Busca por nombre, ID o RFC. Visualiza contacto y RFC, y revisa adeudos. Para registrar pagos de adeudos, inicia sesión en Configuración.' } })) } catch {} }}>Ayuda</Button>}
       </div>
-      <div id="cli-form" className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
-        <input ref={nameRef} placeholder="Nombre" title="Nombre del cliente" autoComplete="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} onBlur={() => setNameTouched(true)} className={(submitted || nameTouched) && !nameValid ? 'invalid' : ''} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre el nombre" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Nombre', text: 'Requerido para identificar al cliente en ventas con crédito y reportes.' } })) } catch {} }}><IconInfo /></button>}
-        <input ref={phoneRef} type="tel" inputMode="tel" autoComplete="tel" placeholder="Teléfono (+525512345678)" title="Número de contacto con código de país" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} onBlur={() => { setPhoneTouched(true); const raw = (form.phone || '').trim(); let v = raw.replace(/[^0-9+]/g, ''); if (v.includes('+')) { v = '+' + v.replace(/\+/g, ''); } if (v !== form.phone) setForm({ ...form, phone: v }); }} className={(submitted || phoneTouched) && !phoneValid ? 'invalid' : ''} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre teléfono" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Teléfono', text: 'Formato sugerido con código de país: +52... Útil para contacto en crédito.' } })) } catch {} }}><IconInfo /></button>}
-        <input ref={emailRef} type="email" autoComplete="email" placeholder="Email (usuario@dominio.com)" title="Correo electrónico" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} onBlur={() => { setEmailTouched(true); const e = (form.email || '').trim().toLowerCase(); if (e !== form.email) setForm({ ...form, email: e }); }} className={(submitted || emailTouched) && !emailValid ? 'invalid' : ''} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre email" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Email', text: 'Se usa para contacto y puede mostrarse en tickets de crédito según la configuración.' } })) } catch {} }}><IconInfo /></button>}
-        <input ref={rfcRef} maxLength={13} placeholder="RFC (ABCX010203XYZ)" title="RFC del cliente (opcional)" value={form.rfc} onChange={e => setForm({ ...form, rfc: e.target.value })} onBlur={() => { setRfcTouched(true); const r = (form.rfc || '').trim().toUpperCase().replace(/\s+/g, ''); if (r !== form.rfc) setForm({ ...form, rfc: r }); }} className={(submitted || rfcTouched) && !rfcValid ? 'invalid' : ''} />
-        {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Información sobre RFC" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'RFC', text: 'Opcional. Puede mostrarse en tickets de crédito si así lo decides en Configuración.' } })) } catch {} }}><IconInfo /></button>}
+      <Card id="cli-form" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
+        <Input inputRef={nameRef} placeholder="Nombre" title="Nombre del cliente" autoComplete="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} onBlur={() => setNameTouched(true)} className={(submitted || nameTouched) && !nameValid ? 'invalid' : ''} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre el nombre" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Nombre', text: 'Requerido para identificar al cliente en ventas con crédito y reportes.' } })) } catch {} }}><IconInfo /></Button>}
+        <Input inputRef={phoneRef} type="tel" inputMode="tel" autoComplete="tel" placeholder="Teléfono (+525512345678)" title="Número de contacto con código de país" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} onBlur={() => { setPhoneTouched(true); const raw = (form.phone || '').trim(); let v = raw.replace(/[^0-9+]/g, ''); if (v.includes('+')) { v = '+' + v.replace(/\+/g, ''); } if (v !== form.phone) setForm({ ...form, phone: v }); }} className={(submitted || phoneTouched) && !phoneValid ? 'invalid' : ''} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre teléfono" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Teléfono', text: 'Formato sugerido con código de país: +52... Útil para contacto en crédito.' } })) } catch {} }}><IconInfo /></Button>}
+        <Input inputRef={emailRef} type="email" autoComplete="email" placeholder="Email (usuario@dominio.com)" title="Correo electrónico" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} onBlur={() => { setEmailTouched(true); const e = (form.email || '').trim().toLowerCase(); if (e !== form.email) setForm({ ...form, email: e }); }} className={(submitted || emailTouched) && !emailValid ? 'invalid' : ''} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre email" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Email', text: 'Se usa para contacto y puede mostrarse en tickets de crédito según la configuración.' } })) } catch {} }}><IconInfo /></Button>}
+        <Input inputRef={rfcRef} maxLength={13} placeholder="RFC (ABCX010203XYZ)" title="RFC del cliente (opcional)" value={form.rfc} onChange={e => setForm({ ...form, rfc: e.target.value })} onBlur={() => { setRfcTouched(true); const r = (form.rfc || '').trim().toUpperCase().replace(/\s+/g, ''); if (r !== form.rfc) setForm({ ...form, rfc: r }); }} className={(submitted || rfcTouched) && !rfcValid ? 'invalid' : ''} />
+        {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Información sobre RFC" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'RFC', text: 'Opcional. Puede mostrarse en tickets de crédito si así lo decides en Configuración.' } })) } catch {} }}><IconInfo /></Button>}
         {(submitted || nameTouched) && !nameValid && <div className="muted" style={{ gridColumn: 'span 4' }}>Nombre requerido</div>}
         {(submitted || emailTouched) && !emailValid && <div className="muted" style={{ gridColumn: 'span 4' }}>Email inválido</div>}
         {(submitted || phoneTouched) && !phoneValid && <div className="muted" style={{ gridColumn: 'span 4' }}>Teléfono inválido</div>}
         {(submitted || rfcTouched) && !rfcValid && <div className="muted" style={{ gridColumn: 'span 4' }}>RFC inválido</div>}
         <div style={{ gridColumn: 'span 4', display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn btn-primary" onClick={save} disabled={loading || !nameValid || !emailValid || !phoneValid || !rfcValid} title="Guardar cliente">Guardar</button>
+          <Button variant="primary" onClick={save} disabled={loading || !nameValid || !emailValid || !phoneValid || !rfcValid} title="Guardar cliente">Guardar</Button>
         </div>
-      </div>
-      <table className="table" style={{ marginTop: 12 }}>
-        <thead>
-          <tr>
-            <th>ID</th><th>Nombre</th><th className="hide-sm">Teléfono</th><th className="hide-sm">Email</th><th className="hide-xs">RFC</th><th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {list.length === 0 && (
-            <tr><td colSpan="6">No hay clientes. Guarda un cliente nuevo arriba.</td></tr>
-          )}
-          {list.map(c => (
-            <tr key={c.id}>
-              <td>{c.id}</td>
-              <td>{c.name}</td>
-              <td className="hide-sm">{c.phone}</td>
-              <td className="hide-sm">{c.email}</td>
-              <td className="hide-xs">{c.rfc || '-'}</td>
-              <td><button className="btn btn-ghost" onClick={() => askRemove(c.id)} title="Eliminar cliente">Eliminar</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {delClientId && (
-        <div className="modal-overlay" onClick={() => { setDelClientId(null); setDelClientName('') }}>
-          <div className="card modal" onClick={e => e.stopPropagation()}>
-            <h3>Eliminar cliente</h3>
-            <div className="row" style={{ alignItems: 'flex-start', gap: 8 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path d="M12 3 L3 21 H21 Z" fill="none" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M12 9 V14" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="12" cy="17" r="1.5" fill="var(--accent, #e53935)" />
-              </svg>
-              <div>¿Seguro que deseas eliminar {delClientName ? `"${delClientName}"` : 'este cliente'}? No se podrá recuperar.</div>
-            </div>
-            <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => { setDelClientId(null); setDelClientName('') }}>Cancelar</button>
-              <button className="btn" style={{ background: 'var(--accent, #e53935)', color: '#fff' }} onClick={async () => { try { await api(`/customers/${delClientId}`, { method: 'DELETE' }); await load(); try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Cliente eliminado' })) } catch {} } catch {} finally { setDelClientId(null); setDelClientName('') } }}>Eliminar</button>
-            </div>
-          </div>
-        </div>
+      </Card>
+      {loading && (
+        <Card style={{ marginTop: 8 }}>
+          <Skeleton lines={2} />
+        </Card>
       )}
+      {list.length === 0 ? (
+        <Card><div className="muted">No hay clientes. Guarda un cliente nuevo arriba.</div></Card>
+      ) : (
+        <Card style={{ marginTop: 12 }}>
+          <Table columns={[
+            { title: 'ID', key: 'id' },
+            { title: 'Nombre', key: 'name' },
+            { title: 'Teléfono', key: 'phone', className: 'hide-sm' },
+            { title: 'Email', key: 'email', className: 'hide-sm' },
+            { title: 'RFC', key: 'rfc', className: 'hide-xs', render: r => (r.rfc || '-') },
+            { title: '', render: r => (<Button variant="ghost" onClick={() => askRemove(r.id)} title="Eliminar cliente">Eliminar</Button>) }
+          ]} rows={list} filterable={true} pageSize={20} stickyFirst={true} />
+        </Card>
+      )}
+      <Modal open={!!delClientId} title="Eliminar cliente" onClose={() => { setDelClientId(null); setDelClientName('') }}>
+        <div className="row" style={{ alignItems: 'flex-start', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 3 L3 21 H21 Z" fill="none" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M12 9 V14" stroke="var(--accent, #e53935)" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="12" cy="17" r="1.5" fill="var(--accent, #e53935)" />
+          </svg>
+          <div>¿Seguro que deseas eliminar {delClientName ? `"${delClientName}"` : 'este cliente'}? No se podrá recuperar.</div>
+        </div>
+        <div className="modal-actions">
+          <Button variant="ghost" onClick={() => { setDelClientId(null); setDelClientName('') }}>Cancelar</Button>
+          <Button onClick={async () => { try { await api(`/customers/${delClientId}`, { method: 'DELETE' }); await load(); try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Cliente eliminado' })) } catch {} } catch {} finally { setDelClientId(null); setDelClientName('') } }} style={{ background: 'var(--accent, #e53935)', color: '#fff' }}>Eliminar</Button>
+        </div>
+      </Modal>
     </div>
   )
 }
@@ -1478,6 +1459,7 @@ function Ventas() {
   return (
     <div className="container view">
       <h2>Ventas</h2>
+      <Breadcrumbs items={["Administración","Ventas"]} />
       <div className="row" style={{ justifyContent: 'flex-end', marginBottom: 8 }}>
         {showHelp && <button className="btn btn-ghost" title="Guía de ventas" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Ayuda de Ventas', text: '1) Busca o escanea un producto.\n2) Agrega al carrito y ajusta cantidades.\n3) Aplica descuento si es necesario.\n4) Selecciona cliente para crédito.\n5) Agrega pagos (efectivo, tarjeta, transferencia, crédito).\nAtajos: Alt+Enter completa en efectivo, Alt+C manda pendiente a crédito, Alt+D enfoca descuento. Ctrl+Enter cobra.' } })) } catch {} }}>Ayuda</button>}
       </div>
@@ -1518,18 +1500,11 @@ function Ventas() {
                   </tr>
                 ))}
                 {productsLoading && (
-                  <tr><td colSpan="5">
-                    <div className="row" style={{ alignItems: 'center', gap: 10 }}>
-                      <div className="spinner" />
-                      <span className="muted">Cargando productos...</span>
-                    </div>
-                    <div className="row" style={{ marginTop: 8, gap: 6 }}>
-                      <div className="skeleton-line" style={{ width: '25%' }} />
-                      <div className="skeleton-line" style={{ width: '45%' }} />
-                      <div className="skeleton-line" style={{ width: '15%' }} />
-                      <div className="skeleton-line" style={{ width: '15%' }} />
-                    </div>
-                  </td></tr>
+                  <tr>
+                    <td colSpan="5">
+                      <Skeleton lines={4} />
+                    </td>
+                  </tr>
                 )}
                 {(() => { const q = productFilter.trim().toLowerCase(); const list = products.filter(p => { if (!q) return true; return (p.name?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q)) }); return list.length === 0 ? (<tr><td colSpan="5">Sin resultados <button className="btn btn-ghost" onClick={() => setProductFilter('')}>Limpiar</button></td></tr>) : null })()}
               </tbody>
@@ -1683,66 +1658,61 @@ function Ventas() {
                 <div className="accent" style={{ marginTop: 6, border: '1px solid var(--accent)', borderRadius: 6, padding: '6px 8px' }} title="El cliente tiene adeudos, el crédito se deshabilita hasta liquidar">
                   Cliente con adeudos: {receivablesSummary.count} · {fmt.format(receivablesSummary.total_due || 0)} · Crédito deshabilitado
                   <div style={{ marginTop: 6, display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <button className="btn" onClick={() => setShowReceivables(v => !v)} title="Ver u ocultar adeudos del cliente">{showReceivables ? 'Ocultar adeudos' : 'Ver adeudos'}</button>
-                    {showHelp && <button className="btn btn-ghost" style={{ padding: '6px 10px' }} title="Registrar pagos de adeudos" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Adeudos y pagos', text: 'Puedes registrar pagos de adeudos si has iniciado sesión en Configuración. Ingresa el monto y usa “Registrar pago”.' } })) } catch {} }}><IconInfo /></button>}
+                    <Button onClick={() => setShowReceivables(v => !v)} title="Ver u ocultar adeudos del cliente">{showReceivables ? 'Ocultar adeudos' : 'Ver adeudos'}</Button>
+                    {showHelp && <Button variant="ghost" style={{ padding: '6px 10px' }} title="Registrar pagos de adeudos" onClick={() => { try { window.dispatchEvent(new CustomEvent('app-help', { detail: { title: 'Adeudos y pagos', text: 'Puedes registrar pagos de adeudos si has iniciado sesión en Configuración. Ingresa el monto y usa “Registrar pago”.' } })) } catch {} }}><IconInfo /></Button>}
                   </div>
-              {showReceivables && (
-                    <table className="table" style={{ marginTop: 6 }}>
-                      <thead><tr><th>ID</th><th>Venta</th><th className="right">Adeudo</th><th className="right">Pagado</th><th className="right">Pendiente</th><th>Estado</th></tr></thead>
-                      <tbody>
-                        {receivablesList.length === 0 && <tr><td colSpan="6">Sin adeudos</td></tr>}
-                        {receivablesList.map(r => (
-                          <tr key={r.id}>
-                            <td>{r.id}</td>
-                            <td>{r.sale_id}</td>
-                            <td className="right">{fmt.format(r.amount_due || 0)}</td>
-                            <td className="right">{fmt.format(r.amount_paid || 0)}</td>
-                            <td className="right">{fmt.format(Math.max(0, (r.amount_due || 0) - (r.amount_paid || 0)))}</td>
-                            <td>
-                              <span className={r.status === 'open' ? 'badge badge-accent' : 'badge badge-primary'}>{r.status}</span>
-                              {r.status === 'open' && (() => { const pending = Math.max(0, (r.amount_due || 0) - (r.amount_paid || 0)); const val = parseFloat(payAmounts[r.id]); const invalid = isNaN(val) ? false : (val <= 0 || val > pending); const isExpanded = !!expandedReceivables[r.id]; const payments = receivablePayments[r.id] || []; const count = payments.length; const avg = count ? payments.reduce((s,p)=>s+(p.amount||0),0)/count : 0; const last = payments[0]; return (
-                                <div style={{ display: 'grid', gap: 6, marginTop: 4 }}>
-                                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                    <input type="number" step="0.01" min="0" max={pending} placeholder="Monto" value={payAmounts[r.id] ?? ''} onChange={e => setPayAmounts({ ...payAmounts, [r.id]: e.target.value })} className={invalid ? 'invalid' : ''} style={{ maxWidth: 120 }} title="Monto a registrar" />
-                                    <span className="muted">Pendiente: {fmt.format(pending)}</span>
-                                    <button className="btn" disabled={invalid} title="Registrar pago de adeudo" onClick={async () => { const amt = parseFloat(payAmounts[r.id]); if (!amt || amt <= 0 || amt > pending) { try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'Monto inválido' })) } catch {}; return } if (!localStorage.getItem('token')) { try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'Inicia sesión para registrar pagos' })) } catch {}; return } try { await api(`/receivables/${r.id}/pay`, { method: 'POST', body: JSON.stringify({ amount: amt }) }); const rows = await api(`/receivables/by-customer/${customerId}`); setReceivablesList(rows); const s = await api(`/receivables/summary/${customerId}`); setReceivablesSummary(s); setPayAmounts({ ...payAmounts, [r.id]: '' }); try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Pago registrado' })) } catch {} } catch (e) { try { window.dispatchEvent(new CustomEvent('app-error', { detail: String(e?.message || 'No autorizado') })) } catch {} } }}>Registrar pago</button>
-                                    <button className="btn btn-ghost" onClick={async () => { const next = !isExpanded; setExpandedReceivables({ ...expandedReceivables, [r.id]: next }); if (next) { try { const pr = await api(`/receivables/${r.id}/payments`); setReceivablePayments({ ...receivablePayments, [r.id]: pr }) } catch {} } }} title="Ver/ocultar historial de pagos">{isExpanded ? 'Ocultar historial' : 'Ver historial'}</button>
+              {showReceivables && (receivablesList.length === 0 ? (
+                <div className="muted" style={{ marginTop: 6 }}>Sin adeudos</div>
+              ) : (
+                <Table
+                        columns={[
+                          { title: 'ID', key: 'id' },
+                          { title: 'Venta', key: 'sale_id' },
+                          { title: 'Adeudo', render: (r) => (<span className="right">{fmt.format(r.amount_due || 0)}</span>) },
+                          { title: 'Pagado', render: (r) => (<span className="right">{fmt.format(r.amount_paid || 0)}</span>) },
+                          { title: 'Pendiente', render: (r) => (<span className="right">{fmt.format(Math.max(0, (r.amount_due || 0) - (r.amount_paid || 0)))}</span>) },
+                          { title: 'Estado', render: (r) => { const pending = Math.max(0, (r.amount_due || 0) - (r.amount_paid || 0)); const statusLabel = pending === 0 ? 'Pagado' : (r.status === 'open' ? 'Pendiente' : r.status); const badge = pending === 0 ? 'badge-success' : 'badge-warning'; return (<span className={`badge ${badge}`}>{statusLabel}</span>) } },
+                          { title: '', render: (r) => { const pending = Math.max(0, (r.amount_due || 0) - (r.amount_paid || 0)); const val = parseFloat(payAmounts[r.id]); const invalid = isNaN(val) ? false : (val <= 0 || val > pending); const isExpanded = !!expandedReceivables[r.id]; const payments = receivablePayments[r.id] || []; const count = payments.length; const avg = count ? payments.reduce((s,p)=>s+(p.amount||0),0)/count : 0; const last = payments[0]; return (
+                            <div style={{ display: 'grid', gap: 6 }}>
+                              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                <Input type="number" step="0.01" min="0" max={pending} placeholder="Monto" value={payAmounts[r.id] ?? ''} onChange={e => setPayAmounts({ ...payAmounts, [r.id]: e.target.value })} className={invalid ? 'invalid' : ''} style={{ maxWidth: 120 }} title="Monto a registrar" />
+                                <span className="muted">Pendiente: {fmt.format(pending)}</span>
+                                <Button disabled={invalid} title="Registrar pago de adeudo" onClick={async () => { const amt = parseFloat(payAmounts[r.id]); if (!amt || amt <= 0 || amt > pending) { try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'Monto inválido' })) } catch {}; return } if (!localStorage.getItem('token')) { try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'Inicia sesión para registrar pagos' })) } catch {}; return } try { await api(`/receivables/${r.id}/pay`, { method: 'POST', body: JSON.stringify({ amount: amt }) }); const rows = await api(`/receivables/by-customer/${customerId}`); setReceivablesList(rows); const s = await api(`/receivables/summary/${customerId}`); setReceivablesSummary(s); setPayAmounts({ ...payAmounts, [r.id]: '' }); try { window.dispatchEvent(new CustomEvent('app-message', { detail: 'Pago registrado' })) } catch {} } catch (e) { try { window.dispatchEvent(new CustomEvent('app-error', { detail: String(e?.message || 'No autorizado') })) } catch {} } }}>Registrar pago</Button>
+                                <Button variant="ghost" onClick={async () => { const next = !isExpanded; setExpandedReceivables({ ...expandedReceivables, [r.id]: next }); if (next) { try { const pr = await api(`/receivables/${r.id}/payments`); setReceivablePayments({ ...receivablePayments, [r.id]: pr }) } catch {} } }} title="Ver/ocultar historial de pagos">{isExpanded ? 'Ocultar historial' : 'Ver historial'}</Button>
+                              </div>
+                              {isExpanded && (
+                                <>
+                                  <div className="muted" style={{ display: 'flex', gap: 12 }}>
+                                    <span>Pagado: {fmt.format(r.amount_paid || 0)}</span>
+                                    <span>Pendiente: {fmt.format(pending)}</span>
+                                    <span>Pagos: {count}</span>
+                                    <span>Promedio: {fmt.format(avg)}</span>
+                                    <span>Último pago: {last ? `${last.username || '-'}` : '-'}</span>
+                                    <span>{last ? new Date(last.created_at).toLocaleString() : ''}</span>
                                   </div>
-                                  {isExpanded && (
-                                    <>
-                                      <div className="muted" style={{ display: 'flex', gap: 12 }}>
-                                        <span>Pagado: {fmt.format(r.amount_paid || 0)}</span>
-                                        <span>Pendiente: {fmt.format(pending)}</span>
-                                        <span>Pagos: {count}</span>
-                                        <span>Promedio: {fmt.format(avg)}</span>
-                                        <span>Último pago: {last ? `${last.username || '-'}` : '-'}</span>
-                                        <span>{last ? new Date(last.created_at).toLocaleString() : ''}</span>
-                                      </div>
-                                      <table className="table">
-                                        <thead><tr><th>ID</th><th>Usuario</th><th>Fecha</th><th className="right">Monto</th></tr></thead>
-                                        <tbody>
-                                          {payments.length === 0 && <tr><td colSpan="4">Sin pagos</td></tr>}
-                                          {payments.map(p => (
-                                            <tr key={p.id}><td>{p.id}</td><td>{p.username || '-'}</td><td>{new Date(p.created_at).toLocaleString()}</td><td className="right">{fmt.format(p.amount || 0)}</td></tr>
-                                          ))}
-                                        </tbody>
-                                      </table>
-                                    </>
-                                  )}
-                                </div>
-                              )})()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
+                                  <Table
+                                    columns={[
+                                      { title: 'ID', key: 'id' },
+                                      { title: 'Usuario', render: (p) => (p.username || '-') },
+                                      { title: 'Fecha', render: (p) => new Date(p.created_at).toLocaleString() },
+                                      { title: 'Monto', render: (p) => (<span className="right">{fmt.format(p.amount || 0)}</span>) }
+                                    ]}
+                                    rows={payments}
+                                  />
+                                </>
+                              )}
+                            </div>
+                          ) } }
+                        ]}
+                        rows={receivablesList}
+                      />
+              ))}
                   {showReceivables && !localStorage.getItem('token') && <div className="accent" style={{ marginTop: 6 }}>Para registrar pagos, inicia sesión en Configuración</div>}
                 </div>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button className="btn btn-primary" onClick={checkout} disabled={!cart.length || (payTotal < totals.total && !hasCredit) || (hasCredit && !customerValid) || (hasCredit && !creditAllowed)} title="Finaliza la venta y genera el ticket">Cobrar</button>
+              <Button variant="primary" onClick={checkout} disabled={!cart.length || (payTotal < totals.total && !hasCredit) || (hasCredit && !customerValid) || (hasCredit && !creditAllowed)} title="Finaliza la venta y genera el ticket">Cobrar</Button>
               {(() => { try {
                 let reason = ''
                 if (!cart.length) reason = 'Carrito vacío'
@@ -1755,48 +1725,38 @@ function Ventas() {
             </div>
             </div>
             </div>
-      {newProdOpen && (
-        <div className="modal-overlay" onClick={() => setNewProdOpen(false)}>
-          <div className="card modal" onClick={e => e.stopPropagation()} onKeyDown={e => { if (e.key === 'Escape') setNewProdOpen(false); if (e.key === 'Enter' && !newSaving) saveNewProduct() }} tabIndex={-1}>
-            <h3>Nuevo producto</h3>
-            <div className="row" style={{ gap: 8, alignItems: 'center' }}>
-              <input ref={newProdNameRef} placeholder="Nombre" value={newProd.name} onChange={e => setNewProd({ ...newProd, name: e.target.value })} title="Nombre del producto" />
-              <input placeholder="SKU" value={newProd.sku} onChange={e => setNewProd({ ...newProd, sku: e.target.value })} title="Código interno o de barras" />
-              <input placeholder="Precio" type="number" step="0.01" value={newProd.price} onChange={e => setNewProd({ ...newProd, price: +e.target.value })} title="Precio unitario" />
-              <input placeholder="Stock" type="number" step="0.001" value={newProd.stock} onChange={e => setNewProd({ ...newProd, stock: +e.target.value })} title="Inventario disponible" />
-            </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }} title="Agregar automáticamente al carrito al guardar">
-              <input type="checkbox" checked={newProdAutoAdd} onChange={e => setNewProdAutoAdd(e.target.checked)} />
-              Agregar al carrito automáticamente
-            </label>
-            <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setNewProdOpen(false)}>Cancelar</button>
-              <button className="btn" onClick={saveNewProduct} disabled={newSaving} title="Guardar producto">{newSaving ? 'Guardando...' : 'Guardar'}</button>
-            </div>
-          </div>
+      <Modal open={newProdOpen} title="Nuevo producto" onClose={() => setNewProdOpen(false)}>
+        <div className="row" style={{ gap: 8, alignItems: 'center' }}>
+          <Input inputRef={newProdNameRef} placeholder="Nombre" value={newProd.name} onChange={e => setNewProd({ ...newProd, name: e.target.value })} title="Nombre del producto" />
+          <Input placeholder="SKU" value={newProd.sku} onChange={e => setNewProd({ ...newProd, sku: e.target.value })} title="Código interno o de barras" />
+          <Input placeholder="Precio" type="number" step="0.01" value={newProd.price} onChange={e => setNewProd({ ...newProd, price: +e.target.value })} title="Precio unitario" />
+          <Input placeholder="Stock" type="number" step="0.001" value={newProd.stock} onChange={e => setNewProd({ ...newProd, stock: +e.target.value })} title="Inventario disponible" />
         </div>
-      )}
-      {newClientOpen && (
-        <div className="modal-overlay" onClick={() => setNewClientOpen(false)}>
-          <div className="card modal" onClick={e => e.stopPropagation()} onKeyDown={e => { if (e.key === 'Escape') setNewClientOpen(false); if (e.key === 'Enter' && !newSaving) saveNewClient() }} tabIndex={-1}>
-            <h3>Nuevo cliente</h3>
-            <div className="row" style={{ gap: 8, alignItems: 'center' }}>
-              <input ref={newClientNameRef} placeholder="Nombre" value={newClient.name} onChange={e => setNewClient({ ...newClient, name: e.target.value })} title="Nombre del cliente" />
-              <input placeholder="Teléfono" value={newClient.phone} onChange={e => setNewClient({ ...newClient, phone: e.target.value })} title="Teléfono" />
-              <input placeholder="Email" value={newClient.email} onChange={e => setNewClient({ ...newClient, email: e.target.value })} title="Correo electrónico" />
-              <input placeholder="RFC" maxLength={13} value={newClient.rfc} onChange={e => setNewClient({ ...newClient, rfc: e.target.value })} title="RFC (opcional)" />
-            </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }} title="Seleccionar automáticamente el cliente en ventas">
-              <input type="checkbox" checked={newClientSelectCurrent} onChange={e => setNewClientSelectCurrent(e.target.checked)} />
-              Seleccionar como cliente actual
-            </label>
-            <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setNewClientOpen(false)}>Cancelar</button>
-              <button className="btn" onClick={saveNewClient} disabled={newSaving} title="Guardar cliente">{newSaving ? 'Guardando...' : 'Guardar'}</button>
-            </div>
-          </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }} title="Agregar automáticamente al carrito al guardar">
+          <input type="checkbox" checked={newProdAutoAdd} onChange={e => setNewProdAutoAdd(e.target.checked)} />
+          Agregar al carrito automáticamente
+        </label>
+        <div className="modal-actions">
+          <Button variant="ghost" onClick={() => setNewProdOpen(false)}>Cancelar</Button>
+          <Button onClick={saveNewProduct} disabled={newSaving} title="Guardar producto">{newSaving ? 'Guardando...' : 'Guardar'}</Button>
         </div>
-      )}
+      </Modal>
+      <Modal open={newClientOpen} title="Nuevo cliente" onClose={() => setNewClientOpen(false)}>
+        <div className="row" style={{ gap: 8, alignItems: 'center' }}>
+          <Input inputRef={newClientNameRef} placeholder="Nombre" value={newClient.name} onChange={e => setNewClient({ ...newClient, name: e.target.value })} title="Nombre del cliente" />
+          <Input placeholder="Teléfono" value={newClient.phone} onChange={e => setNewClient({ ...newClient, phone: e.target.value })} title="Teléfono" />
+          <Input placeholder="Email" value={newClient.email} onChange={e => setNewClient({ ...newClient, email: e.target.value })} title="Correo electrónico" />
+          <Input placeholder="RFC" maxLength={13} value={newClient.rfc} onChange={e => setNewClient({ ...newClient, rfc: e.target.value })} title="RFC (opcional)" />
+        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }} title="Seleccionar automáticamente el cliente en ventas">
+          <input type="checkbox" checked={newClientSelectCurrent} onChange={e => setNewClientSelectCurrent(e.target.checked)} />
+          Seleccionar como cliente actual
+        </label>
+        <div className="modal-actions">
+          <Button variant="ghost" onClick={() => setNewClientOpen(false)}>Cancelar</Button>
+          <Button onClick={saveNewClient} disabled={newSaving} title="Guardar cliente">{newSaving ? 'Guardando...' : 'Guardar'}</Button>
+        </div>
+      </Modal>
     </div>
   )
 }
@@ -3046,19 +3006,18 @@ export default function App() {
         <button className="btn" onClick={onToggleHelpMode} title="Mostrar/ocultar ayudas contextuales">{helpMode ? 'Ayudas ON' : 'Ayudas OFF'}</button>
       </div>
       {toast && <div className="toast" onClick={() => setToast('')}>{toast}</div>}
-      {help && (
-        <div className="modal-overlay">
-          <div className="card modal">
-            <h3>{help.title || 'Ayuda'}</h3>
-            <div className="muted">
-              {String(help.text || '').split('\n').map((x,i)=>(<div key={i}>{x}</div>))}
-            </div>
-            <div className="modal-actions">
-              <button className="btn" onClick={() => setHelp(null)}>Cerrar</button>
-            </div>
-          </div>
+      <Modal open={!!help} title={help?.title || 'Ayuda'} onClose={() => setHelp(null)}>
+        <div className="muted">
+          {String(help?.text || '').split('\n').map((x,i)=>(<div key={i}>{x}</div>))}
         </div>
-      )}
+      </Modal>
+      <Routes>
+        <Route path="/" element={<Navigate to="/ventas" replace />} />
+        <Route path="/ventas" element={<div className="route-enter"><Ventas /></div>} />
+        <Route path="/admin/audits" element={<Suspense fallback={<Card style={{padding:20}}><Skeleton lines={4} /></Card>}><RequireAdmin><div className="route-enter"><Audits /></div></RequireAdmin></Suspense>} />
+        <Route path="/admin/metrics" element={<Suspense fallback={<Card style={{padding:20}}><Skeleton lines={4} /></Card>}><RequireAdmin><div className="route-enter"><Metrics /></div></RequireAdmin></Suspense>} />
+        <Route path="/admin/settings" element={<Suspense fallback={<Card style={{padding:20}}><Skeleton lines={4} /></Card>}><RequireAdmin><div className="route-enter"><BusinessSettings /></div></RequireAdmin></Suspense>} />
+      </Routes>
       {tab === 'ventas' && <Ventas />}
       {tab === 'productos' && <Productos />}
       {tab === 'clientes' && <Clientes />}
@@ -3066,4 +3025,12 @@ export default function App() {
       {tab === 'config' && <Config dark={dark} contrast={contrast} />}
     </div>
   )
+}
+
+function RequireAdmin({ children }) {
+  const [ok, setOk] = useState(null)
+  useEffect(() => { (async () => { try { const r = await api('/auth/me'); setOk(r?.user?.role === 'admin') } catch { setOk(false) } })() }, [])
+  if (ok == null) return <div>Cargando…</div>
+  if (!ok) return <div style={{ padding: 20 }}><div className="card"><h3>Permisos insuficientes</h3><div className="muted">Requiere rol admin</div></div></div>
+  return children
 }

@@ -37,6 +37,14 @@
         --shadow: 0 0 0 rgba(0,0,0,0);
       }
 
+      [data-compact='1'] {
+        --radius: 8px;
+      }
+      [data-compact='1'] .btn { padding: 8px 12px; }
+      [data-compact='1'] .card { padding: 12px; }
+      [data-compact='1'] .table th, [data-compact='1'] .table td { padding: 8px; }
+      [data-compact='1'] .toolbar { padding: 8px 12px; }
+
       html, body { height: 100%; }
       body {
         margin: 0;
@@ -79,7 +87,7 @@
         transition: all .2s ease;
       }
       .toolbar .tab:hover { box-shadow: 0 6px 16px rgba(2,6,23,0.06); transform: translateY(-1px); }
-      .toolbar .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+      .toolbar .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 8px 24px rgba(30,136,229,0.35); }
       .toolbar .actions { display: flex; gap: 8px; align-items: center; }
       .icon { width: 16px; height: 16px; fill: currentColor; }
 
@@ -129,19 +137,26 @@
         cursor: pointer;
         transition: all .2s ease;
       }
+      .btn.btn-mini { padding: 6px 10px; }
       .btn:hover { box-shadow: 0 8px 24px rgba(2,6,23,0.08); transform: translateY(-1px); }
       .btn:disabled { opacity: .6; cursor: not-allowed; }
       .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
       .btn-accent { background: var(--accent); color: #fff; border-color: var(--accent); }
       .btn-ghost { background: transparent; color: var(--accent); border-color: var(--accent); }
+      .btn-ghost:hover { background: rgba(229,57,53,0.08); }
 
       .table { width: 100%; border-collapse: collapse; }
       .table th, .table td { border: 1px solid var(--border); padding: 12px; }
-      .table th { background: #f8fafc; text-align: left; color: var(--muted); font-weight: 600; }
-      .table tr:hover { background: #f1f5f9; }
+      .table th { background: #f8fafc; text-align: left; color: var(--muted); font-weight: 600; position: sticky; top: 0; z-index: 1; }
+      .table tbody tr:nth-child(even) { background: #f9fbfd; }
+      .table tr:hover { background: #eef2f7; }
 
       .right { text-align: right; }
       .accent { color: var(--accent); }
+      .badge { display: inline-block; padding: 2px 6px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+      .badge-primary { background: var(--primary); color: #fff; }
+      .badge-accent { background: var(--accent); color: #fff; }
+      .cell-nowrap { white-space: nowrap; }
 
       @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
       .view { animation: fadeUp .25s ease; }
@@ -152,10 +167,29 @@
       .modal { max-width: 760px; width: calc(100% - 32px); }
       .modal h3 { margin: 0 0 8px 0; }
       .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+      .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .skeleton-line { height: 12px; background: linear-gradient(90deg, #e9eef5 25%, #f2f5fa 37%, #e9eef5 63%); border-radius: 6px; }
+      .skeleton-line { background-size: 400% 100%; animation: shimmer 1.2s ease-in-out infinite; }
+      @keyframes shimmer { 0% { background-position: 0% 0; } 100% { background-position: 100% 0; } }
+      @media (max-width: 680px) {
+        .grid-2 { grid-template-columns: 1fr; }
+        .toolbar .tab span { display: none; }
+        .btn { padding: 8px 12px; }
+        .table { font-size: 14px; }
+        .table th, .table td { padding: 8px; }
+        .toolbar { padding: 10px 12px; }
+        .hide-sm { display: none; }
+      }
+      @media (max-width: 560px) {
+        .hide-xs { display: none; }
+      }
     </style>
-    <script type="module" crossorigin src="/assets/index-Y0PLfSV_.js"></script>
+    <script type="module" crossorigin src="/assets/index-DbtmaT95.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DxWmkGVL.css">
   </head>
   <body>
     <div id="root"></div>
   </body>
   </html>
+ 

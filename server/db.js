@@ -49,10 +49,20 @@ function init() {
     phone TEXT,
     email TEXT
   )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS audits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event TEXT NOT NULL,
+    user_id INTEGER,
+    ref_type TEXT,
+    ref_id INTEGER,
+    data TEXT,
+    created_at TEXT NOT NULL
+  )`);
   try {
-    const cols = all('PRAGMA table_info(customers)')
+    const cols = all('PRAGMA table_info(customers)');
     if (!cols.find(c => c.name === 'rfc')) {
-      run('ALTER TABLE customers ADD COLUMN rfc TEXT')
+      run('ALTER TABLE customers ADD COLUMN rfc TEXT');
     }
   } catch {}
   db.exec(`CREATE TABLE IF NOT EXISTS sales (
@@ -85,9 +95,9 @@ function init() {
     FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE
   )`);
   try {
-    const cols = all('PRAGMA table_info(payments)')
+    const cols = all('PRAGMA table_info(payments)');
     if (!cols.find(c => c.name === 'user_id')) {
-      run('ALTER TABLE payments ADD COLUMN user_id INTEGER')
+      run('ALTER TABLE payments ADD COLUMN user_id INTEGER');
     }
   } catch {}
 
@@ -187,6 +197,27 @@ function init() {
   if (!get('SELECT id FROM customers WHERE email = ?', ['compras@xyz.com'])) {
     run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', ['Empresa XYZ', '555-777-8888', 'compras@xyz.com', 'XYZ010203ZZZ']);
   }
+
+  // Índices para rendimiento
+  try {
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sales_created_at ON sales(created_at)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sales_customer_id ON sales(customer_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sale_items_sale_id ON sale_items(sale_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_sale_items_product_id ON sale_items(product_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_payments_sale_id ON payments(sale_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_products_name ON products(name)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_cash_movements_session_id ON cash_movements(session_id)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_cash_movements_created_at ON cash_movements(created_at)');
+  } catch {}
 }
 
-module.exports = { getDb, run, all, get, init };
+function audit(event, user_id, ref_type, ref_id, data) {
+  const created_at = new Date().toISOString();
+  const payload = data ? JSON.stringify(data) : null;
+  run('INSERT INTO audits (event, user_id, ref_type, ref_id, data, created_at) VALUES (?, ?, ?, ?, ?, ?)', [event, user_id || null, ref_type || null, ref_id || null, payload, created_at]);
+}
+
+module.exports = { getDb, run, all, get, init, audit };

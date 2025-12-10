@@ -1,6 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
+const client = require('prom-client');
+const { logger } = require('./logger');
+require('dotenv').config();
 const db = require('./db');
+const { allowedOrigins, ensureConfig } = require('./config');
 
 const productsRouter = require('./routes/products');
 const categoriesRouter = require('./routes/categories');
@@ -11,10 +18,31 @@ const authModule = require('./routes/auth');
 const cashRouter = require('./routes/cash');
 const receivablesRouter = require('./routes/receivables');
 const reportsRouter = require('./routes/reports');
+const auditsRouter = require('./routes/audits');
 
 const app = express();
-app.use(cors());
+app.use(helmet());
+app.use(cors({ origin: allowedOrigins, methods: ['GET','POST','PUT','DELETE'], credentials: false }));
 app.use(express.json());
+app.use(morgan('combined'));
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
+
+// Métricas Prometheus
+client.collectDefaultMetrics({ prefix: 'pos_' });
+const httpRequestDuration = new client.Histogram({
+  name: 'pos_http_request_duration_seconds',
+  help: 'Duración de solicitudes HTTP',
+  labelNames: ['method','route','status'],
+  buckets: [0.01,0.05,0.1,0.3,0.5,1,2,5]
+});
+app.use((req, res, next) => {
+  const end = httpRequestDuration.startTimer();
+  res.on('finish', () => {
+    const route = (req.route && req.route.path) ? req.route.path : (req.originalUrl ? req.originalUrl.split('?')[0] : 'unknown');
+    end({ method: req.method, route, status: String(res.statusCode) });
+  });
+  next();
+});
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true });
@@ -29,60 +57,26 @@ app.use('/api/auth', authModule.router);
 app.use('/api/cash', cashRouter);
 app.use('/api/receivables', receivablesRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/audits', auditsRouter);
 
-app.get('/api/reports/summary', (req, res) => {
-  const from = req.query.from ? new Date(req.query.from).toISOString() : new Date('1970-01-01').toISOString();
-  const to = req.query.to ? new Date(req.query.to).toISOString() : new Date().toISOString();
-  const rows = db.get('SELECT COUNT(*) AS count, SUM(total) AS total FROM sales WHERE created_at BETWEEN ? AND ?', [from, to]);
-  res.json(rows);
-});
-
-app.get('/api/reports/products', (req, res) => {
-  const from = req.query.from ? new Date(req.query.from).toISOString() : new Date('1970-01-01').toISOString();
-  const to = req.query.to ? new Date(req.query.to).toISOString() : new Date().toISOString();
-  const rows = db.all(`SELECT si.product_id, p.name, SUM(si.quantity) AS qty, SUM(si.line_total) AS total
-    FROM sale_items si JOIN sales s ON si.sale_id = s.id JOIN products p ON si.product_id = p.id
-    WHERE s.created_at BETWEEN ? AND ? GROUP BY si.product_id ORDER BY total DESC`, [from, to]);
-  res.json(rows);
-});
-
-app.get('/api/reports/customers', (req, res) => {
-  const from = req.query.from ? new Date(req.query.from).toISOString() : new Date('1970-01-01').toISOString();
-  const to = req.query.to ? new Date(req.query.to).toISOString() : new Date().toISOString();
-  const rows = db.all(`SELECT s.customer_id, c.name, COUNT(s.id) AS count, SUM(s.total) AS total
-    FROM sales s LEFT JOIN customers c ON s.customer_id = c.id
-    WHERE s.created_at BETWEEN ? AND ? GROUP BY s.customer_id ORDER BY total DESC`, [from, to]);
-  res.json(rows);
-});
-
-app.get('/api/reports/demo-summary', (req, res) => {
+app.get('/api/metrics', async (req, res) => {
   try {
-    const from = req.query.from ? new Date(req.query.from).toISOString() : new Date('1970-01-01').toISOString();
-    const to = req.query.to ? new Date(req.query.to).toISOString() : new Date().toISOString();
-    const setting = db.get('SELECT value FROM settings WHERE key = ?', ['demo_sales']);
-    let ids = [];
-    try {
-      const parsed = JSON.parse(setting?.value || '[]');
-      if (Array.isArray(parsed)) ids = parsed;
-      else if (parsed && typeof parsed === 'object' && Array.isArray(parsed.ids)) ids = parsed.ids;
-    } catch {}
-    let demo = { count: 0, total: 0 };
-    let real = { count: 0, total: 0 };
-    if (ids.length > 0) {
-      const placeholders = ids.map(() => '?').join(',');
-      demo = db.get(`SELECT COUNT(*) AS count, SUM(total) AS total FROM sales WHERE id IN (${placeholders}) AND created_at BETWEEN ? AND ?`, [...ids, from, to]);
-      real = db.get(`SELECT COUNT(*) AS count, SUM(total) AS total FROM sales WHERE id NOT IN (${placeholders}) AND created_at BETWEEN ? AND ?`, [...ids, from, to]);
-    } else {
-      real = db.get('SELECT COUNT(*) AS count, SUM(total) AS total FROM sales WHERE created_at BETWEEN ? AND ?', [from, to]);
-    }
-    res.json({ demo, real });
+    res.set('Content-Type', client.register.contentType);
+    res.send(await client.register.metrics());
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    res.status(500).json({ error: e.message });
   }
 });
 
+// Reportes centralizados en routes/reports
+
+const { errorHandler } = require('./middleware/errorHandler');
+app.use((req, res, next) => next());
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 3001;
+ensureConfig();
 app.listen(PORT, () => {
   db.init();
-  console.log(`POS API escuchando en http://localhost:${PORT}`);
+  logger.info(`POS API escuchando en http://localhost:${PORT}`);
 });

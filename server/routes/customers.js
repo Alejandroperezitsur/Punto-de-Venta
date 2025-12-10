@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { customersCreateRules, customersUpdateRules } = require('../validators/customersValidator');
+const { validationResult } = require('express-validator');
 
 router.get('/', async (req, res) => {
   try {
@@ -21,7 +23,9 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', customersCreateRules, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
   const { name, phone, email, rfc } = req.body;
   try {
     const result = await db.run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', [name, phone || null, email || null, rfc || null]);
@@ -32,7 +36,9 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', customersUpdateRules, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
   const { name, phone, email, rfc } = req.body;
   try {
     const current = await db.get('SELECT * FROM customers WHERE id = ?', [req.params.id]);
