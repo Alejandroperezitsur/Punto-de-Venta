@@ -22,8 +22,10 @@ const auditsRouter = require('./routes/audits');
 
 const app = express();
 app.use(helmet());
-app.use(cors({ origin: allowedOrigins, methods: ['GET','POST','PUT','DELETE'], credentials: false }));
+app.use(cors({ origin: allowedOrigins, methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: false }));
 app.use(express.json());
+const { responseHandler } = require('./middleware/responseHandler');
+app.use(responseHandler);
 app.use(morgan('combined'));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 
@@ -32,8 +34,8 @@ client.collectDefaultMetrics({ prefix: 'pos_' });
 const httpRequestDuration = new client.Histogram({
   name: 'pos_http_request_duration_seconds',
   help: 'Duración de solicitudes HTTP',
-  labelNames: ['method','route','status'],
-  buckets: [0.01,0.05,0.1,0.3,0.5,1,2,5]
+  labelNames: ['method', 'route', 'status'],
+  buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5]
 });
 app.use((req, res, next) => {
   const end = httpRequestDuration.startTimer();

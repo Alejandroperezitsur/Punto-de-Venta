@@ -15,41 +15,82 @@
   --card: #ffffff;
   --card-foreground: #0f172a;
 
-  --border: #e2e8f0;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
 
   --foreground: #0f172a;
   --muted-foreground: #64748b;
 
   --radius: 0.75rem;
+  --radius-sm: 0.5rem;
+  --radius-lg: 1rem;
+
+  --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -1px rgb(0 0 0 / 0.03);
+  --shadow-popover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+
+  --header-height: 4.5rem;
+  --sidebar-width: 17rem;
 }
 
-[data-theme='dark'] {
+[data-theme='dark'],
+.dark {
   /* Dark Theme */
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
 
-  --bg: #0f172a;
-  --bg-input: #1e293b;
-  --bg-muted: #1e293b;
+  --card: 222.2 84% 6.5%;
+  /* Slightly lighter than bg */
+  --card-foreground: 210 40% 98%;
 
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
+  --popover: 222.2 84% 6.5%;
+  --popover-foreground: 210 40% 98%;
 
-  --border: #334155;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
 
-  --foreground: #f8fafc;
-  --muted-foreground: #94a3b8;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 48%;
+
+  --shadow-subtle: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -1px rgb(0 0 0 / 0.3);
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
+  }
+
+  .glass-card {
+    @apply bg-card/90 backdrop-blur-sm border border-border/50 shadow-sm;
+  }
 }
 
 * {
   box-sizing: border-box;
+  border-color: hsl(var(--border));
 }
 
 body {
   margin: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--bg);
-  color: var(--foreground);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s, color 0.3s;
 }
 

@@ -39,49 +39,61 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--bg-muted)] relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))] relative overflow-hidden">
             {/* Background Decor */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--primary)] rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[hsl(var(--primary))] rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse delay-1000"></div>
 
-            <div className="w-full max-w-md p-8 bg-[var(--card)] rounded-2xl shadow-xl border border-[var(--border)] relative z-10 animate-fade-in">
+            <div className="w-full max-w-md p-8 bg-[hsl(var(--card))/0.9] backdrop-blur-xl rounded-3xl shadow-2xl border border-[hsl(var(--border))] relative z-10 animate-fade-in ring-1 ring-white/10">
                 <div className="text-center mb-8">
-                    <div className="h-16 w-16 bg-[var(--primary)] text-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-bold shadow-lg transform rotate-3">
-                        <Store className="h-8 w-8" />
+                    <div className="h-20 w-20 bg-gradient-to-tr from-[hsl(var(--primary))] to-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl font-bold shadow-xl transform rotate-3 hover:rotate-6 transition-transform duration-300">
+                        <Store className="h-10 w-10" />
                     </div>
-                    <h1 className="text-2xl font-bold text-[var(--foreground)]">Punto de Venta</h1>
-                    <p className="text-[var(--muted-foreground)] mt-2">Ingresa a tu cuenta para continuar</p>
+                    <h1 className="text-3xl font-bold text-[hsl(var(--foreground))] tracking-tight">Punto de Venta</h1>
+                    <p className="text-[hsl(var(--muted-foreground))] mt-2 text-sm font-medium">Sistema Profesional de Gestión</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                        icon={User}
-                        placeholder="Usuario o Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        autoFocus
-                    />
-                    <Input
-                        type="password"
-                        icon={Lock}
-                        placeholder="Contraseña"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                        <Input
+                            icon={User}
+                            placeholder="Usuario o Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            autoFocus
+                            className="bg-[hsl(var(--background))] h-12"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Input
+                            type="password"
+                            icon={Lock}
+                            placeholder="Contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="bg-[hsl(var(--background))] h-12"
+                        />
+                    </div>
 
                     {error && (
-                        <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-100 text-center">
+                        <div className="p-4 rounded-xl bg-red-50 text-red-600 text-sm border border-red-100 text-center font-medium animate-shake">
                             {error}
                         </div>
                     )}
 
-                    <Button type="submit" className="w-full h-11 text-base shadow-lg hover:translate-y-[-1px] transition-all" isLoading={loading}>
+                    <Button
+                        type="submit"
+                        className="w-full h-12 text-base font-semibold shadow-lg shadow-[hsl(var(--primary))/0.2] hover:translate-y-[-2px] transition-all duration-200"
+                        isLoading={loading}
+                    >
                         Iniciar Sesión
                     </Button>
                 </form>
 
-                <div className="mt-6 text-center text-xs text-[var(--muted-foreground)]">
-                    &copy; {new Date().getFullYear()} Sistema POS. Todos los derechos reservados.
+                <div className="mt-8 text-center">
+                    <p className="text-xs text-[hsl(var(--muted-foreground))] font-medium">
+                        &copy; {new Date().getFullYear()} Sistema POS. Versión 2.0
+                    </p>
                 </div>
             </div>
         </div>

@@ -7,9 +7,9 @@ router.get('/', async (req, res) => {
     const rows = await db.all('SELECT key, value FROM settings');
     const out = {};
     for (const r of rows) out[r.key] = r.value;
-    res.json(out);
+    res.jsonResponse(out);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.jsonError(e.message);
   }
 });
 
@@ -22,9 +22,9 @@ router.put('/', async (req, res) => {
     const rows = await db.all('SELECT key, value FROM settings');
     const out = {};
     for (const r of rows) out[r.key] = r.value;
-    res.json(out);
+    res.jsonResponse(out);
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    res.jsonError(e.message, 400);
   }
 });
 

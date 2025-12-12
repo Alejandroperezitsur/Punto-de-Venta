@@ -12,6 +12,7 @@ import CustomersView from './views/Customers';
 // We might need to handle their dependencies if they break.
 const Reportes = React.lazy(() => import('./views/Reportes'));
 const BusinessSettings = React.lazy(() => import('./views/BusinessSettings'));
+const CashControlView = React.lazy(() => import('./views/CashControl'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -86,6 +87,12 @@ function App() {
                     <Route path="/config" element={
                         <RequireAuth>
                             <BusinessSettings />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/caja" element={
+                        <RequireAuth>
+                            <CashControlView />
                         </RequireAuth>
                     } />
 

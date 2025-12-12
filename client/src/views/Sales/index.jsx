@@ -14,26 +14,135 @@ const SalesView = () => {
     const handleCheckout = async (paymentData) => {
         setProcessing(true);
         try {
-            const { total, discount } = getTotals();
+            const { total, discount, subtotal, tax } = getTotals();
+
+            // Prepare payments array
+            const payments = paymentData.payments || [{ method: paymentData.method, amount: total }];
+
             const payload = {
                 items: items.map(i => ({ product_id: i.id, quantity: i.quantity, unit_price: i.price })),
                 discount,
-                payment_method: paymentData.method,
-                payments: [{ method: paymentData.method, amount: total }]
+                payment_method: paymentData.method, // 'mixed' or specific
+                payments
             };
 
-            await api('/sales', { method: 'POST', body: JSON.stringify(payload) });
+            const res = await api('/sales', { method: 'POST', body: JSON.stringify(payload) });
 
             // Success
+            // Print Ticket
+            printTicket({
+                items,
+                totals: { total, discount, subtotal, tax },
+                payments,
+                change: paymentData.change || 0,
+                date: new Date(),
+                id: res.id
+            });
+
             clearCart();
             setPayModalOpen(false);
-            // Ideally show a success toast or print ticket here
-            alert('Venta completada con éxito'); // Simple feedback for now
+            // alert('Venta completada con éxito'); // Ticket should be enough feedback
         } catch (e) {
             alert('Error al procesar la venta: ' + e.message);
         } finally {
             setProcessing(false);
         }
+    };
+
+    const printTicket = (data) => {
+        const win = window.open('', '', 'width=300,height=600');
+        if (!win) return;
+
+        const html = `
+            <html>
+            <head>
+                <title>Ticket #${data.id}</title>
+                <style>
+                    body { font-family: 'Courier New', monospace; font-size: 12px; width: 280px; margin: 0 auto; color: #000; }
+                    .center { text-align: center; }
+                    .right { text-align: right; }
+                    .bold { font-weight: bold; }
+                    .line { border-top: 1px dashed #000; margin: 5px 0; }
+                    table { width: 100%; border-collapse: collapse; }
+                    td { vertical-align: top; }
+                    @media print { .no-print { display: none; } }
+                </style>
+            </head>
+            <body>
+                <div class="center">
+                    <h2 style="margin:0">POS SYSTEM</h2>
+                    <p>Sucursal Principal<br>San Felipe, Gto.<br>RFC: XAXX010101000</p>
+                    <p class="line"></p>
+                    <p>
+                        Ticket: #${data.id}<br>
+                        Fecha: ${data.date.toLocaleString()}
+                    </p>
+                    <p class="line"></p>
+                </div>
+
+                <table>
+                    ${data.items.map(item => `
+                        <tr>
+                            <td colspan="2">${item.name}</td>
+                        </tr>
+                        <tr>
+                            <td>${item.quantity} x $${item.price.toFixed(2)}</td>
+                            <td class="right">$${(item.quantity * item.price).toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+
+                <p class="line"></p>
+                
+                <table>
+                    <tr>
+                        <td>Subtotal:</td>
+                        <td class="right">$${data.totals.subtotal.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td>IVA:</td>
+                        <td class="right">$${data.totals.tax.toFixed(2)}</td>
+                    </tr>
+                    ${data.totals.discount > 0 ? `
+                    <tr>
+                        <td>Descuento:</td>
+                        <td class="right">-$${data.totals.discount.toFixed(2)}</td>
+                    </tr>` : ''}
+                    <tr class="bold" style="font-size: 14px">
+                        <td>TOTAL:</td>
+                        <td class="right">$${data.totals.total.toFixed(2)}</td>
+                    </tr>
+                </table>
+
+                <p class="line"></p>
+
+                <table>
+                    ${data.payments.map(p => `
+                        <tr>
+                            <td>Pago (${p.method}):</td>
+                            <td class="right">$${p.amount.toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                    <tr class="bold">
+                        <td>Cambio:</td>
+                        <td class="right">$${data.change.toFixed(2)}</td>
+                    </tr>
+                </table>
+
+                <div class="center" style="margin-top: 20px">
+                    <p>¡Gracias por su compra!</p>
+                    <p>v2.0 Powered by DeepMind</p>
+                </div>
+
+                <script>
+                    window.onload = function() { window.print(); setTimeout(() => window.close(), 100); }
+                </script>
+            </body>
+            </html>
+        `;
+
+        win.document.write(html);
+        win.document.close();
     };
 
     return (

@@ -8,7 +8,7 @@ export async function api(path, options) {
     const headers = token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders
     res = await fetch(`${API}${path}`, { headers, ...options })
   } catch (e) {
-    try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'Error de red' })) } catch {}
+    try { window.dispatchEvent(new CustomEvent('app-error', { detail: 'Error de red' })) } catch { }
     throw e
   }
   if (!res.ok) {
@@ -24,31 +24,32 @@ export async function api(path, options) {
     } else {
       msg = await res.text()
     }
-    try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })) } catch {}
+    try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })) } catch { }
     throw new Error(msg)
   }
-  return res.json()
+  const json = await res.json()
+  return (json.data !== undefined) ? json.data : json
 }
 
 export async function getProducts() { return api('/products') }
 export async function getCustomers() { return api('/customers') }
 export async function getProductBySku(sku) {
   const list = await getProducts()
-  return list.find(x => String(x.sku||'').toLowerCase() === String(sku||'').toLowerCase()) || null
+  return list.find(x => String(x.sku || '').toLowerCase() === String(sku || '').toLowerCase()) || null
 }
-export async function createSale(payload) { return api('/sales', { method:'POST', body: JSON.stringify(payload) }) }
-export async function openCash(opening_balance=0) { return api('/cash/open', { method:'POST', body: JSON.stringify({ opening_balance }) }) }
-export async function closeCash() { return api('/cash/close', { method:'POST' }) }
+export async function createSale(payload) { return api('/sales', { method: 'POST', body: JSON.stringify(payload) }) }
+export async function openCash(opening_balance = 0) { return api('/cash/open', { method: 'POST', body: JSON.stringify({ opening_balance }) }) }
+export async function closeCash() { return api('/cash/close', { method: 'POST' }) }
 export async function getCashSession() { return api('/cash/status') }
 export async function getCashMovements() { return api('/cash/movements') }
-export async function getReport(kind, params={}) {
+export async function getReport(kind, params = {}) {
   const p = new URLSearchParams(params)
   const qs = p.toString()
   const base = qs ? `?${qs}` : ''
   return api(`/reports/${kind}${base}`)
 }
 
-export async function getAudits(params={}) {
+export async function getAudits(params = {}) {
   const p = new URLSearchParams(params)
   const qs = p.toString()
   const base = qs ? `?${qs}` : ''

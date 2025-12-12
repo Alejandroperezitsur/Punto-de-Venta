@@ -64,7 +64,7 @@ function init() {
     if (!cols.find(c => c.name === 'rfc')) {
       run('ALTER TABLE customers ADD COLUMN rfc TEXT');
     }
-  } catch {}
+  } catch { }
   db.exec(`CREATE TABLE IF NOT EXISTS sales (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id INTEGER,
@@ -99,7 +99,7 @@ function init() {
     if (!cols.find(c => c.name === 'user_id')) {
       run('ALTER TABLE payments ADD COLUMN user_id INTEGER');
     }
-  } catch {}
+  } catch { }
 
   db.exec(`CREATE TABLE IF NOT EXISTS receivables (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,18 +121,52 @@ function init() {
     FOREIGN KEY (receivable_id) REFERENCES receivables(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
   )`);
+  // Phase 2: Categories Hierarchy
+  try {
+    const cols = all('PRAGMA table_info(categories)');
+    if (!cols.find(c => c.name === 'parent_id')) {
+      run('ALTER TABLE categories ADD COLUMN parent_id INTEGER REFERENCES categories(id) ON DELETE SET NULL');
+    }
+    if (!cols.find(c => c.name === 'image_url')) {
+      run('ALTER TABLE categories ADD COLUMN image_url TEXT');
+    }
+  } catch { }
+
+  // Phase 2: Product Images
+  try {
+    const cols = all('PRAGMA table_info(products)');
+    if (!cols.find(c => c.name === 'image_url')) {
+      run('ALTER TABLE products ADD COLUMN image_url TEXT');
+    }
+  } catch { }
+
+  // Phase 2: Multiple Barcodes
+  db.exec(`CREATE TABLE IF NOT EXISTS product_barcodes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL,
+    code TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+  )`);
+
+  // Phase 2: Settings Table (Ensured)
+  db.exec(`CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  )`);
+
+  // Phase 2: Inventory Movements (Ensured)
   db.exec(`CREATE TABLE IF NOT EXISTS inventory_movements (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id INTEGER NOT NULL,
     change REAL NOT NULL,
     reason TEXT,
+    reference_id INTEGER,
+    reference_type TEXT,
     created_at TEXT NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
   )`);
-  db.exec(`CREATE TABLE IF NOT EXISTS settings (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL
-  )`);
+
   run(`INSERT OR IGNORE INTO settings (key, value) VALUES
     ('currency', 'MXN'),
     ('tax_rate', '0.16'),
@@ -175,30 +209,7 @@ function init() {
     run('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
   }
 
-  run('INSERT OR IGNORE INTO categories (name) VALUES (?)', ['General']);
-  run('INSERT OR IGNORE INTO categories (name) VALUES (?)', ['Bebidas']);
-  run('INSERT OR IGNORE INTO categories (name) VALUES (?)', ['Snacks']);
-
-  const catGeneral = get('SELECT id FROM categories WHERE name = ?', ['General'])?.id;
-  const catBebidas = get('SELECT id FROM categories WHERE name = ?', ['Bebidas'])?.id;
-  const catSnacks = get('SELECT id FROM categories WHERE name = ?', ['Snacks'])?.id;
-  run('INSERT OR IGNORE INTO products (name, sku, price, cost, stock, category_id) VALUES (?, ?, ?, ?, ?, ?)', ['Café Americano', 'CAF-001', 25.00, 8.00, 100, catBebidas]);
-  run('INSERT OR IGNORE INTO products (name, sku, price, cost, stock, category_id) VALUES (?, ?, ?, ?, ?, ?)', ['Agua 600ml', 'AGU-600', 12.00, 4.00, 200, catBebidas]);
-  run('INSERT OR IGNORE INTO products (name, sku, price, cost, stock, category_id) VALUES (?, ?, ?, ?, ?, ?)', ['Galletas Chocolate', 'GAL-CHO', 18.50, 7.50, 150, catSnacks]);
-  run('INSERT OR IGNORE INTO products (name, sku, price, cost, stock, category_id) VALUES (?, ?, ?, ?, ?, ?)', ['Papas Sal', 'PAP-SAL', 20.00, 9.00, 120, catSnacks]);
-  run('INSERT OR IGNORE INTO products (name, sku, price, cost, stock, category_id) VALUES (?, ?, ?, ?, ?, ?)', ['Bolígrafo Azul', 'BOL-AZ', 7.00, 2.00, 300, catGeneral]);
-
-  if (!get('SELECT id FROM customers WHERE email = ?', ['juan.perez@example.com'])) {
-    run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', ['Juan Pérez', '555-111-2222', 'juan.perez@example.com', 'JUAP800101XXX']);
-  }
-  if (!get('SELECT id FROM customers WHERE email = ?', ['maria.lopez@example.com'])) {
-    run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', ['María López', '555-333-4444', 'maria.lopez@example.com', 'MALO810202YYY']);
-  }
-  if (!get('SELECT id FROM customers WHERE email = ?', ['compras@xyz.com'])) {
-    run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', ['Empresa XYZ', '555-777-8888', 'compras@xyz.com', 'XYZ010203ZZZ']);
-  }
-
-  // Índices para rendimiento
+  // Indices for performance
   try {
     db.exec('CREATE INDEX IF NOT EXISTS idx_sales_created_at ON sales(created_at)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_sales_customer_id ON sales(customer_id)');
@@ -207,11 +218,12 @@ function init() {
     db.exec('CREATE INDEX IF NOT EXISTS idx_payments_sale_id ON payments(sale_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_products_name ON products(name)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku)');
+    db.exec('CREATE INDEX IF NOT EXISTS idx_product_barcodes_code ON product_barcodes(code)'); // New Index
     db.exec('CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_cash_movements_session_id ON cash_movements(session_id)');
     db.exec('CREATE INDEX IF NOT EXISTS idx_cash_movements_created_at ON cash_movements(created_at)');
-  } catch {}
+  } catch { }
 }
 
 function audit(event, user_id, ref_type, ref_id, data) {

@@ -29,39 +29,41 @@ export const Topbar = () => {
     }, []);
 
     return (
-        <header className="h-16 border-b border-[var(--border)] bg-[var(--card)] flex items-center justify-between px-6 fixed top-0 right-0 left-64 z-40 transition-all">
+        <header className="h-[var(--header-height)] border-b border-[hsl(var(--border))] bg-[hsl(var(--card))/0.8] backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40 transition-all shadow-sm">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar}>
                     <Menu className="h-5 w-5" />
                 </Button>
-                <div className="relative hidden md:block">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
+                <div className="relative hidden md:block group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))] group-focus-within:text-[hsl(var(--primary))] transition-colors" />
                     <input
                         type="text"
-                        placeholder="Buscar..."
-                        className="h-9 w-64 rounded-full border border-[var(--border)] bg-[var(--bg)] pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                        placeholder="Buscar (Ctrl+K)..."
+                        className="h-10 w-64 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--background))] pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all"
                     />
                 </div>
             </div>
 
             <div className="flex items-center gap-3">
                 {cashStatus ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         Caja Abierta
                     </span>
                 ) : (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-rose-500" />
                         Caja Cerrada
                     </span>
                 )}
 
-                <div className="w-px h-6 bg-[var(--border)] mx-1" />
+                <div className="w-px h-6 bg-[hsl(var(--border))] mx-2" />
 
-                <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover:bg-[hsl(var(--secondary))] rounded-full">
                     {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
                 </Button>
 
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="hover:bg-[hsl(var(--secondary))] rounded-full">
                     <Bell className="h-5 w-5" />
                 </Button>
             </div>
