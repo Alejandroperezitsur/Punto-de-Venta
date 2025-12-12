@@ -58,6 +58,21 @@ export default function Ventas() {
   useEffect(() => { api('/settings').then(s => { setCurrency(s.currency || 'MXN'); setTaxRate(+s.tax_rate || 0.16); setBusinessName(s.business_name || ''); setBusinessRFC(s.business_rfc || ''); setBusinessPhone(s.business_phone || ''); setBusinessEmail(s.business_email || ''); setBusinessAddress(s.business_address || ''); setLogoDataUrl(s.logo_data_url || ''); setTicketWidth(parseInt(s.ticket_width || '80')); setLogoSize(parseInt(s.ticket_logo_size_mm || '20')); setAutoScan(String(s.auto_scan || '') === '1'); setTicketFooter(s.ticket_footer || ''); setTicketQrDataUrl(s.ticket_qr_data_url || ''); setTicketQrCaption(s.ticket_qr_caption || ''); setTicketQr2DataUrl(s.ticket_qr2_data_url || ''); setTicketQr2Caption(s.ticket_qr2_caption || ''); setTicketQrSize(parseInt(s.ticket_qr_size_mm || String((parseInt(s.ticket_width || '80') <= 58) ? 26 : 32))); setCreditTicketShowContact2(String(s.credit_ticket_show_contact || '1') === '1'); setCreditTicketShowRFC2(String(s.credit_ticket_show_rfc || '1') === '1'); setTicketBodySize2(parseInt(s.ticket_font_body_size || '10')); setTicketLineGap2(parseInt(s.ticket_line_gap_mm || '5')); setTicketHeaderSize2(parseInt(s.ticket_font_header_size || '12')); setTicketCompact2(String(s.ticket_compact_mode || '0') === '1') }) }, [])
   const fmt = useMemo(() => new Intl.NumberFormat(undefined, { style: 'currency', currency }), [currency])
 
+  const totals = useMemo(() => {
+    const subtotal = cart.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
+    const tax = +(subtotal * taxRate).toFixed(2)
+    const disc = +parseFloat(discount || 0)
+    const discApplied = Math.max(0, Math.min(disc, subtotal + tax))
+    const total = +((subtotal + tax) - discApplied).toFixed(2)
+    return { subtotal, tax, discount: discApplied, total }
+  }, [cart, discount, taxRate])
+
+  const payTotal = useMemo(() => payments.reduce((acc, p) => acc + (p.amount || 0), 0), [payments])
+  const hasCredit = useMemo(() => payments.some(p => p.method === 'credit' && p.amount > 0), [payments])
+  const customerExists = useMemo(() => customers.some(c => String(c.id) === String(customerId)), [customers, customerId])
+  const customerValid = useMemo(() => !hasCredit || (/^\d+$/.test((customerId || '')) && customerExists), [hasCredit, customerId, customerExists])
+  const creditAllowed = useMemo(() => !(receivablesSummary && (receivablesSummary.total_due || 0) > 0), [receivablesSummary])
+
   const loadProducts = async () => { try { const list = await api('/products'); setProducts(list) } catch { setProducts([]) } }
   useEffect(() => { loadProducts() }, [])
   const loadCustomers = async () => setCustomers(await api('/customers'))
@@ -198,20 +213,7 @@ export default function Ventas() {
 
   
 
-  const totals = useMemo(() => {
-    const subtotal = cart.reduce((acc, i) => acc + i.unit_price * i.quantity, 0)
-    const tax = +(subtotal * taxRate).toFixed(2)
-    const disc = +parseFloat(discount || 0)
-    const discApplied = Math.max(0, Math.min(disc, subtotal + tax))
-    const total = +((subtotal + tax) - discApplied).toFixed(2)
-    return { subtotal, tax, discount: discApplied, total }
-  }, [cart, discount, taxRate])
-
-  const payTotal = useMemo(() => payments.reduce((acc, p) => acc + (p.amount || 0), 0), [payments])
-  const hasCredit = useMemo(() => payments.some(p => p.method === 'credit' && p.amount > 0), [payments])
-  const customerExists = useMemo(() => customers.some(c => String(c.id) === String(customerId)), [customers, customerId])
-  const customerValid = useMemo(() => !hasCredit || (/^\d+$/.test((customerId || '')) && customerExists), [hasCredit, customerId, customerExists])
-  const creditAllowed = useMemo(() => !(receivablesSummary && (receivablesSummary.total_due || 0) > 0), [receivablesSummary])
+  
 
   
 
