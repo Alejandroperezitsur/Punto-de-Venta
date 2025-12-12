@@ -23,6 +23,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/scan/:code', async (req, res) => {
+  try {
+    const code = req.params.code;
+    const row = await db.get('SELECT * FROM products WHERE sku = ? AND active = 1', [code]);
+    if (!row) return res.status(404).json({ error: 'Producto no encontrado' });
+    res.json(row);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.post('/', productCreateRules, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });

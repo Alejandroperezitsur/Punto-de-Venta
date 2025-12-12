@@ -1,0 +1,100 @@
+@import './styles/theme.css';
+@import './styles/animations.css';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Light Theme */
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+
+  --bg: #f8fafc;
+  --bg-input: #ffffff;
+  --bg-muted: #f1f5f9;
+
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+
+  --border: #e2e8f0;
+
+  --foreground: #0f172a;
+  --muted-foreground: #64748b;
+
+  --radius: 0.75rem;
+}
+
+[data-theme='dark'] {
+  /* Dark Theme */
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+
+  --bg: #0f172a;
+  --bg-input: #1e293b;
+  --bg-muted: #1e293b;
+
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+
+  --border: #334155;
+
+  --foreground: #f8fafc;
+  --muted-foreground: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--foreground);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Animations - Keeping these if animations.css misses them */
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
