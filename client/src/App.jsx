@@ -13,6 +13,9 @@ import CustomersView from './views/Customers';
 const Reportes = React.lazy(() => import('./views/Reportes'));
 const BusinessSettings = React.lazy(() => import('./views/BusinessSettings'));
 const CashControlView = React.lazy(() => import('./views/CashControl'));
+const UsersView = React.lazy(() => import('./views/Users'));
+const AuditsView = React.lazy(() => import('./views/Audits'));
+const OnboardingWizard = React.lazy(() => import('./views/OnboardingWizard'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -57,6 +60,7 @@ function App() {
             <React.Suspense fallback={<LoadingFallback />}>
                 <Routes>
                     <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
+                    <Route path="/setup" element={<PublicOnly><OnboardingWizard /></PublicOnly>} />
 
                     <Route path="/" element={<Navigate to="/ventas" replace />} />
 
@@ -93,6 +97,18 @@ function App() {
                     <Route path="/caja" element={
                         <RequireAuth>
                             <CashControlView />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/usuarios" element={
+                        <RequireAuth>
+                            <UsersView />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/audits" element={
+                        <RequireAuth>
+                            <AuditsView />
                         </RequireAuth>
                     } />
 

@@ -155,6 +155,18 @@ function init() {
     value TEXT NOT NULL
   )`);
 
+  // Phase 3: Stores Table (Multi-tienda)
+  db.exec(`CREATE TABLE IF NOT EXISTS stores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    address TEXT,
+    phone TEXT,
+    email TEXT,
+    logo_url TEXT,
+    active INTEGER DEFAULT 1,
+    created_at TEXT NOT NULL
+  )`);
+
   // Phase 2: Inventory Movements (Ensured)
   db.exec(`CREATE TABLE IF NOT EXISTS inventory_movements (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -163,22 +175,42 @@ function init() {
     reason TEXT,
     reference_id INTEGER,
     reference_type TEXT,
+    user_id INTEGER,
     created_at TEXT NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
   )`);
 
+  // Default settings - expanded for Phase 3
   run(`INSERT OR IGNORE INTO settings (key, value) VALUES
     ('currency', 'MXN'),
     ('tax_rate', '0.16'),
+    ('tax_name', 'IVA'),
+    ('tax_included', '0'),
     ('theme_primary', '#1e88e5'),
-    ('theme_accent', '#e53935')
+    ('theme_accent', '#e53935'),
+    ('business_name', 'Mi Tienda'),
+    ('business_address', ''),
+    ('business_phone', ''),
+    ('business_email', ''),
+    ('business_rfc', ''),
+    ('business_logo', ''),
+    ('ticket_footer', 'Gracias por su compra'),
+    ('ticket_width', '80'),
+    ('compact_mode', '0'),
+    ('sound_enabled', '1'),
+    ('low_stock_threshold', '5'),
+    ('require_customer', '0'),
+    ('onboarding_complete', '0')
   `);
 
   db.exec(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    role TEXT NOT NULL CHECK(role IN ('admin','cajero'))
+    role TEXT NOT NULL CHECK(role IN ('admin','cajero','supervisor')),
+    active INTEGER DEFAULT 1,
+    created_at TEXT,
+    last_login TEXT
   )`);
 
   db.exec(`CREATE TABLE IF NOT EXISTS cash_sessions (

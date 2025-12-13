@@ -1,0 +1,61 @@
+{
+  "name": "pos-pro",
+  "version": "1.0.0",
+  "description": "Sistema Profesional de Punto de Venta",
+  "main": "electron/main.js",
+  "author": "POS Pro Team",
+  "license": "MIT",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "client": "cd client && npm run dev",
+    "server": "cd server && node index.js",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "echo Server ready for production",
+    "build:pwa": "cd client && npm run build",
+    "build:desktop": "npm run build && electron-builder",
+    "electron:dev": "concurrently \"npm run server\" \"npm run client\" \"wait-on http://localhost:5173 && electron .\"",
+    "setup": "npm install && cd client && npm install && cd ../server && npm install",
+    "reset-db": "cd server && rm -f pos.db && node -e \"require('./db').init()\"",
+    "lint": "cd client && npm run lint"
+  },
+  "build": {
+    "appId": "com.pospro.app",
+    "productName": "POS Pro",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "client/dist/**/*",
+      "server/**/*",
+      "!server/node_modules",
+      "!client/node_modules"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "electron/assets/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "electron/assets/icon.icns"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "electron/assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "electron/assets/icon.ico",
+      "uninstallerIcon": "electron/assets/icon.ico",
+      "installerHeaderIcon": "electron/assets/icon.ico"
+    }
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "wait-on": "^7.2.0"
+  }
+}

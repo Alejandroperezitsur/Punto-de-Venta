@@ -1,128 +1,141 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { getAudits, getAuditEvents } from '../lib/api'
-import Breadcrumbs from '../components/ui/Breadcrumbs'
-import Skeleton from '../components/ui/Skeleton'
+import React, { useState, useEffect } from 'react';
+import { api } from '../lib/api';
+import { Card } from '../components/common/Card';
+import { Input } from '../components/common/Input';
+import { formatMoney } from '../utils/format';
+import { ClipboardList, Search, Calendar, User, ArrowUpDown } from 'lucide-react';
 
-function AuditFilters({ filters, onChange, events }) {
-  const [local, setLocal] = useState(filters)
-  useEffect(() => { setLocal(filters) }, [filters])
-  const apply = () => onChange(local)
-  return (
-    <div className="card" style={{ marginBottom: 12 }}>
-      <h3>Filtros</h3>
-      <div className="grid-4" style={{ gap: 8 }}>
-        <div className="field"><span className="label">Desde</span><input type="date" value={local.startDate || ''} onChange={e=>setLocal({ ...local, startDate: e.target.value })} /></div>
-        <div className="field"><span className="label">Hasta</span><input type="date" value={local.endDate || ''} onChange={e=>setLocal({ ...local, endDate: e.target.value })} /></div>
-        <div className="field"><span className="label">Usuario</span><input type="text" placeholder="ID" value={local.userId || ''} onChange={e=>setLocal({ ...local, userId: e.target.value })} /></div>
-        <div className="field"><span className="label">Evento</span><select value={local.event || ''} onChange={e=>setLocal({ ...local, event: e.target.value })}>
-          <option value="">Todos</option>
-          {events.map(ev => (<option key={ev} value={ev}>{ev}</option>))}
-        </select></div>
-        <div className="field" style={{ gridColumn: '1 / -1' }}><span className="label">Buscar</span><input type="text" placeholder="Texto libre" value={local.search || ''} onChange={e=>setLocal({ ...local, search: e.target.value })} /></div>
-      </div>
-      <div className="row" style={{ justifyContent: 'flex-end', marginTop: 8 }}>
-        <button className="btn" onClick={apply}>Aplicar</button>
-      </div>
-    </div>
-  )
-}
+const AuditsView = () => {
+  const [audits, setAudits] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [sortDir, setSortDir] = useState('desc');
 
-function AuditTable({ items, onShow }) {
-  return (
-    <table className="table">
-      <thead><tr><th>Fecha/Hora</th><th>Usuario</th><th>Evento</th><th>Referencia</th><th>Data</th><th></th></tr></thead>
-      <tbody>
-        {items.map(row => (
-          <tr key={row.id}>
-            <td>{row.created_at}</td>
-            <td>{row.user_id || '-'}</td>
-            <td>{row.event}</td>
-            <td>{[row.ref_type || '-', row.ref_id || '-'].join(' / ')}</td>
-            <td style={{ maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(() => { try { const d = row.data ? JSON.parse(row.data) : null; return d ? JSON.stringify(d) : '' } catch { return String(row.data||'') } })()}</td>
-            <td><button className="btn btn-ghost" onClick={() => onShow(row)}>Ver detalles</button></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )
-}
-
-function AuditDetailsModal({ item, onClose }) {
-  if (!item) return null
-  let pretty = ''
-  try { pretty = JSON.stringify(item.data ? JSON.parse(item.data) : null, null, 2) } catch { pretty = String(item.data||'') }
-  return (
-    <div className="modal-overlay">
-      <div className="card modal" style={{ maxWidth: 680 }}>
-        <h3>Detalles</h3>
-        <div className="muted">{item.event} • {item.created_at} • Usuario {item.user_id || '-'}</div>
-        <pre style={{ background: 'var(--bg2)', padding: 10, borderRadius: 6, maxHeight: 360, overflow: 'auto' }}>{pretty}</pre>
-        <div className="modal-actions"><button className="btn" onClick={onClose}>Cerrar</button></div>
-      </div>
-    </div>
-  )
-}
-
-function Audits() {
-  const [events, setEvents] = useState([])
-  const [filters, setFilters] = useState({ startDate: '', endDate: '', userId: '', event: '', search: '', limit: 20, offset: 0 })
-  const [items, setItems] = useState([])
-  const [total, setTotal] = useState(0)
-  const [show, setShow] = useState(null)
-  const [busy, setBusy] = useState(false)
-
-  useEffect(() => { (async () => { try { const list = await getAuditEvents(); setEvents(list) } catch {} })() }, [])
-  const load = async () => {
-    setBusy(true)
+  const loadAudits = async () => {
+    setLoading(true);
     try {
-      const q = (() => { const o = { ...filters }; if (o.startDate) o.startDate = o.startDate + 'T00:00:00'; if (o.endDate) o.endDate = o.endDate + 'T23:59:59'; return o })()
-      const r = await getAudits(q)
-      setItems(r.items || [])
-      setTotal(r.total || 0)
-    } catch {} finally { setBusy(false) }
-  }
-  useEffect(() => { load() }, [filters.limit, filters.offset])
-  const applyFilters = (f) => { setFilters({ ...filters, ...f, offset: 0 }) }
+      const data = await api('/audits');
+      setAudits(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const pages = useMemo(() => { const l = Math.max(1, filters.limit||20); return Math.ceil((total||0)/l) }, [total, filters.limit])
-  const page = useMemo(() => { const l = Math.max(1, filters.limit||20); return Math.floor((filters.offset||0)/l)+1 }, [filters.offset, filters.limit])
-  const setPage = (p) => { const l = Math.max(1, filters.limit||20); setFilters({ ...filters, offset: (Math.max(1,p)-1)*l }) }
+  useEffect(() => {
+    loadAudits();
+  }, []);
 
-  const exportCsv = () => {
-    const headers = { created_at: 'Fecha/Hora', user_id: 'Usuario', event: 'Evento', ref_type: 'Ref Tipo', ref_id: 'Ref ID', data: 'Data' }
-    const rows = items.map(r => ({ ...r, data: (() => { try { const d = r.data ? JSON.parse(r.data) : null; return d ? JSON.stringify(d) : '' } catch { return String(r.data||'') } })() }))
-    const cols = Object.keys(headers)
-    const head = cols.map(k => headers[k]).join(',')
-    const body = rows.map(r => cols.map(k => { const v = r[k]; if (v == null) return ''; const s = String(v); const needsQuote = s.includes(',') || s.includes('\n') || s.includes('"'); const t = s.replace(/"/g, '""'); return needsQuote ? `"${t}"` : t }).join(',')).join('\n')
-    const csv = head + '\n' + body
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url; a.download = 'audits.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-  }
+  const filtered = audits.filter(a => {
+    const q = search.toLowerCase();
+    return (
+      a.action?.toLowerCase().includes(q) ||
+      a.entity_type?.toLowerCase().includes(q) ||
+      String(a.user_id).includes(q)
+    );
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    const ta = new Date(a.created_at).getTime();
+    const tb = new Date(b.created_at).getTime();
+    return sortDir === 'desc' ? tb - ta : ta - tb;
+  });
+
+  const getActionBadge = (action) => {
+    const colors = {
+      sale_create: 'bg-green-100 text-green-700',
+      sale_delete: 'bg-red-100 text-red-700',
+      user_create: 'bg-blue-100 text-blue-700',
+      user_update: 'bg-yellow-100 text-yellow-700',
+      user_delete: 'bg-red-100 text-red-700',
+      cash_open: 'bg-green-100 text-green-700',
+      cash_close: 'bg-purple-100 text-purple-700',
+      cash_withdraw: 'bg-orange-100 text-orange-700',
+      cash_deposit: 'bg-teal-100 text-teal-700',
+      settings_update: 'bg-indigo-100 text-indigo-700',
+    };
+    return colors[action] || 'bg-gray-100 text-gray-700';
+  };
 
   return (
-    <div className="container">
-      <Breadcrumbs items={["Admin","Auditoría"]} />
-      <h2>Auditoría</h2>
-      <AuditFilters filters={filters} onChange={applyFilters} events={events} />
-      <div className="row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
-        <div className="muted">Total: {total} • Página {page} de {pages}</div>
-        <div className="row" style={{ gap: 8 }}>
-          <select value={filters.limit} onChange={e=>setFilters({ ...filters, limit: parseInt(e.target.value,10), offset: 0 })} title="Tamaño de página">
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-          <button className="btn" onClick={() => setPage(Math.max(1,page-1))} disabled={page<=1}>Anterior</button>
-          <button className="btn" onClick={() => setPage(page+1)} disabled={page>=pages}>Siguiente</button>
-          <button className="btn" onClick={exportCsv}>Exportar CSV</button>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <ClipboardList className="h-6 w-6 text-[hsl(var(--primary))]" />
+          <h1 className="text-2xl font-bold">Auditoría del Sistema</h1>
+        </div>
+        <div className="flex gap-2 items-center">
+          <Input
+            placeholder="Buscar acción, entidad..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            icon={Search}
+            className="w-64"
+          />
+          <button
+            onClick={() => setSortDir(sortDir === 'desc' ? 'asc' : 'desc')}
+            className="p-2 rounded-lg border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]"
+            title="Cambiar orden"
+          >
+            <ArrowUpDown className="h-4 w-4" />
+          </button>
         </div>
       </div>
-      {busy ? <Skeleton lines={6} /> : <AuditTable items={items} onShow={setShow} />}
-      <AuditDetailsModal item={show} onClose={() => setShow(null)} />
-    </div>
-  )
-}
 
-export default Audits
+      <Card className="p-0 overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">Cargando registros...</div>
+        ) : sorted.length === 0 ? (
+          <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">No hay registros de auditoría</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-[hsl(var(--muted))]">
+                <tr>
+                  <th className="text-left px-6 py-3 font-medium">Fecha/Hora</th>
+                  <th className="text-left px-6 py-3 font-medium">Acción</th>
+                  <th className="text-left px-6 py-3 font-medium">Entidad</th>
+                  <th className="text-left px-6 py-3 font-medium">Usuario</th>
+                  <th className="text-left px-6 py-3 font-medium">Detalles</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[hsl(var(--border))]">
+                {sorted.slice(0, 100).map(a => (
+                  <tr key={a.id} className="hover:bg-[hsl(var(--muted))/0.5]">
+                    <td className="px-6 py-3 font-mono text-xs text-[hsl(var(--muted-foreground))]">
+                      {new Date(a.created_at).toLocaleString()}
+                    </td>
+                    <td className="px-6 py-3">
+                      <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${getActionBadge(a.action)}`}>
+                        {a.action}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3 text-[hsl(var(--muted-foreground))]">
+                      {a.entity_type} #{a.entity_id}
+                    </td>
+                    <td className="px-6 py-3">
+                      <span className="inline-flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        {a.user_id}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3 text-xs text-[hsl(var(--muted-foreground))] max-w-xs truncate">
+                      {a.details ? JSON.stringify(JSON.parse(a.details)) : '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      <p className="text-xs text-[hsl(var(--muted-foreground))] text-center">
+        Mostrando los últimos 100 registros
+      </p>
+    </div>
+  );
+};
+
+export default AuditsView;
