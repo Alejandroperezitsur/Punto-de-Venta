@@ -1,31 +1,49 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const prisma = require('../db');
 const { customersCreateRules, customersUpdateRules } = require('../validators/customersValidator');
 const { validationResult } = require('express-validator');
 
 router.get('/', async (req, res) => {
   try {
     const q = req.query.q;
-    let rows;
+    const where = { store_id: req.user.storeId };
+
     if (q) {
-      rows = await db.all('SELECT * FROM customers WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? ORDER BY id DESC', [`%${q}%`, `%${q}%`, `%${q}%`]);
-    } else {
-      rows = await db.all('SELECT * FROM customers ORDER BY id DESC');
+      where.OR = [
+        { name: { contains: q } },
+        { email: { contains: q } },
+        { phone: { contains: q } }
+      ];
     }
-    res.jsonResponse(rows);
+
+    // SQLite case-insensitive "contains" note:
+    // By default in standard SQL "LIKE" is case-insensitive, but Prisma "contains" might not be depending on collation.
+    // For now assuming standard behavior or acceptable limitations.
+    const customers = await prisma.customer.findMany({
+      where,
+      orderBy: { id: 'desc' }
+    });
+
+    res.jsonResponse(customers);
   } catch (e) {
-    res.jsonError(e.message);
+    console.error(e);
+    res.jsonError('Error al obtener clientes', 500);
   }
 });
 
 router.get('/:id', async (req, res) => {
   try {
-    const row = await db.get('SELECT * FROM customers WHERE id = ?', [req.params.id]);
-    if (!row) return res.jsonError('No encontrado', 404);
-    res.jsonResponse(row);
+    const id = parseInt(req.params.id);
+    const customer = await prisma.customer.findFirst({
+      where: { id, store_id: req.user.storeId }
+    });
+
+    if (!customer) return res.jsonError('No encontrado', 404);
+    res.jsonResponse(customer);
   } catch (e) {
-    res.jsonError(e.message);
+    console.error(e);
+    res.jsonError('Error al obtener cliente', 500);
   }
 });
 
@@ -33,12 +51,21 @@ router.post('/', customersCreateRules, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.jsonError(errors.array()[0].msg, 400);
   const { name, phone, email, rfc } = req.body;
+
   try {
-    const result = await db.run('INSERT INTO customers (name, phone, email, rfc) VALUES (?, ?, ?, ?)', [name, phone || null, email || null, rfc || null]);
-    const row = await db.get('SELECT * FROM customers WHERE id = ?', [result.id]);
-    res.jsonResponse(row, { status: 201 });
+    const customer = await prisma.customer.create({
+      data: {
+        store_id: req.user.storeId,
+        name,
+        phone: phone || null,
+        email: email || null,
+        rfc: rfc || null
+      }
+    });
+    res.jsonResponse(customer, { status: 201 });
   } catch (e) {
-    res.jsonError(e.message, 400);
+    console.error(e);
+    res.jsonError('Error al crear cliente', 400);
   }
 });
 
@@ -46,24 +73,43 @@ router.put('/:id', customersUpdateRules, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.jsonError(errors.array()[0].msg, 400);
   const { name, phone, email, rfc } = req.body;
+  const id = parseInt(req.params.id);
+
   try {
-    const current = await db.get('SELECT * FROM customers WHERE id = ?', [req.params.id]);
+    const current = await prisma.customer.findFirst({
+      where: { id, store_id: req.user.storeId }
+    });
+
     if (!current) return res.jsonError('No encontrado', 404);
-    await db.run('UPDATE customers SET name = ?, phone = ?, email = ?, rfc = ? WHERE id = ?', [name ?? current.name, (phone ?? current.phone) || null, (email ?? current.email) || null, (rfc ?? current.rfc) || null, req.params.id]);
-    const row = await db.get('SELECT * FROM customers WHERE id = ?', [req.params.id]);
-    res.jsonResponse(row);
+
+    const updated = await prisma.customer.update({
+      where: { id },
+      data: {
+        name: name ?? undefined,
+        phone: phone !== undefined ? (phone || null) : undefined,
+        email: email !== undefined ? (email || null) : undefined,
+        rfc: rfc !== undefined ? (rfc || null) : undefined
+      }
+    });
+
+    res.jsonResponse(updated);
   } catch (e) {
-    res.jsonError(e.message, 400);
+    console.error(e);
+    res.jsonError('Error al actualizar cliente', 400);
   }
 });
 
 router.delete('/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
   try {
-    const result = await db.run('DELETE FROM customers WHERE id = ?', [req.params.id]);
-    if (!result.changes) return res.jsonError('No encontrado', 404);
+    const current = await prisma.customer.findFirst({ where: { id, store_id: req.user.storeId } });
+    if (!current) return res.jsonError('No encontrado', 404);
+
+    await prisma.customer.delete({ where: { id } });
     res.jsonResponse({ ok: true });
   } catch (e) {
-    res.jsonError(e.message);
+    console.error(e);
+    res.jsonError('Error al eliminar cliente', 500);
   }
 });
 

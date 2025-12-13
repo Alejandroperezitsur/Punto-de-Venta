@@ -1,145 +1,66 @@
 import React, { useState } from 'react';
-import { Button } from '../common/Button';
-import { Input } from '../common/Input';
-import { formatMoney } from '../../utils/format';
-import { X, CreditCard, Banknote, User } from 'lucide-react';
+import { api } from '../../lib/api';
 
-export const PaymentModal = ({ total, onClose, onConfirm, isLoading }) => {
-    const [method, setMethod] = useState('cash');
-    const [amount, setAmount] = useState(total);
-    const [payments, setPayments] = useState([]);
+export function PaymentModal({ amount, onClose, onConfirm }) {
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState(null);
 
-    const totalPaid = payments.reduce((acc, p) => acc + p.amount, 0);
-    const remaining = Math.max(0, total - totalPaid);
-    const change = totalPaid > total ? totalPaid - total : 0;
-    const isComplete = totalPaid >= total - 0.01; // tolerance
+    const handlePay = async () => {
+        setProcessing(true);
+        setError(null);
+        try {
+            // 1. Create Intent
+            const intent = await api.post('/payments/create-intent', { amount });
 
-    const handleAddPayment = () => {
-        const val = parseFloat(amount);
-        if (!val || val <= 0) return;
+            // 2. Simulate User entering card details and confirming...
+            await new Promise(r => setTimeout(r, 1500)); // Simulate UI interaction
 
-        setPayments([...payments, { method, amount: val, id: Date.now() }]);
-        const newRemaining = Math.max(0, total - (totalPaid + val));
-        setAmount(newRemaining); // Auto-fill next amount
+            // 3. Confirm
+            const res = await api.post('/payments/confirm', {
+                paymentId: intent.id
+            });
+
+            if (res.success) {
+                onConfirm({ method: 'card_online', amount: amount, reference: res.paymentId });
+            }
+        } catch (e) {
+            setError(e.message || 'Error en el pago');
+            setProcessing(false);
+        }
     };
-
-    const removePayment = (id) => {
-        setPayments(payments.filter(p => p.id !== id));
-        // Reset amount to remaining? maybe logic updates automatically
-    };
-
-    const methods = [
-        { id: 'cash', label: 'Efectivo', icon: Banknote },
-        { id: 'card', label: 'Tarjeta', icon: CreditCard },
-        { id: 'transfer', label: 'Transferencia', icon: User }, // changed credit to transfer for clarity or keep credit
-    ];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4">
-            <div className="bg-[hsl(var(--card))] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-[hsl(var(--border))]">
-                <div className="p-5 border-b border-[hsl(var(--border))] flex justify-between items-center bg-[hsl(var(--muted))/0.5]">
-                    <h3 className="font-bold text-xl">Realizar Cobro</h3>
-                    <button onClick={onClose} className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors">
-                        <X className="h-6 w-6" />
-                    </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+                <h2 className="text-xl font-bold mb-4">Pago con Tarjeta</h2>
+                <div className="mb-4">
+                    <p className="text-gray-600">Total a pagar:</p>
+                    <p className="text-3xl font-bold text-gray-900">${amount.toFixed(2)}</p>
                 </div>
 
-                <div className="p-6 grid gap-6">
-                    {/* Totals Display */}
-                    <div className="flex gap-4 text-center">
-                        <div className="flex-1 bg-[hsl(var(--bg-muted))] p-4 rounded-xl border border-[hsl(var(--border))]">
-                            <p className="text-sm text-[hsl(var(--muted-foreground))] uppercase font-bold tracking-wider">Total</p>
-                            <p className="text-3xl font-bold text-[hsl(var(--primary))]">{formatMoney(total)}</p>
-                        </div>
-                        <div className="flex-1 bg-[hsl(var(--bg-muted))] p-4 rounded-xl border border-[hsl(var(--border))]">
-                            <p className="text-sm text-[hsl(var(--muted-foreground))] uppercase font-bold tracking-wider">Restante</p>
-                            <p className={`text-3xl font-bold ${remaining > 0 ? 'text-red-500' : 'text-green-500'}`}>
-                                {formatMoney(remaining)}
-                            </p>
-                        </div>
+                {error && <div className="bg-red-100 text-red-700 p-2 mb-4 rounded text-sm">{error}</div>}
+
+                <div className="bg-gray-50 p-4 rounded border mb-4">
+                    <div className="h-4 w-full bg-gray-200 rounded mb-2 animate-pulse"></div>
+                    <div className="flex gap-2">
+                        <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-4 w-1/3 bg-gray-200 rounded animate-pulse"></div>
                     </div>
-
-                    {/* Payment Form */}
-                    {!isComplete && (
-                        <div className="space-y-4 animate-slide-up">
-                            <div className="grid grid-cols-3 gap-3">
-                                {methods.map((m) => {
-                                    const Icon = m.icon;
-                                    return (
-                                        <button
-                                            key={m.id}
-                                            onClick={() => setMethod(m.id)}
-                                            className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200 ${method === m.id
-                                                ? 'border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] shadow-md transform scale-[1.02]'
-                                                : 'border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]'
-                                                }`}
-                                        >
-                                            <Icon className="h-6 w-6 mb-1" />
-                                            <span className="text-xs font-bold">{m.label}</span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="flex gap-3">
-                                <div className="relative flex-1">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-[hsl(var(--muted-foreground))]">$</span>
-                                    <input
-                                        type="number"
-                                        className="w-full h-12 pl-8 pr-4 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] text-lg font-bold focus:ring-2 focus:ring-[hsl(var(--primary))] focus:outline-none"
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleAddPayment()}
-                                        autoFocus
-                                        placeholder="0.00"
-                                    />
-                                </div>
-                                <Button onClick={handleAddPayment} className="h-12 px-6 font-bold shadow-sm">
-                                    Agregar
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Payments List */}
-                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        {payments.map((p) => (
-                            <div key={p.id} className="flex justify-between items-center p-3 bg-[hsl(var(--background))] border border-[hsl(var(--border))] rounded-lg shadow-sm animate-fade-in">
-                                <span className="flex items-center gap-2 font-medium capitalize">
-                                    {methods.find(m => m.id === p.method)?.icon({ className: "w-4 h-4" })}
-                                    {methods.find(m => m.id === p.method)?.label}
-                                </span>
-                                <div className="flex items-center gap-3">
-                                    <span className="font-bold">{formatMoney(p.amount)}</span>
-                                    <button onClick={() => removePayment(p.id)} className="text-red-500 hover:bg-red-50 p-1 rounded-full transition-colors">
-                                        <X className="h-4 w-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Change Display */}
-                    {change > 0 && (
-                        <div className="flex justify-between items-center p-4 bg-green-50 border border-green-200 rounded-xl animate-bounce-in">
-                            <span className="text-green-800 font-bold uppercase tracking-wider">Cambio a Entregar</span>
-                            <span className="text-2xl font-black text-green-700">{formatMoney(change)}</span>
-                        </div>
-                    )}
+                    <p className="text-xs text-center text-gray-500 mt-2">(Simulación de Pasarela Segura)</p>
                 </div>
 
-                <div className="p-5 border-t border-[hsl(var(--border))] bg-[hsl(var(--bg-muted))/0.3] flex gap-3">
-                    <Button variant="ghost" className="flex-1 h-12" onClick={onClose}>Cancelar</Button>
-                    <Button
-                        className="flex-1 h-12 text-lg font-bold shadow-lg"
-                        onClick={() => onConfirm({ method: 'mixed', payments, change })}
-                        disabled={isLoading || !isComplete}
-                        isLoading={isLoading}
+                <div className="flex justify-end gap-3">
+                    <button onClick={onClose} disabled={processing} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
+                    <button
+                        onClick={handlePay}
+                        disabled={processing}
+                        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 flex items-center"
                     >
-                        Confirmar Cobro
-                    </Button>
+                        {processing && <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
+                        {processing ? 'Procesando...' : 'Pagar Ahora'}
+                    </button>
                 </div>
             </div>
         </div>
     );
-};
+}

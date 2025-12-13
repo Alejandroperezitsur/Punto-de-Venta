@@ -1,60 +1,219 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const prisma = require('../db');
 const { auth } = require('./auth');
 const { requireRole } = require('../middleware/role');
 
-router.post('/open', auth, requireRole('admin', 'cajero'), (req, res) => {
+router.post('/open', auth, requireRole('admin', 'cajero'), async (req, res) => {
   const { opening_balance = 0 } = req.body || {};
-  const open = db.get('SELECT * FROM cash_sessions WHERE closed_at IS NULL AND user_id = ?', [req.user.uid]);
-  if (open) return res.jsonError('Ya existe caja abierta', 400);
-  const created_at = new Date().toISOString();
-  const r = db.run('INSERT INTO cash_sessions (user_id, opened_at, opening_balance, status) VALUES (?, ?, ?, ?)', [req.user.uid, created_at, opening_balance, 'open']);
-  try { db.audit('cash_open', req.user.uid, 'cash_session', r.id, { opening_balance }); } catch { }
-  res.jsonResponse(db.get('SELECT * FROM cash_sessions WHERE id = ?', [r.id]), { status: 201 });
+  try {
+    const open = await prisma.cashSession.findFirst({
+      where: {
+        user_id: req.user.uid,
+        store_id: req.user.storeId,
+        closed_at: null
+      }
+    });
+
+    if (open) return res.jsonError('Ya existe caja abierta para este usuario en esta tienda', 400);
+
+    const session = await prisma.cashSession.create({
+      data: {
+        user_id: req.user.uid,
+        store_id: req.user.storeId, // Ensure session is linked to store
+        opening_balance: parseFloat(opening_balance),
+        status: 'open',
+        opened_at: new Date()
+      }
+    });
+
+    try {
+      await prisma.audit.create({
+        data: {
+          store_id: req.user.storeId,
+          event: 'cash_open',
+          user_id: req.user.uid,
+          ref_type: 'cash_session',
+          ref_id: session.id,
+          data: JSON.stringify({ opening_balance })
+        }
+      });
+    } catch { }
+
+    res.jsonResponse(session, { status: 201 });
+  } catch (e) {
+    console.error(e);
+    res.jsonError('Error al abrir caja', 500);
+  }
 });
 
-router.post('/close', auth, requireRole('admin', 'cajero'), (req, res) => {
-  const session = db.get('SELECT * FROM cash_sessions WHERE closed_at IS NULL AND user_id = ?', [req.user.uid]);
-  if (!session) return res.jsonError('No hay caja abierta', 400);
-  const totalMov = db.get('SELECT SUM(amount) AS sum FROM cash_movements WHERE session_id = ?', [session.id]);
-  const closing_balance = +(session.opening_balance + (totalMov?.sum || 0)).toFixed(2);
-  const closed_at = new Date().toISOString();
-  db.run('UPDATE cash_sessions SET closed_at = ?, closing_balance = ?, status = ? WHERE id = ?', [closed_at, closing_balance, 'closed', session.id]);
-  try { db.audit('cash_close', req.user.uid, 'cash_session', session.id, { closing_balance }); } catch { }
-  res.jsonResponse(db.get('SELECT * FROM cash_sessions WHERE id = ?', [session.id]));
+router.post('/close', auth, requireRole('admin', 'cajero'), async (req, res) => {
+  try {
+    const session = await prisma.cashSession.findFirst({
+      where: {
+        user_id: req.user.uid,
+        store_id: req.user.storeId,
+        closed_at: null
+      }
+    });
+    if (!session) return res.jsonError('No hay caja abierta', 400);
+
+    const agg = await prisma.cashMovement.aggregate({
+      _sum: { amount: true },
+      where: { session_id: session.id }
+    });
+
+    const closing_balance = session.opening_balance + (agg._sum.amount || 0);
+
+    const closed = await prisma.cashSession.update({
+      where: { id: session.id },
+      data: {
+        closed_at: new Date(),
+        closing_balance,
+        status: 'closed'
+      }
+    });
+
+    try {
+      await prisma.audit.create({
+        data: {
+          store_id: req.user.storeId,
+          event: 'cash_close',
+          user_id: req.user.uid,
+          ref_type: 'cash_session',
+          ref_id: session.id,
+          data: JSON.stringify({ closing_balance })
+        }
+      });
+    } catch { }
+
+    res.jsonResponse(closed);
+  } catch (e) {
+    console.error(e);
+    res.jsonError('Error al cerrar caja', 500);
+  }
 });
 
-router.get('/status', auth, requireRole('admin', 'cajero'), (req, res) => {
-  const session = db.get('SELECT * FROM cash_sessions WHERE closed_at IS NULL AND user_id = ?', [req.user.uid]);
-  res.jsonResponse({ session });
+router.get('/status', auth, requireRole('admin', 'cajero'), async (req, res) => {
+  try {
+    const session = await prisma.cashSession.findFirst({
+      where: {
+        user_id: req.user.uid,
+        store_id: req.user.storeId,
+        closed_at: null
+      }
+    });
+    res.jsonResponse({ session });
+  } catch (e) {
+    console.error(e);
+    res.jsonError('Error al obtener estado de caja', 500);
+  }
 });
 
-router.get('/movements', auth, requireRole('admin', 'cajero'), (req, res) => {
-  const session = db.get('SELECT * FROM cash_sessions WHERE closed_at IS NULL AND user_id = ?', [req.user.uid]);
-  if (!session) return res.jsonError('No hay caja abierta', 400);
-  const rows = db.all('SELECT * FROM cash_movements WHERE session_id = ? ORDER BY id DESC', [session.id]);
-  res.jsonResponse(rows);
+router.get('/movements', auth, requireRole('admin', 'cajero'), async (req, res) => {
+  try {
+    const session = await prisma.cashSession.findFirst({
+      where: {
+        user_id: req.user.uid,
+        store_id: req.user.storeId,
+        closed_at: null
+      }
+    });
+    if (!session) return res.jsonError('No hay caja abierta', 400);
+
+    const rows = await prisma.cashMovement.findMany({
+      where: { session_id: session.id },
+      orderBy: { id: 'desc' }
+    });
+    res.jsonResponse(rows);
+  } catch (e) {
+    console.error(e);
+    res.jsonError('Error al obtener movimientos', 500);
+  }
 });
 
-router.post('/withdraw', auth, requireRole('admin'), (req, res) => {
+router.post('/withdraw', auth, requireRole('admin'), async (req, res) => {
   const { amount, reference = 'Retiro' } = req.body || {};
-  const session = db.get('SELECT * FROM cash_sessions WHERE closed_at IS NULL AND user_id = ?', [req.user.uid]);
-  if (!session) return res.jsonError('No hay caja abierta', 400);
-  const created_at = new Date().toISOString();
-  db.run('INSERT INTO cash_movements (session_id, type, reference, amount, created_at) VALUES (?, ?, ?, ?, ?)', [session.id, 'withdraw', reference, -Math.abs(amount || 0), created_at]);
-  try { db.audit('cash_withdraw', req.user.uid, 'cash_session', session.id, { amount: -Math.abs(amount || 0), reference }); } catch { }
-  res.jsonResponse({ ok: true }, { status: 201 });
+  try {
+    const session = await prisma.cashSession.findFirst({
+      where: {
+        user_id: req.user.uid,
+        store_id: req.user.storeId,
+        closed_at: null
+      }
+    });
+    if (!session) return res.jsonError('No hay caja abierta', 400);
+
+    await prisma.cashMovement.create({
+      data: {
+        session_id: session.id,
+        type: 'withdraw',
+        reference,
+        amount: -Math.abs(amount || 0),
+        created_at: new Date()
+      }
+    });
+
+    try {
+      await prisma.audit.create({
+        data: {
+          store_id: req.user.storeId,
+          event: 'cash_withdraw',
+          user_id: req.user.uid,
+          ref_type: 'cash_session',
+          ref_id: session.id,
+          data: JSON.stringify({ amount: -Math.abs(amount || 0), reference })
+        }
+      });
+    } catch { }
+
+    res.jsonResponse({ ok: true }, { status: 201 });
+  } catch (e) {
+    console.error(e);
+    res.jsonError('Error al realizar retiro', 500);
+  }
 });
 
-router.post('/deposit', auth, requireRole('admin', 'cajero'), (req, res) => {
+router.post('/deposit', auth, requireRole('admin', 'cajero'), async (req, res) => {
   const { amount, reference = 'Depósito' } = req.body || {};
-  const session = db.get('SELECT * FROM cash_sessions WHERE closed_at IS NULL AND user_id = ?', [req.user.uid]);
-  if (!session) return res.jsonError('No hay caja abierta', 400);
-  const created_at = new Date().toISOString();
-  db.run('INSERT INTO cash_movements (session_id, type, reference, amount, created_at) VALUES (?, ?, ?, ?, ?)', [session.id, 'deposit', reference, Math.abs(amount || 0), created_at]);
-  try { db.audit('cash_deposit', req.user.uid, 'cash_session', session.id, { amount: Math.abs(amount || 0), reference }); } catch { }
-  res.jsonResponse({ ok: true }, { status: 201 });
+  try {
+    const session = await prisma.cashSession.findFirst({
+      where: {
+        user_id: req.user.uid,
+        store_id: req.user.storeId,
+        closed_at: null
+      }
+    });
+    if (!session) return res.jsonError('No hay caja abierta', 400);
+
+    await prisma.cashMovement.create({
+      data: {
+        session_id: session.id,
+        type: 'deposit',
+        reference,
+        amount: Math.abs(amount || 0),
+        created_at: new Date()
+      }
+    });
+
+    try {
+      await prisma.audit.create({
+        data: {
+          store_id: req.user.storeId,
+          event: 'cash_deposit',
+          user_id: req.user.uid,
+          ref_type: 'cash_session',
+          ref_id: session.id,
+          data: JSON.stringify({ amount: Math.abs(amount || 0), reference })
+        }
+      });
+    } catch { }
+
+    res.jsonResponse({ ok: true }, { status: 201 });
+  } catch (e) {
+    console.error(e);
+    res.jsonError('Error al realizar depósito', 500);
+  }
 });
 
 module.exports = router;

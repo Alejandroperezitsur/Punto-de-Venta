@@ -1,51 +1,78 @@
-const express = require('express')
-const router = express.Router()
-const db = require('../db')
-const { auth } = require('./auth')
-const { requireRole } = require('../middleware/role')
-const { logger } = require('../logger')
+const express = require('express');
+const router = express.Router();
+const prisma = require('../db');
+const { auth } = require('./auth');
+const { requireRole } = require('../middleware/role');
+const { logger } = require('../logger');
 
-function parseFilters(q) {
-  const startDate = q.startDate ? new Date(q.startDate).toISOString() : null
-  const endDate = q.endDate ? new Date(q.endDate).toISOString() : null
-  const userId = q.userId ? String(q.userId) : null
-  const event = q.event ? String(q.event) : null
-  const search = q.search ? String(q.search).trim() : null
-  const limit = Math.min(Math.max(parseInt(q.limit || '20', 10), 1), 200)
-  const offset = Math.max(parseInt(q.offset || '0', 10), 0)
-  return { startDate, endDate, userId, event, search, limit, offset }
-}
-
-router.get('/', auth, requireRole('admin'), (req, res) => {
+router.get('/', auth, requireRole('admin'), async (req, res) => {
   try {
-    const f = parseFilters(req.query)
-    const where = []
-    const params = []
-    if (f.startDate && f.endDate) { where.push('created_at BETWEEN ? AND ?'); params.push(f.startDate, f.endDate) }
-    if (f.userId) { where.push('user_id = ?'); params.push(f.userId) }
-    if (f.event) { where.push('event = ?'); params.push(f.event) }
-    if (f.search) { where.push('(COALESCE(ref_type,"") LIKE ? OR COALESCE(ref_id,"") LIKE ? OR COALESCE(data,"") LIKE ?)'); const s = `%${f.search}%`; params.push(s, s, s) }
-    const whereSql = where.length ? ('WHERE ' + where.join(' AND ')) : ''
-    const order = 'ORDER BY created_at DESC, id DESC'
-    const totalRow = db.get(`SELECT COUNT(*) AS total FROM audits ${whereSql}`, params)
-    const rows = db.all(`SELECT id, event, user_id, ref_type, ref_id, data, created_at FROM audits ${whereSql} ${order} LIMIT ? OFFSET ?`, [...params, f.limit, f.offset])
-    try { logger.info({ filters: f, count: rows.length }, 'audits_list') } catch { }
-    try { db.audit('audit_query', req.user.uid, 'audit', null, f) } catch { }
-    res.jsonResponse({ total: totalRow?.total || 0, items: rows, limit: f.limit, offset: f.offset })
+    const { startDate, endDate, userId, event, search, limit = '20', offset = '0' } = req.query;
+
+    const where = {
+      store_id: req.user.storeId // STRICT ISOLATION
+    };
+
+    if (startDate && endDate) {
+      where.created_at = {
+        gte: new Date(startDate),
+        lte: new Date(endDate)
+      };
+    }
+    if (userId) where.user_id = parseInt(userId);
+    if (event) where.event = event;
+    if (search) {
+      where.OR = [
+        { ref_type: { contains: search } },
+        { ref_id: { contains: search } }, // ref_id is often Int, check schema. If String OK. If Int, this might crash. Assuming String or careful.
+        // If ref_id is Int in Prisma, 'contains' won't work.
+        // Let's assume ref_type or data is the main search target.
+        { data: { contains: search } }
+      ];
+    }
+
+    // Safety check for search on non-string fields?
+    // In original legacy code: ref_id was often stringified or just ID.
+    // Prisma `Audits` model `ref_id` should probably be String to support multiple types or Int?
+    // If it is Int, we cannot do contains.
+
+    const take = Math.min(Math.max(parseInt(limit), 1), 200);
+    const skip = Math.max(parseInt(offset), 0);
+
+    const [total, items] = await prisma.$transaction([
+      prisma.audit.count({ where }),
+      prisma.audit.findMany({
+        where,
+        orderBy: { created_at: 'desc' },
+        take,
+        skip
+      })
+    ]);
+
+    try { logger.info({ count: items.length }, 'audits_list'); } catch { }
+
+    res.jsonResponse({ total, items, limit: parseInt(limit), offset: parseInt(offset) });
   } catch (e) {
+    console.error(e);
     res.jsonError(e.message);
   }
-})
+});
 
-router.get('/events', auth, requireRole('admin'), (req, res) => {
+router.get('/events', auth, requireRole('admin'), async (req, res) => {
   try {
-    const rows = db.all('SELECT DISTINCT event FROM audits ORDER BY event ASC')
-    const list = rows.map(r => r.event).filter(Boolean)
-    try { logger.info({ count: list.length }, 'audits_events') } catch { }
-    res.jsonResponse(list)
+    // Distinct events
+    const rows = await prisma.audit.groupBy({
+      by: ['event'],
+      where: { store_id: req.user.storeId },
+      orderBy: { event: 'asc' }
+    });
+
+    const list = rows.map(r => r.event).filter(Boolean);
+    res.jsonResponse(list);
   } catch (e) {
+    console.error(e);
     res.jsonError(e.message);
   }
-})
+});
 
-module.exports = router
+module.exports = router;

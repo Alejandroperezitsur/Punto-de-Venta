@@ -19,6 +19,7 @@ const cashRouter = require('./routes/cash');
 const receivablesRouter = require('./routes/receivables');
 const reportsRouter = require('./routes/reports');
 const auditsRouter = require('./routes/audits');
+const systemRouter = require('./routes/system');
 
 const app = express();
 app.use(helmet());
@@ -58,8 +59,13 @@ app.use('/api/settings', settingsRouter);
 app.use('/api/auth', authModule.router);
 app.use('/api/cash', cashRouter);
 app.use('/api/receivables', receivablesRouter);
+app.use('/api/receivables', receivablesRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/invoices', require('./routes/invoices'));
+app.use('/api/payments', require('./routes/payments'));
 app.use('/api/audits', auditsRouter);
+app.use('/api/system', systemRouter);
+app.use('/api/admin-saas', require('./routes/admin_saas'));
 
 app.get('/api/metrics', async (req, res) => {
   try {
@@ -78,7 +84,16 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 ensureConfig();
-app.listen(PORT, () => {
-  db.init();
-  logger.info(`POS API escuchando en http://localhost:${PORT}`);
+// Start Cron Jobs
+const { startCron } = require('./cron');
+startCron();
+
+app.listen(PORT, async () => {
+  try {
+    await db.$connect();
+    logger.info('Database connected successfully');
+  } catch (e) {
+    logger.error('Database connection failed', e);
+  }
+  logger.info(`Server running on port ${PORT}`);
 });

@@ -1,56 +1,81 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const prisma = require('../db');
+const { auth } = require('./auth');
 
-router.get('/', async (req, res) => {
+// Note: Categories should probably be authenticated to ensure store isolation.
+// Adding auth middleware to all routes here.
+router.get('/', auth, async (req, res) => {
   try {
-    const rows = await db.all('SELECT * FROM categories ORDER BY name ASC');
-    // Optional: build hierarchy tree here if needed, but returning flat list is fine for now
-    res.jsonResponse(rows);
+    const categories = await prisma.category.findMany({
+      where: { store_id: req.user.storeId }, // Enforce store isolation
+      orderBy: { name: 'asc' },
+      include: { children: true } // Optional hierarchy
+    });
+    res.jsonResponse(categories);
   } catch (e) {
-    res.jsonError(e.message);
+    console.error(e);
+    res.jsonError('Error al obtener categorías', 500);
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   const { name, parent_id, image_url } = req.body;
   try {
-    const result = await db.run(
-      'INSERT INTO categories (name, parent_id, image_url) VALUES (?, ?, ?)',
-      [name, parent_id || null, image_url || null]
-    );
-    const row = await db.get('SELECT * FROM categories WHERE id = ?', [result.id]);
-    res.jsonResponse(row, { status: 201 });
+    const category = await prisma.category.create({
+      data: {
+        store_id: req.user.storeId,
+        name,
+        parent_id: parent_id ? parseInt(parent_id) : null,
+        image_url: image_url || null
+      }
+    });
+    res.jsonResponse(category, { status: 201 });
   } catch (e) {
-    res.jsonError(e.message, 400);
+    console.error(e);
+    res.jsonError('Error al crear categoría', 400);
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   const { name, parent_id, image_url } = req.body;
+  const id = parseInt(req.params.id);
   try {
-    const current = await db.get('SELECT * FROM categories WHERE id = ?', [req.params.id]);
+    const current = await prisma.category.findFirst({
+      where: { id, store_id: req.user.storeId }
+    });
+
     if (!current) return res.jsonError('No encontrado', 404);
 
-    await db.run(
-      'UPDATE categories SET name = ?, parent_id = ?, image_url = ? WHERE id = ?',
-      [name ?? current.name, parent_id ?? current.parent_id, image_url ?? current.image_url, req.params.id]
-    );
+    const updated = await prisma.category.update({
+      where: { id },
+      data: {
+        name: name ?? undefined,
+        parent_id: parent_id !== undefined ? (parent_id ? parseInt(parent_id) : null) : undefined,
+        image_url: image_url !== undefined ? (image_url || null) : undefined
+      }
+    });
 
-    const row = await db.get('SELECT * FROM categories WHERE id = ?', [req.params.id]);
-    res.jsonResponse(row);
+    res.jsonResponse(updated);
   } catch (e) {
-    res.jsonError(e.message, 400);
+    console.error(e);
+    res.jsonError('Error al actualizar categoría', 400);
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
+  const id = parseInt(req.params.id);
   try {
-    const result = await db.run('DELETE FROM categories WHERE id = ?', [req.params.id]);
-    if (!result.changes) return res.jsonError('No encontrado', 404);
+    const current = await prisma.category.findFirst({
+      where: { id, store_id: req.user.storeId }
+    });
+    if (!current) return res.jsonError('No encontrado', 404);
+
+    await prisma.category.delete({ where: { id } });
     res.jsonResponse({ ok: true });
   } catch (e) {
-    res.jsonError(e.message);
+    console.error(e);
+    res.jsonError('Error al eliminar categoría', 500);
   }
 });
 

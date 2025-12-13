@@ -16,6 +16,8 @@ const CashControlView = React.lazy(() => import('./views/CashControl'));
 const UsersView = React.lazy(() => import('./views/Users'));
 const AuditsView = React.lazy(() => import('./views/Audits'));
 const OnboardingWizard = React.lazy(() => import('./views/OnboardingWizard'));
+const AboutView = React.lazy(() => import('./views/About'));
+const BackupsView = React.lazy(() => import('./views/Backups'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -42,11 +44,9 @@ const PublicOnly = ({ children }) => {
     return children;
 };
 
-const LoadingFallback = () => (
-    <div className="flex items-center justify-center h-screen bg-[var(--bg)] text-[var(--muted-foreground)]">
-        <Loader2 className="h-8 w-8 animate-spin" />
-    </div>
-);
+import { Splash } from './components/common/Splash';
+
+const LoadingFallback = () => <Splash />;
 
 function App() {
     const { theme } = useAppStore();
@@ -109,6 +109,18 @@ function App() {
                     <Route path="/audits" element={
                         <RequireAuth>
                             <AuditsView />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/about" element={
+                        <RequireAuth>
+                            <AboutView />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/backups" element={
+                        <RequireAuth>
+                            <BackupsView />
                         </RequireAuth>
                     } />
 

@@ -281,6 +281,28 @@ const BusinessSettings = () => {
         </div>
       </SettingsSection>
 
+      {/* Branding */}
+      <SettingsSection title="Personalización de Marca" icon={Store}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs font-medium mb-1 block">Nombre de la Aplicación</label>
+            <Input
+              placeholder="POS Pro"
+              value={settings.app_name || 'POS Pro'}
+              onChange={e => updateSetting('app_name', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium mb-1 block">Copyright del Footer</label>
+            <Input
+              placeholder="© 2024 Mi Empresa"
+              value={settings.app_copyright || ''}
+              onChange={e => updateSetting('app_copyright', e.target.value)}
+            />
+          </div>
+        </div>
+      </SettingsSection>
+
       {/* Notifications */}
       <SettingsSection title="Notificaciones y Alertas" icon={Bell}>
         <div className="space-y-4">

@@ -33,7 +33,28 @@ export const MainLayout = ({ children }) => {
                         {children}
                     </motion.div>
                 </main>
+                <Footer />
             </div>
         </div>
+    );
+};
+
+const Footer = () => {
+    const [info, setInfo] = React.useState({ copyright: '', version: '' });
+
+    React.useEffect(() => {
+        fetch('/api/settings').then(res => res.json()).then(data => {
+            setInfo({
+                copyright: data.app_copyright || '© 2024 POS Pro',
+                version: data.app_version || '1.0.0'
+            });
+        }).catch(() => { });
+    }, []);
+
+    return (
+        <footer className="py-2 px-6 border-t border-[hsl(var(--border))] bg-[hsl(var(--card))] text-xs text-[hsl(var(--muted-foreground))] flex justify-between items-center">
+            <span>{info.copyright}</span>
+            <span>v{info.version}</span>
+        </footer>
     );
 };

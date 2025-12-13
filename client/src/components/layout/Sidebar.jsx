@@ -85,7 +85,9 @@ export const Sidebar = () => {
                 <NavItem to="/reportes" icon={BarChart3} show={hasPermission(PERMISSIONS.REPORTS_VIEW)}>Reportes</NavItem>
                 <NavItem to="/usuarios" icon={Shield} show={hasPermission(PERMISSIONS.USERS_VIEW)}>Usuarios</NavItem>
                 <NavItem to="/audits" icon={ClipboardList} show={hasPermission(PERMISSIONS.AUDITS_VIEW)}>Auditoría</NavItem>
+                <NavItem to="/backups" icon={HardDrive} show={hasPermission(PERMISSIONS.SETTINGS_VIEW)}>Respaldos</NavItem>
                 <NavItem to="/config" icon={Settings} shortcut="F10" show={hasPermission(PERMISSIONS.SETTINGS_VIEW)}>Configuración</NavItem>
+                <NavItem to="/about" icon={Info} show={true}>Acerca de</NavItem>
             </nav>
 
             <div className="p-4 border-t border-[hsl(var(--border))] bg-[hsl(var(--muted))/0.3]">
