@@ -24,22 +24,22 @@ export function WelcomeTour() {
     const steps = [
         {
             title: '¡Bienvenido a Ventify! 🚀',
-            content: 'Tu nuevo sistema de punto de venta. Vamos a dar un recorrido rápido para que empieces a vender en minutos.',
+            content: 'El sistema que crece contigo. Simplificamos tus ventas para que tú te enfoques en crecer.',
             position: 'center'
         },
         {
-            title: 'Punto de Venta',
-            content: 'Aquí realizarás tus ventas. Busca productos, escanea códigos y cobra en efectivo o tarjeta.',
-            position: 'top-left' // Mock position, real implementation would use refs
+            title: '🛒 Punto de Venta Rápido',
+            content: 'Tu caja registradora moderna. Usa el escáner o busca productos al instante. ¡Soporta atajos de teclado!',
+            position: 'top-left'
         },
         {
-            title: 'Facturación CFDI',
-            content: 'Emite facturas fiscales válidas con un solo clic desde el historial de ventas.',
+            title: '⚡ Facturación al Instante',
+            content: 'Olvídate de portales externos. Factura (CFDI 4.0) directamente al cerrar la venta o desde el historial.',
             position: 'center'
         },
         {
-            title: 'Soporte Offline',
-            content: '¿Se fue el internet? No te preocupes, Ventify sigue funcionando y sincroniza tus datos cuando regreses.',
+            title: '📊 Toma Decisiones Reales',
+            content: 'Nuestra IA analiza tus datos y te dice qué vender y cuándo reabastecer. Revisa el Dashboard de Insights.',
             position: 'bottom-right'
         }
     ];

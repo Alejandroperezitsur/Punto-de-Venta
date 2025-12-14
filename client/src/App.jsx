@@ -58,8 +58,9 @@ const PublicOnly = ({ children }) => {
 };
 
 import { Splash } from './components/common/Splash';
+import { LoadingFallback } from './components/common/LoadingFallback';
 
-const LoadingFallback = () => <Splash />;
+// const LoadingFallback = () => <Splash />; // Replaced with enhanced component
 
 function App() {
     const { theme } = useAppStore();

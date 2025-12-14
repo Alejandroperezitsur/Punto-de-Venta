@@ -129,7 +129,9 @@ model Product {
 
   // SKU constraint: unique per store
   @@unique([store_id, sku])
+  @@unique([store_id, sku])
   @@index([name])
+  @@index([store_id, active])
   @@map("products")
 }
 
@@ -196,7 +198,11 @@ model Sale {
   receivables    Receivable[]
   invoices       Invoice[]
 
+  invoices       Invoice[]
+
   @@index([created_at])
+  @@index([store_id, created_at])
+  @@index([customer_id])
   @@map("sales")
 }
 
