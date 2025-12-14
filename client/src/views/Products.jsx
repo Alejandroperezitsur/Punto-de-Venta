@@ -16,15 +16,24 @@ const ProductsView = () => {
     const [saving, setSaving] = useState(false);
     const [kardexProduct, setKardexProduct] = useState(null);
 
+    const [predictions, setPredictions] = useState({});
+
     const loadData = async () => {
         setLoading(true);
         try {
-            const [pData, cData] = await Promise.all([
+            const [pData, cData, aiData] = await Promise.all([
                 api('/products'),
-                api('/categories')
+                api('/categories'),
+                api('/ai/inventory').catch(() => [])
             ]);
             setProducts(pData);
             setCategories(cData);
+
+            const predMap = {};
+            if (Array.isArray(aiData)) {
+                aiData.forEach(p => predMap[p.productId] = p);
+            }
+            setPredictions(predMap);
         } catch (e) {
             console.error(e);
         } finally {
@@ -95,6 +104,20 @@ const ProductsView = () => {
                     {row.stock}
                 </span>
             )
+        },
+        {
+            title: 'Predicción', key: 'ai', render: (row) => {
+                const pred = predictions[row.id];
+                if (!pred) return <span className="text-gray-300">-</span>;
+                return (
+                    <div className="text-xs">
+                        <div className={`font-bold ${pred.daysLeft <= 7 ? 'text-orange-600' : 'text-gray-600'}`}>
+                            {pred.daysLeft} días
+                        </div>
+                        <div className="text-gray-400 text-[10px]">restantes</div>
+                    </div>
+                );
+            }
         },
         {
             title: 'Acciones', key: 'actions', render: (row) => (

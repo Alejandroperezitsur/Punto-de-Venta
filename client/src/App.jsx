@@ -29,6 +29,7 @@ const MetricsDashboard = React.lazy(() => import('./views/admin/MetricsDashboard
 const SupportTickets = React.lazy(() => import('./views/SupportTickets'));
 const Subscription = React.lazy(() => import('./views/Subscription'));
 const EnterpriseReports = React.lazy(() => import('./views/admin/EnterpriseReports'));
+const AiInsights = React.lazy(() => import('./views/AiInsights'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -164,6 +165,12 @@ function App() {
                     <Route path="/admin/enterprise" element={
                         <RequireAuth>
                             <EnterpriseReports />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/insights" element={
+                        <RequireAuth>
+                            <AiInsights />
                         </RequireAuth>
                     } />
 

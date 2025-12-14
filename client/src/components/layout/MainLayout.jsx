@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
 import { FeedbackWidget } from '../common/FeedbackWidget';
+import { AiAssistant } from '../ai/AiAssistant';
 
 export const MainLayout = ({ children }) => {
     const navigate = useNavigate();
@@ -38,6 +39,7 @@ export const MainLayout = ({ children }) => {
                 <Footer />
             </div>
             <FeedbackWidget />
+            <AiAssistant />
         </div>
     );
 };

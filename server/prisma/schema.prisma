@@ -450,3 +450,32 @@ model Subscription {
   
   @@map("subscriptions")
 }
+
+model AiInsight {
+  id           Int      @id @default(autoincrement())
+  store_id     Int
+  type         String   // prediction, alert, opportunity
+  title        String
+  description  String
+  data         String?  // JSON context
+  priority     String   @default("info") // info, warning, critical
+  is_read      Boolean  @default(false)
+  created_at   DateTime @default(now())
+
+  store        Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@map("ai_insights")
+}
+
+model AiConfig {
+  store_id              Int      @id
+  enable_predictions    Boolean  @default(true)
+  enable_recommendations Boolean @default(true)
+  enable_assistant      Boolean  @default(true)
+  low_stock_threshold   Int      @default(5)
+  analysis_period_days  Int      @default(30)
+
+  store                 Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@map("ai_configs")
+}
