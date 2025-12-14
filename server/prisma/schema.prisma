@@ -307,6 +307,42 @@ model Invoice {
   @@map("invoices")
 }
 
+model ProductEvent {
+  id        Int      @id @default(autoincrement())
+  type      String
+  user_id   Int?
+  store_id  Int?
+  data      String?
+  created_at DateTime @default(now())
+
+  @@index([type])
+  @@index([store_id])
+  @@map("product_events")
+}
+
+model UserFeedback {
+  id        Int      @id @default(autoincrement())
+  user_id   Int?
+  type      String   // 'bug', 'suggestion', 'other'
+  comment   String
+  rating    Int?
+  url       String?
+  created_at DateTime @default(now())
+
+  @@map("user_feedback")
+}
+
+model FeatureVote {
+  id           Int      @id @default(autoincrement())
+  feature_name String   @unique
+  description  String?
+  votes        Int      @default(0)
+  status       String   @default("planned") // planned, in_progress, completed
+  created_at   DateTime @default(now())
+
+  @@map("feature_votes")
+}
+
 model Audit {
   id         Int      @id @default(autoincrement())
   store_id   Int      @default(1)

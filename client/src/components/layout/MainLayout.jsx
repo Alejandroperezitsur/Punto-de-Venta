@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 
+import { FeedbackWidget } from '../common/FeedbackWidget';
+
 export const MainLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -35,6 +37,7 @@ export const MainLayout = ({ children }) => {
                 </main>
                 <Footer />
             </div>
+            <FeedbackWidget />
         </div>
     );
 };

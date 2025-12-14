@@ -66,6 +66,9 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/audits', auditsRouter);
 app.use('/api/system', systemRouter);
 app.use('/api/admin-saas', require('./routes/admin_saas'));
+app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/feedback', require('./routes/feedback'));
+app.use('/api/roadmap', require('./routes/roadmap'));
 
 app.get('/api/metrics', async (req, res) => {
   try {

@@ -12,6 +12,7 @@ import CustomersView from './views/Customers';
 import { Landing } from './pages/Landing';
 import { Pricing } from './pages/Pricing';
 import { Support } from './pages/Support';
+import { Roadmap } from './pages/Roadmap';
 
 // Legacy Views (kept as is for now, assuming they work with legacy UI components)
 // We might need to handle their dependencies if they break.
@@ -22,7 +23,9 @@ const UsersView = React.lazy(() => import('./views/Users'));
 const AuditsView = React.lazy(() => import('./views/Audits'));
 const OnboardingWizard = React.lazy(() => import('./views/OnboardingWizard'));
 const AboutView = React.lazy(() => import('./views/About'));
+const AboutView = React.lazy(() => import('./views/About'));
 const BackupsView = React.lazy(() => import('./views/Backups'));
+const MetricsDashboard = React.lazy(() => import('./views/admin/MetricsDashboard'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -71,6 +74,7 @@ function App() {
                     <Route path="/landing" element={<PublicOnly><Landing /></PublicOnly>} />
                     <Route path="/pricing" element={<Pricing />} />
                     <Route path="/support" element={<Support />} />
+                    <Route path="/roadmap" element={<Roadmap />} />
 
                     <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
 
@@ -131,6 +135,12 @@ function App() {
                     <Route path="/backups" element={
                         <RequireAuth>
                             <BackupsView />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/admin/metrics" element={
+                        <RequireAuth>
+                            <MetricsDashboard />
                         </RequireAuth>
                     } />
 
