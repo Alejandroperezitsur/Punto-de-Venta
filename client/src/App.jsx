@@ -8,6 +8,11 @@ import SalesView from './views/Sales';
 import ProductsView from './views/Products';
 import CustomersView from './views/Customers';
 
+// Commercial Pages
+import { Landing } from './pages/Landing';
+import { Pricing } from './pages/Pricing';
+import { Support } from './pages/Support';
+
 // Legacy Views (kept as is for now, assuming they work with legacy UI components)
 // We might need to handle their dependencies if they break.
 const Reportes = React.lazy(() => import('./views/Reportes'));
@@ -62,7 +67,12 @@ function App() {
                     <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
                     <Route path="/setup" element={<PublicOnly><OnboardingWizard /></PublicOnly>} />
 
-                    <Route path="/" element={<Navigate to="/ventas" replace />} />
+                    {/* Commercial Routes */}
+                    <Route path="/landing" element={<PublicOnly><Landing /></PublicOnly>} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/support" element={<Support />} />
+
+                    <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
 
                     <Route path="/ventas" element={
                         <RequireAuth>
