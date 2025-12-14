@@ -69,6 +69,8 @@ app.use('/api/admin-saas', require('./routes/admin_saas'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/feedback', require('./routes/feedback'));
 app.use('/api/roadmap', require('./routes/roadmap'));
+app.use('/api/support', require('./routes/support'));
+app.use('/api/billing', require('./routes/billing'));
 
 app.get('/api/metrics', async (req, res) => {
   try {

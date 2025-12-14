@@ -17,6 +17,14 @@ model Store {
   fiscal_name  String?
   tax_regime   String?
   
+  // Internationalization & White-Label
+  reseller_id  Int?      @default(1)
+  country      String?   @default("MX")
+  currency     String?   @default("MXN")
+  timezone     String?   @default("America/Mexico_City")
+
+  reseller     Reseller? @relation(fields: [reseller_id], references: [id])
+  
   users        UserStore[]
   products     Product[]
   sales        Sale[]
@@ -383,4 +391,62 @@ model Backup {
   created_at DateTime @default(now())
 
   @@map("backups")
+}
+
+model Reseller {
+  id           Int      @id @default(autoincrement())
+  name         String
+  domain       String   @unique
+  logo_url     String?
+  primary_color String? @default("#4f46e5")
+  support_email String?
+  created_at   DateTime @default(now())
+
+  stores       Store[]
+  
+  @@map("resellers")
+}
+
+model SupportTicket {
+  id           Int      @id @default(autoincrement())
+  store_id     Int
+  user_id      Int
+  subject      String
+  message      String
+  status       String   @default("open") // open, in_progress, resolved, closed
+  priority     String   @default("normal") // low, normal, high, urgent
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  store        Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  messages     TicketMessage[]
+
+  @@map("support_tickets")
+}
+
+model TicketMessage {
+  id        Int      @id @default(autoincrement())
+  ticket_id Int
+  user_id   Int?     // Null if system/agent
+  message   String
+  is_staff  Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  ticket    SupportTicket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  
+  @@map("ticket_messages")
+}
+
+model Subscription {
+  id             Int       @id @default(autoincrement())
+  store_id       Int       @unique
+  plan_id        String    // free, pro, enterprise
+  status         String    // active, past_due, canceled
+  current_period_end DateTime?
+  payment_method String?
+  
+  store          Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
 }

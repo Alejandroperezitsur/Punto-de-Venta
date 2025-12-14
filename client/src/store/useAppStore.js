@@ -3,7 +3,22 @@ import { create } from 'zustand';
 export const useAppStore = create((set) => ({
     theme: localStorage.getItem('theme') || 'light',
     user: JSON.parse(localStorage.getItem('user') || 'null'),
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
     token: localStorage.getItem('token') || null,
+    reseller: null, // White-label config
+
+    fetchResellerConfig: async () => {
+        // In real app, fetch from /api/system/branding or similar.
+        // For now, we simulate based on URL or defaults.
+        set({
+            reseller: {
+                id: 1,
+                name: 'Ventify',
+                primary_color: '#4f46e5',
+                domain: 'app.ventify.com'
+            }
+        });
+    },
 
     toggleTheme: () => set((state) => {
         const newTheme = state.theme === 'light' ? 'dark' : 'light';

@@ -26,9 +26,13 @@ const AboutView = React.lazy(() => import('./views/About'));
 const AboutView = React.lazy(() => import('./views/About'));
 const BackupsView = React.lazy(() => import('./views/Backups'));
 const MetricsDashboard = React.lazy(() => import('./views/admin/MetricsDashboard'));
+const SupportTickets = React.lazy(() => import('./views/SupportTickets'));
+const Subscription = React.lazy(() => import('./views/Subscription'));
+const EnterpriseReports = React.lazy(() => import('./views/admin/EnterpriseReports'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
+import { DynamicBranding } from './components/common/DynamicBranding';
 
 // Components
 import { Loader2 } from 'lucide-react';
@@ -65,6 +69,7 @@ function App() {
 
     return (
         <BrowserRouter>
+            <DynamicBranding />
             <React.Suspense fallback={<LoadingFallback />}>
                 <Routes>
                     <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
@@ -141,6 +146,24 @@ function App() {
                     <Route path="/admin/metrics" element={
                         <RequireAuth>
                             <MetricsDashboard />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/soporte" element={
+                        <RequireAuth>
+                            <SupportTickets />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/billing" element={
+                        <RequireAuth>
+                            <Subscription />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/admin/enterprise" element={
+                        <RequireAuth>
+                            <EnterpriseReports />
                         </RequireAuth>
                     } />
 
