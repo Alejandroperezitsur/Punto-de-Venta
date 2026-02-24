@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 
 // Views
@@ -23,7 +23,6 @@ const UsersView = React.lazy(() => import('./views/Users'));
 const AuditsView = React.lazy(() => import('./views/Audits'));
 const OnboardingWizard = React.lazy(() => import('./views/OnboardingWizard'));
 const AboutView = React.lazy(() => import('./views/About'));
-const AboutView = React.lazy(() => import('./views/About'));
 const BackupsView = React.lazy(() => import('./views/Backups'));
 const MetricsDashboard = React.lazy(() => import('./views/admin/MetricsDashboard'));
 const SupportTickets = React.lazy(() => import('./views/SupportTickets'));
@@ -35,15 +34,17 @@ const AiInsights = React.lazy(() => import('./views/AiInsights'));
 import { MainLayout } from './components/layout/MainLayout';
 import { DynamicBranding } from './components/common/DynamicBranding';
 
-// Components
-import { Loader2 } from 'lucide-react';
-
-const RequireAuth = ({ children }) => {
+const RequireAuth = ({ children, requiredPermission }) => {
     const token = useAppStore(state => state.token);
+    const hasPermission = useAppStore(state => state.hasPermission);
     const location = useLocation();
 
     if (!token) {
         return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    if (requiredPermission && !hasPermission(requiredPermission)) {
+        return <Navigate to="/ventas" replace />;
     }
 
     return <MainLayout>{children}</MainLayout>;
@@ -57,7 +58,6 @@ const PublicOnly = ({ children }) => {
     return children;
 };
 
-import { Splash } from './components/common/Splash';
 import { LoadingFallback } from './components/common/LoadingFallback';
 
 // const LoadingFallback = () => <Splash />; // Replaced with enhanced component
@@ -70,14 +70,13 @@ function App() {
     }, [theme]);
 
     return (
-        <BrowserRouter>
+        <>
             <DynamicBranding />
             <React.Suspense fallback={<LoadingFallback />}>
                 <Routes>
                     <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
                     <Route path="/setup" element={<PublicOnly><OnboardingWizard /></PublicOnly>} />
 
-                    {/* Commercial Routes */}
                     <Route path="/landing" element={<PublicOnly><Landing /></PublicOnly>} />
                     <Route path="/pricing" element={<Pricing />} />
                     <Route path="/support" element={<Support />} />
@@ -86,49 +85,49 @@ function App() {
                     <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
 
                     <Route path="/ventas" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="sales:view">
                             <SalesView />
                         </RequireAuth>
                     } />
 
                     <Route path="/productos" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="products:view">
                             <ProductsView />
                         </RequireAuth>
                     } />
 
                     <Route path="/clientes" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="customers:view">
                             <CustomersView />
                         </RequireAuth>
                     } />
 
                     <Route path="/reportes" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="reports:view">
                             <Reportes />
                         </RequireAuth>
                     } />
 
                     <Route path="/config" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="settings:view">
                             <BusinessSettings />
                         </RequireAuth>
                     } />
 
                     <Route path="/caja" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="cash:view">
                             <CashControlView />
                         </RequireAuth>
                     } />
 
                     <Route path="/usuarios" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="users:view">
                             <UsersView />
                         </RequireAuth>
                     } />
 
                     <Route path="/audits" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="audits:view">
                             <AuditsView />
                         </RequireAuth>
                     } />
@@ -140,7 +139,7 @@ function App() {
                     } />
 
                     <Route path="/backups" element={
-                        <RequireAuth>
+                        <RequireAuth requiredPermission="settings:view">
                             <BackupsView />
                         </RequireAuth>
                     } />
@@ -178,7 +177,7 @@ function App() {
                     <Route path="*" element={<Navigate to="/ventas" replace />} />
                 </Routes>
             </React.Suspense>
-        </BrowserRouter>
+        </>
     );
 }
 

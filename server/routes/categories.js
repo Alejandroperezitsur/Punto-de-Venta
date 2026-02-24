@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
 const { auth } = require('./auth');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
 // Note: Categories should probably be authenticated to ensure store isolation.
 // Adding auth middleware to all routes here.
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const categories = await prisma.category.findMany({
       where: { store_id: req.user.storeId }, // Enforce store isolation
@@ -19,7 +20,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, requirePermission(PERMISSIONS.PRODUCTS_CREATE), async (req, res) => {
   const { name, parent_id, image_url } = req.body;
   try {
     const category = await prisma.category.create({
@@ -37,7 +38,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_EDIT), async (req, res) => {
   const { name, parent_id, image_url } = req.body;
   const id = parseInt(req.params.id);
   try {
@@ -63,7 +64,7 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_DELETE), async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const current = await prisma.category.findFirst({

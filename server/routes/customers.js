@@ -3,8 +3,10 @@ const router = express.Router();
 const prisma = require('../db');
 const { customersCreateRules, customersUpdateRules } = require('../validators/customersValidator');
 const { validationResult } = require('express-validator');
+const { auth } = require('./auth');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
-router.get('/', async (req, res) => {
+router.get('/', auth, requirePermission(PERMISSIONS.CUSTOMERS_VIEW), async (req, res) => {
   try {
     const q = req.query.q;
     const where = { store_id: req.user.storeId };
@@ -32,7 +34,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, requirePermission(PERMISSIONS.CUSTOMERS_VIEW), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const customer = await prisma.customer.findFirst({
@@ -47,7 +49,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', customersCreateRules, async (req, res) => {
+router.post('/', auth, requirePermission(PERMISSIONS.CUSTOMERS_CREATE), customersCreateRules, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.jsonError(errors.array()[0].msg, 400);
   const { name, phone, email, rfc } = req.body;
@@ -69,7 +71,7 @@ router.post('/', customersCreateRules, async (req, res) => {
   }
 });
 
-router.put('/:id', customersUpdateRules, async (req, res) => {
+router.put('/:id', auth, requirePermission(PERMISSIONS.CUSTOMERS_EDIT), customersUpdateRules, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.jsonError(errors.array()[0].msg, 400);
   const { name, phone, email, rfc } = req.body;
@@ -99,7 +101,7 @@ router.put('/:id', customersUpdateRules, async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, requirePermission(PERMISSIONS.CUSTOMERS_DELETE), async (req, res) => {
   const id = parseInt(req.params.id);
   try {
     const current = await prisma.customer.findFirst({ where: { id, store_id: req.user.storeId } });

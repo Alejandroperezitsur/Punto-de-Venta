@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { optionalAuth, requireSuperAdmin } = require('./auth');
+const { auth, optionalAuth, requireSuperAdmin } = require('./auth');
 
 // Track Event
 router.post('/event', optionalAuth, async (req, res) => {
@@ -24,7 +24,7 @@ router.post('/event', optionalAuth, async (req, res) => {
 });
 
 // Admin Stats
-router.get('/stats', requireSuperAdmin, async (req, res) => {
+router.get('/stats', auth, requireSuperAdmin, async (req, res) => {
     try {
         const [users, stores, sales, errors] = await Promise.all([
             prisma.user.count(),

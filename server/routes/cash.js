@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
 const { auth } = require('./auth');
-const { requireRole } = require('../middleware/role');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
-router.post('/open', auth, requireRole('admin', 'cajero'), async (req, res) => {
+router.post('/open', auth, requirePermission(PERMISSIONS.CASH_OPEN), async (req, res) => {
   const { opening_balance = 0 } = req.body || {};
   try {
     const open = await prisma.cashSession.findFirst({
@@ -47,7 +47,7 @@ router.post('/open', auth, requireRole('admin', 'cajero'), async (req, res) => {
   }
 });
 
-router.post('/close', auth, requireRole('admin', 'cajero'), async (req, res) => {
+router.post('/close', auth, requirePermission(PERMISSIONS.CASH_CLOSE), async (req, res) => {
   try {
     const session = await prisma.cashSession.findFirst({
       where: {
@@ -94,7 +94,7 @@ router.post('/close', auth, requireRole('admin', 'cajero'), async (req, res) => 
   }
 });
 
-router.get('/status', auth, requireRole('admin', 'cajero'), async (req, res) => {
+router.get('/status', auth, requirePermission(PERMISSIONS.CASH_VIEW), async (req, res) => {
   try {
     const session = await prisma.cashSession.findFirst({
       where: {
@@ -110,7 +110,7 @@ router.get('/status', auth, requireRole('admin', 'cajero'), async (req, res) => 
   }
 });
 
-router.get('/movements', auth, requireRole('admin', 'cajero'), async (req, res) => {
+router.get('/movements', auth, requirePermission(PERMISSIONS.CASH_VIEW), async (req, res) => {
   try {
     const session = await prisma.cashSession.findFirst({
       where: {
@@ -132,7 +132,7 @@ router.get('/movements', auth, requireRole('admin', 'cajero'), async (req, res) 
   }
 });
 
-router.post('/withdraw', auth, requireRole('admin'), async (req, res) => {
+router.post('/withdraw', auth, requirePermission(PERMISSIONS.CASH_WITHDRAW), async (req, res) => {
   const { amount, reference = 'Retiro' } = req.body || {};
   try {
     const session = await prisma.cashSession.findFirst({
@@ -174,7 +174,7 @@ router.post('/withdraw', auth, requireRole('admin'), async (req, res) => {
   }
 });
 
-router.post('/deposit', auth, requireRole('admin', 'cajero'), async (req, res) => {
+router.post('/deposit', auth, requirePermission(PERMISSIONS.CASH_DEPOSIT), async (req, res) => {
   const { amount, reference = 'Depósito' } = req.body || {};
   try {
     const session = await prisma.cashSession.findFirst({

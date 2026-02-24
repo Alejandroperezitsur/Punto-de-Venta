@@ -180,6 +180,28 @@ function auth(req, res, next) {
   }
 }
 
+function optionalAuth(req, res, next) {
+  const h = req.headers.authorization || '';
+  const m = h.match(/^Bearer\s+(.*)$/);
+  if (!m) return next();
+  try {
+    req.user = jwt.verify(m[1], JWT_SECRET);
+    next();
+  } catch (e) {
+    if (e.name === 'TokenExpiredError') {
+      return res.jsonError('Sesión expirada', 401);
+    }
+    res.jsonError('Token inválido', 401);
+  }
+}
+
+function requireSuperAdmin(req, res, next) {
+  if (!req.user || !req.user.is_super_admin) {
+    return res.jsonError('Requiere privilegios de Super Admin', 403);
+  }
+  next();
+}
+
 // User Management Endpoints
 router.get('/users', auth, requirePermission(PERMISSIONS.USERS_VIEW), async (req, res) => {
   try {
@@ -370,4 +392,4 @@ router.delete('/users/:id', auth, requirePermission(PERMISSIONS.USERS_DELETE), a
   }
 });
 
-module.exports = { router, auth };
+module.exports = { router, auth, optionalAuth, requireSuperAdmin };

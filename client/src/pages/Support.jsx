@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
-import { api } from '../lib/api';
 
 export function Support() {
     const [issue, setIssue] = useState('');
@@ -54,7 +53,7 @@ export function Support() {
                                 </span>
                             </summary>
                             <p className="text-gray-600 mt-3 group-open:animate-fadeIn">
-                                Ve al historial de ventas, selecciona una venta y haz clic en el botón "Facturar". Ingresa el RFC del cliente y listo.
+                                Ve al historial de ventas, selecciona una venta y haz clic en el botón &quot;Facturar&quot;. Ingresa el RFC del cliente y listo.
                             </p>
                         </details>
                         <hr className="border-gray-100" />

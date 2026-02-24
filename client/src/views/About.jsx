@@ -11,6 +11,10 @@ const AboutView = () => {
     const [license, setLicense] = useState(null);
     const [diagnostics, setDiagnostics] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showActivation, setShowActivation] = useState(false);
+    const [activationKey, setActivationKey] = useState('');
+    const [activationError, setActivationError] = useState(null);
+    const [activating, setActivating] = useState(false);
 
     const loadData = async () => {
         setLoading(true);
@@ -31,6 +35,24 @@ const AboutView = () => {
     useEffect(() => {
         loadData();
     }, []);
+
+    const handleActivate = async () => {
+        setActivating(true);
+        setActivationError(null);
+        try {
+            await api('/system/activate', {
+                method: 'POST',
+                body: JSON.stringify({ licenseKey: activationKey })
+            });
+            setShowActivation(false);
+            setActivationKey('');
+            await loadData();
+        } catch (e) {
+            setActivationError(e.message || 'Error al activar licencia');
+        } finally {
+            setActivating(false);
+        }
+    };
 
     const formatBytes = (bytes) => {
         if (bytes === 0) return '0 B';
@@ -156,9 +178,9 @@ const AboutView = () => {
                                     maxLength={19}
                                 />
                             </div>
-                            {error && <p className="text-xs text-red-500">{error}</p>}
+                            {activationError && <p className="text-xs text-red-500">{activationError}</p>}
                             <div className="flex justify-end gap-2 mt-6">
-                                <Button variant="ghost" onClick={() => { setShowActivation(false); setError(null); }}>
+                                <Button variant="ghost" onClick={() => { setShowActivation(false); setActivationError(null); }}>
                                     Cancelar
                                 </Button>
                                 <Button

@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth, optionalAuth } = require('./auth');
+const { auth } = require('./auth');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 const { createSale, deleteSaleWithReversal } = require('../services/salesService');
 
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, requirePermission(PERMISSIONS.SALES_VIEW), async (req, res) => {
   try {
     const sales = await prisma.sale.findMany({
       where: { store_id: req.user.storeId },
@@ -25,7 +26,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', auth, requirePermission(PERMISSIONS.SALES_VIEW), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const sale = await prisma.sale.findFirst({
@@ -68,7 +69,7 @@ router.get('/:id', auth, async (req, res) => {
   }
 });
 
-router.post('/', auth, async (req, res, next) => {
+router.post('/', auth, requirePermission(PERMISSIONS.SALES_CREATE), async (req, res, next) => {
   const { customer_id = null, items = [], discount = 0, payment_method = 'cash', payments = null } = req.body;
   try {
     const userId = req.user.uid;
@@ -90,7 +91,7 @@ router.post('/', auth, async (req, res, next) => {
   }
 });
 
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth, requirePermission(PERMISSIONS.SALES_DELETE), async (req, res) => {
   try {
     const sale_id = parseInt(req.params.id);
     const ok = await deleteSaleWithReversal(sale_id, req.user.uid, req.user.storeId);
@@ -101,7 +102,7 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-router.post('/reset-demo', auth, async (req, res) => {
+router.post('/reset-demo', auth, requirePermission(PERMISSIONS.SALES_DELETE), async (req, res) => {
   // Only Admin can reset demo
   if (req.user.role !== 'admin') return res.jsonError('No autorizado', 403);
 

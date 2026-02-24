@@ -1,64 +1,148 @@
-import React, { useState } from 'react';
-import { api } from '../../lib/api';
+import React, { useMemo, useState } from 'react';
+import { Button } from '../common/Button';
+import { Input } from '../common/Input';
 
-export function PaymentModal({ amount, onClose, onConfirm }) {
-    const [processing, setProcessing] = useState(false);
-    const [error, setError] = useState(null);
+const PAYMENT_METHODS = [
+    { value: 'cash', label: 'Efectivo' },
+    { value: 'card', label: 'Tarjeta' },
+    { value: 'transfer', label: 'Transferencia' },
+    { value: 'credit', label: 'Crédito' },
+    { value: 'mixed', label: 'Pago Mixto' }
+];
 
-    const handlePay = async () => {
-        setProcessing(true);
-        setError(null);
-        try {
-            // 1. Create Intent
-            const intent = await api.post('/payments/create-intent', { amount });
+export function PaymentModal({ total, onClose, onConfirm, isLoading }) {
+    const [method, setMethod] = useState('cash');
+    const [amount, setAmount] = useState(total);
+    const [payments, setPayments] = useState([{ method: 'cash', amount: total }]);
+    const [error, setError] = useState('');
 
-            // 2. Simulate User entering card details and confirming...
-            await new Promise(r => setTimeout(r, 1500)); // Simulate UI interaction
+    const totalMixed = useMemo(() => {
+        return payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    }, [payments]);
 
-            // 3. Confirm
-            const res = await api.post('/payments/confirm', {
-                paymentId: intent.id
-            });
+    const handleConfirm = () => {
+        setError('');
 
-            if (res.success) {
-                onConfirm({ method: 'card_online', amount: amount, reference: res.paymentId });
+        if (method === 'mixed') {
+            const normalized = payments
+                .map(p => ({ method: p.method, amount: parseFloat(p.amount) || 0 }))
+                .filter(p => p.amount > 0);
+
+            if (normalized.length === 0) {
+                setError('Agrega al menos un pago válido');
+                return;
             }
-        } catch (e) {
-            setError(e.message || 'Error en el pago');
-            setProcessing(false);
+
+            onConfirm({ method: 'mixed', payments: normalized });
+            return;
         }
+
+        const normalizedAmount = parseFloat(amount);
+        if (!normalizedAmount || normalizedAmount <= 0) {
+            setError('Monto inválido');
+            return;
+        }
+
+        onConfirm({ method, payments: [{ method, amount: normalizedAmount }] });
+    };
+
+    const updatePayment = (index, key, value) => {
+        setPayments(prev => prev.map((p, i) => i === index ? { ...p, [key]: value } : p));
+    };
+
+    const addPayment = () => {
+        setPayments(prev => [...prev, { method: 'card', amount: 0 }]);
+    };
+
+    const removePayment = (index) => {
+        setPayments(prev => prev.filter((_, i) => i !== index));
     };
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-                <h2 className="text-xl font-bold mb-4">Pago con Tarjeta</h2>
+            <div className="bg-[var(--card-bg)] text-[var(--text)] rounded-xl p-6 max-w-md w-full border border-[hsl(var(--border))] shadow-lg">
+                <h2 className="text-xl font-bold mb-4">Cobro</h2>
                 <div className="mb-4">
-                    <p className="text-gray-600">Total a pagar:</p>
-                    <p className="text-3xl font-bold text-gray-900">${amount.toFixed(2)}</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">Total a pagar</p>
+                    <p className="text-3xl font-bold">${total.toFixed(2)}</p>
                 </div>
 
-                {error && <div className="bg-red-100 text-red-700 p-2 mb-4 rounded text-sm">{error}</div>}
-
-                <div className="bg-gray-50 p-4 rounded border mb-4">
-                    <div className="h-4 w-full bg-gray-200 rounded mb-2 animate-pulse"></div>
-                    <div className="flex gap-2">
-                        <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse"></div>
-                        <div className="h-4 w-1/3 bg-gray-200 rounded animate-pulse"></div>
+                <div className="mb-4">
+                    <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-2">Método de pago</label>
+                    <div className="flex flex-wrap gap-2">
+                        {PAYMENT_METHODS.map(m => (
+                            <button
+                                key={m.value}
+                                onClick={() => setMethod(m.value)}
+                                className={`px-3 py-2 rounded-lg border text-sm ${method === m.value ? 'bg-[hsl(var(--primary))] text-white border-[hsl(var(--primary))]' : 'border-[hsl(var(--border))] text-[var(--text)] hover:bg-[var(--bg-muted)]'}`}
+                                type="button"
+                            >
+                                {m.label}
+                            </button>
+                        ))}
                     </div>
-                    <p className="text-xs text-center text-gray-500 mt-2">(Simulación de Pasarela Segura)</p>
                 </div>
+
+                {method !== 'mixed' && (
+                    <div className="mb-4">
+                        <label className="text-xs font-medium text-[var(--muted-foreground)] block mb-2">Monto</label>
+                        <Input
+                            type="number"
+                            value={amount}
+                            min="0"
+                            step="0.01"
+                            onChange={(e) => setAmount(e.target.value)}
+                        />
+                    </div>
+                )}
+
+                {method === 'mixed' && (
+                    <div className="mb-4 space-y-3">
+                        {payments.map((p, i) => (
+                            <div key={`${p.method}-${i}`} className="flex gap-2 items-center">
+                                <select
+                                    className="h-10 rounded-lg border border-[hsl(var(--border))] bg-[var(--bg-input)] px-2 text-sm"
+                                    value={p.method}
+                                    onChange={(e) => updatePayment(i, 'method', e.target.value)}
+                                >
+                                    {PAYMENT_METHODS.filter(m => m.value !== 'mixed').map(m => (
+                                        <option key={m.value} value={m.value}>{m.label}</option>
+                                    ))}
+                                </select>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={p.amount}
+                                    onChange={(e) => updatePayment(i, 'amount', e.target.value)}
+                                />
+                                <button
+                                    className="h-10 px-2 rounded-lg border border-[hsl(var(--border))] text-sm hover:bg-[var(--bg-muted)]"
+                                    onClick={() => removePayment(i)}
+                                    type="button"
+                                >
+                                    Quitar
+                                </button>
+                            </div>
+                        ))}
+                        <div className="flex items-center justify-between text-sm">
+                            <button
+                                className="text-[hsl(var(--primary))] font-medium"
+                                onClick={addPayment}
+                                type="button"
+                            >
+                                Agregar método
+                            </button>
+                            <span className="text-[var(--muted-foreground)]">Total pagos: ${totalMixed.toFixed(2)}</span>
+                        </div>
+                    </div>
+                )}
+
+                {error && <div className="bg-red-50 text-red-600 p-2 mb-4 rounded text-sm border border-red-100">{error}</div>}
 
                 <div className="flex justify-end gap-3">
-                    <button onClick={onClose} disabled={processing} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Cancelar</button>
-                    <button
-                        onClick={handlePay}
-                        disabled={processing}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 flex items-center"
-                    >
-                        {processing && <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>}
-                        {processing ? 'Procesando...' : 'Pagar Ahora'}
-                    </button>
+                    <Button variant="ghost" onClick={onClose} disabled={isLoading}>Cancelar</Button>
+                    <Button onClick={handleConfirm} isLoading={isLoading}>Confirmar pago</Button>
                 </div>
             </div>
         </div>

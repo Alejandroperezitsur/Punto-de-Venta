@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
 const { auth } = require('./auth');
-const { requireRole } = require('../middleware/role');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 const { logger } = require('../logger');
 
-router.get('/', auth, requireRole('admin'), async (req, res) => {
+router.get('/', auth, requirePermission(PERMISSIONS.AUDITS_VIEW), async (req, res) => {
   try {
     const { startDate, endDate, userId, event, search, limit = '20', offset = '0' } = req.query;
 

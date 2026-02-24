@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAppStore } from '../../store/useAppStore';
 import { api } from '../../lib/api';
 
 export function InvoiceModal({ sale, onClose }) {
@@ -18,9 +17,9 @@ export function InvoiceModal({ sale, onClose }) {
         setLoading(true);
         setError(null);
         try {
-            const res = await api.post('/invoices/emit', {
-                saleId: sale.id,
-                customerData
+            const res = await api('/invoices/emit', {
+                method: 'POST',
+                body: JSON.stringify({ saleId: sale.id, customerData })
             });
             setSuccess(res);
         } catch (e) {
@@ -37,8 +36,8 @@ export function InvoiceModal({ sale, onClose }) {
                     <h2 className="text-xl font-bold text-green-600 mb-4">¡Factura Timbrada!</h2>
                     <p className="mb-4">Folio Fiscal (UUID): <br /><span className="font-mono text-sm">{success.uuid}</span></p>
                     <div className="flex gap-4">
-                        <a href={success.pdf_url} target="_blank" className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">PDF</a>
-                        <a href={success.xml_url} target="_blank" className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">XML</a>
+                        <a href={success.pdf_url} target="_blank" rel="noreferrer" className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">PDF</a>
+                        <a href={success.xml_url} target="_blank" rel="noreferrer" className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">XML</a>
                     </div>
                     <button onClick={onClose} className="mt-6 w-full text-gray-500 hover:text-gray-700">Cerrar</button>
                 </div>

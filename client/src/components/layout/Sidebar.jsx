@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Package, Users, BarChart3, Settings, LogOut, Wallet, Shield, ClipboardList } from 'lucide-react';
+import { ShoppingCart, Package, Users, BarChart3, Settings, LogOut, Wallet, Shield, ClipboardList, HardDrive, Info } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
 import { useAppStore } from '../../store/useAppStore';

@@ -59,7 +59,6 @@ app.use('/api/settings', settingsRouter);
 app.use('/api/auth', authModule.router);
 app.use('/api/cash', cashRouter);
 app.use('/api/receivables', receivablesRouter);
-app.use('/api/receivables', receivablesRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/invoices', require('./routes/invoices'));
 app.use('/api/payments', require('./routes/payments'));

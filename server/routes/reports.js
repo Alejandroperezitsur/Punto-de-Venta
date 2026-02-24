@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
 const { auth } = require('./auth');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
 function parseRange(q) {
   const from = q.from ? new Date(q.from) : new Date(0); // 1970
@@ -9,7 +10,7 @@ function parseRange(q) {
   return { from, to };
 }
 
-router.get('/summary', auth, async (req, res) => {
+router.get('/summary', auth, requirePermission(PERMISSIONS.REPORTS_VIEW), async (req, res) => {
   try {
     const { from, to } = parseRange(req.query);
     const agg = await prisma.sale.aggregate({
@@ -34,7 +35,7 @@ router.get('/summary', auth, async (req, res) => {
   }
 });
 
-router.get('/products', auth, async (req, res) => {
+router.get('/products', auth, requirePermission(PERMISSIONS.REPORTS_VIEW), async (req, res) => {
   try {
     const { from, to } = parseRange(req.query);
 
@@ -69,7 +70,7 @@ router.get('/products', auth, async (req, res) => {
   }
 });
 
-router.get('/customers', auth, async (req, res) => {
+router.get('/customers', auth, requirePermission(PERMISSIONS.REPORTS_VIEW), async (req, res) => {
   try {
     const { from, to } = parseRange(req.query);
     // Left join manually
@@ -100,7 +101,7 @@ router.get('/customers', auth, async (req, res) => {
   }
 });
 
-router.get('/demo-summary', auth, async (req, res) => {
+router.get('/demo-summary', auth, requirePermission(PERMISSIONS.REPORTS_VIEW), async (req, res) => {
   try {
     const { from, to } = parseRange(req.query);
     const setting = await prisma.storeSetting.findUnique({

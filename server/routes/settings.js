@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
 const { auth } = require('./auth');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), async (req, res) => {
   try {
     const rows = await prisma.storeSetting.findMany({
       where: { store_id: req.user.storeId }
@@ -17,15 +18,11 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-router.put('/', auth, async (req, res) => {
+router.put('/', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), async (req, res) => {
   const updates = req.body || {};
   try {
     // Check permission? Assuming auth middleware handles role check if needed, 
     // but usually settings are admin only.
-    if (req.user.role !== 'admin' && req.user.role !== 'supervisor') {
-      return res.jsonError('No tiene permisos para modificar configuración', 403);
-    }
-
     const transaction = [];
     for (const [key, value] of Object.entries(updates)) {
       transaction.push(

@@ -3,6 +3,8 @@ const router = express.Router();
 const prisma = require('../db');
 const { productCreateRules, productUpdateRules } = require('../validators/productsValidator');
 const { validationResult } = require('express-validator');
+const { auth } = require('./auth');
+const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
 // Helper to format product with barcodes
 const formatProduct = (p) => ({
@@ -10,7 +12,7 @@ const formatProduct = (p) => ({
   barcodes: p.barcodes ? p.barcodes.map(b => b.code) : []
 });
 
-router.get('/', async (req, res) => {
+router.get('/', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const q = req.query.q;
     const where = { store_id: req.user.storeId };
@@ -36,7 +38,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const product = await prisma.product.findFirst({
@@ -52,7 +54,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.get('/scan/:code', async (req, res) => {
+router.get('/scan/:code', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const code = req.params.code;
     const product = await prisma.product.findFirst({
@@ -75,7 +77,7 @@ router.get('/scan/:code', async (req, res) => {
   }
 });
 
-router.get('/:id/movements', async (req, res) => {
+router.get('/:id/movements', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     // Verify ownership first? Or just filter by store via product relation?
@@ -99,7 +101,7 @@ router.get('/:id/movements', async (req, res) => {
   }
 });
 
-router.post('/', productCreateRules, async (req, res) => {
+router.post('/', auth, requirePermission(PERMISSIONS.PRODUCTS_CREATE), productCreateRules, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.jsonError(errors.array()[0].msg, 400);
 
@@ -161,7 +163,7 @@ router.post('/', productCreateRules, async (req, res) => {
   }
 });
 
-router.put('/:id', productUpdateRules, async (req, res) => {
+router.put('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_EDIT), productUpdateRules, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.jsonError(errors.array()[0].msg, 400);
 
@@ -228,7 +230,7 @@ router.put('/:id', productUpdateRules, async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_DELETE), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     // Verify existence in store

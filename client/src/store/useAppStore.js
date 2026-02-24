@@ -3,7 +3,6 @@ import { create } from 'zustand';
 export const useAppStore = create((set) => ({
     theme: localStorage.getItem('theme') || 'light',
     user: JSON.parse(localStorage.getItem('user') || 'null'),
-    user: JSON.parse(localStorage.getItem('user') || 'null'),
     token: localStorage.getItem('token') || null,
     reseller: null, // White-label config
 
@@ -49,14 +48,20 @@ export const useAppStore = create((set) => ({
         const role = state.user?.role || 'cajero';
         const rolePermissions = {
             'admin': ['*'],
-            'supervisor': ['sales.*', 'products.*', 'customers.*', 'reports.*', 'cash.*'],
-            'cajero': ['sales.create', 'products.view', 'customers.view', 'customers.create']
+            'supervisor': ['sales:*', 'products:*', 'customers:*', 'reports:*', 'cash:*'],
+            'cajero': ['sales:create', 'products:view', 'customers:view', 'customers:create']
         };
 
         const permissions = rolePermissions[role] || [];
         if (permissions.includes('*')) return true;
 
         // Exact match or wildcard match (e.g. 'sales.view' matches 'sales.*')
-        return permissions.some(p => p === required || (p.endsWith('.*') && required.startsWith(p.slice(0, -2))));
+        return permissions.some(p => {
+            if (p === required) return true;
+            if (p === '*') return true;
+            if (p.endsWith(':*')) return required.startsWith(p.slice(0, -2));
+            if (p.endsWith('.*')) return required.startsWith(p.slice(0, -2));
+            return false;
+        });
     }
 }));

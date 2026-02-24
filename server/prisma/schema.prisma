@@ -129,7 +129,6 @@ model Product {
 
   // SKU constraint: unique per store
   @@unique([store_id, sku])
-  @@unique([store_id, sku])
   @@index([name])
   @@index([store_id, active])
   @@map("products")
@@ -155,6 +154,8 @@ model InventoryMovement {
   
   product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
+  @@index([product_id])
+  @@index([created_at])
   @@map("inventory_movements")
 }
 
@@ -196,8 +197,6 @@ model Sale {
   items          SaleItem[]
   payments       Payment[]
   receivables    Receivable[]
-  invoices       Invoice[]
-
   invoices       Invoice[]
 
   @@index([created_at])
@@ -294,6 +293,8 @@ model CashMovement {
   
   session     CashSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
 
+  @@index([created_at])
+  @@index([type])
   @@map("cash_movements")
 }
 
