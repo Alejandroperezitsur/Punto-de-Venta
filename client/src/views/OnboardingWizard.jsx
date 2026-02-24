@@ -13,8 +13,6 @@ import {
 const STEPS = [
     { id: 'welcome', title: 'Bienvenido', icon: Sparkles },
     { id: 'business', title: 'Tu Negocio', icon: Building },
-    { id: 'tax', title: 'Impuestos', icon: Percent },
-    { id: 'admin', title: 'Administrador', icon: User },
     { id: 'product', title: 'Primer Producto', icon: Package },
     { id: 'done', title: '¡Listo!', icon: PartyPopper },
 ];
@@ -31,10 +29,9 @@ const OnboardingWizard = () => {
         tax_rate: '16',
         tax_name: 'IVA',
         admin_username: 'admin',
-        admin_password: '',
+        admin_password: 'admin123',
         product_name: '',
         product_price: '',
-        product_sku: '',
     });
 
     const updateData = (key, value) => {
@@ -47,11 +44,11 @@ const OnboardingWizard = () => {
     const handleComplete = async () => {
         setLoading(true);
         try {
-            // Save settings
+            // Save settings - Automated defaults
             await api('/settings', {
                 method: 'PUT',
                 body: JSON.stringify({
-                    business_name: data.business_name,
+                    business_name: data.business_name || 'Mi Negocio',
                     business_address: data.business_address,
                     business_phone: data.business_phone,
                     tax_rate: (parseFloat(data.tax_rate) / 100).toFixed(4),
@@ -67,13 +64,13 @@ const OnboardingWizard = () => {
                     body: JSON.stringify({
                         name: data.product_name,
                         price: parseFloat(data.product_price),
-                        sku: data.product_sku || `SKU-${Date.now()}`,
-                        stock: 100,
+                        sku: `SKU-${Date.now()}`,
+                        stock: 999, // High default
                     })
                 });
             }
 
-            // Login
+            // Login - Automated for first time
             const res = await api('/auth/login', {
                 method: 'POST',
                 body: JSON.stringify({ username: 'admin', password: 'admin123' })
@@ -92,156 +89,123 @@ const OnboardingWizard = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
-            <Card className="w-full max-w-xl p-8 shadow-2xl animate-fade-in">
+            <Card className="w-full max-w-xl p-10 rounded-[3rem] shadow-2xl animate-fade-in border-4 border-white/20 backdrop-blur-sm">
                 {/* Progress */}
-                <div className="mb-8">
-                    <div className="flex justify-between mb-2">
+                <div className="mb-10">
+                    <div className="flex justify-between mb-4 px-2">
                         {STEPS.map((s, i) => (
                             <div
                                 key={s.id}
-                                className={`flex items-center justify-center h-8 w-8 rounded-full transition-all ${i < step ? 'bg-green-500 text-white' :
-                                        i === step ? 'bg-[hsl(var(--primary))] text-white ring-4 ring-blue-200' :
-                                            'bg-gray-200 text-gray-400'
-                                    }`}
+                                className={cn(
+                                    "flex items-center justify-center h-12 w-12 rounded-2xl transition-all duration-500",
+                                    i < step ? 'bg-green-500 text-white' :
+                                        i === step ? 'bg-white text-blue-600 shadow-xl scale-110' :
+                                            'bg-white/20 text-white/50'
+                                )}
                             >
-                                {i < step ? <Check className="h-4 w-4" /> : <s.icon className="h-4 w-4" />}
+                                {i < step ? <Check className="h-6 w-6" /> : <s.icon className="h-6 w-6" />}
                             </div>
                         ))}
                     </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-3 bg-white/20 rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
+                            className="h-full bg-white transition-all duration-700 ease-out"
                             style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>
 
                 {/* Step Content */}
-                <div className="min-h-[280px]">
+                <div className="min-h-[320px] text-white">
                     {step === 0 && (
-                        <div className="text-center py-8">
-                            <Sparkles className="h-16 w-16 mx-auto text-[hsl(var(--primary))] mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">¡Bienvenido a POS Pro!</h2>
-                            <p className="text-[hsl(var(--muted-foreground))]">
-                                Configuremos tu sistema de punto de venta en solo unos minutos.
+                        <div className="text-center py-10 space-y-4">
+                            <div className="h-24 w-24 bg-white/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                                <Sparkles className="h-12 w-12 text-white" />
+                            </div>
+                            <h2 className="text-4xl font-black tracking-tighter">¡Hola!</h2>
+                            <p className="text-xl font-medium text-white/80">
+                                Vamos a preparar tu caja en menos de 1 minuto.
                             </p>
                         </div>
                     )}
 
                     {step === 1 && (
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <Building className="h-5 w-5" /> Información del Negocio
+                        <div className="space-y-6">
+                            <h2 className="text-3xl font-black tracking-tighter flex items-center gap-3">
+                                <Building className="h-8 w-8" /> Tu Negocio
                             </h2>
-                            <Input
-                                placeholder="Nombre del negocio"
-                                value={data.business_name}
-                                onChange={e => updateData('business_name', e.target.value)}
-                            />
-                            <Input
-                                placeholder="Dirección (opcional)"
-                                value={data.business_address}
-                                onChange={e => updateData('business_address', e.target.value)}
-                            />
-                            <Input
-                                placeholder="Teléfono (opcional)"
-                                value={data.business_phone}
-                                onChange={e => updateData('business_phone', e.target.value)}
-                            />
+                            <div className="space-y-4">
+                                <Input
+                                    placeholder="Nombre de tu negocio (ej: Abarrotes Mary)"
+                                    value={data.business_name}
+                                    onChange={e => updateData('business_name', e.target.value)}
+                                    className="h-16 text-xl rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                                />
+                                <Input
+                                    placeholder="Teléfono (opcional)"
+                                    value={data.business_phone}
+                                    onChange={e => updateData('business_phone', e.target.value)}
+                                    className="h-16 text-xl rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                                />
+                            </div>
                         </div>
                     )}
 
                     {step === 2 && (
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <Percent className="h-5 w-5" /> Configuración de Impuestos
+                        <div className="space-y-6">
+                            <h2 className="text-3xl font-black tracking-tighter flex items-center gap-3">
+                                <Package className="h-8 w-8" /> Tu Primer Producto
                             </h2>
-                            <div className="grid grid-cols-2 gap-4">
+                            <p className="text-white/70 font-medium">No te preocupes, puedes agregar más después.</p>
+                            <div className="space-y-4">
                                 <Input
-                                    placeholder="Nombre (ej: IVA)"
-                                    value={data.tax_name}
-                                    onChange={e => updateData('tax_name', e.target.value)}
+                                    placeholder="Nombre del producto (ej: Coca Cola)"
+                                    value={data.product_name}
+                                    onChange={e => updateData('product_name', e.target.value)}
+                                    className="h-16 text-xl rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
                                 />
-                                <Input
-                                    type="number"
-                                    placeholder="Tasa (%)"
-                                    value={data.tax_rate}
-                                    onChange={e => updateData('tax_rate', e.target.value)}
-                                />
+                                <div className="relative">
+                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-bold text-white/40">$</span>
+                                    <Input
+                                        type="number"
+                                        placeholder="Precio de venta"
+                                        value={data.product_price}
+                                        onChange={e => updateData('product_price', e.target.value)}
+                                        className="h-16 pl-12 text-2xl font-black rounded-2xl bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                                    />
+                                </div>
                             </div>
-                            <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                                Puedes cambiar esto después en Configuración.
-                            </p>
                         </div>
                     )}
 
                     {step === 3 && (
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <User className="h-5 w-5" /> Usuario Administrador
-                            </h2>
-                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                <p className="text-sm"><strong>Usuario:</strong> admin</p>
-                                <p className="text-sm"><strong>Contraseña:</strong> admin123</p>
+                        <div className="text-center py-10 space-y-4">
+                            <div className="h-24 w-24 bg-white/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                                <PartyPopper className="h-12 w-12 text-white" />
                             </div>
-                            <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                                Recuerda cambiar la contraseña después de iniciar sesión.
-                            </p>
-                        </div>
-                    )}
-
-                    {step === 4 && (
-                        <div className="space-y-4">
-                            <h2 className="text-xl font-bold flex items-center gap-2">
-                                <Package className="h-5 w-5" /> Tu Primer Producto
-                            </h2>
-                            <Input
-                                placeholder="Nombre del producto"
-                                value={data.product_name}
-                                onChange={e => updateData('product_name', e.target.value)}
-                            />
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                    type="number"
-                                    placeholder="Precio"
-                                    value={data.product_price}
-                                    onChange={e => updateData('product_price', e.target.value)}
-                                />
-                                <Input
-                                    placeholder="SKU (opcional)"
-                                    value={data.product_sku}
-                                    onChange={e => updateData('product_sku', e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {step === 5 && (
-                        <div className="text-center py-8">
-                            <PartyPopper className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                            <h2 className="text-2xl font-bold mb-2">¡Todo Listo!</h2>
-                            <p className="text-[hsl(var(--muted-foreground))]">
-                                Tu sistema POS está configurado y listo para usar.
+                            <h2 className="text-4xl font-black tracking-tighter">¡Listo para vender!</h2>
+                            <p className="text-xl font-medium text-white/80">
+                                Tu sistema está configurado con las mejores opciones para tu negocio.
                             </p>
                         </div>
                     )}
                 </div>
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-8">
+                <div className="flex justify-between mt-12">
                     {step > 0 && step < STEPS.length - 1 ? (
-                        <Button variant="outline" onClick={prev}>
-                            <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+                        <Button variant="ghost" onClick={prev} className="text-white hover:bg-white/10 px-8 h-14 rounded-2xl font-bold">
+                            <ChevronLeft className="h-5 w-5 mr-2" /> Atrás
                         </Button>
                     ) : <div />}
 
                     {step < STEPS.length - 1 ? (
-                        <Button onClick={next}>
-                            Siguiente <ChevronRight className="h-4 w-4 ml-1" />
+                        <Button onClick={next} className="bg-white text-blue-600 hover:bg-blue-50 px-10 h-14 rounded-2xl font-black text-lg shadow-xl">
+                            Siguiente <ChevronRight className="h-5 w-5 ml-2" />
                         </Button>
                     ) : (
-                        <Button onClick={handleComplete} isLoading={loading} className="bg-green-600 hover:bg-green-700">
-                            <ShoppingCart className="h-4 w-4 mr-2" /> Comenzar a Vender
+                        <Button onClick={handleComplete} isLoading={loading} className="bg-green-500 hover:bg-green-600 text-white px-10 h-16 rounded-2xl font-black text-xl shadow-2xl">
+                            ¡A VENDER! <ShoppingCart className="h-6 w-6 ml-2" />
                         </Button>
                     )}
                 </div>
@@ -249,5 +213,7 @@ const OnboardingWizard = () => {
         </div>
     );
 };
+
+import { cn } from '../utils/cn';
 
 export default OnboardingWizard;

@@ -48,42 +48,41 @@ export const Cart = () => {
                         <div
                             key={item.id}
                             className={cn(
-                                "flex items-center gap-3 p-3 bg-[var(--card)] border rounded-lg shadow-sm transition-all duration-300",
+                                "flex items-center gap-4 p-4 bg-white border-2 rounded-2xl shadow-sm transition-all duration-300",
                                 isRecent
-                                    ? "border-green-500 bg-green-50 dark:bg-green-900/20 scale-[1.02] animate-pulse"
-                                    : "border-[var(--border)]",
-                                isLowStock && !isRecent && "border-l-4 border-l-amber-500"
+                                    ? "border-green-500 bg-green-50 scale-[1.02] ring-4 ring-green-100"
+                                    : "border-gray-100",
+                                isLowStock && !isRecent && "border-l-8 border-l-amber-500"
                             )}
                         >
                             <div className={cn(
-                                "h-12 w-12 rounded-md flex items-center justify-center text-xs font-bold",
-                                isRecent ? "bg-green-200 text-green-700" : "bg-gray-100 text-gray-500"
+                                "h-16 w-16 rounded-2xl flex items-center justify-center text-xl font-black shrink-0",
+                                isRecent ? "bg-green-500 text-white" : "bg-gray-100 text-gray-400"
                             )}>
-                                {String(item.name).slice(0, 2).toUpperCase()}
+                                {String(item.name).slice(0, 1).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-sm truncate">{item.name}</h4>
+                                <h4 className="font-black text-lg truncate text-gray-800">{item.name}</h4>
                                 <div className="flex items-center gap-2">
-                                    <p className="text-xs text-[var(--muted-foreground)]">{formatMoney(item.price)}</p>
+                                    <p className="text-sm font-bold text-gray-400">{formatMoney(item.price)} c/u</p>
                                     {isLowStock && (
-                                        <span className="inline-flex items-center gap-1 text-[10px] text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full">
-                                            <AlertTriangle className="h-2.5 w-2.5" />
-                                            Stock: {item.stock}
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-1 rounded-full uppercase">
+                                            ¡Poco Stock!
                                         </span>
                                     )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
-                                    {item.quantity === 1 ? <Trash2 className="h-4 w-4 text-red-500" /> : <Minus className="h-4 w-4" />}
+                            <div className="flex items-center gap-4 bg-gray-50 p-1 rounded-2xl border-2 border-gray-100">
+                                <Button variant="ghost" size="icon" className="h-12 w-12 bg-white shadow-sm border border-gray-100 rounded-xl" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                                    {item.quantity === 1 ? <Trash2 className="h-6 w-6 text-red-500" /> : <Minus className="h-6 w-6" />}
                                 </Button>
-                                <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
-                                    <Plus className="h-4 w-4" />
+                                <span className="w-10 text-center text-2xl font-black text-gray-800">{item.quantity}</span>
+                                <Button variant="ghost" size="icon" className="h-12 w-12 bg-white shadow-sm border border-gray-100 rounded-xl" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                                    <Plus className="h-6 w-6" />
                                 </Button>
                             </div>
-                            <div className="text-right w-20">
-                                <p className="font-bold text-sm">{formatMoney(item.price * item.quantity)}</p>
+                            <div className="text-right w-24">
+                                <p className="font-black text-xl text-gray-900">{formatMoney(item.price * item.quantity)}</p>
                             </div>
                         </div>
                     );
