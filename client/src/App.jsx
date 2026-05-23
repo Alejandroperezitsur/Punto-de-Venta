@@ -3,6 +3,10 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useUserStore } from './store/userStore';
 import { useCartStore } from './store/cartStore';
 import { initSyncManager } from './lib/syncManager';
+import { initSyncEngineV2 } from './lib/syncEngineV2';
+import { initGlobalErrorHandler, setCorrelationId } from './lib/structuredLogger';
+import { getHealthMonitor } from './lib/healthMonitor';
+import { attemptCrashRecovery, attemptCartRollback, safeQueueReplay, runIntegrityCheck } from './lib/snapshotManager';
 
 // Views
 import Login from './views/Login';
@@ -73,8 +77,40 @@ function App() {
     }, [theme]);
 
     useEffect(() => {
+        // Initialize all enterprise subsystems
+        setCorrelationId(crypto.randomUUID?.() || 'app-' + Date.now());
+        initGlobalErrorHandler();
         hydrate();
-        initSyncManager();
+        initSyncManager(); // delegates to syncEngineV2
+        initSyncEngineV2();
+        getHealthMonitor().init();
+
+        // Attempt crash recovery on startup
+        const init = async () => {
+            try {
+                const recovery = await attemptCrashRecovery();
+                if (recovery.recovered && recovery.restoredItems > 0) {
+                    console.log(`[Recovery] Restored ${recovery.restoredItems} items from snapshot`);
+                }
+                const cartRollback = await attemptCartRollback();
+                if (cartRollback.rolledBack) {
+                    console.log(`[Recovery] Cart rolled back: ${cartRollback.reason}`);
+                }
+                const integrity = await runIntegrityCheck();
+                if (!integrity.queueConsistent || !integrity.snapshotValid) {
+                    console.warn(`[Integrity] Issues found: ${integrity.details.join(', ')}`);
+                    await safeQueueReplay();
+                }
+            } catch (e) {
+                console.error('[Init] Recovery error:', e);
+            }
+        };
+        init();
+
+        // Cleanup on unmount
+        return () => {
+            getHealthMonitor().destroy();
+        };
     }, [hydrate]);
 
     return (

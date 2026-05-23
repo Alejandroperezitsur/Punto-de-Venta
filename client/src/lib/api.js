@@ -2,6 +2,19 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
+let deviceFpPromise = null;
+
+function getDeviceFingerprintHeader() {
+  if (!deviceFpPromise) {
+    try {
+      deviceFpPromise = import('./deviceFingerprint').then(m => m.getDeviceFingerprint());
+    } catch {
+      return '';
+    }
+  }
+  return '';
+}
+
 export async function api(path, options = {}) {
   let res;
   const { retries = 0, backoff = 500, ...fetchOptions } = options;
@@ -9,6 +22,10 @@ export async function api(path, options = {}) {
   const token = localStorage.getItem('token') || '';
   const baseHeaders = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
   const headers = token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders;
+
+  // Add device fingerprint
+  const fp = getDeviceFingerprintHeader();
+  if (fp) headers['X-Device-Fingerprint'] = fp;
 
   try {
     res = await fetch(`${API_BASE}${path}`, { headers, ...fetchOptions });
@@ -25,6 +42,12 @@ export async function api(path, options = {}) {
     const msg = e.message === 'Failed to fetch' ? 'Sin conexión al servidor' : e.message;
     try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })); } catch { }
     throw e;
+  }
+
+  // Handle token rotation
+  const newToken = res.headers.get('X-New-Token');
+  if (newToken) {
+    localStorage.setItem('token', newToken);
   }
 
   if (!res.ok) {

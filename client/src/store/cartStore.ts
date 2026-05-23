@@ -44,6 +44,21 @@ interface CartStoreActions {
   hydrate: () => Promise<void>;
 }
 
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+function debouncedPersist(state: CartStoreState) {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    persistCart({
+      id: 'current',
+      items: state.items,
+      customer: state.customer,
+      discount: state.discount,
+      checkoutId: state.checkoutId,
+      updated_at: Date.now(),
+    });
+  }, 300);
+}
+
 export const useCartStore = create<CartStoreState & CartStoreActions>((set, get) => ({
   items: [],
   customer: null,
@@ -95,28 +110,16 @@ export const useCartStore = create<CartStoreState & CartStoreActions>((set, get)
           { ...product, price: safePrice, quantity: qty, discount: 0 },
         ];
       }
-      persistCart({
-        id: 'current',
-        items: newItems,
-        customer: state.customer,
-        discount: state.discount,
-        checkoutId: state.checkoutId,
-        updated_at: Date.now(),
-      });
+      const nextState = { ...state, items: newItems };
+      debouncedPersist(nextState);
       return { items: newItems };
     }),
 
   removeItem: (productId) =>
     set((state) => {
       const newItems = state.items.filter((i) => i.id !== productId);
-      persistCart({
-        id: 'current',
-        items: newItems,
-        customer: state.customer,
-        discount: state.discount,
-        checkoutId: state.checkoutId,
-        updated_at: Date.now(),
-      });
+      const nextState = { ...state, items: newItems };
+      debouncedPersist(nextState);
       return { items: newItems };
     }),
 
@@ -133,45 +136,28 @@ export const useCartStore = create<CartStoreState & CartStoreActions>((set, get)
           return { ...i, quantity: Math.min(qty, maxStock) };
         });
       }
-      persistCart({
-        id: 'current',
-        items: newItems,
-        customer: state.customer,
-        discount: state.discount,
-        checkoutId: state.checkoutId,
-        updated_at: Date.now(),
-      });
+      const nextState = { ...state, items: newItems };
+      debouncedPersist(nextState);
       return { items: newItems };
     }),
 
   setCustomer: (customer) =>
     set((state) => {
-      persistCart({
-        id: 'current',
-        items: state.items,
-        customer,
-        discount: state.discount,
-        checkoutId: state.checkoutId,
-        updated_at: Date.now(),
-      });
+      const nextState = { ...state, customer };
+      debouncedPersist(nextState);
       return { customer };
     }),
 
   setDiscount: (discount) =>
     set((state) => {
       const safeDiscount = Math.max(0, Number(discount) || 0);
-      persistCart({
-        id: 'current',
-        items: state.items,
-        customer: state.customer,
-        discount: safeDiscount,
-        checkoutId: state.checkoutId,
-        updated_at: Date.now(),
-      });
+      const nextState = { ...state, discount: safeDiscount };
+      debouncedPersist(nextState);
       return { discount: safeDiscount };
     }),
 
   clearCart: () => {
+    if (persistTimer) clearTimeout(persistTimer);
     removePersistedCart();
     set({ items: [], customer: null, discount: 0, checkoutId: null });
   },

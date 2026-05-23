@@ -1,5 +1,7 @@
 import { openDB, type IDBPDatabase, type DBSchema } from 'idb';
 
+// ─── Legacy Types (Phase 1-7) ───
+
 export interface OfflineSale {
   id: string;
   items: SaleItem[];
@@ -37,6 +39,117 @@ export interface CartPersist {
   updated_at: number;
 }
 
+// ─── Phase 8 Enterprise Types ───
+
+export type QueueItemStatus = 'pending' | 'processing' | 'done' | 'delivered' | 'dead';
+export type QueueItemType = 'sale' | 'inventory_movement' | 'cash_movement' | 'product_update' | 'customer_update';
+
+export interface QueueItem {
+  id: string;
+  type: QueueItemType;
+  priority: number;
+  payload: unknown;
+  idempotencyKey: string;
+  correlationId: string;
+  status: QueueItemStatus;
+  attempts: number;
+  maxAttempts: number;
+  lastError: string | null;
+  nextRetryAt: number | null;
+  createdAt: number;
+  updatedAt: number;
+  checkpoint: number;
+  batchId: string | null;
+}
+
+export interface DeadLetterItem {
+  id: string;
+  originalId: string;
+  type: QueueItemType;
+  payload: unknown;
+  errorHistory: Array<{ attempt: number; error: string; timestamp: number }>;
+  poisonedAt: number;
+  correlationId: string;
+}
+
+export interface QueueCheckpoint {
+  id: string;
+  lastProcessedId: string | null;
+  itemCount: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface QueueLock {
+  id: string;
+  resourceId: string;
+  expiresAt: number;
+  owner: string;
+  createdAt: number;
+}
+
+export interface InventoryVersion {
+  id: string;
+  productId: string;
+  version: number;
+  checksum: string | null;
+  lastConflict: number | null;
+  vectorClock: Record<string, number>;
+  updatedAt: number;
+}
+
+export interface ReconciliationLog {
+  id: string;
+  storeId: number;
+  type: 'drift' | 'conflict' | 'resolved' | 'checksum_mismatch';
+  productId: string | null;
+  serverVersion: number | null;
+  clientVersion: number | null;
+  driftAmount: number | null;
+  resolution: 'server_wins' | 'client_wins' | 'merge' | null;
+  details: string | null;
+  createdAt: number;
+}
+
+export interface IntegrityCheck {
+  id: string;
+  checkId: string;
+  status: 'pass' | 'fail';
+  details: string | null;
+  checkedAt: number;
+}
+
+export interface Snapshot {
+  id: string;
+  data: string;
+  checksum: string;
+  itemCount: number;
+  createdAt: number;
+}
+
+export interface OrphanLog {
+  id: string;
+  operationId: string;
+  type: string;
+  detectedAt: number;
+  resolution: string | null;
+}
+
+export interface ClientAuditEvent {
+  id: string;
+  event: string;
+  correlationId: string;
+  actor: string | null;
+  refType: string | null;
+  refId: string | null;
+  beforeSnapshot: string | null;
+  afterSnapshot: string | null;
+  metadata: string | null;
+  hash: string;
+  prevHash: string | null;
+  createdAt: number;
+}
+
 interface POSDB extends DBSchema {
   offlineSales: {
     key: string;
@@ -52,34 +165,155 @@ interface POSDB extends DBSchema {
     key: string;
     value: CartPersist;
   };
+  queueItems: {
+    key: string;
+    value: QueueItem;
+    indexes: {
+      'by-status': QueueItemStatus;
+      'by-type': QueueItemType;
+      'by-next-retry': number;
+      'by-correlation': string;
+      'by-checkpoint': number;
+    };
+  };
+  deadLetters: {
+    key: string;
+    value: DeadLetterItem;
+    indexes: { 'by-original': string; 'by-type': QueueItemType };
+  };
+  queueCheckpoints: {
+    key: string;
+    value: QueueCheckpoint;
+  };
+  queueLocks: {
+    key: string;
+    value: QueueLock;
+    indexes: { 'by-resource': string; 'by-expires': number };
+  };
+  inventoryVersions: {
+    key: string;
+    value: InventoryVersion;
+    indexes: { 'by-product': string };
+  };
+  reconciliationLogs: {
+    key: string;
+    value: ReconciliationLog;
+    indexes: { 'by-store': number; 'by-type': string };
+  };
+  integrityChecks: {
+    key: string;
+    value: IntegrityCheck;
+    indexes: { 'by-status': string };
+  };
+  snapshots: {
+    key: string;
+    value: Snapshot;
+    indexes: { 'by-created': number };
+  };
+  orphanLog: {
+    key: string;
+    value: OrphanLog;
+  };
+  clientAudit: {
+    key: string;
+    value: ClientAuditEvent;
+    indexes: { 'by-event': string; 'by-correlation': string; 'by-created': number };
+  };
 }
 
 const DB_NAME = 'pos-offline';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<POSDB>> | null = null;
 
 export function getDB(): Promise<IDBPDatabase<POSDB>> {
   if (!dbPromise) {
     dbPromise = openDB<POSDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, _oldVersion, _newVersion, _tx) {
         if (!db.objectStoreNames.contains('offlineSales')) {
-          const saleStore = db.createObjectStore('offlineSales', { keyPath: 'id' });
-          saleStore.createIndex('by-synced', 'synced');
-          saleStore.createIndex('by-date', 'created_at');
+          const s = db.createObjectStore('offlineSales', { keyPath: 'id' });
+          s.createIndex('by-synced', 'synced');
+          s.createIndex('by-date', 'created_at');
         }
         if (!db.objectStoreNames.contains('offlineMovements')) {
-          const movStore = db.createObjectStore('offlineMovements', { keyPath: 'id' });
-          movStore.createIndex('by-synced', 'synced');
+          const s = db.createObjectStore('offlineMovements', { keyPath: 'id' });
+          s.createIndex('by-synced', 'synced');
         }
         if (!db.objectStoreNames.contains('cartPersist')) {
           db.createObjectStore('cartPersist', { keyPath: 'id' });
         }
+        if (!db.objectStoreNames.contains('queueItems')) {
+          const s = db.createObjectStore('queueItems', { keyPath: 'id' });
+          s.createIndex('by-status', 'status');
+          s.createIndex('by-type', 'type');
+          s.createIndex('by-next-retry', 'nextRetryAt');
+          s.createIndex('by-correlation', 'correlationId');
+          s.createIndex('by-checkpoint', 'checkpoint');
+        }
+        if (!db.objectStoreNames.contains('deadLetters')) {
+          const s = db.createObjectStore('deadLetters', { keyPath: 'id' });
+          s.createIndex('by-original', 'originalId');
+          s.createIndex('by-type', 'type');
+        }
+        if (!db.objectStoreNames.contains('queueCheckpoints')) {
+          db.createObjectStore('queueCheckpoints', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('queueLocks')) {
+          const s = db.createObjectStore('queueLocks', { keyPath: 'id' });
+          s.createIndex('by-resource', 'resourceId');
+          s.createIndex('by-expires', 'expiresAt');
+        }
+        if (!db.objectStoreNames.contains('inventoryVersions')) {
+          const s = db.createObjectStore('inventoryVersions', { keyPath: 'id' });
+          s.createIndex('by-product', 'productId');
+        }
+        if (!db.objectStoreNames.contains('reconciliationLogs')) {
+          const s = db.createObjectStore('reconciliationLogs', { keyPath: 'id' });
+          s.createIndex('by-store', 'storeId');
+          s.createIndex('by-type', 'type');
+        }
+        if (!db.objectStoreNames.contains('integrityChecks')) {
+          const s = db.createObjectStore('integrityChecks', { keyPath: 'id' });
+          s.createIndex('by-status', 'status');
+        }
+        if (!db.objectStoreNames.contains('snapshots')) {
+          const s = db.createObjectStore('snapshots', { keyPath: 'id' });
+          s.createIndex('by-created', 'createdAt');
+        }
+        if (!db.objectStoreNames.contains('orphanLog')) {
+          db.createObjectStore('orphanLog', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('clientAudit')) {
+          const s = db.createObjectStore('clientAudit', { keyPath: 'id' });
+          s.createIndex('by-event', 'event');
+          s.createIndex('by-correlation', 'correlationId');
+          s.createIndex('by-created', 'createdAt');
+        }
       },
+      blocked() { console.warn('[DB] Blocked by other tab'); },
+      blocking() { console.warn('[DB] Close other tabs to upgrade'); },
+      terminated() {
+        console.error('[DB] Connection terminated');
+        dbPromise = null;
+      },
+    }).catch((err) => {
+      console.error('[DB] Open failed:', err);
+      dbPromise = null;
+      throw err;
     });
   }
   return dbPromise;
 }
+
+export async function closeDB(): Promise<void> {
+  if (dbPromise) {
+    const db = await dbPromise;
+    db.close();
+    dbPromise = null;
+  }
+}
+
+// ─── Legacy helpers ───
 
 export async function saveOfflineSale(sale: OfflineSale): Promise<void> {
   const db = await getDB();
@@ -88,8 +322,7 @@ export async function saveOfflineSale(sale: OfflineSale): Promise<void> {
 
 export async function getUnsyncedSales(): Promise<OfflineSale[]> {
   const db = await getDB();
-  const index = db.transaction('offlineSales').store.index('by-synced');
-  return index.getAll(false);
+  return db.transaction('offlineSales').store.index('by-synced').getAll(false);
 }
 
 export async function markSaleSynced(id: string): Promise<void> {
@@ -103,8 +336,7 @@ export async function markSaleSynced(id: string): Promise<void> {
 
 export async function getUnsyncedMovements(): Promise<OfflineInventoryMovement[]> {
   const db = await getDB();
-  const index = db.transaction('offlineMovements').store.index('by-synced');
-  return index.getAll(false);
+  return db.transaction('offlineMovements').store.index('by-synced').getAll(false);
 }
 
 export async function markMovementSynced(id: string): Promise<void> {
@@ -134,4 +366,30 @@ export async function removePersistedCart(): Promise<void> {
 export async function getAllOfflineSales(): Promise<OfflineSale[]> {
   const db = await getDB();
   return db.getAll('offlineSales');
+}
+
+// ─── DB Health ───
+
+export async function checkDBHealth(): Promise<{
+  ok: boolean;
+  latencyMs: number;
+  storeCounts: Record<string, number>;
+  error: string | null;
+}> {
+  const start = performance.now();
+  try {
+    const db = await getDB();
+    const counts: Record<string, number> = {};
+    for (const name of Array.from(db.objectStoreNames)) {
+      counts[name] = await db.count(name);
+    }
+    return { ok: true, latencyMs: performance.now() - start, storeCounts: counts, error: null };
+  } catch (e) {
+    return {
+      ok: false,
+      latencyMs: performance.now() - start,
+      storeCounts: {},
+      error: e instanceof Error ? e.message : 'Unknown DB error',
+    };
+  }
 }
