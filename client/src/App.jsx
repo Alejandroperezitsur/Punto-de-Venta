@@ -126,7 +126,7 @@ function App() {
                     <Route path="/support" element={<Support />} />
                     <Route path="/roadmap" element={<Roadmap />} />
 
-                    <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
+                    <Route path="/" element={<Navigate to="/ventas" replace />} />
 
                     <Route path="/ventas" element={
                         <RequireAuth requiredPermission="sales:view">

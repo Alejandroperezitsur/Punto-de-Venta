@@ -8,7 +8,7 @@ import { formatMoney } from '../utils/format';
 import { MovementHistoryModal } from '../components/products/MovementHistoryModal';
 import { cn } from '../utils/cn';
 
-const ProductCard = memo(function ProductCard({ p, onEdit }: { p: any; onEdit: (p: any) => void }) {
+const ProductCard = memo(function ProductCard({ p, onEdit }) {
   return (
     <div
       key={p.id}

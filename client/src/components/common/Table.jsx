@@ -4,7 +4,7 @@ import { Button } from './Button';
 import { Input } from './Input';
 import { cn } from '../../utils/cn';
 
-const TableRow = memo(function TableRow({ row, columns, index }: { row: any; columns: any[]; index: number }) {
+const TableRow = memo(function TableRow({ row, columns, index }) {
   return (
     <tr key={row.id || index} className="hover:bg-[var(--bg-muted)]/50 transition-colors">
       {columns.map((col) => (
@@ -16,7 +16,7 @@ const TableRow = memo(function TableRow({ row, columns, index }: { row: any; col
   );
 });
 
-const TableBody = memo(function TableBody({ rows, columns }: { rows: any[]; columns: any[] }) {
+const TableBody = memo(function TableBody({ rows, columns }) {
   if (rows.length === 0) {
     return (
       <tr>
