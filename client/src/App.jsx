@@ -69,12 +69,7 @@ import { LoadingFallback } from './components/common/LoadingFallback';
 // const LoadingFallback = () => <Splash />; // Replaced with enhanced component
 
 function App() {
-    const { theme } = useUserStore();
     const hydrate = useCartStore(state => state.hydrate);
-
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-    }, [theme]);
 
     useEffect(() => {
         // Initialize all enterprise subsystems

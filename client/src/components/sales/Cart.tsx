@@ -1,103 +1,80 @@
 import React, { useEffect, useState, useRef, useCallback, memo } from 'react';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
-import { Button } from '../common/Button';
+import { Button } from '../ui/Button';
 import { formatMoney } from '../../utils/format';
 import { cn } from '../../utils/cn';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const LOW_STOCK_THRESHOLD = 5;
 
-interface CartItemProps {
-  item: {
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
-    stock?: number;
-  };
-  isRecent: boolean;
-  isSwiping: boolean;
-  swipeOffset: number;
-  onTouchStart: (e: React.TouchEvent, id: string) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: (id: string) => void;
-  onUpdateQuantity: (id: string, qty: number) => void;
-  onRemove: (id: string) => void;
-}
-
-const CartItemRow = memo(function CartItemRow({
-  item, isRecent, isSwiping, swipeOffset,
-  onTouchStart, onTouchMove, onTouchEnd,
-  onUpdateQuantity, onRemove,
-}: CartItemProps) {
+const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity, onRemove }) {
   const isLowStock = item.stock !== undefined && item.stock <= LOW_STOCK_THRESHOLD;
 
   return (
-    <div
-      role="listitem"
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: 20, scale: 0.95 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: -20, scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       className={cn(
-        "flex items-center gap-4 p-4 bg-white border-2 rounded-2xl shadow-sm transition-all duration-300",
+        'flex items-center gap-3 p-3 rounded-2xl border-2 transition-all duration-300 bg-card',
         isRecent
-          ? "border-green-500 bg-green-50 scale-[1.02] ring-4 ring-green-100"
-          : "border-gray-100",
-        isLowStock && !isRecent && "border-l-8 border-l-amber-500"
+          ? 'border-success/40 bg-success/[0.04] shadow-md shadow-success/10'
+          : 'border-border hover:border-muted-foreground/20',
       )}
-      style={isSwiping ? { transform: `translateX(${swipeOffset}px)` } : undefined}
-      onTouchStart={(e) => onTouchStart(e, item.id)}
-      onTouchMove={onTouchMove}
-      onTouchEnd={() => onTouchEnd(item.id)}
+      role="listitem"
       aria-label={`${item.name}, ${item.quantity} unidades, ${formatMoney(item.price * item.quantity)}`}
     >
       <div className={cn(
-        "h-16 w-16 rounded-2xl flex items-center justify-center text-xl font-black shrink-0",
-        isRecent ? "bg-green-500 text-white" : "bg-gray-100 text-gray-400"
+        'size-14 rounded-2xl flex items-center justify-center text-lg font-black shrink-0',
+        isRecent ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground',
       )}>
-        {String(item.name).slice(0, 1).toUpperCase()}
+        {String(item.name).slice(0, 2).toUpperCase()}
       </div>
+
       <div className="flex-1 min-w-0">
-        <h4 className="font-black text-lg truncate text-gray-800">{item.name}</h4>
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-bold text-gray-400">{formatMoney(item.price)} c/u</p>
+        <h4 className="font-bold text-sm truncate">{item.name}</h4>
+        <div className="flex items-center gap-2 mt-0.5">
+          <p className="text-xs font-semibold text-muted-foreground">{formatMoney(item.price)} c/u</p>
           {isLowStock && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-1 rounded-full uppercase" aria-label="Stock bajo">
-              Poco Stock!
+            <span className="text-[10px] font-bold text-warning bg-warning/10 px-1.5 py-0.5 rounded-full uppercase">
+              Stock bajo
             </span>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-4 bg-gray-50 p-1 rounded-2xl border-2 border-gray-100">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-12 w-12 bg-white shadow-sm border border-gray-100 rounded-xl min-h-[48px] min-w-[48px]"
+
+      <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-2xl border border-border">
+        <button
+          className="size-10 flex items-center justify-center rounded-xl bg-card shadow-sm border border-border hover:bg-surface-hover active:scale-90 transition-all min-h-[40px] min-w-[40px]"
           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity === 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
         >
-          {item.quantity === 1 ? <Trash2 className="h-5 w-5 text-red-500" /> : <Minus className="h-5 w-5" />}
-        </Button>
-        <span className="w-10 text-center text-2xl font-black text-gray-800" aria-live="polite">{item.quantity}</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-12 w-12 bg-white shadow-sm border border-gray-100 rounded-xl min-h-[48px] min-w-[48px]"
+          {item.quantity === 1 ? <Trash2 className="size-4 text-danger" /> : <Minus className="size-4" />}
+        </button>
+        <span className="w-8 text-center text-lg font-bold" aria-live="polite">{item.quantity}</span>
+        <button
+          className="size-10 flex items-center justify-center rounded-xl bg-card shadow-sm border border-border hover:bg-surface-hover active:scale-90 transition-all min-h-[40px] min-w-[40px]"
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
         >
-          <Plus className="h-5 w-5" />
-        </Button>
+          <Plus className="size-4" />
+        </button>
       </div>
-      <div className="text-right w-24">
-        <p className="font-black text-xl text-gray-900">{formatMoney(item.price * item.quantity)}</p>
+
+      <div className="text-right min-w-[80px]">
+        <p className="font-black text-base">{formatMoney(item.price * item.quantity)}</p>
       </div>
-    </div>
+    </motion.div>
   );
 });
 
-export const Cart: React.FC = () => {
+export const Cart = () => {
   const { items, removeItem, updateQuantity, getTotals } = useCartStore();
   const totals = getTotals();
-  const [recentlyAdded, setRecentlyAdded] = useState<string | null>(null);
-  const [swipeState, setSwipeState] = useState<{ startX: number; currentX: number; isSwiping: boolean } | null>(null);
+  const [recentlyAdded, setRecentlyAdded] = useState(null);
   const prevItemsRef = useRef(items.length);
 
   useEffect(() => {
@@ -110,78 +87,48 @@ export const Cart: React.FC = () => {
     prevItemsRef.current = items.length;
   }, [items]);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent, itemId: string) => {
-    setSwipeState({
-      startX: e.touches[0].clientX,
-      currentX: e.touches[0].clientX,
-      isSwiping: true,
-    });
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!swipeState?.isSwiping) return;
-    setSwipeState(prev => prev ? { ...prev, currentX: e.touches[0].clientX } : prev);
-  }, [swipeState]);
-
-  const handleTouchEnd = useCallback((itemId: string) => {
-    if (!swipeState) return;
-    const diff = swipeState.currentX - swipeState.startX;
-    if (diff < -80) {
-      removeItem(itemId);
-    }
-    setSwipeState(null);
-  }, [swipeState, removeItem]);
-
-  const handleUpdateQuantity = useCallback((id: string, qty: number) => {
-    updateQuantity(id, qty);
-  }, [updateQuantity]);
-
-  const handleRemove = useCallback((id: string) => {
-    removeItem(id);
-  }, [removeItem]);
+  const handleUpdateQuantity = useCallback((id, qty) => updateQuantity(id, qty), [updateQuantity]);
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-[var(--muted-foreground)] p-8" role="status">
-        <div className="w-16 h-16 bg-[var(--bg-muted)] rounded-full flex items-center justify-center mb-4">
-          <ShoppingBag className="h-8 w-8 opacity-50" />
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8" role="status">
+        <div className="size-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+          <ShoppingBag className="size-8 opacity-40" />
         </div>
-        <p className="font-bold">El carrito esta vacio</p>
-        <p className="text-sm">Escanea un producto para comenzar</p>
+        <p className="font-bold">Carrito vacío</p>
+        <p className="text-sm font-medium">Escanea un producto para comenzar</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-auto -mx-4 px-4 space-y-3" role="list" aria-label="Productos en el carrito">
-        {items.map((item) => (
-          <CartItemRow
-            key={item.id}
-            item={item}
-            isRecent={recentlyAdded === item.id}
-            isSwiping={swipeState?.isSwiping ?? false}
-            swipeOffset={swipeState?.isSwiping ? Math.max(0, swipeState.currentX - swipeState.startX) : 0}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemove={handleRemove}
-          />
-        ))}
+      <div className="flex-1 space-y-2 pr-1" role="list" aria-label="Productos en el carrito">
+        <AnimatePresence mode="popLayout">
+          {items.map((item) => (
+            <CartItemRow
+              key={item.id}
+              item={item}
+              isRecent={recentlyAdded === item.id}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemove={removeItem}
+            />
+          ))}
+        </AnimatePresence>
       </div>
-      <div className="mt-4 border-t border-[var(--border)] pt-4 space-y-2 px-1">
+
+      <div className="mt-4 pt-4 border-t border-border space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-[var(--muted-foreground)]">Subtotal ({items.length} articulos)</span>
-          <span>{formatMoney(totals.subtotal)}</span>
+          <span className="text-muted-foreground font-medium">Subtotal ({items.length} artículo{items.length !== 1 ? 's' : ''})</span>
+          <span className="font-semibold">{formatMoney(totals.subtotal)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-[var(--muted-foreground)]">IVA (16%)</span>
-          <span>{formatMoney(totals.tax)}</span>
+          <span className="text-muted-foreground font-medium">IVA (16%)</span>
+          <span className="font-semibold">{formatMoney(totals.tax)}</span>
         </div>
-        <div className="flex justify-between text-xl font-bold mt-4">
+        <div className="flex justify-between text-xl font-bold pt-2 border-t border-border/50">
           <span>Total</span>
-          <span className="text-[var(--primary)]">{formatMoney(totals.total)}</span>
+          <span className="text-primary">{formatMoney(totals.total)}</span>
         </div>
       </div>
     </div>

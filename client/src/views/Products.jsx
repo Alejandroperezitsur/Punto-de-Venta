@@ -1,50 +1,56 @@
 import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../lib/api';
-import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
-import { Card } from '../components/common/Card';
-import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Card } from '../components/ui/Card';
+import { Badge } from '../components/ui/Badge';
+import { useToast } from '../components/ui/Toast';
+import { EmptyState } from '../components/ui/EmptyState';
+import { Skeleton } from '../components/ui/Skeleton';
+import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, X } from 'lucide-react';
 import { formatMoney } from '../utils/format';
 import { MovementHistoryModal } from '../components/products/MovementHistoryModal';
 import { cn } from '../utils/cn';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ProductCard = memo(function ProductCard({ p, onEdit }) {
   return (
-    <div
-      key={p.id}
-      className="group relative bg-[var(--card)] border-4 border-[var(--border)] rounded-[2.5rem] p-6 hover:border-[hsl(var(--primary))] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="group relative rounded-3xl border-2 border-border bg-card p-5 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col items-center text-center cursor-pointer"
       onClick={() => onEdit(p)}
     >
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button className="p-2 hover:bg-[var(--bg-muted)] rounded-full text-[var(--muted-foreground)]">
-          <Edit3 className="h-5 w-5" />
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button className="p-2 rounded-xl hover:bg-muted text-muted-foreground" onClick={(e) => { e.stopPropagation(); onEdit(p); }}>
+          <Edit3 className="size-4" />
         </button>
       </div>
 
-      <div className="h-28 w-28 bg-[var(--bg-muted)] rounded-[2rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform overflow-hidden border-2 border-[var(--border)]">
+      <div className="size-24 rounded-2xl bg-muted flex items-center justify-center mb-4 group-hover:scale-110 transition-transform overflow-hidden border border-border">
         {p.image_url ? (
-          <img src={p.image_url} alt="" className="h-full w-full object-cover" />
+          <img src={p.image_url} alt="" className="size-full object-cover" />
         ) : (
-          <Package className="h-10 w-10 text-gray-300" />
+          <Package className="size-10 text-muted-foreground/50" />
         )}
       </div>
 
-      <h3 className="font-black text-xl mb-1 line-clamp-2 min-h-[3.5rem] leading-tight text-gray-800">
-        {p.name}
-      </h3>
+      <h3 className="font-bold text-base mb-1 line-clamp-2 min-h-[2.5rem] leading-tight">{p.name}</h3>
 
-      <div className="mt-auto pt-4 space-y-3 w-full">
-        <p className="text-3xl font-black text-[hsl(var(--primary))] tracking-tighter">
+      <div className="mt-auto pt-3 space-y-2.5 w-full">
+        <p className="text-2xl font-black text-primary tracking-tighter">
           {formatMoney(p.price)}
         </p>
-        <div className={cn(
-          "inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest",
-          p.stock <= 5 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
-        )}>
+        <Badge
+          variant={p.stock <= 5 ? 'warning' : 'success'}
+          size="sm"
+          className="text-[10px]"
+        >
           Stock: {Number(p.stock).toFixed(0)}
-        </div>
+        </Badge>
       </div>
-    </div>
+    </motion.div>
   );
 });
 
@@ -61,6 +67,7 @@ const ProductsView = () => {
   const [kardexProduct, setKardexProduct] = useState(null);
   const [pagination, setPagination] = useState({ nextCursor: null, hasMore: false, total: 0 });
   const searchRef = useRef(null);
+  const toast = useToast();
 
   const loadData = useCallback(async (cursor) => {
     if (!cursor) setLoading(true);
@@ -73,15 +80,11 @@ const ProductsView = () => {
       if (search) params.set('q', search);
 
       const res = await api(`/products?${params.toString()}`);
-
       const data = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
       const pag = res.pagination || { nextCursor: null, hasMore: false, total: data.length };
 
-      if (!cursor) {
-        setProducts(data);
-      } else {
-        setProducts(prev => [...prev, ...data]);
-      }
+      if (!cursor) setProducts(data);
+      else setProducts(prev => [...prev, ...data]);
       setPagination(pag);
     } catch (e) {
       console.error(e);
@@ -91,41 +94,36 @@ const ProductsView = () => {
     }
   }, [search]);
 
-  useEffect(() => {
-    loadData(null);
-  }, [loadData]);
+  useEffect(() => { loadData(null); }, [loadData]);
 
   const handleSearch = useCallback((e) => {
     const value = e.target.value;
     setSearch(value);
     if (searchTimer) clearTimeout(searchTimer);
-    const timer = setTimeout(() => {
-      loadData(null);
-    }, 300);
+    const timer = setTimeout(() => loadData(null), 300);
     setSearchTimer(timer);
   }, [searchTimer, loadData]);
 
-  useEffect(() => {
-    return () => { if (searchTimer) clearTimeout(searchTimer); };
-  }, [searchTimer]);
+  useEffect(() => () => { if (searchTimer) clearTimeout(searchTimer); }, [searchTimer]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
-
     setSaving(true);
     try {
       const payload = {
         ...form,
         price: parseFloat(form.price) || 0,
         stock: parseFloat(form.stock) || 0,
-        sku: form.sku || `SKU-${Date.now()}`
+        sku: form.sku || `SKU-${Date.now()}`,
       };
 
       if (editingProduct) {
         await api(`/products/${editingProduct.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+        toast('Producto actualizado', 'success');
       } else {
         await api('/products', { method: 'POST', body: JSON.stringify(payload) });
+        toast('Producto creado', 'success');
       }
 
       setForm({ name: '', price: '', stock: '999', sku: '' });
@@ -133,10 +131,8 @@ const ProductsView = () => {
       setModalOpen(false);
       await loadData(null);
     } catch (e) {
-      alert('Error al guardar: ' + e.message);
-    } finally {
-      setSaving(false);
-    }
+      toast('Error al guardar: ' + e.message, 'error');
+    } finally { setSaving(false); }
   };
 
   const handleEdit = useCallback((p) => {
@@ -149,184 +145,147 @@ const ProductsView = () => {
     if (!window.confirm('¿Archivar este producto?')) return;
     try {
       await api(`/products/${id}`, { method: 'DELETE' });
+      toast('Producto archivado', 'success');
       await loadData(null);
     } catch (e) {
-      alert('Error al archivar: ' + e.message);
+      toast('Error al archivar: ' + e.message, 'error');
     }
   };
 
   return (
-    <div className="space-y-8 p-2">
+    <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter">Inventario</h1>
-          <p className="text-[var(--muted-foreground)] font-medium">
+          <h1 className="text-3xl font-black tracking-tighter">Inventario</h1>
+          <p className="text-muted-foreground font-medium text-sm">
             {pagination.total > 0 ? `${pagination.total} productos` : 'Gestiona tus productos'}
           </p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
-          <Button variant="ghost" onClick={() => loadData(null)} className="h-14 px-6 rounded-2xl border-2 border-[var(--border)]">
-            <RefreshCw className={cn("h-5 w-5", loading && "animate-spin")} />
+          <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-2xl border border-border">
+            <RefreshCw className={cn('size-5', loading && 'animate-spin')} />
           </Button>
-          <Button onClick={() => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); }} className="h-14 px-8 rounded-2xl text-lg font-bold flex-1 md:flex-none shadow-xl shadow-[hsl(var(--primary))/0.2]">
-            <Plus className="h-6 w-6 mr-2" /> Nuevo Producto
+          <Button onClick={() => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); }}
+            size="lg" className="font-bold shadow-lg shadow-primary/20">
+            <Plus className="size-5 mr-1" /> Nuevo Producto
           </Button>
         </div>
       </div>
 
+      {/* Search */}
       <div className="relative group">
-        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[var(--muted-foreground)] group-focus-within:text-[hsl(var(--primary))] transition-colors" />
+        <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
         <input
           ref={searchRef}
           type="text"
-          placeholder="Busca por nombre o código de barras..."
-          className="w-full h-20 pl-16 pr-8 bg-[var(--card)] border-4 border-[var(--border)] rounded-[2rem] text-2xl font-bold focus:outline-none focus:border-[hsl(var(--primary))] transition-all shadow-sm placeholder:text-gray-300"
+          placeholder="Buscar por nombre o código de barras..."
+          className="w-full h-16 pl-14 pr-6 rounded-3xl border-2 border-border bg-card text-lg font-bold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/40"
           value={search}
           onChange={handleSearch}
         />
       </div>
 
+      {/* Content */}
       {loading && products.length === 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-            <div key={i} className="aspect-square bg-[var(--bg-muted)] animate-pulse rounded-[2.5rem]" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-square rounded-3xl" />
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-[var(--bg-muted)] rounded-[3rem] border-4 border-dashed border-[var(--border)]">
-          <div className="h-24 w-24 bg-white rounded-full flex items-center justify-center shadow-xl">
-            <Package className="h-12 w-12 text-gray-300" />
-          </div>
-          <div>
-            <h3 className="text-2xl font-black">No hay productos</h3>
-            <p className="text-[var(--muted-foreground)] font-medium">Comienza agregando tu primer producto</p>
-          </div>
-          <Button onClick={() => setModalOpen(true)} className="h-14 px-8 rounded-2xl font-bold">
-            Crear Producto Ahora
-          </Button>
-        </div>
+        <EmptyState
+          icon={Package}
+          title="No hay productos"
+          description="Comienza agregando tu primer producto"
+          action={{ label: 'Crear Producto', onClick: () => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); } }}
+        />
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            {products.map((p) => (
-              <ProductCard key={p.id} p={p} onEdit={handleEdit} />
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
+            <AnimatePresence mode="popLayout">
+              {products.map((p) => (
+                <ProductCard key={p.id} p={p} onEdit={handleEdit} />
+              ))}
+            </AnimatePresence>
           </div>
 
           {pagination.hasMore && (
-            <div className="flex justify-center pt-6">
-              <Button
-                variant="secondary"
-                onClick={() => loadData(pagination.nextCursor)}
-                isLoading={loadingMore}
-                className="h-14 px-10 text-lg font-bold rounded-2xl border-2"
-              >
-                {loadingMore ? 'Cargando...' : `Cargar más productos`}
+            <div className="flex justify-center pt-4">
+              <Button variant="secondary" onClick={() => loadData(pagination.nextCursor)} isLoading={loadingMore} size="lg" className="font-bold border-2">
+                {loadingMore ? 'Cargando...' : 'Cargar más productos'}
               </Button>
             </div>
           )}
         </>
       )}
 
+      {/* Product modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-md">
-          <Card className="w-full max-w-xl p-10 rounded-[3rem] shadow-2xl border-4 border-[var(--border)] relative animate-in fade-in zoom-in duration-200">
-            <button
-              onClick={() => setModalOpen(false)}
-              className="absolute top-8 right-8 p-3 hover:bg-red-50 text-red-500 rounded-2xl transition-all active:scale-90"
-            >
-              <Plus className="h-8 w-8 rotate-45" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="bg-card w-full max-w-xl rounded-4xl border border-border shadow-2xl p-8"
+          >
+            <button onClick={() => setModalOpen(false)} className="float-right p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors" aria-label="Cerrar">
+              <X className="size-5" />
             </button>
 
-            <div className="mb-8">
-              <h2 className="text-3xl font-black tracking-tighter">
+            <div className="mb-6">
+              <h2 className="text-2xl font-black tracking-tighter">
                 {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
-              <p className="text-[var(--muted-foreground)] font-medium">Solo nombre y precio, el resto es automático</p>
+              <p className="text-muted-foreground text-sm font-medium">Nombre y precio, el resto es automático</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="space-y-2">
-                <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-2">Nombre del producto</label>
-                <Input
-                  placeholder="Ej: Coca Cola 600ml..."
-                  value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
-                  required
-                  autoFocus={!editingProduct}
-                  className="h-20 text-2xl font-bold px-8 rounded-[1.5rem]"
-                />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Nombre del producto</label>
+                <Input placeholder="Ej: Coca Cola 600ml..." value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+                  required autoFocus={!editingProduct} size="lg" />
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-2">Precio de venta</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Precio de venta</label>
                   <div className="relative">
-                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-bold text-gray-300">$</span>
-                    <Input
-                      className="h-20 text-3xl font-black pl-12 rounded-[1.5rem]"
-                      placeholder="0.00"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={form.price}
-                      onChange={e => setForm({ ...form, price: e.target.value })}
-                      required
-                    />
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground z-10">$</span>
+                    <Input className="pl-8" placeholder="0.00" type="number" step="0.01" min="0"
+                      value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-2">Stock Inicial</label>
-                  <Input
-                    className="h-20 text-3xl font-black px-8 rounded-[1.5rem]"
-                    placeholder="999"
-                    type="number"
-                    min="0"
-                    value={form.stock}
-                    onChange={e => setForm({ ...form, stock: e.target.value })}
-                  />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Stock inicial</label>
+                  <Input placeholder="999" type="number" min="0"
+                    value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
                 </div>
               </div>
 
               {editingProduct && (
-                <div className="pt-4 flex justify-between items-center">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="text-red-500 hover:bg-red-50 font-bold"
-                    onClick={() => handleDelete(editingProduct.id)}
-                  >
-                    <Trash2 className="h-5 w-5 mr-2" /> Archivar Producto
+                <div className="flex justify-between items-center pt-2">
+                  <Button type="button" variant="ghost" className="text-danger hover:bg-danger/10 font-bold"
+                    onClick={() => handleDelete(editingProduct.id)}>
+                    <Trash2 className="size-4 mr-1" /> Archivar
                   </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="text-blue-500 hover:bg-blue-50 font-bold"
-                    onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}
-                  >
-                    <History className="h-5 w-5 mr-2" /> Ver Historial
+                  <Button type="button" variant="ghost" className="text-info hover:bg-info/10 font-bold"
+                    onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}>
+                    <History className="size-4 mr-1" /> Historial
                   </Button>
                 </div>
               )}
 
-              <Button
-                type="submit"
-                isLoading={saving}
-                disabled={!form.name.trim()}
-                className="w-full h-24 text-2xl font-black rounded-[2rem] shadow-xl shadow-[hsl(var(--primary))/0.2]"
-              >
-                {editingProduct ? 'Guardar Cambios' : 'Guardar y Vender'}
+              <Button type="submit" isLoading={saving} disabled={!form.name.trim()} size="xl" className="w-full font-bold shadow-lg shadow-primary/20">
+                {editingProduct ? 'Guardar Cambios' : 'Guardar Producto'}
               </Button>
             </form>
-          </Card>
+          </motion.div>
         </div>
       )}
 
       {kardexProduct && (
-        <MovementHistoryModal
-          product={kardexProduct}
-          onClose={() => setKardexProduct(null)}
-        />
+        <MovementHistoryModal product={kardexProduct} onClose={() => setKardexProduct(null)} />
       )}
     </div>
   );
