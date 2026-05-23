@@ -56,7 +56,19 @@ export async function api(path, options = {}) {
     if (ct.includes('application/json')) {
       try {
         const data = await res.json();
-        msg = typeof data === 'string' ? data : (data.error || JSON.stringify(data));
+        if (typeof data === 'string') {
+          msg = data;
+        } else if (data.error && typeof data.error === 'string') {
+          msg = data.error;
+        } else if (data.message && typeof data.message === 'string') {
+          msg = data.message;
+        } else if (data.error && typeof data.error === 'object' && typeof data.error.message === 'string') {
+          msg = data.error.message;
+        } else if (data.message && typeof data.message === 'object' && typeof data.message.error === 'string') {
+          msg = data.message.error;
+        } else {
+          msg = JSON.stringify(data);
+        }
       } catch {
         msg = await res.text();
       }
