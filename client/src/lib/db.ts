@@ -219,10 +219,60 @@ interface POSDB extends DBSchema {
     value: ClientAuditEvent;
     indexes: { 'by-event': string; 'by-correlation': string; 'by-created': number };
   };
+  products: {
+    key: string;
+    value: any;
+    indexes: { 'by-sku': string };
+  };
+  sales: {
+    key: string;
+    value: any;
+    indexes: { 'by-idempotency': string };
+  };
+  metrics: {
+    key: string;
+    value: any;
+    indexes: { 'by-name': string; 'by-timestamp': number };
+  };
+  alerts: {
+    key: string;
+    value: any;
+    indexes: { 'by-rule': string; 'by-status': string; 'by-severity': string };
+  };
+  checksums: {
+    key: string;
+    value: any;
+    indexes: { 'by-product': string };
+  };
+  reconciliationSnapshots: {
+    key: string;
+    value: any;
+    indexes: { 'by-store': string; 'by-timestamp': number };
+  };
+  reconciliationJobs: {
+    key: string;
+    value: any;
+    indexes: { 'by-store': string; 'by-status': string };
+  };
+  syncLog: {
+    key: string;
+    value: any;
+    indexes: { 'by-idempotency': string; 'by-correlation': string; 'by-timestamp': number };
+  };
+  conflicts: {
+    key: string;
+    value: any;
+    indexes: { 'by-product': string; 'by-resolved': string };
+  };
+  inventoryMovements: {
+    key: string;
+    value: any;
+    indexes: { 'by-product': string; 'by-synced': string };
+  };
 }
 
 const DB_NAME = 'pos-offline';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBPDatabase<POSDB>> | null = null;
 
@@ -288,6 +338,55 @@ export function getDB(): Promise<IDBPDatabase<POSDB>> {
           s.createIndex('by-event', 'event');
           s.createIndex('by-correlation', 'correlationId');
           s.createIndex('by-created', 'createdAt');
+        }
+        if (!db.objectStoreNames.contains('products')) {
+          const s = db.createObjectStore('products', { keyPath: 'id' });
+          s.createIndex('by-sku', 'sku');
+        }
+        if (!db.objectStoreNames.contains('sales')) {
+          const s = db.createObjectStore('sales', { keyPath: 'id' });
+          s.createIndex('by-idempotency', 'idempotency_key');
+        }
+        if (!db.objectStoreNames.contains('metrics')) {
+          const s = db.createObjectStore('metrics', { keyPath: 'id' });
+          s.createIndex('by-name', 'name');
+          s.createIndex('by-timestamp', 'timestamp');
+        }
+        if (!db.objectStoreNames.contains('alerts')) {
+          const s = db.createObjectStore('alerts', { keyPath: 'id' });
+          s.createIndex('by-rule', 'rule');
+          s.createIndex('by-status', 'status');
+          s.createIndex('by-severity', 'severity');
+        }
+        if (!db.objectStoreNames.contains('checksums')) {
+          const s = db.createObjectStore('checksums', { keyPath: 'productId' });
+          s.createIndex('by-product', 'productId');
+        }
+        if (!db.objectStoreNames.contains('reconciliationSnapshots')) {
+          const s = db.createObjectStore('reconciliationSnapshots', { keyPath: 'id' });
+          s.createIndex('by-store', 'storeId');
+          s.createIndex('by-timestamp', 'timestamp');
+        }
+        if (!db.objectStoreNames.contains('reconciliationJobs')) {
+          const s = db.createObjectStore('reconciliationJobs', { keyPath: 'id' });
+          s.createIndex('by-store', 'storeId');
+          s.createIndex('by-status', 'status');
+        }
+        if (!db.objectStoreNames.contains('syncLog')) {
+          const s = db.createObjectStore('syncLog', { keyPath: 'id' });
+          s.createIndex('by-idempotency', 'idempotencyKey');
+          s.createIndex('by-correlation', 'correlationId');
+          s.createIndex('by-timestamp', 'timestamp');
+        }
+        if (!db.objectStoreNames.contains('conflicts')) {
+          const s = db.createObjectStore('conflicts', { keyPath: 'id' });
+          s.createIndex('by-product', 'productId');
+          s.createIndex('by-resolved', 'resolved');
+        }
+        if (!db.objectStoreNames.contains('inventoryMovements')) {
+          const s = db.createObjectStore('inventoryMovements', { keyPath: 'id' });
+          s.createIndex('by-product', 'product_id');
+          s.createIndex('by-synced', 'synced');
         }
       },
       blocked() { console.warn('[DB] Blocked by other tab'); },

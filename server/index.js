@@ -97,6 +97,7 @@ app.use('/api/billing', require('./routes/billing'));
 app.use('/api/ai', require('./routes/ai'));
 app.use('/api/fraud', require('./routes/fraud'));
 app.use('/api/sessions', sessionRouter);
+app.use('/api/dashboards', require('./routes/dashboards'));
 app.use('/api/health', healthRouter);
 app.use('/api/reconciliation', reconciliationRouter);
 app.use('/api', batchRouter);
