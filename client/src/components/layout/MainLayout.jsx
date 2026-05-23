@@ -41,10 +41,13 @@ export const MainLayout = ({ children }) => {
   return (
     <ToastProvider>
       <div className="flex h-screen bg-background text-foreground font-sans antialiased overflow-hidden">
+        <a href="#main-content" className="skip-to-content">
+          Ir al contenido principal
+        </a>
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <Topbar />
-          <main className="flex-1 overflow-y-auto p-5 md:p-6 scroll-smooth">
+          <main id="main-content" className="flex-1 overflow-y-auto p-5 md:p-6 scroll-smooth" role="main">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
@@ -59,7 +62,7 @@ export const MainLayout = ({ children }) => {
               </motion.div>
             </AnimatePresence>
           </main>
-          <footer className="shrink-0 py-2 px-6 border-t border-border bg-card text-xs text-muted-foreground flex justify-between items-center">
+          <footer className="shrink-0 py-2 px-6 border-t border-border bg-card text-xs text-muted-foreground flex justify-between items-center" role="contentinfo">
             <span>{info.copyright}</span>
             <span>v{info.version}</span>
           </footer>

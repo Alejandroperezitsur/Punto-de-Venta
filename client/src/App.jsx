@@ -35,6 +35,7 @@ const SupportTickets = React.lazy(() => import('./views/SupportTickets'));
 const Subscription = React.lazy(() => import('./views/Subscription'));
 const EnterpriseReports = React.lazy(() => import('./views/admin/EnterpriseReports'));
 const AiInsights = React.lazy(() => import('./views/AiInsights'));
+const ThemeStudio = React.lazy(() => import('./views/ThemeStudio'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -210,6 +211,12 @@ function App() {
                     <Route path="/insights" element={
                         <RequireAuth>
                             <AiInsights />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/theme-studio" element={
+                        <RequireAuth>
+                            <ThemeStudio />
                         </RequireAuth>
                     } />
 

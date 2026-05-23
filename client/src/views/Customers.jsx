@@ -6,12 +6,14 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { useToast } from '../components/ui/Toast';
 import { Badge } from '../components/ui/Badge';
+import ErrorState from '../components/states/ErrorState';
 import { Plus, Trash2, RefreshCw, Users, Phone, Mail, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CustomersView = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', rfc: '' });
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -19,10 +21,12 @@ const CustomersView = () => {
 
   const loadCustomers = async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await api('/customers');
       setCustomers(data);
     } catch (e) {
+      setError(e);
       toast('Error al cargar clientes', 'error');
     } finally { setLoading(false); }
   };
@@ -127,19 +131,23 @@ const CustomersView = () => {
         )}
       </AnimatePresence>
 
-      <Table
-        columns={columns}
-        data={customers}
-        searchable
-        searchPlaceholder="Buscar clientes..."
-        pageSize={15}
-        density="comfortable"
-        loading={loading}
-        emptyIcon={Users}
-        emptyTitle="No hay clientes"
-        emptyDescription="Registra tu primer cliente para comenzar"
-        emptyAction={{ label: 'Crear Cliente', onClick: () => setShowForm(true) }}
-      />
+      {error ? (
+        <ErrorState error={error.message || error} onRetry={loadCustomers} />
+      ) : (
+        <Table
+          columns={columns}
+          data={customers}
+          searchable
+          searchPlaceholder="Buscar clientes..."
+          pageSize={15}
+          density="comfortable"
+          loading={loading}
+          emptyIcon={Users}
+          emptyTitle="No hay clientes"
+          emptyDescription="Registra tu primer cliente para comenzar"
+          emptyAction={{ label: 'Crear Cliente', onClick: () => setShowForm(true) }}
+        />
+      )}
     </div>
   );
 };

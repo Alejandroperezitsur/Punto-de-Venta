@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Card } from '../components/common/Card';
-import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
-import { formatMoney } from '../utils/format';
-import { Plus, Trash2, Edit2, Shield, User, UserCheck, X, Check } from 'lucide-react';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Badge } from '../components/ui/Badge';
+import { useToast } from '../components/ui/Toast';
+import { Skeleton } from '../components/ui/Skeleton';
+import { Table } from '../components/ui/Table';
+import { Select } from '../components/ui/Select';
+import { motion } from 'framer-motion';
+import { Plus, Trash2, Edit2, X, Check } from 'lucide-react';
 
 const UsersView = () => {
     const [users, setUsers] = useState([]);
@@ -13,6 +18,7 @@ const UsersView = () => {
     const [editingId, setEditingId] = useState(null);
     const [form, setForm] = useState({ username: '', password: '', role: 'cajero' });
     const [saving, setSaving] = useState(false);
+    const toast = useToast();
 
     const loadUsers = async () => {
         setLoading(true);
@@ -33,7 +39,7 @@ const UsersView = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.username || (!editingId && !form.password)) {
-            alert('Complete todos los campos requeridos');
+            toast('Complete todos los campos requeridos', 'error');
             return;
         }
         setSaving(true);
@@ -54,7 +60,7 @@ const UsersView = () => {
             setShowForm(false);
             await loadUsers();
         } catch (e) {
-            alert('Error: ' + e.message);
+            toast('Error: ' + e.message, 'error');
         } finally {
             setSaving(false);
         }
@@ -72,23 +78,8 @@ const UsersView = () => {
             await api(`/auth/users/${id}`, { method: 'DELETE' });
             await loadUsers();
         } catch (e) {
-            alert('Error: ' + e.message);
+            toast('Error: ' + e.message, 'error');
         }
-    };
-
-    const getRoleBadge = (role) => {
-        const styles = {
-            admin: 'bg-red-100 text-red-700 border-red-200',
-            supervisor: 'bg-blue-100 text-blue-700 border-blue-200',
-            cajero: 'bg-green-100 text-green-700 border-green-200',
-        };
-        const labels = { admin: 'Administrador', supervisor: 'Supervisor', cajero: 'Cajero' };
-        return (
-            <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full border ${styles[role] || 'bg-gray-100'}`}>
-                <Shield className="h-3 w-3" />
-                {labels[role] || role}
-            </span>
-        );
     };
 
     return (
@@ -102,97 +93,93 @@ const UsersView = () => {
             </div>
 
             {showForm && (
-                <Card className="p-6 animate-fade-in border-l-4 border-l-[hsl(var(--primary))]">
-                    <h3 className="font-semibold mb-4">{editingId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h3>
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <div>
-                            <label className="text-xs font-medium mb-1 block">Usuario</label>
-                            <Input
-                                placeholder="nombre_usuario"
-                                value={form.username}
-                                onChange={e => setForm({ ...form, username: e.target.value })}
-                                disabled={!!editingId}
-                                required={!editingId}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium mb-1 block">Contraseña {editingId && '(dejar vacío para no cambiar)'}</label>
-                            <Input
-                                type="password"
-                                placeholder={editingId ? '••••••••' : 'Contraseña'}
-                                value={form.password}
-                                onChange={e => setForm({ ...form, password: e.target.value })}
-                                required={!editingId}
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium mb-1 block">Rol</label>
-                            <select
-                                className="flex h-10 w-full rounded-md border border-[hsl(var(--border))] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
-                                value={form.role}
-                                onChange={e => setForm({ ...form, role: e.target.value })}
-                            >
-                                <option value="cajero">Cajero</option>
-                                <option value="supervisor">Supervisor</option>
-                                <option value="admin">Administrador</option>
-                            </select>
-                        </div>
-                        <Button type="submit" isLoading={saving}>
-                            <Check className="h-4 w-4 mr-2" />
-                            {editingId ? 'Guardar Cambios' : 'Crear Usuario'}
-                        </Button>
-                    </form>
-                </Card>
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                    <Card className="p-6 border-l-4 border-l-primary">
+                        <h3 className="font-semibold mb-4">{editingId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h3>
+                        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <div>
+                                <label className="text-xs font-medium mb-1 block">Usuario</label>
+                                <Input
+                                    placeholder="nombre_usuario"
+                                    value={form.username}
+                                    onChange={e => setForm({ ...form, username: e.target.value })}
+                                    disabled={!!editingId}
+                                    required={!editingId}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium mb-1 block">Contraseña {editingId && '(dejar vacío para no cambiar)'}</label>
+                                <Input
+                                    type="password"
+                                    placeholder={editingId ? '••••••••' : 'Contraseña'}
+                                    value={form.password}
+                                    onChange={e => setForm({ ...form, password: e.target.value })}
+                                    required={!editingId}
+                                />
+                            </div>
+                            <div>
+                                <Select options={[
+                                    { value: 'cajero', label: 'Cajero' },
+                                    { value: 'supervisor', label: 'Supervisor' },
+                                    { value: 'admin', label: 'Administrador' }
+                                ]} value={form.role} onChange={(v) => setForm({ ...form, role: v })} label="Rol" />
+                            </div>
+                            <Button type="submit" isLoading={saving}>
+                                <Check className="h-4 w-4 mr-2" />
+                                {editingId ? 'Guardar Cambios' : 'Crear Usuario'}
+                            </Button>
+                        </form>
+                    </Card>
+                </motion.div>
             )}
 
             <Card className="p-0 overflow-hidden">
                 {loading ? (
-                    <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">Cargando usuarios...</div>
-                ) : users.length === 0 ? (
-                    <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">No hay usuarios</div>
+                    <div className="p-8 space-y-4">
+                        {[1, 2, 3, 4, 5].map(i => (
+                            <div key={i} className="flex items-center gap-4 px-6">
+                                <Skeleton className="size-10 rounded-full shrink-0" />
+                                <div className="space-y-2 flex-1">
+                                    <Skeleton className="h-4 w-1/3" />
+                                    <Skeleton className="h-3 w-1/5" />
+                                </div>
+                                <Skeleton className="h-8 w-20 rounded-md" />
+                                <Skeleton className="h-8 w-16 rounded-md" />
+                                <Skeleton className="size-8 rounded-md shrink-0" />
+                            </div>
+                        ))}
+                    </div>
                 ) : (
-                    <table className="w-full text-sm">
-                        <thead className="bg-[hsl(var(--muted))]">
-                            <tr>
-                                <th className="text-left px-6 py-3 font-medium">Usuario</th>
-                                <th className="text-left px-6 py-3 font-medium">Rol</th>
-                                <th className="text-left px-6 py-3 font-medium">Estado</th>
-                                <th className="text-right px-6 py-3 font-medium">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-[hsl(var(--border))]">
-                            {users.map(u => (
-                                <tr key={u.id} className="hover:bg-[hsl(var(--muted))/0.5]">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-[hsl(var(--primary))] to-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                                                {u.username.charAt(0).toUpperCase()}
-                                            </div>
-                                            <span className="font-medium">{u.username}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">{getRoleBadge(u.role)}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full ${u.active !== 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                                            {u.active !== 0 ? 'Activo' : 'Inactivo'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(u)} className="h-8 w-8">
-                                                <Edit2 className="h-4 w-4" />
-                                            </Button>
-                                            {u.username !== 'admin' && (
-                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(u.id)} className="h-8 w-8 text-red-500 hover:bg-red-50">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <Table
+                        columns={[
+                            { key: 'username', title: 'Usuario', render: (row) => (
+                                <div className="flex items-center gap-3">
+                                    <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-sm">
+                                        {row.username.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span className="font-medium">{row.username}</span>
+                                </div>
+                            )},
+                            { key: 'role', title: 'Rol', render: (row) => <Badge variant={row.role === 'admin' ? 'danger' : row.role === 'supervisor' ? 'info' : 'success'}>{row.role === 'admin' ? 'Administrador' : row.role === 'supervisor' ? 'Supervisor' : 'Cajero'}</Badge> },
+                            { key: 'active', title: 'Estado', render: (row) => <Badge variant={row.active !== 0 ? 'success' : 'neutral'} dot>{row.active !== 0 ? 'Activo' : 'Inactivo'}</Badge> },
+                            { key: 'actions', title: 'Acciones', render: (row) => (
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="ghost" size="sm" onClick={() => handleEdit(row)}>
+                                        <Edit2 className="size-4" />
+                                    </Button>
+                                    {row.username !== 'admin' && (
+                                        <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)} className="text-danger hover:bg-danger/10">
+                                            <Trash2 className="size-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            )},
+                        ]}
+                        data={users}
+                        loading={loading}
+                        searchable
+                        searchPlaceholder="Buscar usuarios..."
+                    />
                 )}
             </Card>
         </div>

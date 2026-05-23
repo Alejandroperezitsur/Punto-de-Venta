@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useToast } from '../components/ui/Toast';
+import ErrorState from '../components/states/ErrorState';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, X } from 'lucide-react';
@@ -65,6 +66,7 @@ const ProductsView = () => {
   const [form, setForm] = useState({ name: '', price: '', stock: '999', sku: '' });
   const [saving, setSaving] = useState(false);
   const [kardexProduct, setKardexProduct] = useState(null);
+  const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({ nextCursor: null, hasMore: false, total: 0 });
   const searchRef = useRef(null);
   const toast = useToast();
@@ -72,6 +74,7 @@ const ProductsView = () => {
   const loadData = useCallback(async (cursor) => {
     if (!cursor) setLoading(true);
     else setLoadingMore(true);
+    setError(null);
 
     try {
       const params = new URLSearchParams();
@@ -88,6 +91,7 @@ const ProductsView = () => {
       setPagination(pag);
     } catch (e) {
       console.error(e);
+      setError(e);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -187,7 +191,9 @@ const ProductsView = () => {
       </div>
 
       {/* Content */}
-      {loading && products.length === 0 ? (
+      {error ? (
+        <ErrorState error={error.message || error} onRetry={() => loadData(null)} />
+      ) : loading && products.length === 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
           {Array.from({ length: 10 }).map((_, i) => (
             <Skeleton key={i} className="aspect-square rounded-3xl" />

@@ -23,6 +23,7 @@ const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCol
             : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover',
         )
       }
+      aria-label={isCollapsed ? children : undefined}
       title={isCollapsed ? children : undefined}
     >
       <div className={cn('flex items-center gap-3', isCollapsed && 'justify-center')}>
@@ -97,7 +98,7 @@ export const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto" aria-label="Navegación principal">
         {!isCollapsed && (
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-3.5 pt-4 pb-2">
             Principal

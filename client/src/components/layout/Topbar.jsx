@@ -35,6 +35,7 @@ export const Topbar = () => {
 
   return (
     <header
+      role="banner"
       className={cn(
         'h-[var(--header-height)] border-b border-border flex items-center justify-between px-5 sticky top-0 z-40 transition-all duration-200',
         scrolled
@@ -43,7 +44,7 @@ export const Topbar = () => {
       )}
     >
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar}>
+        <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar} aria-label="Menú">
           <Menu className="size-5" />
         </Button>
         {cashStatus ? (

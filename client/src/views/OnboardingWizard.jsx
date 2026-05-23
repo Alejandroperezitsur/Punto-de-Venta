@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { api } from '../lib/api';
-import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
-import { Card } from '../components/common/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Card } from '../components/ui/Card';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
+import { useToast } from '../components/ui/Toast';
 import {
     ChevronRight, ChevronLeft, Check, Building, User, Package,
     ShoppingCart, Percent, Sparkles, PartyPopper
@@ -20,6 +22,7 @@ const STEPS = [
 const OnboardingWizard = () => {
     const navigate = useNavigate();
     const { login } = useUserStore();
+    const { toast } = useToast();
     const [step, setStep] = useState(0);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState({
@@ -78,7 +81,7 @@ const OnboardingWizard = () => {
             login(res.user, res.token);
             navigate('/ventas');
         } catch (e) {
-            alert('Error: ' + e.message);
+            toast('Error: ' + e.message, 'error');
         } finally {
             setLoading(false);
         }
@@ -116,10 +119,10 @@ const OnboardingWizard = () => {
                 </div>
 
                 {/* Step Content */}
-                <div className="min-h-[320px] text-white">
+                <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="min-h-[320px] text-white">
                     {step === 0 && (
                         <div className="text-center py-10 space-y-4">
-                            <div className="h-24 w-24 bg-white/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                            <div className="h-24 w-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
                                 <Sparkles className="h-12 w-12 text-white" />
                             </div>
                             <h2 className="text-4xl font-black tracking-tighter">¡Hola!</h2>
@@ -180,7 +183,7 @@ const OnboardingWizard = () => {
 
                     {step === 3 && (
                         <div className="text-center py-10 space-y-4">
-                            <div className="h-24 w-24 bg-white/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                            <div className="h-24 w-24 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
                                 <PartyPopper className="h-12 w-12 text-white" />
                             </div>
                             <h2 className="text-4xl font-black tracking-tighter">¡Listo para vender!</h2>
@@ -189,7 +192,7 @@ const OnboardingWizard = () => {
                             </p>
                         </div>
                     )}
-                </div>
+                </motion.div>
 
                 {/* Navigation */}
                 <div className="flex justify-between mt-12">
