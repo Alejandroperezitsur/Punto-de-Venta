@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../store/userStore';
 import { api } from '../lib/api';
-import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
 import { User, Lock, Store } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import './Login.css';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [step, setStep] = useState('login'); // login | select-store
+    const [step, setStep] = useState('login');
     const [stores, setStores] = useState([]);
     const [tempToken, setTempToken] = useState(null);
     const login = useUserStore(state => state.login);
@@ -25,7 +24,7 @@ const Login = () => {
         try {
             const res = await api('/auth/login', {
                 method: 'POST',
-                body: JSON.stringify({ username: email, password }) // Changed email to username to match backend
+                body: JSON.stringify({ username: email, password })
             });
 
             if (res.requireStoreSelection) {
@@ -66,99 +65,135 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))] relative overflow-hidden">
-            {/* Background Decor */}
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[hsl(var(--primary))] rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-pulse delay-1000"></div>
+        <div className="login-container">
+            <div className="login-blob-1"></div>
+            <div className="login-blob-2"></div>
+            <div className="login-blob-3"></div>
 
-            <div className="w-full max-w-md p-8 bg-[hsl(var(--card))/0.9] backdrop-blur-xl rounded-3xl shadow-2xl border border-[hsl(var(--border))] relative z-10 animate-fade-in ring-1 ring-white/10">
-                <div className="text-center mb-8">
-                    <div className="h-20 w-20 bg-gradient-to-tr from-[hsl(var(--primary))] to-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl font-bold shadow-xl transform rotate-3 hover:rotate-6 transition-transform duration-300">
-                        <Store className="h-10 w-10" />
+            <div className="login-card">
+                <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <div className="login-logo">
+                        <Store />
                     </div>
-                    <h1 className="text-3xl font-bold text-[hsl(var(--foreground))] tracking-tight">Punto de Venta</h1>
-                    <p className="text-[hsl(var(--muted-foreground))] mt-2 text-sm font-medium">Sistema Profesional de Gestión</p>
+                    <h1 className="login-title">Punto de Venta</h1>
+                    <p className="login-subtitle">Sistema Profesional de Gestión</p>
                 </div>
 
                 {step === 'login' ? (
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div className="space-y-2">
-                            <Input
-                                icon={User}
-                                placeholder="Usuario"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                autoFocus
-                                className="bg-[hsl(var(--background))] h-12"
-                            />
+                    <form onSubmit={handleSubmit} className="login-form">
+                        <div className="login-input-group">
+                            <div className="login-input">
+                                <User size={20} style={{ color: '#64748b', marginRight: '0.75rem', flexShrink: 0 }} />
+                                <input
+                                    type="text"
+                                    placeholder="Usuario"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    autoFocus
+                                    style={{
+                                        flex: 1,
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#f1f5f9',
+                                        outline: 'none',
+                                        fontSize: '1rem',
+                                        fontFamily: 'inherit'
+                                    }}
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Input
-                                type="password"
-                                icon={Lock}
-                                placeholder="Contraseña"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="bg-[hsl(var(--background))] h-12"
-                            />
+
+                        <div className="login-input-group">
+                            <div className="login-input">
+                                <Lock size={20} style={{ color: '#64748b', marginRight: '0.75rem', flexShrink: 0 }} />
+                                <input
+                                    type="password"
+                                    placeholder="Contraseña"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    style={{
+                                        flex: 1,
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#f1f5f9',
+                                        outline: 'none',
+                                        fontSize: '1rem',
+                                        fontFamily: 'inherit'
+                                    }}
+                                />
+                            </div>
                         </div>
 
                         {error && (
-                            <div className="p-4 rounded-xl bg-red-50 text-red-600 text-sm border border-red-100 text-center font-medium animate-shake">
+                            <div className="login-error">
                                 {error}
                             </div>
                         )}
 
-                        <Button
+                        <button
                             type="submit"
-                            className="w-full h-12 text-base font-semibold shadow-lg shadow-[hsl(var(--primary))/0.2] hover:translate-y-[-2px] transition-all duration-200"
-                            isLoading={loading}
+                            className="login-button"
+                            disabled={loading}
                         >
-                            Iniciar Sesión
-                        </Button>
+                            {loading ? (
+                                <>
+                                    <div className="login-spinner"></div>
+                                    Iniciando...
+                                </>
+                            ) : (
+                                'Iniciar Sesión'
+                            )}
+                        </button>
                     </form>
                 ) : (
-                    <div className="space-y-4 animate-fade-in">
-                        <h3 className="text-center font-semibold text-lg text-[hsl(var(--foreground))]">Selecciona una Tienda</h3>
-                        <div className="space-y-3 max-h-60 overflow-y-auto">
+                    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+                        <h3 style={{
+                            textAlign: 'center',
+                            fontWeight: 600,
+                            fontSize: '1.125rem',
+                            color: '#f1f5f9',
+                            marginBottom: '1.5rem'
+                        }}>
+                            Selecciona una Tienda
+                        </h3>
+                        <div className="login-stores">
                             {stores.map(store => (
                                 <button
                                     key={store.id}
                                     onClick={() => handleSelectStore(store.id)}
                                     disabled={loading}
-                                    className="w-full p-4 flex items-center justify-between bg-[hsl(var(--background))] hover:bg-[hsl(var(--muted))] border border-[hsl(var(--border))] rounded-xl transition-all group"
+                                    className="login-store-item"
+                                    style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                                            <Store className="h-5 w-5" />
+                                    <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                                        <div className="login-store-icon">
+                                            <Store size={20} />
                                         </div>
-                                        <div className="text-left">
-                                            <p className="font-semibold text-[hsl(var(--foreground))]">{store.name}</p>
-                                            <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase font-bold">{store.role}</p>
+                                        <div className="login-store-info">
+                                            <div className="login-store-name">{store.name}</div>
+                                            <div className="login-store-role">{store.role}</div>
                                         </div>
                                     </div>
-                                    <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                                    <div className="login-store-status"></div>
                                 </button>
                             ))}
                         </div>
-                        <Button
-                            variant="outline"
-                            className="w-full"
+                        <button
                             onClick={() => {
                                 setStep('login');
                                 setPassword('');
                                 setError('');
                             }}
+                            className="login-button"
+                            style={{ marginTop: '1.5rem' }}
                         >
-                            Volver
-                        </Button>
+                            Volver a Inicio de Sesión
+                        </button>
                     </div>
                 )}
 
-                <div className="mt-8 text-center">
-                    <p className="text-xs text-[hsl(var(--muted-foreground))] font-medium">
-                        &copy; {new Date().getFullYear()} Sistema POS. Versión SaaS
-                    </p>
+                <div className="login-footer">
+                    © 2026 Punto de Venta. Todos los derechos reservados.
                 </div>
             </div>
         </div>
