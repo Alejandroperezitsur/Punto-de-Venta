@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { useAppStore } from '../../store/useAppStore';
+import { useUserStore } from '../../store/userStore';
 
 export function DynamicBranding() {
-    const { reseller } = useAppStore();
+    const { reseller } = useUserStore();
 
     useEffect(() => {
         if (reseller && reseller.primary_color) {
