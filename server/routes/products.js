@@ -6,20 +6,31 @@ const { validationResult } = require('express-validator');
 const { auth } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
-// Helper to format product with barcodes
+const PAGE_SIZE = 50;
+
 const formatProduct = (p) => ({
   ...p,
+  price: Number(p.price),
+  cost: Number(p.cost || 0),
+  stock: Number(p.stock || 0),
+  tax_rate: p.tax_rate ? Number(p.tax_rate) : null,
   barcodes: p.barcodes ? p.barcodes.map(b => b.code) : []
 });
 
 router.get('/', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const q = req.query.q;
-    const where = { store_id: req.user.storeId };
+    const cursor = req.query.cursor ? parseInt(req.query.cursor) : undefined;
+    const take = Math.min(parseInt(req.query.take) || PAGE_SIZE, 200);
+
+    const where = {
+      store_id: req.user.storeId,
+      deleted_at: null
+    };
 
     if (q) {
       where.OR = [
-        { name: { contains: q } }, // Prisma default contains is case-insensitive in SQLite usually? Or depends.
+        { name: { contains: q } },
         { sku: { contains: q } },
         { barcodes: { some: { code: { contains: q } } } }
       ];
@@ -28,10 +39,23 @@ router.get('/', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, 
     const products = await prisma.product.findMany({
       where,
       include: { barcodes: true },
-      orderBy: { id: 'desc' }
+      orderBy: { id: 'desc' },
+      take: take + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {})
     });
 
-    res.jsonResponse(products.map(formatProduct));
+    const hasMore = products.length > take;
+    const nextCursor = hasMore ? products[products.length - 1].id : null;
+    const data = hasMore ? products.slice(0, take) : products;
+
+    res.jsonResponse({
+      data: data.map(formatProduct),
+      pagination: {
+        nextCursor,
+        hasMore,
+        total: await prisma.product.count({ where })
+      }
+    });
   } catch (e) {
     console.error(e);
     res.jsonError('Error al obtener productos', 500);
@@ -41,8 +65,10 @@ router.get('/', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, 
 router.get('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.jsonError('ID inválido', 400);
+
     const product = await prisma.product.findFirst({
-      where: { id, store_id: req.user.storeId },
+      where: { id, store_id: req.user.storeId, deleted_at: null },
       include: { barcodes: true }
     });
 
@@ -61,6 +87,7 @@ router.get('/scan/:code', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), as
       where: {
         store_id: req.user.storeId,
         active: 1,
+        deleted_at: null,
         OR: [
           { sku: code },
           { barcodes: { some: { code } } }
@@ -80,21 +107,21 @@ router.get('/scan/:code', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), as
 router.get('/:id/movements', auth, requirePermission(PERMISSIONS.PRODUCTS_VIEW), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    // Verify ownership first? Or just filter by store via product relation?
-    // InventoryMovement -> Product -> Store.
-    // Prisma query:
+    if (isNaN(id)) return res.jsonError('ID inválido', 400);
+
     const movements = await prisma.inventoryMovement.findMany({
       where: {
         product_id: id,
         product: { store_id: req.user.storeId }
       },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
+      take: 100
     });
 
-    // Rewrite created_at to string if it's DateTime object?
-    // Prisma returns Date object. Frontend might expect ISO string.
-    // JSON.stringify serialization handles it automatically as ISO string.
-    res.jsonResponse(movements);
+    res.jsonResponse(movements.map(m => ({
+      ...m,
+      change: Number(m.change)
+    })));
   } catch (e) {
     console.error(e);
     res.jsonError('Error al obtener movimientos', 500);
@@ -107,13 +134,16 @@ router.post('/', auth, requirePermission(PERMISSIONS.PRODUCTS_CREATE), productCr
 
   const { name, sku, price, cost = 0, stock = 0, category_id = null, active = 1, image_url = '', barcodes = [] } = req.body;
 
+  if (!name || !name.trim()) return res.jsonError('Nombre del producto requerido', 400);
+  const parsedPrice = parseFloat(price);
+  if (isNaN(parsedPrice) || parsedPrice < 0) return res.jsonError('Precio inválido', 400);
+
   try {
-    // Transaction to create product + inventory + barcodes
     const result = await prisma.$transaction(async (tx) => {
       const product = await tx.product.create({
         data: {
           store_id: req.user.storeId,
-          name,
+          name: name.trim(),
           sku: sku || null,
           price: parseFloat(price),
           cost: parseFloat(cost),
@@ -124,7 +154,7 @@ router.post('/', auth, requirePermission(PERMISSIONS.PRODUCTS_CREATE), productCr
         }
       });
 
-      if (stock !== 0) {
+      if (Number(stock) !== 0) {
         await tx.inventoryMovement.create({
           data: {
             product_id: product.id,
@@ -139,16 +169,12 @@ router.post('/', auth, requirePermission(PERMISSIONS.PRODUCTS_CREATE), productCr
         for (const code of barcodes) {
           if (code && code.trim()) {
             await tx.productBarcode.create({
-              data: {
-                product_id: product.id,
-                code: code.trim()
-              }
-            });
+              data: { product_id: product.id, code: code.trim() }
+            }).catch(() => { });
           }
         }
       }
 
-      // Return full object with barcodes
       return tx.product.findUnique({
         where: { id: product.id },
         include: { barcodes: true }
@@ -169,15 +195,15 @@ router.put('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_EDIT), productUp
 
   const { name, sku, price, cost, stock, category_id, active, image_url, barcodes } = req.body;
   const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.jsonError('ID inválido', 400);
 
   try {
-    // Verify existence + store
     const current = await prisma.product.findFirst({
-      where: { id, store_id: req.user.storeId }
+      where: { id, store_id: req.user.storeId, deleted_at: null }
     });
     if (!current) return res.jsonError('No encontrado', 404);
 
-    const oldStock = current.stock || 0;
+    const oldStock = Number(current.stock || 0);
     const newStock = stock !== undefined ? parseFloat(stock) : oldStock;
     const diff = newStock - oldStock;
 
@@ -196,7 +222,7 @@ router.put('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_EDIT), productUp
         }
       });
 
-      if (Math.abs(diff) > 0.0001) { // Float comparison safe-ish
+      if (Math.abs(diff) > 0.001) {
         await tx.inventoryMovement.create({
           data: {
             product_id: id,
@@ -208,13 +234,12 @@ router.put('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_EDIT), productUp
       }
 
       if (Array.isArray(barcodes)) {
-        // Replace strategy
         await tx.productBarcode.deleteMany({ where: { product_id: id } });
         for (const code of barcodes) {
           if (code && code.trim()) {
             await tx.productBarcode.create({
               data: { product_id: id, code: code.trim() }
-            });
+            }).catch(() => { });
           }
         }
       }
@@ -233,12 +258,35 @@ router.put('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_EDIT), productUp
 router.delete('/:id', auth, requirePermission(PERMISSIONS.PRODUCTS_DELETE), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    // Verify existence in store
-    const count = await prisma.product.count({ where: { id, store_id: req.user.storeId } });
-    if (count === 0) return res.jsonError('No encontrado', 404);
+    if (isNaN(id)) return res.jsonError('ID inválido', 400);
 
-    await prisma.product.delete({ where: { id } });
-    res.jsonResponse({ ok: true });
+    const product = await prisma.product.findFirst({
+      where: { id, store_id: req.user.storeId, deleted_at: null }
+    });
+    if (!product) return res.jsonError('No encontrado', 404);
+
+    const hasSales = await prisma.saleItem.count({ where: { product_id: id } });
+    if (hasSales > 0) {
+      await prisma.product.update({
+        where: { id },
+        data: {
+          deleted_at: new Date(),
+          deleted_by: req.user.uid,
+          active: 0
+        }
+      });
+      return res.jsonResponse({ ok: true, softDeleted: true, message: 'Producto archivado (tiene ventas asociadas)' });
+    }
+
+    await prisma.product.update({
+      where: { id },
+      data: {
+        deleted_at: new Date(),
+        deleted_by: req.user.uid,
+        active: 0
+      }
+    });
+    res.jsonResponse({ ok: true, softDeleted: false });
   } catch (e) {
     console.error(e);
     res.jsonError('Error al eliminar producto', 500);

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
 const { auth } = require('./auth');
-const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
+const { requirePermission, requireRole, PERMISSIONS } = require('../middleware/permissions');
 const { logger } = require('../logger');
 
 router.get('/', auth, requirePermission(PERMISSIONS.AUDITS_VIEW), async (req, res) => {

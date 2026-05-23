@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../lib/api';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { Card } from '../components/common/Card';
-import { Plus, Trash2, RefreshCw, History, Image as ImageIcon, Search, Edit3, Package, MoreVertical } from 'lucide-react';
+import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { formatMoney } from '../utils/format';
 import { MovementHistoryModal } from '../components/products/MovementHistoryModal';
 import { cn } from '../utils/cn';
@@ -11,31 +11,71 @@ import { cn } from '../utils/cn';
 const ProductsView = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [isModalOpen, setModalOpen] = useState(false);
     const [search, setSearch] = useState('');
+    const [searchTimer, setSearchTimer] = useState(null);
     const [editingProduct, setEditingProduct] = useState(null);
     const [form, setForm] = useState({ name: '', price: '', stock: '999', sku: '' });
     const [saving, setSaving] = useState(false);
     const [kardexProduct, setKardexProduct] = useState(null);
+    const [pagination, setPagination] = useState({ nextCursor: null, hasMore: false, total: 0 });
+    const [allProducts, setAllProducts] = useState([]);
+    const searchRef = useRef(null);
 
-    const loadData = async () => {
-        setLoading(true);
+    const loadData = useCallback(async (cursor) => {
+        if (!cursor) setLoading(true);
+        else setLoadingMore(true);
+
         try {
-            const data = await api('/products');
-            setProducts(data);
+            const params = new URLSearchParams();
+            if (cursor) params.set('cursor', cursor);
+            params.set('take', '50');
+            if (search) params.set('q', search);
+
+            const res = await api(`/products?${params.toString()}`);
+
+            const data = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+            const pag = res.pagination || { nextCursor: null, hasMore: false, total: data.length };
+
+            if (!cursor) {
+                setProducts(data);
+                setAllProducts(data);
+            } else {
+                setProducts(prev => [...prev, ...data]);
+                setAllProducts(prev => [...prev, ...data]);
+            }
+            setPagination(pag);
         } catch (e) {
             console.error(e);
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
+    }, [search]);
+
+    useEffect(() => {
+        loadData(null);
+    }, [loadData]);
+
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setSearch(value);
+        if (searchTimer) clearTimeout(searchTimer);
+        const timer = setTimeout(() => {
+            loadData(null);
+        }, 300);
+        setSearchTimer(timer);
     };
 
     useEffect(() => {
-        loadData();
-    }, []);
+        return () => { if (searchTimer) clearTimeout(searchTimer); };
+    }, [searchTimer]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!form.name.trim()) return;
+
         setSaving(true);
         try {
             const payload = {
@@ -54,7 +94,7 @@ const ProductsView = () => {
             setForm({ name: '', price: '', stock: '999', sku: '' });
             setEditingProduct(null);
             setModalOpen(false);
-            await loadData();
+            await loadData(null);
         } catch (e) {
             alert('Error al guardar: ' + e.message);
         } finally {
@@ -64,35 +104,33 @@ const ProductsView = () => {
 
     const handleEdit = (p) => {
         setEditingProduct(p);
-        setForm({ name: p.name, price: p.price.toString(), stock: p.stock.toString(), sku: p.sku });
+        setForm({ name: p.name, price: p.price.toString(), stock: p.stock.toString(), sku: p.sku || '' });
         setModalOpen(true);
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Eliminar producto?')) return;
+        if (!window.confirm('¿Archivar este producto?')) return;
         try {
             await api(`/products/${id}`, { method: 'DELETE' });
-            await loadData();
+            await loadData(null);
         } catch (e) {
-            alert('Error al eliminar');
+            alert('Error al archivar: ' + e.message);
         }
     };
 
-    const filteredProducts = products.filter(p => 
-        p.name.toLowerCase().includes(search.toLowerCase()) || 
-        p.sku?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredProducts = products;
 
     return (
         <div className="space-y-8 p-2">
-            {/* Header Zen */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-4xl font-black tracking-tighter">Inventario</h1>
-                    <p className="text-[var(--muted-foreground)] font-medium">Gestiona tus productos de forma rápida</p>
+                    <p className="text-[var(--muted-foreground)] font-medium">
+                        {pagination.total > 0 ? `${pagination.total} productos` : 'Gestiona tus productos'}
+                    </p>
                 </div>
                 <div className="flex gap-3 w-full md:w-auto">
-                    <Button variant="ghost" onClick={loadData} className="h-14 px-6 rounded-2xl border-2 border-[var(--border)]">
+                    <Button variant="ghost" onClick={() => loadData(null)} className="h-14 px-6 rounded-2xl border-2 border-[var(--border)]">
                         <RefreshCw className={cn("h-5 w-5", loading && "animate-spin")} />
                     </Button>
                     <Button onClick={() => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); }} className="h-14 px-8 rounded-2xl text-lg font-bold flex-1 md:flex-none shadow-xl shadow-[hsl(var(--primary))/0.2]">
@@ -101,20 +139,19 @@ const ProductsView = () => {
                 </div>
             </div>
 
-            {/* Búsqueda Dominante */}
             <div className="relative group">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-[var(--muted-foreground)] group-focus-within:text-[hsl(var(--primary))] transition-colors" />
                 <input
+                    ref={searchRef}
                     type="text"
                     placeholder="Busca por nombre o código de barras..."
                     className="w-full h-20 pl-16 pr-8 bg-[var(--card)] border-4 border-[var(--border)] rounded-[2rem] text-2xl font-bold focus:outline-none focus:border-[hsl(var(--primary))] transition-all shadow-sm placeholder:text-gray-300"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={handleSearch}
                 />
             </div>
 
-            {/* Galería de Tarjetas */}
-            {loading && products.length === 0 ? (
+            {loading && filteredProducts.length === 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
                         <div key={i} className="aspect-square bg-[var(--bg-muted)] animate-pulse rounded-[2.5rem]" />
@@ -127,59 +164,73 @@ const ProductsView = () => {
                     </div>
                     <div>
                         <h3 className="text-2xl font-black">No hay productos</h3>
-                        <p className="text-[var(--muted-foreground)] font-medium">Comienza agregando tu primer producto en 10 segundos</p>
+                        <p className="text-[var(--muted-foreground)] font-medium">Comienza agregando tu primer producto</p>
                     </div>
                     <Button onClick={() => setModalOpen(true)} className="h-14 px-8 rounded-2xl font-bold">
                         Crear Producto Ahora
                     </Button>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-                    {filteredProducts.map((p) => (
-                        <div 
-                            key={p.id} 
-                            className="group relative bg-[var(--card)] border-4 border-[var(--border)] rounded-[2.5rem] p-6 hover:border-[hsl(var(--primary))] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
-                            onClick={() => handleEdit(p)}
-                        >
-                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="p-2 hover:bg-[var(--bg-muted)] rounded-full text-[var(--muted-foreground)]">
-                                    <Edit3 className="h-5 w-5" />
-                                </button>
-                            </div>
+                <>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                        {filteredProducts.map((p) => (
+                            <div
+                                key={p.id}
+                                className="group relative bg-[var(--card)] border-4 border-[var(--border)] rounded-[2.5rem] p-6 hover:border-[hsl(var(--primary))] hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center text-center cursor-pointer"
+                                onClick={() => handleEdit(p)}
+                            >
+                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button className="p-2 hover:bg-[var(--bg-muted)] rounded-full text-[var(--muted-foreground)]">
+                                        <Edit3 className="h-5 w-5" />
+                                    </button>
+                                </div>
 
-                            <div className="h-28 w-28 bg-[var(--bg-muted)] rounded-[2rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform overflow-hidden border-2 border-[var(--border)]">
-                                {p.image_url ? (
-                                    <img src={p.image_url} alt="" className="h-full w-full object-cover" />
-                                ) : (
-                                    <Package className="h-10 w-10 text-gray-300" />
-                                )}
-                            </div>
+                                <div className="h-28 w-28 bg-[var(--bg-muted)] rounded-[2rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform overflow-hidden border-2 border-[var(--border)]">
+                                    {p.image_url ? (
+                                        <img src={p.image_url} alt="" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <Package className="h-10 w-10 text-gray-300" />
+                                    )}
+                                </div>
 
-                            <h3 className="font-black text-xl mb-1 line-clamp-2 min-h-[3.5rem] leading-tight text-gray-800">
-                                {p.name}
-                            </h3>
-                            
-                            <div className="mt-auto pt-4 space-y-3 w-full">
-                                <p className="text-3xl font-black text-[hsl(var(--primary))] tracking-tighter">
-                                    {formatMoney(p.price)}
-                                </p>
-                                <div className={cn(
-                                    "inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest",
-                                    p.stock <= 5 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
-                                )}>
-                                    Stock: {p.stock}
+                                <h3 className="font-black text-xl mb-1 line-clamp-2 min-h-[3.5rem] leading-tight text-gray-800">
+                                    {p.name}
+                                </h3>
+
+                                <div className="mt-auto pt-4 space-y-3 w-full">
+                                    <p className="text-3xl font-black text-[hsl(var(--primary))] tracking-tighter">
+                                        {formatMoney(p.price)}
+                                    </p>
+                                    <div className={cn(
+                                        "inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest",
+                                        p.stock <= 5 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"
+                                    )}>
+                                        Stock: {Number(p.stock).toFixed(0)}
+                                    </div>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+
+                    {pagination.hasMore && (
+                        <div className="flex justify-center pt-6">
+                            <Button
+                                variant="secondary"
+                                onClick={() => loadData(pagination.nextCursor)}
+                                isLoading={loadingMore}
+                                className="h-14 px-10 text-lg font-bold rounded-2xl border-2"
+                            >
+                                {loadingMore ? 'Cargando...' : `Cargar más productos`}
+                            </Button>
                         </div>
-                    ))}
-                </div>
+                    )}
+                </>
             )}
 
-            {/* Modal de Creación Ultra Rápida */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-md">
                     <Card className="w-full max-w-xl p-10 rounded-[3rem] shadow-2xl border-4 border-[var(--border)] relative animate-in fade-in zoom-in duration-200">
-                        <button 
+                        <button
                             onClick={() => setModalOpen(false)}
                             className="absolute top-8 right-8 p-3 hover:bg-red-50 text-red-500 rounded-2xl transition-all active:scale-90"
                         >
@@ -201,7 +252,7 @@ const ProductsView = () => {
                                     value={form.name}
                                     onChange={e => setForm({ ...form, name: e.target.value })}
                                     required
-                                    autoFocus
+                                    autoFocus={!editingProduct}
                                     className="h-20 text-2xl font-bold px-8 rounded-[1.5rem]"
                                 />
                             </div>
@@ -216,6 +267,7 @@ const ProductsView = () => {
                                             placeholder="0.00"
                                             type="number"
                                             step="0.01"
+                                            min="0"
                                             value={form.price}
                                             onChange={e => setForm({ ...form, price: e.target.value })}
                                             required
@@ -228,6 +280,7 @@ const ProductsView = () => {
                                         className="h-20 text-3xl font-black px-8 rounded-[1.5rem]"
                                         placeholder="999"
                                         type="number"
+                                        min="0"
                                         value={form.stock}
                                         onChange={e => setForm({ ...form, stock: e.target.value })}
                                     />
@@ -236,17 +289,17 @@ const ProductsView = () => {
 
                             {editingProduct && (
                                 <div className="pt-4 flex justify-between items-center">
-                                    <Button 
-                                        type="button" 
-                                        variant="ghost" 
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
                                         className="text-red-500 hover:bg-red-50 font-bold"
                                         onClick={() => handleDelete(editingProduct.id)}
                                     >
-                                        <Trash2 className="h-5 w-5 mr-2" /> Eliminar Producto
+                                        <Trash2 className="h-5 w-5 mr-2" /> Archivar Producto
                                     </Button>
-                                    <Button 
-                                        type="button" 
-                                        variant="ghost" 
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
                                         className="text-blue-500 hover:bg-blue-50 font-bold"
                                         onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}
                                     >
@@ -255,9 +308,10 @@ const ProductsView = () => {
                                 </div>
                             )}
 
-                            <Button 
-                                type="submit" 
-                                isLoading={saving} 
+                            <Button
+                                type="submit"
+                                isLoading={saving}
+                                disabled={!form.name.trim()}
                                 className="w-full h-24 text-2xl font-black rounded-[2rem] shadow-xl shadow-[hsl(var(--primary))/0.2]"
                             >
                                 {editingProduct ? 'Guardar Cambios' : 'Guardar y Vender'}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAppStore } from '../store/useAppStore';
+import { useUserStore } from '../store/userStore';
 import { api } from '../lib/api';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
@@ -14,7 +14,7 @@ const Login = () => {
     const [step, setStep] = useState('login'); // login | select-store
     const [stores, setStores] = useState([]);
     const [tempToken, setTempToken] = useState(null);
-    const login = useAppStore(state => state.login);
+    const login = useUserStore(state => state.login);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {

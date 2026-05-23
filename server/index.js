@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const client = require('prom-client');
 const { logger } = require('./logger');
@@ -21,20 +20,22 @@ const reportsRouter = require('./routes/reports');
 const auditsRouter = require('./routes/audits');
 const systemRouter = require('./routes/system');
 
+const { apiLimiter, cashLimiter } = require('./middleware/rateLimiter');
+
 const app = express();
 app.use(helmet());
 app.use(cors({ origin: allowedOrigins, methods: ['GET', 'POST', 'PUT', 'DELETE'], credentials: false }));
 app.use(express.json());
+
 const { responseHandler } = require('./middleware/responseHandler');
 app.use(responseHandler);
 app.use(morgan('combined'));
-app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 
-// Métricas Prometheus
+// Metrics
 client.collectDefaultMetrics({ prefix: 'pos_' });
 const httpRequestDuration = new client.Histogram({
   name: 'pos_http_request_duration_seconds',
-  help: 'Duración de solicitudes HTTP',
+  help: 'HTTP request duration in seconds',
   labelNames: ['method', 'route', 'status'],
   buckets: [0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 5]
 });
@@ -48,8 +49,12 @@ app.use((req, res, next) => {
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, time: new Date().toISOString() });
 });
+
+app.use('/api/auth', apiLimiter);
+app.use('/api/cash', cashLimiter);
+app.use('/api/', apiLimiter);
 
 app.use('/api/products', productsRouter);
 app.use('/api/categories', categoriesRouter);
@@ -81,15 +86,13 @@ app.get('/api/metrics', async (req, res) => {
   }
 });
 
-// Reportes centralizados en routes/reports
-
 const { errorHandler } = require('./middleware/errorHandler');
 app.use((req, res, next) => next());
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 ensureConfig();
-// Start Cron Jobs
+
 const { startCron } = require('./cron');
 startCron();
 

@@ -1,6 +1,5 @@
-const API = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Simple delay helper
 const delay = ms => new Promise(r => setTimeout(r, ms));
 
 export async function api(path, options = {}) {
@@ -12,9 +11,8 @@ export async function api(path, options = {}) {
   const headers = token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders;
 
   try {
-    res = await fetch(`${API}${path}`, { headers, ...fetchOptions });
+    res = await fetch(`${API_BASE}${path}`, { headers, ...fetchOptions });
 
-    // Retry on 5xx or Network Error (if thrown)
     if (!res.ok && res.status >= 500 && retries > 0) {
       throw new Error(`Server Error ${res.status}`);
     }
@@ -24,7 +22,6 @@ export async function api(path, options = {}) {
       return api(path, { ...options, retries: retries - 1, backoff: backoff * 2 });
     }
 
-    // Dispatch Global Error
     const msg = e.message === 'Failed to fetch' ? 'Sin conexión al servidor' : e.message;
     try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })); } catch { }
     throw e;
@@ -44,10 +41,10 @@ export async function api(path, options = {}) {
       msg = await res.text();
     }
 
-    // 401: Token expired?
     if (res.status === 401) {
-      // Optional: Redirect to login or dispatch auth-error
       try { window.dispatchEvent(new CustomEvent('auth-error')); } catch { }
+    } else if (res.status === 409) {
+      throw new Error(msg);
     } else {
       try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })); } catch { }
     }
@@ -58,38 +55,66 @@ export async function api(path, options = {}) {
   return (json.data !== undefined) ? json.data : json;
 }
 
-// GET with retry default
 export const get = (path) => api(path, { retries: 2 });
 
-// Export helpers using retry for reads
-export async function getProducts() { return get('/products'); }
-export async function getCustomers() { return get('/customers'); }
-export async function getProductBySku(sku) {
-  const list = await getProducts();
-  return list.find(x => String(x.sku || '').toLowerCase() === String(sku || '').toLowerCase()) || null;
+export async function getProducts(cursor, take = 50) {
+  const params = new URLSearchParams();
+  if (cursor) params.set('cursor', cursor);
+  if (take) params.set('take', take);
+  const qs = params.toString();
+  return get(`/products${qs ? '?' + qs : ''}`);
 }
-export async function createSale(payload) { return api('/sales', { method: 'POST', body: JSON.stringify(payload) }); }
-export async function openCash(opening_balance = 0) { return api('/cash/open', { method: 'POST', body: JSON.stringify({ opening_balance }) }); }
-export async function closeCash() { return api('/cash/close', { method: 'POST' }); }
+
+export async function getCustomers() { return get('/customers'); }
+
+export async function getProductBySku(sku) {
+  try {
+    return await api(`/products/scan/${encodeURIComponent(sku)}`);
+  } catch {
+    return null;
+  }
+}
+
+export async function createSale(payload) {
+  return api('/sales', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: payload.headers || {}
+  });
+}
+
+export async function openCash(opening_balance = 0) {
+  return api('/cash/open', { method: 'POST', body: JSON.stringify({ opening_balance }) });
+}
+
+export async function closeCash(counted_cash) {
+  return api('/cash/close', { method: 'POST', body: JSON.stringify({ counted_cash }) });
+}
+
 export async function getCashSession() { return get('/cash/status'); }
 export async function getCashMovements() { return get('/cash/movements'); }
+export async function getCashHistory() { return get('/cash/history'); }
+
 export async function getReport(kind, params = {}) {
   const p = new URLSearchParams(params);
   const qs = p.toString();
   const base = qs ? `?${qs}` : '';
   return get(`/reports/${kind}${base}`);
 }
+
 export async function getAudits(params = {}) {
   const p = new URLSearchParams(params);
   const qs = p.toString();
   const base = qs ? `?${qs}` : '';
   return get(`/audits${base}`);
 }
+
 export async function getAuditEvents() { return get('/audits/events'); }
+
 export async function getMetrics() {
   const token = localStorage.getItem('token') || '';
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API}/metrics`, { headers });
+  const res = await fetch(`${API_BASE}/metrics`, { headers });
   if (!res.ok) throw new Error('Error al obtener métricas');
   return res.text();
 }

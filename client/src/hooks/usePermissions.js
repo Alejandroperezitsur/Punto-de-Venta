@@ -1,4 +1,4 @@
-import { useAppStore } from '../store/useAppStore';
+import { useUserStore } from '../store/userStore';
 
 /**
  * Permission constants matching backend
@@ -72,7 +72,7 @@ const ROLE_PERMISSIONS = {
  * Hook to check user permissions
  */
 export const usePermissions = () => {
-    const user = useAppStore(state => state.user);
+    const user = useUserStore(state => state.user);
     const role = user?.role || 'cajero';
 
     const hasPermission = (permission) => {

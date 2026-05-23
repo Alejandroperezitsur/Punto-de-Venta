@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Sun, Moon, Bell, Search, Menu } from 'lucide-react';
-import { useAppStore } from '../../store/useAppStore';
+import { useUserStore } from '../../store/userStore';
 import { Button } from '../common/Button';
+import { ConnectionStatus } from '../common/ConnectionStatus';
 import { api } from '../../lib/api';
 
 export const Topbar = () => {
-    const { theme, toggleTheme, toggleSidebar } = useAppStore();
+    const { theme, toggleTheme, toggleSidebar } = useUserStore();
     const [cashStatus, setCashStatus] = useState(null);
 
     useEffect(() => {
@@ -56,6 +57,8 @@ export const Topbar = () => {
                         Caja Cerrada
                     </span>
                 )}
+
+                <ConnectionStatus />
 
                 <div className="w-px h-6 bg-[hsl(var(--border))] mx-2" />
 

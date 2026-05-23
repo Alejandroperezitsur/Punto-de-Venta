@@ -8,6 +8,10 @@ import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { FeedbackWidget } from '../common/FeedbackWidget';
 import { AiAssistant } from '../ai/AiAssistant';
 
+const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+
 export const MainLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -28,8 +32,8 @@ export const MainLayout = ({ children }) => {
                 <main className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth">
                     <motion.div
                         key={location.pathname}
-                        initial={{ opacity: 0, scale: 0.98, y: 5 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.98, y: 5 }}
+                        animate={prefersReducedMotion ? {} : { opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
                         className="max-w-[1600px] mx-auto h-full"
                     >
