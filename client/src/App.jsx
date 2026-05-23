@@ -16,7 +16,7 @@ import { Roadmap } from './pages/Roadmap';
 
 // Legacy Views (kept as is for now, assuming they work with legacy UI components)
 // We might need to handle their dependencies if they break.
-const Reportes = React.lazy(() => import('./views/Reportes'));
+const MyBusiness = React.lazy(() => import('./views/Reportes'));
 const BusinessSettings = React.lazy(() => import('./views/BusinessSettings'));
 const CashControlView = React.lazy(() => import('./views/CashControl'));
 const UsersView = React.lazy(() => import('./views/Users'));
@@ -104,7 +104,7 @@ function App() {
 
                     <Route path="/reportes" element={
                         <RequireAuth requiredPermission="reports:view">
-                            <Reportes />
+                            <MyBusiness />
                         </RequireAuth>
                     } />
 

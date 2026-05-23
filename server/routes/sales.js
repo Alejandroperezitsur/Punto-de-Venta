@@ -4,22 +4,45 @@ const prisma = require('../db');
 const { auth } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 const { createSale, deleteSaleWithReversal } = require('../services/salesService');
+const { idempotency } = require('../middleware/idempotency');
+
+// Pagination defaults
+const PAGE_SIZE = 50;
 
 router.get('/', auth, requirePermission(PERMISSIONS.SALES_VIEW), async (req, res) => {
   try {
+    const cursor = req.query.cursor ? parseInt(req.query.cursor) : undefined;
+    const take = Math.min(parseInt(req.query.take) || PAGE_SIZE, 200);
+
     const sales = await prisma.sale.findMany({
       where: { store_id: req.user.storeId },
       orderBy: { id: 'desc' },
+      take: take + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: { customer: true }
     });
 
-    // Format to match frontend expectations if necessary
-    const formatted = sales.map(s => ({
+    const hasMore = sales.length > take;
+    const nextCursor = hasMore ? sales[sales.length - 1].id : null;
+    const data = hasMore ? sales.slice(0, take) : sales;
+
+    const formatted = data.map(s => ({
       ...s,
-      customer_name: s.customer?.name
+      customer_name: s.customer?.name,
+      total: Number(s.total),
+      subtotal: Number(s.subtotal),
+      tax: Number(s.tax),
+      discount: Number(s.discount)
     }));
 
-    res.jsonResponse(formatted);
+    res.jsonResponse({
+      data: formatted,
+      pagination: {
+        nextCursor,
+        hasMore,
+        total: await prisma.sale.count({ where: { store_id: req.user.storeId } })
+      }
+    });
   } catch (e) {
     console.error(e);
     res.jsonError('Error al obtener ventas', 500);
@@ -29,35 +52,39 @@ router.get('/', auth, requirePermission(PERMISSIONS.SALES_VIEW), async (req, res
 router.get('/:id', auth, requirePermission(PERMISSIONS.SALES_VIEW), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.jsonError('ID inválido', 400);
+
     const sale = await prisma.sale.findFirst({
       where: { id, store_id: req.user.storeId },
       include: {
-        items: {
-          include: { product: true }
-        },
-        payments: {
-          include: { user: true }
-        },
+        items: { include: { product: true } },
+        payments: { include: { user: true } },
         customer: true
       }
     });
 
     if (!sale) return res.jsonError('No encontrado', 404);
 
-    // Format legacy response structure
     const response = {
       ...sale,
       customer_name: sale.customer?.name || null,
       customer_phone: sale.customer?.phone || null,
       customer_email: sale.customer?.email || null,
       customer_rfc: sale.customer?.rfc || null,
+      total: Number(sale.total),
+      subtotal: Number(sale.subtotal),
+      tax: Number(sale.tax),
+      discount: Number(sale.discount),
       items: sale.items.map(i => ({
         ...i,
-        product_name: i.product?.name
+        quantity: Number(i.quantity),
+        unit_price: Number(i.unit_price),
+        line_total: Number(i.line_total),
+        product_name: i.product?.name || i.product_name
       })),
       payments: sale.payments.map(p => ({
         method: p.method,
-        amount: p.amount,
+        amount: Number(p.amount),
         username: p.user?.username
       }))
     };
@@ -69,8 +96,13 @@ router.get('/:id', auth, requirePermission(PERMISSIONS.SALES_VIEW), async (req, 
   }
 });
 
-router.post('/', auth, requirePermission(PERMISSIONS.SALES_CREATE), async (req, res, next) => {
+router.post('/', auth, requirePermission(PERMISSIONS.SALES_CREATE), idempotency, async (req, res, next) => {
   const { customer_id = null, items = [], discount = 0, payment_method = 'cash', payments = null } = req.body;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.jsonError('Se requiere al menos un producto', 400);
+  }
+
   try {
     const userId = req.user.uid;
     const storeId = req.user.storeId;
@@ -82,11 +114,14 @@ router.post('/', auth, requirePermission(PERMISSIONS.SALES_CREATE), async (req, 
       payment_method,
       payments,
       userId,
-      storeId
+      storeId,
+      idempotencyKey: req.idempotencyKey || null
     });
 
     res.jsonResponse(result, { status: 201 });
   } catch (e) {
+    if (e.status === 409) return res.jsonError(e.message, 409);
+    if (e.status === 400) return res.jsonError(e.message, 400);
     next(e);
   }
 });
@@ -94,6 +129,8 @@ router.post('/', auth, requirePermission(PERMISSIONS.SALES_CREATE), async (req, 
 router.delete('/:id', auth, requirePermission(PERMISSIONS.SALES_DELETE), async (req, res) => {
   try {
     const sale_id = parseInt(req.params.id);
+    if (isNaN(sale_id)) return res.jsonError('ID inválido', 400);
+
     const ok = await deleteSaleWithReversal(sale_id, req.user.uid, req.user.storeId);
     if (!ok) return res.jsonError('No encontrado o no pertenece a esta tienda', 404);
     res.jsonResponse({ ok });
@@ -103,7 +140,6 @@ router.delete('/:id', auth, requirePermission(PERMISSIONS.SALES_DELETE), async (
 });
 
 router.post('/reset-demo', auth, requirePermission(PERMISSIONS.SALES_DELETE), async (req, res) => {
-  // Only Admin can reset demo
   if (req.user.role !== 'admin') return res.jsonError('No autorizado', 403);
 
   try {

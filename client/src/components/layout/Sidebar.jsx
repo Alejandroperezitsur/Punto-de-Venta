@@ -110,7 +110,7 @@ export const Sidebar = () => {
                     {!isCollapsed && "Caja"}
                 </NavItem>
                 <NavItem to="/reportes" icon={BarChart3} show={hasPermission(PERMISSIONS.REPORTS_VIEW)}>
-                    {!isCollapsed && "Reportes"}
+                    {!isCollapsed && "Mi Negocio"}
                 </NavItem>
                 <NavItem to="/usuarios" icon={Shield} show={hasPermission(PERMISSIONS.USERS_VIEW)}>
                     {!isCollapsed && "Usuarios"}

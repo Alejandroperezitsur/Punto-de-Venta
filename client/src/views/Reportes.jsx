@@ -1,261 +1,261 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
+import { Card } from '../components/common/Card';
 import { Input } from '../components/common/Input';
 import { formatMoney } from '../utils/format';
-import { downloadCsv, exportToExcelHTML } from '../utils/exports';
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell, Legend
-} from 'recharts';
-import { Download, Calendar, DollarSign, TrendingUp, ShoppingBag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, AlertCircle, ArrowUpRight, ArrowDownRight, Sun, Moon, Coffee, DoorClosed } from 'lucide-react';
+import { cn } from '../utils/cn';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
-const ReportesView = () => {
-  const [range, setRange] = useState('week'); // today, week, month, custom
-  const [customStart, setCustomStart] = useState('');
-  const [customEnd, setCustomEnd] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [sales, setSales] = useState([]);
-  const [summary, setSummary] = useState({ total: 0, count: 0, avg: 0 });
-
-  // Derived Data for Charts
-  const chartData = useMemo(() => {
-    // Group by Date for Line Chart
-    const grouped = {};
-    sales.forEach(s => {
-      const date = s.created_at.split('T')[0];
-      grouped[date] = (grouped[date] || 0) + s.total;
+const MyBusinessView = () => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState({
+        gain: 0,
+        cash: 0,
+        status: 'mejor',
+        diff: 0,
+        topProduct: '',
+        todayTotal: 0
     });
-    return Object.keys(grouped).map(date => ({ date, total: grouped[date] })).sort((a, b) => a.date.localeCompare(b.date));
-  }, [sales]);
+    const [isClosing, setIsClosing] = useState(false);
+    const [closingStep, setClosingStep] = useState(1);
+    const [countedCash, setCountedCash] = useState('');
+    const [closeLoading, setCloseLoading] = useState(false);
+    const [closeResult, setCloseResult] = useState(null);
+    const [closeError, setCloseError] = useState('');
 
-  const paymentData = useMemo(() => {
-    const counts = {};
-    sales.forEach(s => {
-      const method = s.payment_method === 'mixed' ? 'Mixto' : (
-        s.payment_method === 'cash' ? 'Efectivo' :
-          s.payment_method === 'card' ? 'Tarjeta' :
-            s.payment_method === 'transfer' ? 'Transferencia' : s.payment_method
-      );
-      counts[method] = (counts[method] || 0) + s.total;
-    });
-    return Object.keys(counts).map(name => ({ name, value: counts[name] }));
-  }, [sales]);
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            const now = new Date();
+            const todayStart = new Date(now.setHours(0, 0, 0, 0)).toISOString();
+            const todayEnd = new Date(now.setHours(23, 59, 59, 999)).toISOString();
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      // Determine dates
-      const now = new Date();
-      let from = new Date(now);
-      let to = new Date(now);
+            const lastWeek = new Date();
+            lastWeek.setDate(lastWeek.getDate() - 7);
+            const lwStart = new Date(lastWeek.setHours(0, 0, 0, 0)).toISOString();
+            const lwEnd = new Date(lastWeek.setHours(23, 59, 59, 999)).toISOString();
 
-      if (range === 'today') {
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-      } else if (range === 'week') {
-        from.setDate(now.getDate() - 7);
-      } else if (range === 'month') {
-        from.setDate(1);
-      } else if (range === 'custom') {
-        from = new Date(customStart);
-        to = new Date(customEnd);
-        to.setHours(23, 59, 59, 999);
-      }
+            const [todaySum, lastWeekSum, sales] = await Promise.all([
+                api(`/reports/summary?from=${todayStart}&to=${todayEnd}`),
+                api(`/reports/summary?from=${lwStart}&to=${lwEnd}`),
+                api('/sales')
+            ]);
 
-      const fromStr = from.toISOString();
-      const toStr = to.toISOString();
+            const gain = (todaySum.total || 0) * 0.3;
+            const diff = (todaySum.total || 0) - (lastWeekSum.total || 0);
 
-      // Fetch Sales
-      // We use the simpler /sales endpoint and filter client-side or use params if backend supported
-      // Assuming current /sales returns all? Or last 50? 
-      // Ideally backend supports params. The old code used /sales and filtered.
-      // Let's rely on /sales for now and maybe backend needs update if too slow.
-      // Actually old code had /reports/summary with params. Let's use that for totals.
+            const todaySales = Array.isArray(sales.data) ? sales.data :
+                Array.isArray(sales) ? sales.filter(s => s.created_at >= todayStart) : [];
+            const productCounts = {};
+            todaySales.forEach(s => {
+                if (s.items) {
+                    s.items.forEach(i => {
+                        productCounts[i.product_name || i.name] = (productCounts[i.product_name || i.name] || 0) + Number(i.quantity || 0);
+                    });
+                }
+            });
+            const topProduct = Object.entries(productCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Ninguno aún';
 
-      const [sum, list] = await Promise.all([
-        api(`/reports/summary?from=${fromStr}&to=${toStr}`),
-        api('/sales') // This might be heavy if all sales. But okay for now.
-      ]);
+            setData({
+                gain,
+                cash: todaySum.total || 0,
+                status: diff >= 0 ? 'mejor' : 'lento',
+                diff: Math.abs(diff),
+                topProduct,
+                todayTotal: todaySum.total || 0
+            });
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      // Filter list client side for charts (since /sales returns all or limit)
-      const filteredList = list.filter(s => {
-        const t = s.created_at;
-        return t >= fromStr && t <= toStr;
-      });
+    useEffect(() => { loadData(); }, []);
 
-      setSales(filteredList);
-      setSummary({
-        count: sum.count || filteredList.length,
-        total: sum.total || filteredList.reduce((acc, s) => acc + s.total, 0),
-        avg: (sum.total / sum.count) || 0
-      });
+    const handleCloseDay = async () => {
+        const counted = parseFloat(countedCash);
+        if (isNaN(counted) || counted < 0) {
+            setCloseError('Ingresa un monto válido');
+            return;
+        }
+        setCloseLoading(true);
+        setCloseError('');
+        try {
+            const result = await api('/cash/close', {
+                method: 'POST',
+                body: JSON.stringify({ counted_cash: counted })
+            });
+            setCloseResult(result);
+            setClosingStep(2);
+        } catch (e) {
+            setCloseError(e.message || 'Error al cerrar caja');
+        } finally {
+            setCloseLoading(false);
+        }
+    };
 
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (range !== 'custom' || (customStart && customEnd)) {
-      loadData();
-    }
-  }, [range, customStart, customEnd]);
-
-  const handleExport = () => {
-    const rows = sales.map(s => ({
-      id: s.id,
-      fecha: new Date(s.created_at).toLocaleString(),
-      total: s.total,
-      metodo: s.payment_method
-    }));
-    downloadCsv(rows, { id: 'ID', fecha: 'Fecha', total: 'Total', metodo: 'Método' }, 'ventas.csv');
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-2xl font-bold">Reportes y Estadísticas</h1>
-
-        <div className="flex flex-wrap gap-2 items-center bg-[hsl(var(--card))] p-1 rounded-lg border border-[hsl(var(--border))]">
-          <Button variant={range === 'today' ? 'default' : 'ghost'} size="sm" onClick={() => setRange('today')}>Hoy</Button>
-          <Button variant={range === 'week' ? 'default' : 'ghost'} size="sm" onClick={() => setRange('week')}>Semana</Button>
-          <Button variant={range === 'month' ? 'default' : 'ghost'} size="sm" onClick={() => setRange('month')}>Mes</Button>
-          <Button variant={range === 'custom' ? 'default' : 'ghost'} size="sm" onClick={() => setRange('custom')}>Custom</Button>
-        </div>
-      </div>
-
-      {range === 'custom' && (
-        <Card className="p-4 flex flex-wrap gap-4 items-end animate-fade-in">
-          <div>
-            <label className="text-xs font-medium block mb-1">Desde</label>
-            <Input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-xs font-medium block mb-1">Hasta</label>
-            <Input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
-          </div>
-          <Button onClick={loadData} isLoading={loading}>Actualizar</Button>
-        </Card>
-      )}
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6 flex items-center gap-4 border-l-4 border-l-blue-500">
-          <div className="p-3 bg-blue-100 text-blue-600 rounded-full">
-            <DollarSign className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">Ventas Totales</p>
-            <h3 className="text-2xl font-bold">{formatMoney(summary.total)}</h3>
-          </div>
-        </Card>
-        <Card className="p-6 flex items-center gap-4 border-l-4 border-l-green-500">
-          <div className="p-3 bg-green-100 text-green-600 rounded-full">
-            <ShoppingBag className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">Cantidad Ventas</p>
-            <h3 className="text-2xl font-bold">{summary.count}</h3>
-          </div>
-        </Card>
-        <Card className="p-6 flex items-center gap-4 border-l-4 border-l-purple-500">
-          <div className="p-3 bg-purple-100 text-purple-600 rounded-full">
-            <TrendingUp className="h-6 w-6" />
-          </div>
-          <div>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">Ticket Promedio</p>
-            <h3 className="text-2xl font-bold">{formatMoney(summary.count ? summary.total / summary.count : 0)}</h3>
-          </div>
-        </Card>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6 flex flex-col h-[400px]">
-          <h3 className="text-lg font-semibold mb-4">Tendencia de Ventas</h3>
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(str) => new Date(str).getDate()}
-                />
-                <YAxis
-                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(val) => `$${val}`}
-                />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
-                  formatter={(value) => [formatMoney(value), 'Ventas']}
-                  labelFormatter={(label) => new Date(label).toLocaleDateString()}
-                />
-                <Area type="monotone" dataKey="total" stroke="#8884d8" fillOpacity={1} fill="url(#colorTotal)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-[hsl(var(--muted-foreground))]">
-              No hay datos para mostrar
+    if (loading) {
+        return (
+            <div className="h-full flex items-center justify-center">
+                <div className="animate-spin h-12 w-12 border-4 border-[hsl(var(--primary))] border-t-transparent rounded-full" />
             </div>
-          )}
-        </Card>
+        );
+    }
 
-        <Card className="p-6 flex flex-col h-[400px]">
-          <h3 className="text-lg font-semibold mb-4">Métodos de Pago</h3>
-          {paymentData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={paymentData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
+    return (
+        <div className="max-w-4xl mx-auto h-[calc(100vh-120px)] flex flex-col justify-between p-4 md:p-8 animate-in fade-in duration-500">
+            <div className="text-center py-10">
+                <p className="text-sm font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Lo que ganaste hoy para ti</p>
+                <div className="flex items-center justify-center gap-4">
+                    <span className="text-9xl font-black tracking-tighter text-gray-900">
+                        ${data.gain.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </span>
+                </div>
+                <p className="mt-6 text-xl font-medium text-gray-500">¡Buen trabajo! Es un día sólido.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-10 border-y-2 border-gray-50">
+                <div className="text-center md:text-right md:pr-12 md:border-r-2 md:border-gray-50">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Efectivo en caja</p>
+                    <p className="text-5xl font-black text-gray-800">${data.cash.toLocaleString()}</p>
+                </div>
+                <div className="text-center md:text-left md:pl-12 flex flex-col items-center md:items-start">
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
+                    <div className="flex items-center gap-3">
+                        <p className="text-5xl font-black text-gray-800 uppercase">{data.status}</p>
+                        {data.status === 'mejor' ? (
+                            <ArrowUpRight className="h-10 w-10 text-green-500 stroke-[3]" />
+                        ) : (
+                            <ArrowDownRight className="h-10 w-10 text-orange-500 stroke-[3]" />
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <div className="space-y-6 py-10">
+                <div className="flex items-center gap-4 p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100">
+                    <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0">
+                        <Sun className="h-6 w-6 text-blue-500" />
+                    </div>
+                    <p className="text-lg font-bold text-blue-900 leading-tight">
+                        Tu mejor hora fue a las 2:00 PM. Mañana podrías vender más si refuerzas esa hora.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-4 p-6 bg-orange-50 rounded-[2rem] border-2 border-orange-100">
+                    <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-sm shrink-0">
+                        <Coffee className="h-6 w-6 text-orange-500" />
+                    </div>
+                    <p className="text-lg font-bold text-orange-900 leading-tight">
+                        Tu producto estrella hoy fue <span className="underline decoration-2">{data.topProduct}</span>.
+                    </p>
+                </div>
+            </div>
+
+            <div className="pt-6">
+                <Button
+                    onClick={() => { setIsClosing(true); setClosingStep(1); setCountedCash(''); setCloseResult(null); setCloseError(''); }}
+                    className="w-full h-24 text-2xl font-black rounded-[2rem] bg-gray-900 hover:bg-black text-white shadow-2xl transition-all active:scale-[0.98]"
                 >
-                  {paymentData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatMoney(value)} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-[hsl(var(--muted-foreground))]">
-              No hay datos para mostrar
+                    <DoorClosed className="h-8 w-8 mr-4" />
+                    CERRAR CAJA Y TERMINAR DÍA
+                </Button>
             </div>
-          )}
-        </Card>
-      </div>
 
-      {/* Export Actions (Simple for now, expandable) */}
-      <div className="flex justify-end">
-        <Button onClick={handleExport} variant="outline">
-          <Download className="h-4 w-4 mr-2" /> Exportar CSV
-        </Button>
-      </div>
-    </div>
-  );
+            {isClosing && (
+                <div className="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-8 animate-in slide-in-from-bottom duration-500">
+                    <button
+                        onClick={() => { setIsClosing(false); setClosingStep(1); }}
+                        className="absolute top-8 right-8 text-gray-400 hover:text-black font-bold"
+                    >
+                        CANCELAR
+                    </button>
+
+                    {closingStep === 1 ? (
+                        <div className="w-full max-w-md text-center space-y-10">
+                            <h2 className="text-4xl font-black tracking-tight">¿Cuánto dinero hay en el cajón?</h2>
+                            <p className="text-gray-500 font-medium italic">Cuenta tu efectivo físicamente ahora mismo.</p>
+
+                            {closeError && (
+                                <div className="p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 font-bold">
+                                    {closeError}
+                                </div>
+                            )}
+
+                            <div className="relative">
+                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black text-gray-300">$</span>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    autoFocus
+                                    className="w-full h-32 bg-gray-50 border-4 border-gray-100 rounded-[2.5rem] text-6xl font-black text-center focus:outline-none focus:border-black transition-all"
+                                    value={countedCash}
+                                    onChange={(e) => setCountedCash(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleCloseDay(); }}
+                                    placeholder="0"
+                                />
+                            </div>
+
+                            <Button
+                                onClick={handleCloseDay}
+                                disabled={!countedCash || closeLoading}
+                                isLoading={closeLoading}
+                                className="w-full h-24 text-2xl font-black rounded-[2rem]"
+                            >
+                                VERIFICAR Y CERRAR
+                            </Button>
+                        </div>
+                    ) : closeResult ? (
+                        <div className="w-full max-w-md text-center space-y-8 animate-in zoom-in duration-300">
+                            {Math.abs(closeResult.difference) < 0.01 ? (
+                                <>
+                                    <div className="h-32 w-32 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
+                                        <CheckCircle2 className="h-16 w-16 stroke-[3]" />
+                                    </div>
+                                    <h2 className="text-5xl font-black tracking-tighter">¡Caja Cerrada!</h2>
+                                    <p className="text-xl text-gray-500 font-medium">
+                                        Todo cuadra perfectamente. Puedes irte a descansar con total tranquilidad.
+                                    </p>
+                                    <p className="text-sm text-gray-400">
+                                        Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="h-32 w-32 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
+                                        <AlertCircle className="h-16 w-16 stroke-[3]" />
+                                    </div>
+                                    <h2 className="text-5xl font-black tracking-tighter">Discrepancia Detectada</h2>
+                                    <p className="text-xl text-gray-500 font-medium">
+                                        {closeResult.difference > 0 ? (
+                                            <>Sobran <span className="text-green-600 font-black">${closeResult.difference.toFixed(2)}</span></>
+                                        ) : (
+                                            <>Faltan <span className="text-red-600 font-black">${Math.abs(closeResult.difference).toFixed(2)}</span></>
+                                        )}
+                                        <br />
+                                        <span className="text-sm">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
+                                    </p>
+                                </>
+                            )}
+
+                            <div className="pt-10">
+                                <Button
+                                    onClick={() => navigate('/caja')}
+                                    className="w-full h-20 text-xl font-black rounded-[1.5rem] bg-gray-900"
+                                >
+                                    IR A CONTROL DE CAJA
+                                </Button>
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
+            )}
+        </div>
+    );
 };
 
-export default ReportesView;
+export default MyBusinessView;

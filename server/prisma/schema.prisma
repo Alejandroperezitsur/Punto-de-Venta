@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -16,15 +16,14 @@ model Store {
   rfc          String?
   fiscal_name  String?
   tax_regime   String?
-  
-  // Internationalization & White-Label
+
   reseller_id  Int?      @default(1)
   country      String?   @default("MX")
   currency     String?   @default("MXN")
   timezone     String?   @default("America/Mexico_City")
 
   reseller     Reseller? @relation(fields: [reseller_id], references: [id])
-  
+
   users        UserStore[]
   products     Product[]
   sales        Sale[]
@@ -32,10 +31,14 @@ model Store {
   customers    Customer[]
   categories   Category[]
   settings     StoreSetting[]
-  audits       Audit[]
-  cashSessions CashSession[]
-  licenses     License[]
-  
+  audits        Audit[]
+  cashSessions  CashSession[]
+  licenses      License[]
+  supportTickets SupportTicket[]
+  subscriptions Subscription[]
+  aiInsights    AiInsight[]
+  aiConfigs     AiConfig[]
+
   @@map("stores")
 }
 
@@ -47,11 +50,13 @@ model User {
   is_super_admin      Boolean   @default(false)
   created_at          DateTime  @default(now())
   last_login          DateTime?
-  
+
   stores              UserStore[]
   cash_sessions       CashSession[]
   receivable_payments ReceivablePayment[]
   audits              Audit[]
+  supportTickets      SupportTicket[]
+  ticketMessages      TicketMessage[]
 
   @@map("users")
 }
@@ -61,7 +66,7 @@ model UserStore {
   user_id   Int
   store_id  Int
   role      String   // admin, supervisor, cajero
-  
+
   user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   store     Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
 
@@ -80,8 +85,6 @@ model StoreSetting {
   @@map("store_settings")
 }
 
-// Maps to existing 'settings' for backward compatibility or global settings
-// We might migrate data from 'settings' to 'store_settings'
 model GlobalSetting {
   key   String @id
   value String
@@ -95,12 +98,12 @@ model Category {
   name        String
   image_url   String?
   parent_id   Int?
-  
+
   store       Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
   parent      Category? @relation("CategoryHierarchy", fields: [parent_id], references: [id])
   children    Category[] @relation("CategoryHierarchy")
   products    Product[]
-  
+
   @@unique([store_id, name])
   @@map("categories")
 }
@@ -110,16 +113,19 @@ model Product {
   store_id    Int       @default(1)
   name        String
   sku         String?
-  price       Float
-  cost        Float?    @default(0)
-  stock       Float?    @default(0)
+  price       Decimal   @default(0)
+  cost        Decimal   @default(0)
+  stock       Decimal   @default(0)
   category_id Int?
   image_url   String?
   active      Int?      @default(1)
-  
-  // Fiscal info could be per product (e.g. tax rate override)
-  tax_rate    Float?    @default(0.16) // Default IVA 16%
+
+  tax_rate    Decimal?  @default(0.16)
   tax_exempt  Boolean   @default(false)
+
+  // Soft delete
+  deleted_at  DateTime?
+  deleted_by  Int?
 
   store       Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
   category    Category? @relation(fields: [category_id], references: [id])
@@ -127,10 +133,10 @@ model Product {
   sale_items  SaleItem[]
   barcodes    ProductBarcode[]
 
-  // SKU constraint: unique per store
   @@unique([store_id, sku])
   @@index([name])
   @@index([store_id, active])
+  @@index([store_id, deleted_at])
   @@map("products")
 }
 
@@ -139,7 +145,7 @@ model ProductBarcode {
   product_id Int
   code       String   @unique
   created_at DateTime @default(now())
-  
+
   product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@map("product_barcodes")
@@ -148,10 +154,10 @@ model ProductBarcode {
 model InventoryMovement {
   id         Int      @id @default(autoincrement())
   product_id Int
-  change     Float
+  change     Decimal
   reason     String?
   created_at DateTime @default(now())
-  
+
   product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
   @@index([product_id])
@@ -165,13 +171,12 @@ model Customer {
   name        String
   phone       String?
   email       String?
-  
-  // Fiscal Data
+
   rfc         String?
   fiscal_name String?
   tax_regime  String?
   zip_code    String?
-  use_cfdi    String? // e.g. G03
+  use_cfdi    String?
 
   store       Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
   sales       Sale[]
@@ -182,18 +187,21 @@ model Customer {
 }
 
 model Sale {
-  id             Int       @id @default(autoincrement())
-  store_id       Int       @default(1)
+  id             Int        @id @default(autoincrement())
+  store_id       Int        @default(1)
   customer_id    Int?
-  subtotal       Float
-  tax            Float
-  discount       Float
-  total          Float
+  subtotal       Decimal
+  tax            Decimal
+  discount       Decimal    @default(0)
+  total          Decimal
   payment_method String
-  created_at     DateTime  @default(now())
-  
-  store          Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
-  customer       Customer? @relation(fields: [customer_id], references: [id])
+  created_at     DateTime   @default(now())
+
+  // Idempotency: unique key to prevent duplicate sales
+  idempotency_key String?   @unique
+
+  store          Store      @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  customer       Customer?  @relation(fields: [customer_id], references: [id])
   items          SaleItem[]
   payments       Payment[]
   receivables    Receivable[]
@@ -202,6 +210,7 @@ model Sale {
   @@index([created_at])
   @@index([store_id, created_at])
   @@index([customer_id])
+  @@index([idempotency_key])
   @@map("sales")
 }
 
@@ -209,10 +218,13 @@ model SaleItem {
   id         Int     @id @default(autoincrement())
   sale_id    Int
   product_id Int
-  quantity   Float
-  unit_price Float
-  line_total Float
-  
+  quantity   Decimal
+  unit_price Decimal
+  line_total Decimal
+
+  // Snapshot of product name at time of sale (historical preservation)
+  product_name String?
+
   sale       Sale    @relation(fields: [sale_id], references: [id], onDelete: Cascade)
   product    Product @relation(fields: [product_id], references: [id])
 
@@ -223,14 +235,13 @@ model Payment {
   id          Int      @id @default(autoincrement())
   sale_id     Int
   method      String
-  amount      Float
+  amount      Decimal
   user_id     Int?
   created_at  DateTime @default(now())
-  
-  // External Payment info
+
   external_id String?
-  provider    String? // stripe, mercadopago
-  status      String? @default("completed") // pending, completed, failed
+  provider    String?
+  status      String?  @default("completed")
 
   sale       Sale     @relation(fields: [sale_id], references: [id], onDelete: Cascade)
 
@@ -241,11 +252,11 @@ model Receivable {
   id          Int       @id @default(autoincrement())
   customer_id Int
   sale_id     Int
-  amount_due  Float
-  amount_paid Float     @default(0)
+  amount_due  Decimal
+  amount_paid Decimal   @default(0)
   status      String
   created_at  DateTime  @default(now())
-  
+
   customer    Customer  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
   sale        Sale      @relation(fields: [sale_id], references: [id], onDelete: Cascade)
   payments    ReceivablePayment[]
@@ -257,9 +268,9 @@ model ReceivablePayment {
   id            Int        @id @default(autoincrement())
   receivable_id Int
   user_id       Int
-  amount        Float
+  amount        Decimal
   created_at    DateTime   @default(now())
-  
+
   receivable    Receivable @relation(fields: [receivable_id], references: [id], onDelete: Cascade)
   user          User       @relation(fields: [user_id], references: [id])
 
@@ -272,29 +283,34 @@ model CashSession {
   user_id         Int
   opened_at       DateTime  @default(now())
   closed_at       DateTime?
-  opening_balance Float
-  closing_balance Float?
-  status          String
-  
+  opening_balance Decimal
+  closing_balance Decimal?
+  counted_cash    Decimal?
+  expected_cash   Decimal?
+  difference      Decimal?
+  status          String    // open, closed, reconciling, discrepancy
+
   store           Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
   user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
   movements       CashMovement[]
 
+  @@index([store_id, user_id, status])
   @@map("cash_sessions")
 }
 
 model CashMovement {
   id          Int         @id @default(autoincrement())
   session_id  Int
-  type        String
+  type        String      // sale, deposit, withdraw, opening, closing
   reference   String?
-  amount      Float
+  amount      Decimal
   created_at  DateTime    @default(now())
-  
+
   session     CashSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
 
   @@index([created_at])
   @@index([type])
+  @@index([session_id])
   @@map("cash_movements")
 }
 
@@ -303,15 +319,15 @@ model Invoice {
   store_id    Int
   sale_id     Int
   customer_id Int?
-  
-  uuid        String?  // UUID Fiscal (Folio Fiscal)
+
+  uuid        String?
   rfc_emisor  String
   rfc_receptor String
-  total       Float
+  total       Decimal
   xml_url     String?
   pdf_url     String?
-  status      String   @default("draft") // draft, stamped, cancelled
-  
+  status      String   @default("draft")
+
   created_at  DateTime @default(now())
   stamped_at  DateTime?
 
@@ -338,7 +354,7 @@ model ProductEvent {
 model UserFeedback {
   id        Int      @id @default(autoincrement())
   user_id   Int?
-  type      String   // 'bug', 'suggestion', 'other'
+  type      String
   comment   String
   rating    Int?
   url       String?
@@ -352,7 +368,7 @@ model FeatureVote {
   feature_name String   @unique
   description  String?
   votes        Int      @default(0)
-  status       String   @default("planned") // planned, in_progress, completed
+  status       String   @default("planned")
   created_at   DateTime @default(now())
 
   @@map("feature_votes")
@@ -371,6 +387,9 @@ model Audit {
   store      Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
   user       User?    @relation(fields: [user_id], references: [id])
 
+  @@index([store_id, created_at])
+  @@index([event])
+  @@index([ref_type, ref_id])
   @@map("audits")
 }
 
@@ -410,7 +429,7 @@ model Reseller {
   created_at   DateTime @default(now())
 
   stores       Store[]
-  
+
   @@map("resellers")
 }
 
@@ -420,8 +439,8 @@ model SupportTicket {
   user_id      Int
   subject      String
   message      String
-  status       String   @default("open") // open, in_progress, resolved, closed
-  priority     String   @default("normal") // low, normal, high, urgent
+  status       String   @default("open")
+  priority     String   @default("normal")
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
@@ -435,43 +454,54 @@ model SupportTicket {
 model TicketMessage {
   id        Int      @id @default(autoincrement())
   ticket_id Int
-  user_id   Int?     // Null if system/agent
+  user_id   Int?
   message   String
   is_staff  Boolean  @default(false)
   created_at DateTime @default(now())
 
   ticket    SupportTicket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
-  
+  user      User?         @relation(fields: [user_id], references: [id])
+
   @@map("ticket_messages")
 }
 
 model Subscription {
   id             Int       @id @default(autoincrement())
   store_id       Int       @unique
-  plan_id        String    // free, pro, enterprise
-  status         String    // active, past_due, canceled
+  plan_id        String
+  status         String
   current_period_end DateTime?
   payment_method String?
-  
+
   store          Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
-  
+
   @@map("subscriptions")
 }
 
 model AiInsight {
   id           Int      @id @default(autoincrement())
   store_id     Int
-  type         String   // prediction, alert, opportunity
+  type         String
   title        String
   description  String
-  data         String?  // JSON context
-  priority     String   @default("info") // info, warning, critical
+  data         String?
+  priority     String   @default("info")
   is_read      Boolean  @default(false)
   created_at   DateTime @default(now())
 
   store        Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
 
   @@map("ai_insights")
+}
+
+model IdempotencyKey {
+  id         Int      @id @default(autoincrement())
+  key        String   @unique
+  store_id   Int
+  created_at DateTime @default(now())
+
+  @@index([created_at])
+  @@map("idempotency_keys")
 }
 
 model AiConfig {
