@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Package, Users, BarChart3, Settings, LogOut, Wallet, Shield, ClipboardList, HardDrive, Info } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
-import { useAppStore } from '../../store/useAppStore';
+import { useUserStore } from '../../store/userStore';
 
 const NavItem = ({ to, icon: Icon, children, shortcut, show = true }) => {
     if (!show) return null;
@@ -48,7 +48,7 @@ const RoleBadge = ({ role }) => {
 
 export const Sidebar = () => {
     const { hasPermission, role } = usePermissions();
-    const { user, logout } = useAppStore();
+    const { user, logout } = useUserStore();
     const navigate = useNavigate();
     const location = useLocation();
 

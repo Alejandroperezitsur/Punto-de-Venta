@@ -3,7 +3,7 @@ import { api } from '../lib/api';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { useAppStore } from '../store/useAppStore';
+import { useUserStore } from '../store/userStore';
 import {
   Settings, Store, Receipt, Palette, Bell, Save, Check,
   Building, Phone, Mail, Globe, Percent, Image
@@ -20,7 +20,7 @@ const SettingsSection = ({ title, icon: Icon, children }) => (
 );
 
 const BusinessSettings = () => {
-  const { toggleTheme, theme } = useAppStore();
+  const { toggleTheme, theme } = useUserStore();
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

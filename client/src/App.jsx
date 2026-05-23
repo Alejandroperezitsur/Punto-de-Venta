@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useAppStore } from './store/useAppStore';
+import { useUserStore } from './store/userStore';
+import { useCartStore } from './store/cartStore';
+import { initSyncManager } from './lib/syncManager';
 
 // Views
 import Login from './views/Login';
@@ -35,8 +37,8 @@ import { MainLayout } from './components/layout/MainLayout';
 import { DynamicBranding } from './components/common/DynamicBranding';
 
 const RequireAuth = ({ children, requiredPermission }) => {
-    const token = useAppStore(state => state.token);
-    const hasPermission = useAppStore(state => state.hasPermission);
+    const token = useUserStore(state => state.token);
+    const hasPermission = useUserStore(state => state.hasPermission);
     const location = useLocation();
 
     if (!token) {
@@ -51,7 +53,7 @@ const RequireAuth = ({ children, requiredPermission }) => {
 };
 
 const PublicOnly = ({ children }) => {
-    const token = useAppStore(state => state.token);
+    const token = useUserStore(state => state.token);
     if (token) {
         return <Navigate to="/ventas" replace />;
     }
@@ -63,11 +65,17 @@ import { LoadingFallback } from './components/common/LoadingFallback';
 // const LoadingFallback = () => <Splash />; // Replaced with enhanced component
 
 function App() {
-    const { theme } = useAppStore();
+    const { theme } = useUserStore();
+    const hydrate = useCartStore(state => state.hydrate);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
+
+    useEffect(() => {
+        hydrate();
+        initSyncManager();
+    }, [hydrate]);
 
     return (
         <>

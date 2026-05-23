@@ -4,7 +4,7 @@ import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { Card } from '../components/common/Card';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../store/useAppStore';
+import { useUserStore } from '../store/userStore';
 import {
     ChevronRight, ChevronLeft, Check, Building, User, Package,
     ShoppingCart, Percent, Sparkles, PartyPopper
@@ -19,7 +19,7 @@ const STEPS = [
 
 const OnboardingWizard = () => {
     const navigate = useNavigate();
-    const { login } = useAppStore();
+    const { login } = useUserStore();
     const [step, setStep] = useState(0);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState({
