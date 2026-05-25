@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Package, Users, BarChart3, Settings, LogOut, Wallet,
-  Shield, ClipboardList, ChevronLeft, Store,
+  Shield, ClipboardList, ChevronLeft, Store, Palette,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
@@ -133,6 +133,9 @@ export const Sidebar = () => {
         </NavItem>
         <NavItem to="/config" icon={Settings} shortcut="F10" show={hasPermission(PERMISSIONS.SETTINGS_VIEW)} isCollapsed={isCollapsed}>
           Configuración
+        </NavItem>
+        <NavItem to="/branding" icon={Palette} show={hasPermission(PERMISSIONS.SETTINGS_VIEW)} isCollapsed={isCollapsed}>
+          Personalización
         </NavItem>
       </nav>
 

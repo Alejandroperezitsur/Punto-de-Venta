@@ -11,7 +11,7 @@ import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { CommandPalette, ShortcutsOverlay, useKeyboardShortcuts } from '../../components/common/CommandPalette';
 import { api } from '../../lib/api';
-import { initSyncManager } from '../../lib/syncManager';
+import { enqueueSale, initSyncManager } from '../../lib/syncManager';
 import { Plus, Zap, AlertTriangle, ShoppingBag, Command } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { motion } from 'framer-motion';
@@ -154,15 +154,55 @@ const SalesView = () => {
       };
 
       const idempotencyKey = generateCheckoutId();
-      const res = await api('/sales', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: { 'X-Idempotency-Key': idempotencyKey },
-      });
+      let ticketId = idempotencyKey;
+      let offlineMode = false;
 
-      printTicket({ items, totals, payments, change: paymentData.change || 0, date: new Date(), id: res.id });
+      try {
+        if (!navigator.onLine) {
+          throw new Error('offline');
+        }
+
+        const res = await api('/sales', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'X-Idempotency-Key': idempotencyKey },
+        });
+
+        ticketId = res.id || idempotencyKey;
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        const shouldQueueOffline = !navigator.onLine || /offline|failed to fetch|network error/i.test(message);
+
+        if (!shouldQueueOffline) {
+          const msg = 'Error al procesar la venta: ' + message;
+          setPayError(msg);
+          toast(msg, 'error');
+          throw e;
+        }
+
+        await enqueueSale(
+          {
+            items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+            total: totals.total,
+            tax: totals.tax,
+            discount: totals.discount,
+            payment_method: paymentData.method,
+            created_at: new Date(),
+            idempotency_key: idempotencyKey,
+          },
+          idempotencyKey,
+        );
+        offlineMode = true;
+      }
+
+      printTicket({ items, totals, payments, change: paymentData.change || 0, date: new Date(), id: ticketId });
       clearCart();
-      toast('Venta completada exitosamente', 'success');
+      toast(
+        offlineMode
+          ? 'Venta guardada localmente y se sincronizará cuando vuelva la conexión'
+          : 'Venta completada exitosamente',
+        offlineMode ? 'warning' : 'success',
+      );
       setTimeout(focusSearch, 100);
     } catch (e) {
       const msg = 'Error al procesar la venta: ' + e.message;

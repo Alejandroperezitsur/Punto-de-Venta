@@ -36,6 +36,7 @@ const Subscription = React.lazy(() => import('./views/Subscription'));
 const EnterpriseReports = React.lazy(() => import('./views/admin/EnterpriseReports'));
 const AiInsights = React.lazy(() => import('./views/AiInsights'));
 const ThemeStudio = React.lazy(() => import('./views/ThemeStudio'));
+const Branding = React.lazy(() => import('./views/Branding'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -217,6 +218,12 @@ function App() {
                     <Route path="/theme-studio" element={
                         <RequireAuth>
                             <ThemeStudio />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/branding" element={
+                        <RequireAuth requiredPermission="settings:view">
+                            <Branding />
                         </RequireAuth>
                     } />
 

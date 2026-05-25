@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import App from './App'
 import './styles/globals.css'
+import { registerSW } from 'virtual:pwa-register'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -14,3 +15,14 @@ createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 )
+
+registerSW({
+  onRegistered(registration) {
+    if (registration) {
+      console.log('Service worker registered');
+    }
+  },
+  onRegisterError(error) {
+    console.error('Service worker registration failed:', error);
+  },
+});

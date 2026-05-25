@@ -2,6 +2,7 @@
   "name": "punto-de-venta-client",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://alejandroperezitsur.github.io/Punto-de-Venta/",
   "description": "Frontend POS con React y Vite",
   "scripts": {
     "dev": "vite",
@@ -12,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:chaos": "vitest run tests/chaos",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "deploy": "npm run build && npx gh-pages -d dist -b gh-pages --dotfiles"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -47,6 +49,7 @@
     "vite": "^5.4.8",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^3.1.0",
-    "workbox-window": "^7.4.0"
+    "workbox-window": "^7.4.0",
+    "gh-pages": "^5.0.0"
   }
 }
