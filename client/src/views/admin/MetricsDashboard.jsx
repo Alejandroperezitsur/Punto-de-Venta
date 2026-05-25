@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
+import { Table } from '../../components/ui/Table';
 
 export default function MetricsDashboard() {
     const [data, setData] = useState(null);
@@ -28,28 +29,21 @@ export default function MetricsDashboard() {
             <div className="bg-white rounded-lg shadow border p-6">
                 <h3 className="font-bold text-gray-700 mb-4">Eventos Recientes</h3>
                 <div className="overflow-auto max-h-96">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-500 sticky top-0">
-                            <tr>
-                                <th className="p-3">Evento</th>
-                                <th className="p-3">Store ID</th>
-                                <th className="p-3">User</th>
-                                <th className="p-3">Data</th>
-                                <th className="p-3">Tiempo</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {recentEvents.map(ev => (
-                                <tr key={ev.id} className="hover:bg-gray-50">
-                                    <td className="p-3 font-medium text-indigo-600">{ev.type}</td>
-                                    <td className="p-3">{ev.store_id || '-'}</td>
-                                    <td className="p-3">{ev.user_id || '-'}</td>
-                                    <td className="p-3 font-mono text-xs text-gray-500 truncate max-w-xs">{ev.data}</td>
-                                    <td className="p-3 text-gray-400">{new Date(ev.created_at).toLocaleTimeString()}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <Table
+                        data={recentEvents}
+                        searchable={false}
+                        pageSize={recentEvents.length || 10}
+                        striped={false}
+                        density="compact"
+                        columns={[
+                            { key: 'type', title: 'Evento', render: (ev) => <span className="font-medium text-indigo-600">{ev.type}</span> },
+                            { key: 'store_id', title: 'Store ID', render: (ev) => ev.store_id || '-' },
+                            { key: 'user_id', title: 'User', render: (ev) => ev.user_id || '-' },
+                            { key: 'data', title: 'Data', render: (ev) => <span className="font-mono text-xs text-gray-500 truncate max-w-xs block">{ev.data}</span> },
+                            { key: 'created_at', title: 'Tiempo', render: (ev) => <span className="text-gray-400">{new Date(ev.created_at).toLocaleTimeString()}</span> },
+                        ]}
+                        rowKey={(ev) => ev.id}
+                    />
                 </div>
             </div>
         </div>

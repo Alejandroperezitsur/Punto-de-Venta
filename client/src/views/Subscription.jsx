@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { useToast } from '../components/ui/Toast';
 
 export default function Subscription() {
+    const toast = useToast();
     const [sub, setSub] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -19,10 +21,10 @@ export default function Subscription() {
             });
             if (res.success) {
                 setSub(res.subscription);
-                alert('¡Pago exitoso! Plan actualizado.');
+                toast('¡Pago exitoso! Plan actualizado.', 'success');
             }
         } catch (e) {
-            alert('Error en pago');
+            toast('Error en pago', 'error');
         } finally {
             setLoading(false);
         }

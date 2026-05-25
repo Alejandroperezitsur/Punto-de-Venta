@@ -1,75 +1,79 @@
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Bell, Search, Menu } from 'lucide-react';
+import { Sun, Moon, Bell, Menu, Command } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import { useUserStore } from '../../store/userStore';
-import { Button } from '../common/Button';
+import { Button } from '../ui/Button';
 import { ConnectionStatus } from '../common/ConnectionStatus';
-import { api } from '../../lib/api';
+import { cn } from '../../utils/cn';
 
 export const Topbar = () => {
-    const { theme, toggleTheme, toggleSidebar } = useUserStore();
-    const [cashStatus, setCashStatus] = useState(null);
+  const { isDark, toggleDark } = useTheme();
+  const { toggleSidebar } = useUserStore();
+  const [cashStatus, setCashStatus] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
 
-    useEffect(() => {
-        // Poll or event listener for cash status
-        const checkCash = async () => {
-            try {
-                const res = await api('/cash/status');
-                setCashStatus(res.session);
-            } catch (e) { }
-        };
-        checkCash();
-        const interval = setInterval(checkCash, 60000); // Check every minute
+  useEffect(() => {
+    const checkCash = async () => {
+      try {
+        const { api } = await import('../../lib/api');
+        const res = await api('/cash/status');
+        setCashStatus(res.session);
+      } catch { /* noop */ }
+    };
+    checkCash();
+    const interval = setInterval(checkCash, 60000);
+    const onCashUpdate = () => checkCash();
+    window.addEventListener('cash-status', onCashUpdate);
+    return () => { clearInterval(interval); window.removeEventListener('cash-status', onCashUpdate); };
+  }, []);
 
-        const onCashUpdate = () => checkCash();
-        window.addEventListener('cash-status', onCashUpdate);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-        return () => {
-            clearInterval(interval);
-            window.removeEventListener('cash-status', onCashUpdate);
-        };
-    }, []);
+  return (
+    <header
+      role="banner"
+      className={cn(
+        'h-[var(--header-height)] border-b border-border flex items-center justify-between px-5 sticky top-0 z-40 transition-all duration-200',
+        scrolled
+          ? 'glass-strong shadow-sm'
+          : 'bg-card',
+      )}
+    >
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar} aria-label="Menú">
+          <Menu className="size-5" />
+        </Button>
+        {cashStatus ? (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20 shadow-sm">
+            <span className="size-2 rounded-full bg-success animate-[pulse-dot_2s_ease-in-out_infinite]" />
+            Caja Abierta
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-danger/10 text-danger border border-danger/20 shadow-sm">
+            <span className="size-2 rounded-full bg-danger" />
+            Caja Cerrada
+          </span>
+        )}
+      </div>
 
-    return (
-        <header className="h-[var(--header-height)] border-b border-[hsl(var(--border))] bg-[hsl(var(--card))/0.8] backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40 transition-all shadow-sm">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar}>
-                    <Menu className="h-5 w-5" />
-                </Button>
-                <div className="relative hidden md:block group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))] group-focus-within:text-[hsl(var(--primary))] transition-colors" />
-                    <input
-                        type="text"
-                        placeholder="Buscar (Ctrl+K)..."
-                        className="h-10 w-64 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--background))] pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:border-transparent transition-all"
-                    />
-                </div>
-            </div>
+      <div className="flex items-center gap-2">
+        <ConnectionStatus />
 
-            <div className="flex items-center gap-3">
-                {cashStatus ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        Caja Abierta
-                    </span>
-                ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm">
-                        <span className="w-2 h-2 rounded-full bg-rose-500" />
-                        Caja Cerrada
-                    </span>
-                )}
+        <div className="w-px h-5 bg-border mx-1" />
 
-                <ConnectionStatus />
+        <Button variant="ghost" size="icon" onClick={toggleDark} className="rounded-full" aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}>
+          {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
+        </Button>
 
-                <div className="w-px h-6 bg-[hsl(var(--border))] mx-2" />
-
-                <Button variant="ghost" size="icon" onClick={toggleTheme} className="hover:bg-[hsl(var(--secondary))] rounded-full">
-                    {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                </Button>
-
-                <Button variant="ghost" size="icon" className="hover:bg-[hsl(var(--secondary))] rounded-full">
-                    <Bell className="h-5 w-5" />
-                </Button>
-            </div>
-        </header>
-    );
+        <Button variant="ghost" size="icon" className="rounded-full relative" aria-label="Notificaciones">
+          <Bell className="size-5" />
+          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-card" />
+        </Button>
+      </div>
+    </header>
+  );
 };

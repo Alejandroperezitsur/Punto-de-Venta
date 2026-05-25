@@ -516,3 +516,109 @@ model AiConfig {
 
   @@map("ai_configs")
 }
+
+// ─── Phase 8 Enterprise Models ───
+
+model AuditEntry {
+  id              Int      @id @default(autoincrement())
+  store_id        Int
+  event           String
+  event_version   Int      @default(1)
+  actor_id        Int?
+  actor_ip        String?
+  actor_agent     String?
+  session_id      String?
+  ref_type        String?
+  ref_id          String?
+  before_snapshot String?
+  after_snapshot  String?
+  metadata        String?
+  prev_hash       String?
+  hash            String   @unique
+  fingerprint     String?
+  created_at      DateTime @default(now())
+
+  store           Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([store_id, created_at])
+  @@index([event])
+  @@index([hash])
+  @@map("audit_entries")
+}
+
+model Session {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  store_id      Int
+  token_jti     String   @unique
+  refresh_token String   @unique
+  fingerprint   String?
+  ip_address    String?
+  user_agent    String?
+  last_used_at  DateTime @default(now())
+  revoked_at    DateTime?
+  expires_at    DateTime
+  created_at    DateTime @default(now())
+
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  store         Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([token_jti])
+  @@index([user_id])
+  @@map("sessions")
+}
+
+model ReconciliationLog {
+  id             Int      @id @default(autoincrement())
+  store_id       Int
+  type           String   // drift, conflict, resolved, checksum_mismatch
+  product_id     Int?
+  server_version Int?
+  client_version Int?
+  drift_amount   Decimal?
+  resolved_by    Int?
+  resolution     String?  // server_wins, client_wins, merge
+  details        String?
+  created_at     DateTime @default(now())
+
+  store          Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([store_id])
+  @@index([type])
+  @@map("reconciliation_logs")
+}
+
+model InventoryVersion {
+  id            Int      @id @default(autoincrement())
+  store_id      Int
+  product_id    Int
+  version       Int      @default(1)
+  checksum      String?
+  last_conflict DateTime?
+  vector_clock  String?  // JSON: {branchId: counter}
+
+  store         Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  product       Product  @relation(fields: [product_id], references: [id])
+
+  @@unique([store_id, product_id])
+  @@map("inventory_versions")
+}
+
+model FraudAlert {
+  id          Int      @id @default(autoincrement())
+  store_id    Int
+  user_id     Int?
+  score       Int
+  severity    String   // low, medium, high, critical
+  heuristics  String   // JSON array
+  details     String?
+  acknowledged_by Int?
+  acknowledged_at DateTime?
+  created_at  DateTime @default(now())
+
+  store       Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([store_id])
+  @@index([severity])
+  @@map("fraud_alerts")
+}

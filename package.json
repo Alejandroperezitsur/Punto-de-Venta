@@ -17,7 +17,8 @@
     "electron:dev": "concurrently \"npm run server\" \"npm run client\" \"wait-on http://localhost:5173 && electron .\"",
     "setup": "npm install && cd client && npm install && cd ../server && npm install",
     "reset-db": "cd server && rm -f pos.db && node -e \"require('./db').init()\"",
-    "lint": "cd client && npm run lint"
+    "lint": "cd client && npm run lint",
+    "deploy:web": "cd client && npm install && npm run deploy"
   },
   "build": {
     "appId": "com.pospro.app",

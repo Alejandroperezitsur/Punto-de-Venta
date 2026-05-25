@@ -3,6 +3,7 @@ const router = express.Router();
 const prisma = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { JWT_SECRET } = require('../config');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
@@ -81,12 +82,25 @@ router.post('/login', async (req, res) => {
       data: { last_login: new Date() }
     });
 
+    const jti = crypto.randomUUID();
+    await prisma.session.create({
+      data: {
+        jti,
+        user_id: user.id,
+        store_id: selectedStore.store_id,
+        device_fingerprint: req.headers['x-device-fingerprint'] || null,
+        ip_address: req.ip,
+        last_activity: new Date(),
+      }
+    });
+
     const token = jwt.sign({
       uid: user.id,
       storeId: selectedStore.store_id,
       role: selectedStore.role,
       username: user.username,
-      is_super_admin: user.is_super_admin // Added
+      is_super_admin: user.is_super_admin,
+      jti
     }, JWT_SECRET, { expiresIn: '12h' });
 
     res.jsonResponse({
@@ -134,12 +148,25 @@ router.post('/select-store', async (req, res) => {
 
     if (!userStore) return res.jsonError('Acceso denegado', 403);
 
+    const jti = crypto.randomUUID();
+    await prisma.session.create({
+      data: {
+        jti,
+        user_id: payload.uid,
+        store_id: userStore.store_id,
+        device_fingerprint: req.headers['x-device-fingerprint'] || null,
+        ip_address: req.ip,
+        last_activity: new Date(),
+      }
+    });
+
     const token = jwt.sign({
       uid: payload.uid,
       storeId: userStore.store_id,
       role: userStore.role,
       username: userStore.user.username,
-      is_super_admin: userStore.user.is_super_admin // Added
+      is_super_admin: userStore.user.is_super_admin,
+      jti
     }, JWT_SECRET, { expiresIn: '12h' });
 
     res.jsonResponse({
@@ -160,16 +187,21 @@ router.post('/select-store', async (req, res) => {
   }
 });
 
-function auth(req, res, next) {
+async function auth(req, res, next) {
   const h = req.headers.authorization || '';
   const m = h.match(/^Bearer\s+(.*)$/);
   if (!m) return res.jsonError('No autenticado', 401);
   try {
     req.user = jwt.verify(m[1], JWT_SECRET);
     if (!req.user.storeId && !req.user.partial) {
-      // Legacy token support? Or just reject.
-      // For migration, we might default to storeId 1 if missing?
-      // No, let's enforce storeId.
+      return res.jsonError('Token inválido: falta storeId', 401);
+    }
+    // Check session revocation
+    if (req.user.jti && !req.user.partial) {
+      const session = await prisma.session.findUnique({ where: { jti: req.user.jti } });
+      if (!session || session.revoked) {
+        return res.jsonError('Sesión revocada', 401);
+      }
     }
     next();
   } catch (e) {
@@ -178,6 +210,22 @@ function auth(req, res, next) {
     }
     res.jsonError('Token inválido', 401);
   }
+}
+
+// Middleware placed AFTER routes to rotate JWT on every response
+function attachTokenRotation(req, res, next) {
+  if (!req.user || !req.user.jti) return next();
+  const originalJson = res.json.bind(res);
+  res.json = function (body) {
+    const newToken = jwt.sign(
+      { uid: req.user.uid, storeId: req.user.storeId, role: req.user.role, username: req.user.username, is_super_admin: req.user.is_super_admin, jti: req.user.jti },
+      JWT_SECRET,
+      { expiresIn: '12h' }
+    );
+    res.setHeader('X-New-Token', newToken);
+    return originalJson(body);
+  };
+  next();
 }
 
 function optionalAuth(req, res, next) {
@@ -392,4 +440,4 @@ router.delete('/users/:id', auth, requirePermission(PERMISSIONS.USERS_DELETE), a
   }
 });
 
-module.exports = { router, auth, optionalAuth, requireSuperAdmin };
+module.exports = { router, auth, attachTokenRotation, optionalAuth, requireSuperAdmin };

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Card } from '../components/common/Card';
-import { Button } from '../components/common/Button';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
+import { motion } from 'framer-motion';
 import {
     Info, Shield, Check, AlertTriangle, Calendar, Cpu,
     Database, HardDrive, RefreshCw, ExternalLink
@@ -79,7 +81,7 @@ const AboutView = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64 text-[hsl(var(--muted-foreground))]">
+            <div className="flex items-center justify-center h-64 text-muted-foreground">
                 Cargando información...
             </div>
         );
@@ -88,7 +90,7 @@ const AboutView = () => {
     return (
         <div className="space-y-6 max-w-3xl mx-auto">
             <div className="flex items-center gap-3">
-                <Info className="h-6 w-6 text-[hsl(var(--primary))]" />
+                <Info className="h-6 w-6 text-primary" />
                 <h1 className="text-2xl font-bold">Acerca de {license?.appName || 'POS Pro'}</h1>
             </div>
 
@@ -112,30 +114,30 @@ const AboutView = () => {
             {/* License Status */}
             <Card className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <Shield className="h-5 w-5 text-[hsl(var(--primary))]" />
+                    <Shield className="h-5 w-5 text-primary" />
                     <h3 className="font-semibold">Estado de Licencia</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 rounded-lg bg-[hsl(var(--muted))]">
-                        <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase">Tipo</p>
+                    <div className="p-4 rounded-lg bg-muted">
+                        <p className="text-xs text-muted-foreground uppercase">Tipo</p>
                         <p className="font-bold capitalize">{license?.type || 'Trial'}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-[hsl(var(--muted))]">
-                        <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase">Estado</p>
+                    <div className="p-4 rounded-lg bg-muted">
+                        <p className="text-xs text-muted-foreground uppercase">Estado</p>
                         <p className={`font-bold ${license?.isValid ? 'text-green-600' : 'text-red-500'}`}>
                             {license?.isValid ? 'Activa' : 'Expirada'}
                         </p>
                     </div>
                     {license?.daysRemaining !== null && (
-                        <div className="p-4 rounded-lg bg-[hsl(var(--muted))]">
-                            <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase">Días Restantes</p>
+                        <div className="p-4 rounded-lg bg-muted">
+                            <p className="text-xs text-muted-foreground uppercase">Días Restantes</p>
                             <p className={`font-bold ${license.daysRemaining <= 7 ? 'text-amber-500' : ''}`}>
                                 {license.daysRemaining}
                             </p>
                         </div>
                     )}
-                    <div className="p-4 rounded-lg bg-[hsl(var(--muted))]">
-                        <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase">Productos</p>
+                    <div className="p-4 rounded-lg bg-muted">
+                        <p className="text-xs text-muted-foreground uppercase">Productos</p>
                         <p className="font-bold">
                             {license?.features?.maxProducts === -1 ? 'Ilimitados' : license?.features?.maxProducts || '50'}
                         </p>
@@ -199,24 +201,24 @@ const AboutView = () => {
             {/* System Info */}
             <Card className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <Cpu className="h-5 w-5 text-[hsl(var(--primary))]" />
+                    <Cpu className="h-5 w-5 text-primary" />
                     <h3 className="font-semibold">Información del Sistema</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex justify-between p-3 bg-[hsl(var(--muted))] rounded-lg">
-                        <span className="text-[hsl(var(--muted-foreground))]">Plataforma</span>
+                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                        <span className="text-muted-foreground">Plataforma</span>
                         <span className="font-medium">{diagnostics?.system?.platform}</span>
                     </div>
-                    <div className="flex justify-between p-3 bg-[hsl(var(--muted))] rounded-lg">
-                        <span className="text-[hsl(var(--muted-foreground))]">Arquitectura</span>
+                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                        <span className="text-muted-foreground">Arquitectura</span>
                         <span className="font-medium">{diagnostics?.system?.arch}</span>
                     </div>
-                    <div className="flex justify-between p-3 bg-[hsl(var(--muted))] rounded-lg">
-                        <span className="text-[hsl(var(--muted-foreground))]">Memoria Total</span>
+                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                        <span className="text-muted-foreground">Memoria Total</span>
                         <span className="font-medium">{formatBytes(diagnostics?.system?.memory?.total || 0)}</span>
                     </div>
-                    <div className="flex justify-between p-3 bg-[hsl(var(--muted))] rounded-lg">
-                        <span className="text-[hsl(var(--muted-foreground))]">Base de Datos</span>
+                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                        <span className="text-muted-foreground">Base de Datos</span>
                         <span className="font-medium">{formatBytes(diagnostics?.database?.size || 0)}</span>
                     </div>
                 </div>
@@ -225,21 +227,21 @@ const AboutView = () => {
             {/* Database Stats */}
             <Card className="p-6">
                 <div className="flex items-center gap-3 mb-4">
-                    <Database className="h-5 w-5 text-[hsl(var(--primary))]" />
+                    <Database className="h-5 w-5 text-primary" />
                     <h3 className="font-semibold">Estadísticas de Datos</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {Object.entries(diagnostics?.database?.counts || {}).map(([key, value]) => (
-                        <div key={key} className="text-center p-4 bg-[hsl(var(--muted))] rounded-lg">
-                            <p className="text-2xl font-bold text-[hsl(var(--primary))]">{value}</p>
-                            <p className="text-xs text-[hsl(var(--muted-foreground))] capitalize">{key}</p>
+                        <div key={key} className="text-center p-4 bg-muted rounded-lg">
+                            <p className="text-2xl font-bold text-primary">{value}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{key}</p>
                         </div>
                     ))}
                 </div>
             </Card>
 
             {/* Footer */}
-            <div className="text-center text-sm text-[hsl(var(--muted-foreground))] pb-8">
+            <div className="text-center text-sm text-muted-foreground pb-8">
                 <p>{license?.copyright}</p>
                 <p className="mt-1">Machine ID: {diagnostics?.machineId?.slice(0, 16)}...</p>
             </div>

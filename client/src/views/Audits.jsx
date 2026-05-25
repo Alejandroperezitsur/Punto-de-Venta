@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Card } from '../components/common/Card';
-import { Input } from '../components/common/Input';
+import { Card } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Badge } from '../components/ui/Badge';
+import { Select } from '../components/ui/Select';
+import { Table } from '../components/ui/Table';
+import { useToast } from '../components/ui/Toast';
+import { Skeleton } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
 import { formatMoney } from '../utils/format';
 import { ClipboardList, Search, Calendar, User, ArrowUpDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const AuditsView = () => {
   const [audits, setAudits] = useState([]);
@@ -62,7 +69,7 @@ const AuditsView = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-3">
-          <ClipboardList className="h-6 w-6 text-[hsl(var(--primary))]" />
+          <ClipboardList className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">Auditoría del Sistema</h1>
         </div>
         <div className="flex gap-2 items-center">
@@ -75,7 +82,7 @@ const AuditsView = () => {
           />
           <button
             onClick={() => setSortDir(sortDir === 'desc' ? 'asc' : 'desc')}
-            className="p-2 rounded-lg border border-[hsl(var(--border))] hover:bg-[hsl(var(--muted))]"
+            className="p-2 rounded-lg border border-border hover:bg-muted"
             title="Cambiar orden"
           >
             <ArrowUpDown className="h-4 w-4" />
@@ -84,54 +91,65 @@ const AuditsView = () => {
       </div>
 
       <Card className="p-0 overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">Cargando registros...</div>
-        ) : sorted.length === 0 ? (
-          <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">No hay registros de auditoría</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-[hsl(var(--muted))]">
-                <tr>
-                  <th className="text-left px-6 py-3 font-medium">Fecha/Hora</th>
-                  <th className="text-left px-6 py-3 font-medium">Acción</th>
-                  <th className="text-left px-6 py-3 font-medium">Entidad</th>
-                  <th className="text-left px-6 py-3 font-medium">Usuario</th>
-                  <th className="text-left px-6 py-3 font-medium">Detalles</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[hsl(var(--border))]">
-                {sorted.slice(0, 100).map(a => (
-                  <tr key={a.id} className="hover:bg-[hsl(var(--muted))/0.5]">
-                    <td className="px-6 py-3 font-mono text-xs text-[hsl(var(--muted-foreground))]">
-                      {new Date(a.created_at).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-3">
-                      <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${getActionBadge(a.action)}`}>
-                        {a.action}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-[hsl(var(--muted-foreground))]">
-                      {a.entity_type} #{a.entity_id}
-                    </td>
-                    <td className="px-6 py-3">
-                      <span className="inline-flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        {a.user_id}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-xs text-[hsl(var(--muted-foreground))] max-w-xs truncate">
-                      {a.details ? JSON.stringify(JSON.parse(a.details)) : '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <Table
+          columns={[
+            {
+              key: 'date',
+              title: 'Fecha/Hora',
+              render: (row) => (
+                <span className="font-mono text-xs text-muted-foreground">
+                  {new Date(row.created_at).toLocaleString()}
+                </span>
+              ),
+            },
+            {
+              key: 'action',
+              title: 'Acción',
+              render: (row) => (
+                <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${getActionBadge(row.action)}`}>
+                  {row.action}
+                </span>
+              ),
+            },
+            {
+              key: 'entity',
+              title: 'Entidad',
+              render: (row) => (
+                <span className="text-muted-foreground">
+                  {row.entity_type} #{row.entity_id}
+                </span>
+              ),
+            },
+            {
+              key: 'user',
+              title: 'Usuario',
+              render: (row) => (
+                <span className="inline-flex items-center gap-1">
+                  <User className="h-3 w-3" />
+                  {row.user_id}
+                </span>
+              ),
+            },
+            {
+              key: 'details',
+              title: 'Detalles',
+              render: (row) => (
+                <span className="text-xs text-muted-foreground max-w-xs truncate block">
+                  {row.details ? JSON.stringify(JSON.parse(row.details)) : '-'}
+                </span>
+              ),
+            },
+          ]}
+          data={sorted.slice(0, 100)}
+          loading={loading}
+          searchable
+          searchPlaceholder="Buscar en auditoría..."
+          emptyMessage="No se encontraron registros de auditoría"
+          emptyIcon={<ClipboardList className="size-12" />}
+        />
       </Card>
 
-      <p className="text-xs text-[hsl(var(--muted-foreground))] text-center">
+      <p className="text-xs text-muted-foreground text-center">
         Mostrando los últimos 100 registros
       </p>
     </div>

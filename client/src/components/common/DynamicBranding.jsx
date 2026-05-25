@@ -1,20 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUserStore } from '../../store/userStore';
 
 export function DynamicBranding() {
     const { reseller } = useUserStore();
+    const [branding, setBranding] = useState(null);
 
     useEffect(() => {
-        if (reseller && reseller.primary_color) {
+        // Load custom branding from localStorage
+        const stored = localStorage.getItem('app_branding');
+        if (stored) {
+            try {
+                setBranding(JSON.parse(stored));
+            } catch (e) {
+                console.error('Failed to load branding:', e);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        // Apply custom branding color
+        if (branding?.primaryColor) {
+            document.documentElement.style.setProperty('--primary', branding.primaryColor);
+        } else if (reseller && reseller.primary_color) {
             document.documentElement.style.setProperty('--primary', reseller.primary_color);
-            // We could generate shades here too
-            // document.documentElement.style.setProperty('--primary-focus', ...);
         }
 
-        if (reseller && reseller.name) {
-            document.title = `${reseller.name} - POS`;
-        }
-    }, [reseller]);
+        // Set page title
+        const title = branding?.businessName || reseller?.name || 'Punto de Venta';
+        document.title = `${title} - POS`;
+    }, [branding, reseller]);
 
     return null; // Logic only
 }

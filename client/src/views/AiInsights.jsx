@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { Table } from '../components/ui/Table';
+import { Badge } from '../components/ui/Badge';
 
 export default function AiInsights() {
     const [insights, setInsights] = useState([]);
@@ -45,35 +47,25 @@ export default function AiInsights() {
                     <h2 className="font-bold text-lg text-gray-800">📦 Predicción de Inventario</h2>
                     <p className="text-sm text-gray-500">Productos que se agotarán pronto basado en tu ritmo de ventas.</p>
                 </div>
-                <table className="table w-full">
-                    <thead>
-                        <tr>
-                            <th className="text-left bg-white p-4">Producto</th>
-                            <th className="text-right bg-white p-4">Stock Actual</th>
-                            <th className="text-right bg-white p-4">Venta Diaria Prom.</th>
-                            <th className="text-center bg-white p-4">Se agota en</th>
-                            <th className="text-left bg-white p-4">Fecha Estimada</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {predictions.map((p, idx) => (
-                            <tr key={idx} className="border-t hover:bg-gray-50">
-                                <td className="p-4 font-medium">{p.product}</td>
-                                <td className="p-4 text-right">{p.stock}</td>
-                                <td className="p-4 text-right">{p.dailyAvg}</td>
-                                <td className="p-4 text-center">
-                                    <span className={`px-2 py-1 rounded font-bold text-xs ${p.daysLeft <= 3 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                        {p.daysLeft} días
-                                    </span>
-                                </td>
-                                <td className="p-4 text-gray-500">{new Date(p.depletionDate).toLocaleDateString()}</td>
-                            </tr>
-                        ))}
-                        {predictions.length === 0 && (
-                            <tr><td colSpan="5" className="p-8 text-center text-gray-400">Tu inventario parece saludable. 👏</td></tr>
-                        )}
-                    </tbody>
-                </table>
+                <Table
+                    data={predictions}
+                    searchable={false}
+                    pageSize={predictions.length || 10}
+                    striped={false}
+                    density="compact"
+                    emptyTitle="Tu inventario parece saludable."
+                    columns={[
+                        { key: 'product', title: 'Producto', render: (p) => <span className="font-medium">{p.product}</span> },
+                        { key: 'stock', title: 'Stock Actual', className: 'text-right' },
+                        { key: 'dailyAvg', title: 'Venta Diaria Prom.', className: 'text-right' },
+                        { key: 'daysLeft', title: 'Se agota en', className: 'text-center', render: (p) => (
+                            <span className={`px-2 py-1 rounded font-bold text-xs ${p.daysLeft <= 3 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                {p.daysLeft} días
+                            </span>
+                        )},
+                        { key: 'depletionDate', title: 'Fecha Estimada', render: (p) => <span className="text-gray-500">{new Date(p.depletionDate).toLocaleDateString()}</span> },
+                    ]}
+                />
             </div>
         </div>
     );
