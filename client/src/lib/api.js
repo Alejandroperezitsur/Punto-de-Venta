@@ -1,30 +1,175 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { cacheApiResponse, getApiCache, getApiCacheByTag, getApiCacheByPrefix } from './db';
+import { persistOfflineLogin, signInOffline } from './offlineAuth';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const DEFAULT_TIMEOUT_MS = 12000;
 const delay = ms => new Promise(r => setTimeout(r, ms));
+let deviceFpPromise = null;
+
+async function getDeviceFingerprintHeader() {
+  if (!deviceFpPromise) {
+    try {
+      deviceFpPromise = import('./deviceFingerprint').then((m) => m.getDeviceFingerprint());
+    } catch {
+      return '';
+    }
+  }
+  try {
+    return await deviceFpPromise;
+  } catch {
+    return '';
+  }
+}
+
+function getRequestKey(path, method = 'GET') {
+  return `${method.toUpperCase()}:${path}`;
+}
+
+function normalizeError(error) {
+  if (!error) return 'La conexión se perdió o el servidor no respondió.';
+  if (typeof error === 'string') {
+    if (/failed to fetch/i.test(error)) return 'La conexión se perdió o el servidor no respondió.';
+    return error;
+  }
+  if (error instanceof Error) {
+    if (error.name === 'AbortError') return 'La solicitud fue cancelada por tiempo de espera.';
+    if (/failed to fetch/i.test(error.message)) return 'La conexión se perdió o el servidor no respondió.';
+    return error.message;
+  }
+  return 'La conexión se perdió o el servidor no respondió.';
+}
+
+function parseJsonBody(options) {
+  try {
+    if (!options || !options.body) return null;
+    return typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+  } catch {
+    return null;
+  }
+}
+
+function createAbortController(timeoutMs, signal) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  if (signal) {
+    if (signal.aborted) controller.abort();
+    else signal.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  const originalSignal = controller.signal;
+  const clean = () => clearTimeout(timeout);
+  return { signal: originalSignal, clean };
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  const { signal, clean } = createAbortController(timeoutMs, options.signal);
+  try {
+    return await fetch(url, { ...options, signal });
+  } finally {
+    clean();
+  }
+}
+
+async function getCachedOfflineResponse(path, method) {
+  const requestKey = getRequestKey(path, method);
+  const cached = await getApiCache(requestKey);
+  if (cached) return cached.response;
+
+  if (method === 'GET') {
+    if (path.startsWith('/products/scan/')) {
+      const products = await getApiCacheByTag('products');
+      const last = products.length ? products[products.length - 1].response : null;
+      return last?.find?.((item) => item?.sku === path.split('/').pop()) ?? null;
+    }
+
+    if (path.startsWith('/products')) {
+      const products = await getApiCacheByTag('products');
+      return products.length ? products[products.length - 1].response : [];
+    }
+
+    if (path.startsWith('/customers')) {
+      const customers = await getApiCacheByTag('customers');
+      return customers.length ? customers[customers.length - 1].response : [];
+    }
+
+    if (path.startsWith('/cash')) {
+      const cash = await getApiCacheByTag('cash');
+      return cash.length ? cash[cash.length - 1].response : null;
+    }
+  }
+
+  return null;
+}
+
+async function cacheSuccessfulResponse(path, method, json) {
+  if (method !== 'GET') return;
+  const requestKey = getRequestKey(path, method);
+  const tags = [];
+  if (path.startsWith('/products')) tags.push('products');
+  if (path.startsWith('/customers')) tags.push('customers');
+  if (path.startsWith('/cash')) tags.push('cash');
+  if (path.startsWith('/reports')) tags.push('reports');
+  if (path.startsWith('/audits')) tags.push('audits');
+  if (path.startsWith('/auth')) tags.push('auth');
+  try {
+    await cacheApiResponse(requestKey, method, json, tags);
+  } catch {
+    // ignore caching failures
+  }
+}
+
+async function tryOfflineLoginFallback(options) {
+  const data = parseJsonBody(options);
+  if (!data || !data.username || !data.password) {
+    throw new Error('No hay credenciales válidas para autenticación offline.');
+  }
+  return signInOffline(data.username, data.password);
+}
 
 export async function api(path, options = {}) {
   let res;
-  const { retries = 0, backoff = 500, ...fetchOptions } = options;
-
+  const { retries = 0, backoff = 500, timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
   const token = localStorage.getItem('token') || '';
   const baseHeaders = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
   const headers = token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders;
 
-  try {
-    res = await fetch(`${API_BASE}${path}`, { headers, ...fetchOptions });
+  const fp = await getDeviceFingerprintHeader();
+  if (fp) headers['X-Device-Fingerprint'] = fp;
 
+  try {
+    res = await fetchWithTimeout(`${API_BASE}${path}`, { headers, ...fetchOptions }, timeoutMs);
     if (!res.ok && res.status >= 500 && retries > 0) {
       throw new Error(`Server Error ${res.status}`);
     }
   } catch (e) {
+    const message = normalizeError(e);
+    if (path === '/auth/login') {
+      try {
+        const fallback = await tryOfflineLoginFallback(fetchOptions);
+        return fallback;
+      } catch (offlineError) {
+        const offlineMessage = normalizeError(offlineError);
+        try { window.dispatchEvent(new CustomEvent('app-error', { detail: offlineMessage })); } catch { }
+        throw new Error(offlineMessage);
+      }
+    }
+
     if (retries > 0) {
       await delay(backoff);
       return api(path, { ...options, retries: retries - 1, backoff: backoff * 2 });
     }
 
-    const msg = e.message === 'Failed to fetch' ? 'Sin conexión al servidor' : e.message;
-    try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })); } catch { }
-    throw e;
+    const cached = await getCachedOfflineResponse(path, fetchOptions.method || 'GET');
+    if (cached !== null) {
+      return cached;
+    }
+
+    try { window.dispatchEvent(new CustomEvent('app-error', { detail: message })); } catch { }
+    throw new Error(message);
+  }
+
+  const newToken = res.headers.get('X-New-Token');
+  if (newToken) {
+    localStorage.setItem('token', newToken);
   }
 
   if (!res.ok) {
@@ -33,7 +178,19 @@ export async function api(path, options = {}) {
     if (ct.includes('application/json')) {
       try {
         const data = await res.json();
-        msg = typeof data === 'string' ? data : (data.error || JSON.stringify(data));
+        if (typeof data === 'string') {
+          msg = data;
+        } else if (data.error && typeof data.error === 'string') {
+          msg = data.error;
+        } else if (data.message && typeof data.message === 'string') {
+          msg = data.message;
+        } else if (data.error && typeof data.error === 'object' && typeof data.error.message === 'string') {
+          msg = data.error.message;
+        } else if (data.message && typeof data.message === 'object' && typeof data.message.error === 'string') {
+          msg = data.message.error;
+        } else {
+          msg = JSON.stringify(data);
+        }
       } catch {
         msg = await res.text();
       }
@@ -43,8 +200,6 @@ export async function api(path, options = {}) {
 
     if (res.status === 401) {
       try { window.dispatchEvent(new CustomEvent('auth-error')); } catch { }
-    } else if (res.status === 409) {
-      throw new Error(msg);
     } else {
       try { window.dispatchEvent(new CustomEvent('app-error', { detail: msg })); } catch { }
     }
@@ -52,10 +207,20 @@ export async function api(path, options = {}) {
   }
 
   const json = await res.json();
-  return (json.data !== undefined) ? json.data : json;
+  const result = json.data !== undefined ? json.data : json;
+
+  if (path === '/auth/login' && result?.token && result?.user) {
+    const credentials = parseJsonBody(fetchOptions);
+    if (credentials?.username && credentials?.password) {
+      await persistOfflineLogin(credentials.username, credentials.password, result.user, result.token);
+    }
+  }
+
+  await cacheSuccessfulResponse(path, fetchOptions.method || 'GET', result);
+  return result;
 }
 
-export const get = (path) => api(path, { retries: 2 });
+export const get = (path) => api(path, { retries: 2, timeoutMs: DEFAULT_TIMEOUT_MS });
 
 export async function getProducts(cursor, take = 50) {
   const params = new URLSearchParams();
@@ -79,7 +244,7 @@ export async function createSale(payload) {
   return api('/sales', {
     method: 'POST',
     body: JSON.stringify(payload),
-    headers: payload.headers || {}
+    headers: payload.headers || {},
   });
 }
 

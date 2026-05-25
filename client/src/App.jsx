@@ -3,6 +3,11 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useUserStore } from './store/userStore';
 import { useCartStore } from './store/cartStore';
 import { initSyncManager } from './lib/syncManager';
+import { initSyncEngineV2 } from './lib/syncEngineV2';
+import { initGlobalErrorHandler, setCorrelationId } from './lib/structuredLogger';
+import { getHealthMonitor } from './lib/healthMonitor';
+import { attemptCrashRecovery, attemptCartRollback, safeQueueReplay, runIntegrityCheck } from './lib/snapshotManager';
+import { restoreOfflineSession } from './lib/offlineAuth';
 
 // Views
 import Login from './views/Login';
@@ -31,6 +36,8 @@ const SupportTickets = React.lazy(() => import('./views/SupportTickets'));
 const Subscription = React.lazy(() => import('./views/Subscription'));
 const EnterpriseReports = React.lazy(() => import('./views/admin/EnterpriseReports'));
 const AiInsights = React.lazy(() => import('./views/AiInsights'));
+const ThemeStudio = React.lazy(() => import('./views/ThemeStudio'));
+const Branding = React.lazy(() => import('./views/Branding'));
 
 // Layouts
 import { MainLayout } from './components/layout/MainLayout';
@@ -65,16 +72,49 @@ import { LoadingFallback } from './components/common/LoadingFallback';
 // const LoadingFallback = () => <Splash />; // Replaced with enhanced component
 
 function App() {
-    const { theme } = useUserStore();
     const hydrate = useCartStore(state => state.hydrate);
 
     useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme);
-    }, [theme]);
+        // Initialize all enterprise subsystems
+        setCorrelationId(crypto.randomUUID?.() || 'app-' + Date.now());
+        initGlobalErrorHandler();
 
-    useEffect(() => {
-        hydrate();
-        initSyncManager();
+        const bootstrap = async () => {
+            try {
+                const session = await restoreOfflineSession();
+                if (session) {
+                    useUserStore.getState().login(session.user, session.token);
+                    console.log('[Offline] restored local session for', session.user.username);
+                }
+
+                hydrate();
+                initSyncManager(); // delegates to syncEngineV2
+                initSyncEngineV2();
+                getHealthMonitor().init();
+
+                const recovery = await attemptCrashRecovery();
+                if (recovery.recovered && recovery.restoredItems > 0) {
+                    console.log(`[Recovery] Restored ${recovery.restoredItems} items from snapshot`);
+                }
+                const cartRollback = await attemptCartRollback();
+                if (cartRollback.rolledBack) {
+                    console.log(`[Recovery] Cart rolled back: ${cartRollback.reason}`);
+                }
+                const integrity = await runIntegrityCheck();
+                if (!integrity.queueConsistent || !integrity.snapshotValid) {
+                    console.warn(`[Integrity] Issues found: ${integrity.details.join(', ')}`);
+                    await safeQueueReplay();
+                }
+            } catch (e) {
+                console.error('[Init] Recovery error:', e);
+            }
+        };
+
+        bootstrap();
+
+        return () => {
+            getHealthMonitor().destroy();
+        };
     }, [hydrate]);
 
     return (
@@ -90,7 +130,7 @@ function App() {
                     <Route path="/support" element={<Support />} />
                     <Route path="/roadmap" element={<Roadmap />} />
 
-                    <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
+                    <Route path="/" element={<Navigate to="/ventas" replace />} />
 
                     <Route path="/ventas" element={
                         <RequireAuth requiredPermission="sales:view">
@@ -179,6 +219,18 @@ function App() {
                     <Route path="/insights" element={
                         <RequireAuth>
                             <AiInsights />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/theme-studio" element={
+                        <RequireAuth>
+                            <ThemeStudio />
+                        </RequireAuth>
+                    } />
+
+                    <Route path="/branding" element={
+                        <RequireAuth requiredPermission="settings:view">
+                            <Branding />
                         </RequireAuth>
                     } />
 

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { Table } from '../components/ui/Table';
+import { useToast } from '../components/ui/Toast';
+import { Badge } from '../components/ui/Badge';
 
 export default function SupportTickets() {
+    const toast = useToast();
     const [tickets, setTickets] = useState([]);
     const [newTicket, setNewTicket] = useState(false);
     const [subject, setSubject] = useState('');
@@ -25,7 +29,7 @@ export default function SupportTickets() {
             setMessage('');
             loadTickets();
         } catch (e) {
-            alert('Error creando ticket');
+            toast('Error creando ticket', 'error');
         }
     };
 
@@ -59,29 +63,25 @@ export default function SupportTickets() {
             )}
 
             <div className="bg-white rounded shadow overflow-hidden">
-                <table className="table w-full">
-                    <thead>
-                        <tr>
-                            <th className="text-left bg-gray-50 p-4">Asunto</th>
-                            <th className="text-left bg-gray-50 p-4">Estado</th>
-                            <th className="text-left bg-gray-50 p-4">Fecha</th>
-                            <th className="text-left bg-gray-50 p-4">Mensajes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tickets.map(t => (
-                            <tr key={t.id} className="border-t">
-                                <td className="p-4 font-medium">{t.subject}</td>
-                                <td className="p-4"><span className={`badge ${t.status === 'open' ? 'badge-primary' : 'badge-accent'}`}>{t.status}</span></td>
-                                <td className="p-4 text-gray-500 text-sm">{new Date(t.created_at).toLocaleDateString()}</td>
-                                <td className="p-4">{t.messages.length}</td>
-                            </tr>
-                        ))}
-                        {tickets.length === 0 && (
-                            <tr><td colSpan="4" className="p-8 text-center text-gray-400">No hay tickets de soporte.</td></tr>
-                        )}
-                    </tbody>
-                </table>
+                <Table
+                    data={tickets}
+                    searchable={false}
+                    pageSize={tickets.length || 10}
+                    striped={false}
+                    density="compact"
+                    emptyTitle="No hay tickets de soporte."
+                    columns={[
+                        { key: 'subject', title: 'Asunto', render: (t) => <span className="font-medium">{t.subject}</span> },
+                        { key: 'status', title: 'Estado', render: (t) => (
+                            <Badge variant={t.status === 'open' ? 'info' : 'success'} size="sm">
+                                {t.status}
+                            </Badge>
+                        )},
+                        { key: 'created_at', title: 'Fecha', render: (t) => <span className="text-gray-500 text-sm">{new Date(t.created_at).toLocaleDateString()}</span> },
+                        { key: 'messages', title: 'Mensajes', render: (t) => t.messages.length },
+                    ]}
+                    rowKey={(t) => t.id}
+                />
             </div>
         </div>
     );

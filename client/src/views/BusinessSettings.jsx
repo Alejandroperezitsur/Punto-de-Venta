@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { api } from '../lib/api';
-import { Card } from '../components/common/Card';
-import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
-import { useUserStore } from '../store/userStore';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Skeleton } from '../components/ui/Skeleton';
+import { Select } from '../components/ui/Select';
+import { useToast } from '../components/ui/Toast';
+import { useTheme } from '../context/ThemeContext';
 import {
   Settings, Store, Receipt, Palette, Bell, Save, Check,
   Building, Phone, Mail, Globe, Percent, Image
 } from 'lucide-react';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
-  <Card className="p-6 space-y-4">
-    <div className="flex items-center gap-3 border-b border-[hsl(var(--border))] pb-3 mb-2">
-      <Icon className="h-5 w-5 text-[hsl(var(--primary))]" />
+  <Card variant="outline" className="p-6 space-y-4">
+    <div className="flex items-center gap-3 border-b border-border pb-3 mb-2">
+      <Icon className="h-5 w-5 text-primary" />
       <h3 className="font-semibold text-lg">{title}</h3>
     </div>
     {children}
@@ -20,7 +24,8 @@ const SettingsSection = ({ title, icon: Icon, children }) => (
 );
 
 const BusinessSettings = () => {
-  const { toggleTheme, theme } = useUserStore();
+  const { isDark, toggleDark, setTheme, themes, theme } = useTheme();
+  const { toast } = useToast();
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,9 +60,10 @@ const BusinessSettings = () => {
         body: JSON.stringify(settings)
       });
       setSaved(true);
+      toast({ title: 'Configuración guardada', description: 'Los cambios se han aplicado correctamente.' });
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
-      alert('Error al guardar: ' + e.message);
+      toast({ title: 'Error al guardar', description: e.message, variant: 'error' });
     } finally {
       setSaving(false);
     }
@@ -75,8 +81,28 @@ const BusinessSettings = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-[hsl(var(--muted-foreground))]">
-        Cargando configuración...
+      <div className="space-y-6 max-w-4xl mx-auto pb-20">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-6 w-6" />
+            <Skeleton className="h-8 w-64" />
+          </div>
+          <Skeleton className="h-10 w-40" />
+        </div>
+        {[1, 2, 3].map(i => (
+          <Card key={i} variant="outline" className="p-6 space-y-4">
+            <div className="flex items-center gap-3 border-b border-border pb-3 mb-2">
+              <Skeleton className="h-5 w-5" />
+              <Skeleton className="h-6 w-48" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </Card>
+        ))}
       </div>
     );
   }
@@ -85,12 +111,25 @@ const BusinessSettings = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-20">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <Settings className="h-6 w-6 text-[hsl(var(--primary))]" />
+          <Settings className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">Configuración del Sistema</h1>
         </div>
         <Button onClick={handleSave} isLoading={saving} disabled={saved}>
-          {saved ? <Check className="h-4 w-4 mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-          {saved ? 'Guardado' : 'Guardar Cambios'}
+          {saved ? (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="flex items-center"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Guardado
+            </motion.span>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Guardar Cambios
+            </>
+          )}
         </Button>
       </div>
 
@@ -146,10 +185,10 @@ const BusinessSettings = () => {
             <label className="text-xs font-medium mb-1 block">Logo del Negocio</label>
             <div className="flex items-center gap-4">
               {settings.business_logo ? (
-                <img src={settings.business_logo} alt="Logo" className="h-16 w-16 object-contain rounded-lg border border-[hsl(var(--border))]" />
+                <img src={settings.business_logo} alt="Logo" className="h-16 w-16 object-contain rounded-lg border border-border" />
               ) : (
-                <div className="h-16 w-16 rounded-lg border-2 border-dashed border-[hsl(var(--border))] flex items-center justify-center">
-                  <Image className="h-6 w-6 text-[hsl(var(--muted-foreground))]" />
+                <div className="h-16 w-16 rounded-lg border-2 border-dashed border-border flex items-center justify-center">
+                  <Image className="h-6 w-6 text-muted-foreground" />
                 </div>
               )}
               <div>
@@ -174,18 +213,18 @@ const BusinessSettings = () => {
       <SettingsSection title="Impuestos y Moneda" icon={Percent}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-xs font-medium mb-1 block">Moneda</label>
-            <select
-              className="flex h-10 w-full rounded-md border border-[hsl(var(--border))] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
-              value={settings.currency || 'MXN'}
-              onChange={e => updateSetting('currency', e.target.value)}
-            >
-              <option value="MXN">MXN - Peso Mexicano</option>
-              <option value="USD">USD - Dólar</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="COP">COP - Peso Colombiano</option>
-              <option value="ARS">ARS - Peso Argentino</option>
-            </select>
+            <Select
+                options={[
+                    { value: 'MXN', label: 'MXN - Peso Mexicano' },
+                    { value: 'USD', label: 'USD - Dólar' },
+                    { value: 'EUR', label: 'EUR - Euro' },
+                    { value: 'COP', label: 'COP - Peso Colombiano' },
+                    { value: 'ARS', label: 'ARS - Peso Argentino' },
+                ]}
+                value={settings.currency || 'MXN'}
+                onChange={(v) => updateSetting('currency', v)}
+                label="Moneda"
+            />
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">Nombre del Impuesto</label>
@@ -209,7 +248,7 @@ const BusinessSettings = () => {
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-[hsl(var(--border))]"
+                className="h-4 w-4 rounded border-border"
                 checked={settings.tax_included === '1'}
                 onChange={e => updateSetting('tax_included', e.target.checked ? '1' : '0')}
               />
@@ -223,15 +262,15 @@ const BusinessSettings = () => {
       <SettingsSection title="Configuración de Tickets" icon={Receipt}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-medium mb-1 block">Ancho del Ticket (mm)</label>
-            <select
-              className="flex h-10 w-full rounded-md border border-[hsl(var(--border))] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
-              value={settings.ticket_width || '80'}
-              onChange={e => updateSetting('ticket_width', e.target.value)}
-            >
-              <option value="58">58mm (Pequeño)</option>
-              <option value="80">80mm (Estándar)</option>
-            </select>
+            <Select
+                options={[
+                    { value: '58', label: '58mm (Pequeño)' },
+                    { value: '80', label: '80mm (Estándar)' },
+                ]}
+                value={settings.ticket_width || '80'}
+                onChange={(v) => updateSetting('ticket_width', v)}
+                label="Ancho del Ticket (mm)"
+            />
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">Mensaje de Pie</label>
@@ -242,6 +281,19 @@ const BusinessSettings = () => {
             />
           </div>
         </div>
+        <div className="mt-4">
+          <label className="text-xs font-medium mb-2 block">Vista Previa del Ticket</label>
+          <div className="bg-muted border border-border rounded-2xl p-6 font-mono text-sm max-w-xs mx-auto">
+            <div className="text-center border-b border-dashed border-border pb-3 mb-3">
+              <p className="font-bold">{settings.business_name || 'Mi Negocio'}</p>
+              <p className="text-xs text-muted-foreground">{settings.business_address || ''}</p>
+            </div>
+            <p className="text-center text-xs text-muted-foreground">Ticket de Venta</p>
+            <div className="border-t border-dashed border-border mt-3 pt-3">
+              <p className="text-center text-[10px] text-muted-foreground">Gracias por su compra</p>
+            </div>
+          </div>
+        </div>
       </SettingsSection>
 
       {/* Appearance */}
@@ -249,20 +301,18 @@ const BusinessSettings = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="text-xs font-medium mb-1 block">Tema</label>
-            <select
-              className="flex h-10 w-full rounded-md border border-[hsl(var(--border))] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+            <Select 
+              options={themes.map(t => ({value: t, label: t.charAt(0).toUpperCase() + t.slice(1)}))}
               value={theme}
-              onChange={e => { toggleTheme(); }}
-            >
-              <option value="light">Claro</option>
-              <option value="dark">Oscuro</option>
-            </select>
+              onChange={setTheme}
+              label="Tema"
+            />
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">Color Primario</label>
             <input
               type="color"
-              className="h-10 w-full rounded-md border border-[hsl(var(--border))] cursor-pointer"
+              className="h-10 w-full rounded-md border border-border cursor-pointer bg-card"
               value={settings.theme_primary || '#1e88e5'}
               onChange={e => updateSetting('theme_primary', e.target.value)}
             />
@@ -271,7 +321,7 @@ const BusinessSettings = () => {
             <label className="flex items-center gap-3 cursor-pointer mt-5">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-[hsl(var(--border))]"
+                className="h-4 w-4 rounded border-border"
                 checked={settings.compact_mode === '1'}
                 onChange={e => updateSetting('compact_mode', e.target.checked ? '1' : '0')}
               />
@@ -309,7 +359,7 @@ const BusinessSettings = () => {
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-[hsl(var(--border))]"
+              className="h-4 w-4 rounded border-border"
               checked={settings.sound_enabled === '1'}
               onChange={e => updateSetting('sound_enabled', e.target.checked ? '1' : '0')}
             />
@@ -323,12 +373,12 @@ const BusinessSettings = () => {
               value={settings.low_stock_threshold || '5'}
               onChange={e => updateSetting('low_stock_threshold', e.target.value)}
             />
-            <span className="text-sm text-[hsl(var(--muted-foreground))]">unidades</span>
+            <span className="text-sm text-muted-foreground">unidades</span>
           </div>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-[hsl(var(--border))]"
+              className="h-4 w-4 rounded border-border"
               checked={settings.require_customer === '1'}
               onChange={e => updateSetting('require_customer', e.target.checked ? '1' : '0')}
             />

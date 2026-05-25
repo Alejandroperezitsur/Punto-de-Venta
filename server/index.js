@@ -20,7 +20,13 @@ const reportsRouter = require('./routes/reports');
 const auditsRouter = require('./routes/audits');
 const systemRouter = require('./routes/system');
 
+const healthRouter = require('./routes/health');
+const reconciliationRouter = require('./routes/reconciliation');
+const batchRouter = require('./routes/batch');
+const { evaluateSaleRisk, logFraudAlert } = require('./services/fraudDetectionService');
+
 const { apiLimiter, cashLimiter } = require('./middleware/rateLimiter');
+const sessionRouter = require('./routes/session');
 
 const app = express();
 app.use(helmet());
@@ -45,6 +51,19 @@ app.use((req, res, next) => {
     const route = (req.route && req.route.path) ? req.route.path : (req.originalUrl ? req.originalUrl.split('?')[0] : 'unknown');
     end({ method: req.method, route, status: String(res.statusCode) });
   });
+  next();
+});
+
+// CSP Headers
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws:; font-src 'self' data:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+  );
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   next();
 });
 
@@ -76,6 +95,31 @@ app.use('/api/roadmap', require('./routes/roadmap'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/billing', require('./routes/billing'));
 app.use('/api/ai', require('./routes/ai'));
+app.use('/api/fraud', require('./routes/fraud'));
+app.use('/api/sessions', sessionRouter);
+app.use('/api/dashboards', require('./routes/dashboards'));
+app.use('/api/health', healthRouter);
+app.use('/api/reconciliation', reconciliationRouter);
+app.use('/api', batchRouter);
+
+// Fraud middleware on sales creation
+app.use('/api/sales', (req, res, next) => {
+  if (req.method === 'POST' && req.user) {
+    const originalJson = res.json.bind(res);
+    res.json = function (body) {
+      if (res.statusCode === 201 || res.statusCode === 200) {
+        const saleData = body?.data || body;
+        evaluateSaleRisk(req.user.uid, req.user.storeId, req.body).then((risk) => {
+          if (risk.alert) {
+            logFraudAlert(req.user.uid, req.user.storeId, risk);
+          }
+        }).catch(() => {});
+      }
+      return originalJson(body);
+    };
+  }
+  next();
+});
 
 app.get('/api/metrics', async (req, res) => {
   try {
@@ -85,6 +129,9 @@ app.get('/api/metrics', async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+const { attachTokenRotation } = authModule;
+app.use(attachTokenRotation);
 
 const { errorHandler } = require('./middleware/errorHandler');
 app.use((req, res, next) => next());

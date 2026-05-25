@@ -1,15 +1,29 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
-import { Card } from '../components/common/Card';
-import { Button } from '../components/common/Button';
-import { Input } from '../components/common/Input';
-import { formatMoney } from '../utils/format';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Badge } from '../components/ui/Badge';
+import { useToast } from '../components/ui/Toast';
+import { Skeleton } from '../components/ui/Skeleton';
+import { Table } from '../components/ui/Table';
+import { Select } from '../components/ui/Select';
+import { motion } from 'framer-motion';
 import {
     DoorOpen, DoorClosed, ArrowDownCircle, ArrowUpCircle, RefreshCw,
     AlertCircle, Wallet, History, CheckCircle2
 } from 'lucide-react';
 
 const CashControlView = () => {
+    const toast = useToast();
+
+    const formatMoney = (amount) => {
+        return new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: 'MXN',
+        }).format(amount || 0);
+    };
+
     const [session, setSession] = useState(null);
     const [summary, setSummary] = useState(null);
     const [movements, setMovements] = useState([]);
@@ -20,7 +34,6 @@ const CashControlView = () => {
     const [actionType, setActionType] = useState('deposit');
     const [actionLoading, setActionLoading] = useState(false);
 
-    // Close modal state
     const [isClosing, setIsClosing] = useState(false);
     const [closeStep, setCloseStep] = useState('input');
     const [countedCash, setCountedCash] = useState('');
@@ -28,7 +41,6 @@ const CashControlView = () => {
     const [closeError, setCloseError] = useState('');
     const [closeLoading, setCloseLoading] = useState(false);
 
-    // History modal
     const [showHistory, setShowHistory] = useState(false);
     const [historyData, setHistoryData] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(false);
@@ -62,7 +74,7 @@ const CashControlView = () => {
             setOpeningBalance('');
             await loadStatus();
         } catch (e) {
-            alert('Error al abrir caja: ' + e.message);
+            toast('Error al abrir caja: ' + e.message, 'error');
         } finally {
             setActionLoading(false);
         }
@@ -101,7 +113,7 @@ const CashControlView = () => {
 
     const handleAction = async () => {
         const amount = parseFloat(actionAmount);
-        if (!amount || amount <= 0) return alert('Ingrese un monto válido');
+        if (!amount || amount <= 0) return toast('Ingrese un monto válido', 'error');
         setActionLoading(true);
         try {
             const endpoint = actionType === 'deposit' ? '/cash/deposit' : '/cash/withdraw';
@@ -113,7 +125,7 @@ const CashControlView = () => {
             setActionRef('');
             await loadStatus();
         } catch (e) {
-            alert('Error: ' + e.message);
+            toast('Error: ' + e.message, 'error');
         } finally {
             setActionLoading(false);
         }
@@ -126,7 +138,7 @@ const CashControlView = () => {
             setHistoryData(res.data || []);
             setShowHistory(true);
         } catch (e) {
-            alert('Error al cargar historial');
+            toast('Error al cargar historial', 'error');
         } finally {
             setHistoryLoading(false);
         }
@@ -147,46 +159,48 @@ const CashControlView = () => {
             </div>
 
             {loading ? (
-                <Card className="p-12 text-center text-[hsl(var(--muted-foreground))]">
+                <Card className="p-12 text-center text-muted-foreground">
                     Cargando estado de caja...
                 </Card>
             ) : !session ? (
-                <Card className="p-8 space-y-6 border-l-4 border-l-amber-500 animate-fade-in">
-                    <div className="flex items-center gap-4 text-amber-600">
-                        <AlertCircle className="h-8 w-8" />
-                        <div>
-                            <h3 className="font-bold text-lg">Caja Cerrada</h3>
-                            <p className="text-sm text-[hsl(var(--muted-foreground))]">No hay sesión de caja activa. Abre una para comenzar.</p>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <Card className="p-8 space-y-6 border-l-4 border-l-warning">
+                        <div className="flex items-center gap-4 text-amber-600">
+                            <AlertCircle className="h-8 w-8" />
+                            <div>
+                                <h3 className="font-bold text-lg">Caja Cerrada</h3>
+                                <p className="text-sm text-muted-foreground">No hay sesión de caja activa. Abre una para comenzar.</p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex items-end gap-4">
-                        <div className="flex-1">
-                            <label className="text-xs font-medium mb-1 block">Saldo Inicial</label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                value={openingBalance}
-                                onChange={e => setOpeningBalance(e.target.value)}
-                                icon={Wallet}
-                            />
+                        <div className="flex items-end gap-4">
+                            <div className="flex-1">
+                                <label className="text-xs font-medium mb-1 block">Saldo Inicial</label>
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    value={openingBalance}
+                                    onChange={e => setOpeningBalance(e.target.value)}
+                                    icon={Wallet}
+                                />
+                            </div>
+                            <Button onClick={handleOpen} isLoading={actionLoading} className="h-10">
+                                <DoorOpen className="h-4 w-4 mr-2" /> Abrir Caja
+                            </Button>
                         </div>
-                        <Button onClick={handleOpen} isLoading={actionLoading} className="h-10">
-                            <DoorOpen className="h-4 w-4 mr-2" /> Abrir Caja
-                        </Button>
-                    </div>
-                </Card>
+                    </Card>
+                </motion.div>
             ) : (
-                <div className="space-y-6 animate-fade-in">
-                    <Card className="p-6 border-l-4 border-l-green-500 bg-gradient-to-r from-green-50/50 to-transparent dark:from-green-900/10">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                    <Card className="p-6 border-l-4 border-l-success bg-success/5">
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-green-100 text-green-600 rounded-full">
+                                <div className="p-3 bg-success/10 text-success rounded-full">
                                     <Wallet className="h-6 w-6" />
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-lg text-green-700 dark:text-green-400">Caja Abierta</h3>
-                                    <p className="text-sm text-[hsl(var(--muted-foreground))]">
+                                    <p className="text-sm text-muted-foreground">
                                         Abierta: {new Date(session.opened_at).toLocaleString()} &bull; Inicial: {formatMoney(session.opening_balance)}
                                     </p>
                                 </div>
@@ -200,20 +214,20 @@ const CashControlView = () => {
                     {summary && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <Card className="p-4 text-center">
-                                <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase font-semibold">Ventas (Efectivo)</p>
-                                <p className="text-xl font-bold text-green-600">{formatMoney(summary.sales)}</p>
+                                <p className="text-xs text-muted-foreground uppercase font-semibold">Ventas (Efectivo)</p>
+                                <p className="text-xl font-bold text-success">{formatMoney(summary.sales)}</p>
                             </Card>
                             <Card className="p-4 text-center">
-                                <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase font-semibold">Depósitos</p>
-                                <p className="text-xl font-bold text-blue-600">{formatMoney(summary.deposits)}</p>
+                                <p className="text-xs text-muted-foreground uppercase font-semibold">Depósitos</p>
+                                <p className="text-xl font-bold text-info">{formatMoney(summary.deposits)}</p>
                             </Card>
                             <Card className="p-4 text-center">
-                                <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase font-semibold">Retiros</p>
-                                <p className="text-xl font-bold text-red-500">{formatMoney(summary.withdrawals)}</p>
+                                <p className="text-xs text-muted-foreground uppercase font-semibold">Retiros</p>
+                                <p className="text-xl font-bold text-danger">{formatMoney(summary.withdrawals)}</p>
                             </Card>
-                            <Card className="p-4 text-center border-2 border-[hsl(var(--primary))]">
-                                <p className="text-xs text-[hsl(var(--muted-foreground))] uppercase font-semibold">Saldo Estimado</p>
-                                <p className="text-xl font-black text-[hsl(var(--primary))]">{formatMoney(summary.expected)}</p>
+                            <Card className="p-4 text-center border-2 border-primary">
+                                <p className="text-xs text-muted-foreground uppercase font-semibold">Saldo Estimado</p>
+                                <p className="text-xl font-black text-primary">{formatMoney(summary.expected)}</p>
                             </Card>
                         </div>
                     )}
@@ -222,15 +236,12 @@ const CashControlView = () => {
                         <h4 className="font-semibold mb-4">Registrar Movimiento</h4>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                             <div>
-                                <label className="text-xs font-medium mb-1 block">Tipo</label>
-                                <select
-                                    className="flex h-10 w-full rounded-md border border-[hsl(var(--border))] bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]"
+                                <Select
+                                    label="Tipo"
+                                    options={[{ value: 'deposit', label: 'Depósito' }, { value: 'withdraw', label: 'Retiro' }]}
                                     value={actionType}
-                                    onChange={e => setActionType(e.target.value)}
-                                >
-                                    <option value="deposit">Depósito</option>
-                                    <option value="withdraw">Retiro</option>
-                                </select>
+                                    onChange={setActionType}
+                                />
                             </div>
                             <div>
                                 <label className="text-xs font-medium mb-1 block">Monto</label>
@@ -259,180 +270,163 @@ const CashControlView = () => {
 
                     <Card className="p-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <History className="h-5 w-5 text-[hsl(var(--muted-foreground))]" />
+                            <History className="h-5 w-5 text-muted-foreground" />
                             <h4 className="font-semibold">Movimientos de esta Sesión</h4>
                         </div>
-                        {movements.length === 0 ? (
-                            <p className="text-center text-[hsl(var(--muted-foreground))] py-8">Sin movimientos registrados.</p>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]">
-                                        <tr>
-                                            <th className="text-left px-4 py-2 font-medium">Tipo</th>
-                                            <th className="text-left px-4 py-2 font-medium">Referencia</th>
-                                            <th className="text-right px-4 py-2 font-medium">Monto</th>
-                                            <th className="text-left px-4 py-2 font-medium">Fecha</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-[hsl(var(--border))]">
-                                        {movements.map(m => (
-                                            <tr key={m.id} className="hover:bg-[hsl(var(--muted))/0.5]">
-                                                <td className="px-4 py-3">
-                                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${m.type === 'sale' ? 'bg-green-100 text-green-700' :
-                                                            m.type === 'deposit' || m.type === 'opening' ? 'bg-blue-100 text-blue-700' :
-                                                                'bg-red-100 text-red-700'
-                                                        }`}>
-                                                        {m.type === 'sale' ? 'Venta' : m.type === 'opening' ? 'Apertura' : m.type === 'deposit' ? 'Depósito' : 'Retiro'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3 text-[hsl(var(--muted-foreground))]">{m.reference || '-'}</td>
-                                                <td className={`px-4 py-3 text-right font-semibold ${m.amount >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                                    {m.amount >= 0 ? '+' : ''}{formatMoney(m.amount)}
-                                                </td>
-                                                <td className="px-4 py-3 text-[hsl(var(--muted-foreground))] font-mono text-xs">
-                                                    {new Date(m.created_at).toLocaleString()}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        <Table
+                            data={movements}
+                            searchable={false}
+                            pageSize={movements.length || 10}
+                            striped={false}
+                            density="compact"
+                            emptyTitle="Sin movimientos registrados."
+                            columns={[
+                                { key: 'type', title: 'Tipo', render: (m) => (
+                                    <Badge variant={
+                                        m.type === 'sale' ? 'success' :
+                                        m.type === 'deposit' || m.type === 'opening' ? 'info' :
+                                        'danger'
+                                    } size="sm">
+                                        {m.type === 'sale' ? 'Venta' : m.type === 'opening' ? 'Apertura' : m.type === 'deposit' ? 'Depósito' : 'Retiro'}
+                                    </Badge>
+                                )},
+                                { key: 'reference', title: 'Referencia', render: (m) => <span className="text-muted-foreground">{m.reference || '-'}</span> },
+                                { key: 'amount', title: 'Monto', className: 'text-right', render: (m) => (
+                                    <span className={`font-semibold ${m.amount >= 0 ? 'text-success' : 'text-danger'}`}>
+                                        {m.amount >= 0 ? '+' : ''}{formatMoney(m.amount)}
+                                    </span>
+                                )},
+                                { key: 'created_at', title: 'Fecha', render: (m) => <span className="text-muted-foreground font-mono text-xs">{new Date(m.created_at).toLocaleString()}</span> },
+                            ]}
+                            rowKey={(m) => m.id}
+                        />
                     </Card>
-                </div>
+                </motion.div>
             )}
 
             {isClosing && (
-                <div className="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-8 animate-in slide-in-from-bottom duration-500">
-                    <button
-                        onClick={() => { setIsClosing(false); setCloseStep('input'); }}
-                        className="absolute top-8 right-8 text-gray-400 hover:text-black font-bold"
-                    >
-                        CANCELAR
-                    </button>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-4xl p-8 max-w-md w-full shadow-2xl relative">
+                        <button
+                            onClick={() => { setIsClosing(false); setCloseStep('input'); }}
+                            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground font-bold text-sm"
+                        >
+                            CANCELAR
+                        </button>
 
-                    {closeStep === 'input' ? (
-                        <div className="w-full max-w-md text-center space-y-10">
-                            <h2 className="text-4xl font-black tracking-tight">¿Cuánto dinero hay en el cajón?</h2>
-                            <p className="text-gray-500 font-medium italic">Cuenta tu efectivo físicamente antes de continuar.</p>
+                        {closeStep === 'input' ? (
+                            <div className="text-center space-y-10">
+                                <h2 className="text-4xl font-black tracking-tight">¿Cuánto dinero hay en el cajón?</h2>
+                                <p className="text-muted-foreground font-medium italic">Cuenta tu efectivo físicamente antes de continuar.</p>
 
-                            {closeError && (
-                                <div className="p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 font-bold">
-                                    {closeError}
+                                {closeError && (
+                                    <div className="bg-danger/10 border-2 border-danger/20 rounded-2xl text-danger font-bold p-4">
+                                        {closeError}
+                                    </div>
+                                )}
+
+                                <div className="relative">
+                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black text-muted-foreground/60">$</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        autoFocus
+                                        className="w-full h-24 bg-muted border-4 border-border rounded-4xl text-5xl font-black text-center focus:outline-none focus:border-primary transition-all"
+                                        value={countedCash}
+                                        onChange={(e) => setCountedCash(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') handleCloseSubmit(); }}
+                                        placeholder="0"
+                                    />
                                 </div>
-                            )}
 
-                            <div className="relative">
-                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black text-gray-300">$</span>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    autoFocus
-                                    className="w-full h-32 bg-gray-50 border-4 border-gray-100 rounded-[2.5rem] text-6xl font-black text-center focus:outline-none focus:border-black transition-all"
-                                    value={countedCash}
-                                    onChange={(e) => setCountedCash(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') handleCloseSubmit(); }}
-                                    placeholder="0"
-                                />
-                            </div>
-
-                            <Button
-                                onClick={handleCloseSubmit}
-                                disabled={!countedCash || closeLoading}
-                                isLoading={closeLoading}
-                                className="w-full h-24 text-2xl font-black rounded-[2rem]"
-                            >
-                                VERIFICAR Y CERRAR CAJA
-                            </Button>
-                        </div>
-                    ) : closeResult ? (
-                        <div className="w-full max-w-md text-center space-y-8 animate-in zoom-in duration-300">
-                            {Math.abs(closeResult.difference) < 0.01 ? (
-                                <>
-                                    <div className="h-32 w-32 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-                                        <CheckCircle2 className="h-16 w-16 stroke-[3]" />
-                                    </div>
-                                    <h2 className="text-5xl font-black tracking-tighter">Caja Cerrada</h2>
-                                    <p className="text-xl text-gray-500 font-medium">
-                                        Todo cuadra perfectamente. Diferencia: <span className="text-green-600 font-black">$0.00</span>
-                                    </p>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="h-32 w-32 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-                                        <AlertCircle className="h-16 w-16 stroke-[3]" />
-                                    </div>
-                                    <h2 className="text-5xl font-black tracking-tighter">Discrepancia Detectada</h2>
-                                    <p className="text-xl text-gray-500 font-medium">
-                                        {closeResult.difference > 0 ? (
-                                            <>Sobran <span className="text-green-600 font-black">${closeResult.difference.toFixed(2)}</span></>
-                                        ) : (
-                                            <>Faltan <span className="text-red-600 font-black">${Math.abs(closeResult.difference).toFixed(2)}</span></>
-                                        )}
-                                        <br />
-                                        <span className="text-sm">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
-                                    </p>
-                                </>
-                            )}
-
-                            <div className="pt-6 border-t border-gray-100">
                                 <Button
-                                    onClick={() => { setIsClosing(false); setCloseStep('input'); }}
-                                    className="w-full h-16 text-xl font-black rounded-[1.5rem]"
+                                    onClick={handleCloseSubmit}
+                                    disabled={!countedCash || closeLoading}
+                                    isLoading={closeLoading}
+                                    className="w-full h-24 text-2xl font-black rounded-3xl"
                                 >
-                                    VOLVER AL CONTROL DE CAJA
+                                    VERIFICAR Y CERRAR CAJA
                                 </Button>
                             </div>
-                        </div>
-                    ) : null}
+                        ) : closeResult ? (
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-8">
+                                {Math.abs(closeResult.difference) < 0.01 ? (
+                                    <>
+                                        <div className="h-32 w-32 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
+                                            <CheckCircle2 className="h-16 w-16 stroke-[3]" />
+                                        </div>
+                                        <h2 className="text-5xl font-black tracking-tighter">Caja Cerrada</h2>
+                                        <p className="text-xl text-muted-foreground font-medium">
+                                            Todo cuadra perfectamente. Diferencia: <span className="text-success font-black">$0.00</span>
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="h-32 w-32 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
+                                            <AlertCircle className="h-16 w-16 stroke-[3]" />
+                                        </div>
+                                        <h2 className="text-5xl font-black tracking-tighter">Discrepancia Detectada</h2>
+                                        <p className="text-xl text-muted-foreground font-medium">
+                                            {closeResult.difference > 0 ? (
+                                                <>Sobran <span className="text-success font-black">${closeResult.difference.toFixed(2)}</span></>
+                                            ) : (
+                                                <>Faltan <span className="text-danger font-black">${Math.abs(closeResult.difference).toFixed(2)}</span></>
+                                            )}
+                                            <br />
+                                            <span className="text-sm">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
+                                        </p>
+                                    </>
+                                )}
+
+                                <div className="pt-6 border-t border-border">
+                                    <Button
+                                        onClick={() => { setIsClosing(false); setCloseStep('input'); }}
+                                        className="w-full h-16 text-xl font-black rounded-2xl"
+                                    >
+                                        VOLVER AL CONTROL DE CAJA
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        ) : null}
+                    </motion.div>
                 </div>
             )}
 
             {showHistory && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-md">
-                    <Card className="w-full max-w-3xl max-h-[80vh] overflow-y-auto p-6 rounded-[2rem]">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-4xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold">Historial de Cierres</h2>
                             <Button variant="ghost" onClick={() => setShowHistory(false)}>
                                 Cerrar
                             </Button>
                         </div>
-                        {historyData.length === 0 ? (
-                            <p className="text-center text-[hsl(var(--muted-foreground))] py-8">No hay cierres registrados.</p>
-                        ) : (
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b">
-                                        <th className="text-left py-2">Fecha</th>
-                                        <th className="text-left py-2">Usuario</th>
-                                        <th className="text-right py-2">Esperado</th>
-                                        <th className="text-right py-2">Contado</th>
-                                        <th className="text-right py-2">Diferencia</th>
-                                        <th className="text-center py-2">Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {historyData.map(h => (
-                                        <tr key={h.id} className="border-b hover:bg-gray-50">
-                                            <td className="py-2">{new Date(h.closed_at).toLocaleDateString()}</td>
-                                            <td className="py-2">{h.user}</td>
-                                            <td className="py-2 text-right">${h.expected_cash.toFixed(2)}</td>
-                                            <td className="py-2 text-right">${h.counted_cash.toFixed(2)}</td>
-                                            <td className={`py-2 text-right font-bold ${Math.abs(h.difference) < 0.01 ? 'text-green-600' : 'text-red-600'}`}>
-                                                {h.difference > 0 ? '+' : ''}{h.difference.toFixed(2)}
-                                            </td>
-                                            <td className="py-2 text-center">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${h.status === 'closed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                    {h.status === 'closed' ? 'OK' : 'DISCREPANCIA'}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                    </Card>
+                        <Table
+                            data={historyData}
+                            searchable={false}
+                            pageSize={historyData.length || 10}
+                            striped={false}
+                            density="compact"
+                            emptyTitle="No hay cierres registrados."
+                            columns={[
+                                { key: 'closed_at', title: 'Fecha', render: (h) => new Date(h.closed_at).toLocaleDateString() },
+                                { key: 'user', title: 'Usuario' },
+                                { key: 'expected_cash', title: 'Esperado', className: 'text-right', render: (h) => `$${h.expected_cash.toFixed(2)}` },
+                                { key: 'counted_cash', title: 'Contado', className: 'text-right', render: (h) => `$${h.counted_cash.toFixed(2)}` },
+                                { key: 'difference', title: 'Diferencia', className: 'text-right font-bold', render: (h) => (
+                                    <span className={Math.abs(h.difference) < 0.01 ? 'text-success' : 'text-danger'}>
+                                        {h.difference > 0 ? '+' : ''}{h.difference.toFixed(2)}
+                                    </span>
+                                )},
+                                { key: 'status', title: 'Estado', className: 'text-center', render: (h) => (
+                                    <Badge variant={h.status === 'closed' ? 'success' : 'danger'} size="sm">
+                                        {h.status === 'closed' ? 'OK' : 'DISCREPANCIA'}
+                                    </Badge>
+                                )},
+                            ]}
+                            rowKey={(h) => h.id}
+                        />
+                    </motion.div>
                 </div>
             )}
         </div>

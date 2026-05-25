@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { Package } from 'lucide-react';
+import { cn } from '../../utils/cn';
+import { Skeleton } from '../ui/Skeleton';
 
-interface QuickProduct {
-  id: string;
-  name: string;
-  price: number;
-  stock?: number;
-}
-
-interface QuickProductsProps {
-  onSelect: (product: QuickProduct) => void;
-}
-
-export const QuickProducts: React.FC<QuickProductsProps> = ({ onSelect }) => {
-  const [products, setProducts] = useState<QuickProduct[]>([]);
+export const QuickProducts = ({ onSelect }) => {
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,12 +14,9 @@ export const QuickProducts: React.FC<QuickProductsProps> = ({ onSelect }) => {
       try {
         const data = await api('/products', { retries: 1 });
         const list = Array.isArray(data) ? data : data?.data || [];
-        if (!cancelled) setProducts(list.slice(0, 8));
-      } catch {
-        if (!cancelled) setProducts([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+        if (!cancelled) setProducts(list.slice(0, 10));
+      } catch { if (!cancelled) setProducts([]); }
+      finally { if (!cancelled) setLoading(false); }
     };
     load();
     return () => { cancelled = true; };
@@ -37,34 +25,32 @@ export const QuickProducts: React.FC<QuickProductsProps> = ({ onSelect }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="aspect-square bg-[var(--bg-muted)] border border-[var(--border)] rounded-2xl animate-pulse" />
+        {Array.from({ length: 10 }).map((_, i) => (
+          <Skeleton key={i} className="aspect-square rounded-2xl" />
         ))}
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-        {products.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => onSelect(p)}
-            className="aspect-square bg-[var(--bg-muted)] hover:bg-[var(--secondary)] border border-[var(--border)] rounded-2xl flex flex-col items-center justify-center p-3 transition-all active:scale-95 group shadow-sm min-h-[48px]"
-            title={`Agregar ${p.name}`}
-            aria-label={`Agregar ${p.name} - $${p.price.toFixed(2)}`}
-          >
-            <div className="h-12 w-12 bg-white/50 rounded-xl mb-2 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Package className="h-6 w-6 text-[hsl(var(--primary))]" />
-            </div>
-            <span className="text-xs font-bold text-center line-clamp-2">{p.name}</span>
-            <span className="text-sm font-black text-[hsl(var(--primary))] mt-1">${p.price.toFixed(2)}</span>
-          </button>
-        ))}
-        <div className="aspect-square border-2 border-dashed border-[var(--border)] rounded-2xl flex items-center justify-center text-[var(--muted-foreground)] text-xs text-center p-4">
-          Escanea productos para verlos aqui
-        </div>
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      {products.map((p) => (
+        <button
+          key={p.id}
+          onClick={() => onSelect(p)}
+          className="aspect-square rounded-2xl border-2 border-border bg-card hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 flex flex-col items-center justify-center p-3 transition-all duration-200 active:scale-95 group min-h-[48px]"
+          title={`Agregar ${p.name}`}
+          aria-label={`Agregar ${p.name} - $${p.price?.toFixed(2)}`}
+        >
+          <div className="size-14 rounded-2xl bg-muted flex items-center justify-center mb-2.5 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-200">
+            <Package className="size-7 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+          <span className="text-xs font-bold text-center leading-tight line-clamp-2 px-1">{p.name}</span>
+          <span className="text-sm font-black text-primary mt-1.5">${p.price?.toFixed(2)}</span>
+        </button>
+      ))}
+      <div className="aspect-square rounded-2xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground text-xs text-center p-4 font-medium">
+        Escanea productos<br />para verlos aquí
       </div>
     </div>
   );
