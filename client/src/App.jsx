@@ -7,6 +7,7 @@ import { initSyncEngineV2 } from './lib/syncEngineV2';
 import { initGlobalErrorHandler, setCorrelationId } from './lib/structuredLogger';
 import { getHealthMonitor } from './lib/healthMonitor';
 import { attemptCrashRecovery, attemptCartRollback, safeQueueReplay, runIntegrityCheck } from './lib/snapshotManager';
+import { restoreOfflineSession } from './lib/offlineAuth';
 
 // Views
 import Login from './views/Login';
@@ -77,14 +78,20 @@ function App() {
         // Initialize all enterprise subsystems
         setCorrelationId(crypto.randomUUID?.() || 'app-' + Date.now());
         initGlobalErrorHandler();
-        hydrate();
-        initSyncManager(); // delegates to syncEngineV2
-        initSyncEngineV2();
-        getHealthMonitor().init();
 
-        // Attempt crash recovery on startup
-        const init = async () => {
+        const bootstrap = async () => {
             try {
+                const session = await restoreOfflineSession();
+                if (session) {
+                    useUserStore.getState().login(session.user, session.token);
+                    console.log('[Offline] restored local session for', session.user.username);
+                }
+
+                hydrate();
+                initSyncManager(); // delegates to syncEngineV2
+                initSyncEngineV2();
+                getHealthMonitor().init();
+
                 const recovery = await attemptCrashRecovery();
                 if (recovery.recovered && recovery.restoredItems > 0) {
                     console.log(`[Recovery] Restored ${recovery.restoredItems} items from snapshot`);
@@ -102,9 +109,9 @@ function App() {
                 console.error('[Init] Recovery error:', e);
             }
         };
-        init();
 
-        // Cleanup on unmount
+        bootstrap();
+
         return () => {
             getHealthMonitor().destroy();
         };

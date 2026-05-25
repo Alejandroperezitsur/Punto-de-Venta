@@ -150,6 +150,14 @@ export interface ClientAuditEvent {
   createdAt: number;
 }
 
+export interface ApiCacheEntry {
+  request: string;
+  method: string;
+  response: any;
+  tags: string[];
+  updatedAt: number;
+}
+
 interface POSDB extends DBSchema {
   offlineSales: {
     key: string;
@@ -219,6 +227,11 @@ interface POSDB extends DBSchema {
     value: ClientAuditEvent;
     indexes: { 'by-event': string; 'by-correlation': string; 'by-created': number };
   };
+  apiCache: {
+    key: string;
+    value: ApiCacheEntry;
+    indexes: { 'by-tag': string; 'by-updatedAt': number };
+  };
   products: {
     key: string;
     value: any;
@@ -272,7 +285,7 @@ interface POSDB extends DBSchema {
 }
 
 const DB_NAME = 'pos-offline';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let dbPromise: Promise<IDBPDatabase<POSDB>> | null = null;
 
@@ -372,6 +385,11 @@ export function getDB(): Promise<IDBPDatabase<POSDB>> {
           s.createIndex('by-store', 'storeId');
           s.createIndex('by-status', 'status');
         }
+        if (!db.objectStoreNames.contains('apiCache')) {
+          const s = db.createObjectStore('apiCache', { keyPath: 'request' });
+          s.createIndex('by-tag', 'tags', { multiEntry: true });
+          s.createIndex('by-updatedAt', 'updatedAt');
+        }
         if (!db.objectStoreNames.contains('syncLog')) {
           const s = db.createObjectStore('syncLog', { keyPath: 'id' });
           s.createIndex('by-idempotency', 'idempotencyKey');
@@ -465,6 +483,34 @@ export async function removePersistedCart(): Promise<void> {
 export async function getAllOfflineSales(): Promise<OfflineSale[]> {
   const db = await getDB();
   return db.getAll('offlineSales');
+}
+
+export async function cacheApiResponse(request: string, method: string, response: any, tags: string[] = []): Promise<void> {
+  const db = await getDB();
+  const record = {
+    request,
+    method,
+    response,
+    tags,
+    updatedAt: Date.now(),
+  } as ApiCacheEntry;
+  await db.put('apiCache', record);
+}
+
+export async function getApiCache(request: string): Promise<ApiCacheEntry | undefined> {
+  const db = await getDB();
+  return db.get('apiCache', request);
+}
+
+export async function getApiCacheByTag(tag: string): Promise<ApiCacheEntry[]> {
+  const db = await getDB();
+  return db.transaction('apiCache').store.index('by-tag').getAll(tag);
+}
+
+export async function getApiCacheByPrefix(prefix: string): Promise<ApiCacheEntry[]> {
+  const db = await getDB();
+  const all = await db.getAll('apiCache');
+  return all.filter((entry) => entry.request.startsWith(prefix));
 }
 
 // ─── DB Health ───

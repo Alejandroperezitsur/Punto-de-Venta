@@ -173,6 +173,16 @@ const Login = () => {
             </p>
           </div>
 
+          {!navigator.onLine && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            >
+              <strong>Modo offline activo</strong>. Inicia sesión con <span className="font-semibold">admin</span>/<span className="font-semibold">admin123</span> o restaura tu sesión local.
+            </motion.div>
+          )}
+
           <AnimatePresence mode="wait">
             {step === 'login' ? (
               <motion.form
