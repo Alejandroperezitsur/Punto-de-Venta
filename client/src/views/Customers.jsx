@@ -6,7 +6,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { useToast } from '../components/ui/Toast';
 import { Badge } from '../components/ui/Badge';
-import ErrorState from '../components/states/ErrorState';
+import { ErrorState } from '../components/ui/ErrorState';
 import { Plus, Trash2, RefreshCw, Users, Phone, Mail, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 

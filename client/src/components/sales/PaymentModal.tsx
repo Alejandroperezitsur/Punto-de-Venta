@@ -79,10 +79,10 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="bg-card text-foreground rounded-none sm:rounded-4xl w-full max-w-5xl h-full sm:h-auto overflow-hidden border border-border shadow-2xl flex flex-col md:flex-row"
+        className="bg-card text-foreground rounded-2xl w-full max-w-5xl h-full sm:h-auto overflow-hidden border border-border shadow-xl flex flex-col md:flex-row"
       >
         {/* Left Panel - Total & Methods */}
-        <div className="flex-1 p-6 md:p-8 bg-muted/30 border-r-0 md:border-r border-border flex flex-col justify-between">
+        <div className="flex-1 p-6 bg-muted/30 border-r-0 md:border-r border-border flex flex-col justify-between">
           {/* Steps */}
           <div className="flex items-center gap-2 mb-6" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={3}>
             {LABELS.map((label, i) => (
@@ -169,7 +169,7 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
         </div>
 
         {/* Right Panel - Keypad / Method specific */}
-        <div className="flex-1 p-6 md:p-8 flex flex-col gap-4">
+        <div className="flex-1 p-6 flex flex-col gap-4">
           {method === 'cash' ? (
             <>
               <div className="text-right">
@@ -259,7 +259,7 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="bg-card border border-border w-full max-w-md rounded-4xl shadow-2xl p-8"
+              className="bg-card border border-border w-full max-w-md rounded-2xl shadow-xl p-6"
             >
               <div className="text-center mb-6">
                 <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -334,7 +334,7 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="bg-card border border-border w-full max-w-sm rounded-4xl shadow-2xl p-10 text-center"
+              className="bg-card border border-border w-full max-w-sm rounded-2xl shadow-xl p-8 text-center"
             >
               <motion.div
                 initial={{ scale: 0 }}

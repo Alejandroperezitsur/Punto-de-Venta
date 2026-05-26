@@ -43,18 +43,14 @@ function Select({
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   useEffect(() => {
-    if (open && searchable && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (open && searchable && inputRef.current) inputRef.current.focus();
     if (!open) setQuery('');
   }, [open, searchable]);
 
@@ -76,16 +72,17 @@ function Select({
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          'flex items-center w-full h-11 px-4 rounded-2xl border-2 border-input bg-card text-left transition-all duration-200',
+          'flex items-center w-full h-11 px-4 rounded-2xl border border-input bg-card text-left transition-all duration-150',
           'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20',
           open && 'border-ring ring-2 ring-ring/20',
           error && 'border-danger',
+          'hover:border-foreground/20',
         )}
         aria-expanded={open}
         aria-haspopup="listbox"
       >
         {Icon && <Icon className="size-4 mr-2 text-muted-foreground shrink-0" />}
-        <span className={cn('flex-1 text-sm font-medium truncate', !selected && 'text-muted-foreground/60')}>
+        <span className={cn('flex-1 text-sm font-medium truncate', !selected && 'text-muted-foreground/50')}>
           {selected ? selected.label : placeholder}
         </span>
         <ChevronDown className={cn('size-4 text-muted-foreground transition-transform duration-200', open && 'rotate-180')} />
@@ -94,11 +91,11 @@ function Select({
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -5 }}
+            initial={{ opacity: 0, scale: 0.95, y: -4 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -5 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 mt-2 w-full min-w-[200px] rounded-2xl border border-border bg-card shadow-xl overflow-hidden"
+            exit={{ opacity: 0, scale: 0.95, y: -4 }}
+            transition={{ duration: 0.12 }}
+            className="absolute z-50 mt-2 w-full min-w-[200px] rounded-2xl border border-border bg-card shadow-lg overflow-hidden"
             role="listbox"
           >
             {searchable && (
@@ -111,7 +108,7 @@ function Select({
                     placeholder="Buscar..."
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    className="w-full h-9 pl-9 pr-3 rounded-xl bg-muted text-sm font-medium text-foreground placeholder:text-muted-foreground/60 border-none focus:outline-none focus:ring-2 focus:ring-ring/20"
+                    className="w-full h-9 pl-9 pr-3 rounded-xl bg-muted text-sm font-medium text-foreground placeholder:text-muted-foreground/50 border-none focus:outline-none focus:ring-2 focus:ring-ring/20"
                   />
                 </div>
               </div>

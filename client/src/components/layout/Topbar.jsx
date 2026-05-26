@@ -37,7 +37,7 @@ export const Topbar = () => {
     <header
       role="banner"
       className={cn(
-        'h-[var(--header-height)] border-b border-border/40 flex items-center justify-between px-6 sticky top-0 z-40 transition-all duration-300',
+        'h-[var(--header-height)] border-b border-border/30 flex items-center justify-between px-5 sticky top-0 z-40 transition-all duration-200',
         scrolled
           ? 'bg-background/70 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.03)]'
           : 'bg-transparent',

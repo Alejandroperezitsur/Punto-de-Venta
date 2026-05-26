@@ -26,12 +26,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative group">
           {Icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-ring transition-colors pointer-events-none">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-foreground transition-colors pointer-events-none">
               <Icon className={cn('size-5', scanner && 'size-6')} />
             </div>
           )}
           {scanner && !Icon && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-ring transition-colors pointer-events-none">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-foreground transition-colors pointer-events-none">
               <Barcode className="size-6" />
             </div>
           )}
@@ -39,16 +39,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={inputType}
             className={cn(
-              'flex w-full rounded-2xl border-2 border-input bg-card px-4 py-3 text-base font-medium text-foreground placeholder:text-muted-foreground/60 transition-all duration-200',
-              'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:ring-offset-0',
-              'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted/30',
+              'flex w-full rounded-2xl border border-input bg-card px-4 py-3 text-base font-medium text-foreground',
+              'placeholder:text-muted-foreground/50 transition-all duration-150',
+              'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20',
+              'disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-muted/30',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               Icon && 'pl-12',
-              scanner && 'pl-12 h-16 text-lg font-semibold',
+              scanner && 'pl-12 h-14 text-lg font-semibold',
               IconRight && 'pr-12',
               type === 'password' && 'pr-12',
               error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/20',
-              scanner && 'border-dashed border-2 border-muted-foreground/20 focus-visible:border-solid',
+              scanner && 'border-2 border-primary/30 focus-visible:border-primary focus-visible:ring-primary/25',
+              !scanner && !error && 'hover:border-foreground/20',
               className,
             )}
             {...props}

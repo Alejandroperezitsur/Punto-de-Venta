@@ -24,9 +24,7 @@ function Dropdown({ trigger, items, align = 'end', className }: DropdownProps) {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -43,9 +41,9 @@ function Dropdown({ trigger, items, align = 'end', className }: DropdownProps) {
             initial={{ opacity: 0, scale: 0.95, y: -4 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -4 }}
-            transition={{ duration: 0.12 }}
+            transition={{ duration: 0.1 }}
             className={cn(
-              'absolute z-50 mt-2 min-w-[200px] rounded-2xl border border-border bg-card shadow-xl overflow-hidden p-1.5',
+              'absolute z-50 mt-2 min-w-[200px] rounded-2xl border border-border bg-card shadow-lg overflow-hidden p-1.5',
               align === 'end' ? 'right-0' : 'left-0',
             )}
           >

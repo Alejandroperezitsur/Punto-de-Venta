@@ -266,15 +266,15 @@ const SalesView = () => {
           </Button>
         </div>
 
-        <div className="flex-1 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5 overflow-y-auto">
+        <div className="flex-1 rounded-2xl border border-border/30 bg-card p-5 overflow-y-auto">
           <QuickProducts onSelect={(p) => { addItem(p); focusSearch(); }} />
         </div>
       </div>
 
       {/* Right Panel - Cart */}
-      <div className="w-[440px] flex flex-col rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm shadow-lg h-full overflow-hidden">
+      <div className="w-[var(--pos-cart-width)] flex flex-col rounded-2xl border border-border/30 bg-card shadow-sm h-full overflow-hidden">
         {/* Cart header */}
-        <div className="p-4 border-b border-border/40 bg-muted/10 flex items-center justify-between shrink-0">
+        <div className="p-4 border-b border-border/30 flex items-center justify-between shrink-0">
           <h2 className="font-bold flex items-center gap-2" id="cart-heading">
             <ShoppingBag className="size-5" />
             Carrito
@@ -308,7 +308,7 @@ const SalesView = () => {
         )}
 
         {/* Totals + Checkout */}
-        <div className="p-5 bg-muted/10 border-t border-border/40 space-y-4 shrink-0">
+        <div className="p-5 border-t border-border/30 space-y-4 shrink-0">
           <div className="flex justify-between items-end">
             <span className="text-muted-foreground font-semibold">Total a pagar:</span>
             <motion.span

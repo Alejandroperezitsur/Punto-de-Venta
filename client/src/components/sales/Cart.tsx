@@ -19,10 +19,10 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       exit={{ opacity: 0, x: -20, scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-2xl border-2 transition-all duration-300 bg-card',
+        'flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 bg-card',
         isRecent
           ? 'border-success/40 bg-success/[0.04] shadow-md shadow-success/10'
-          : 'border-border hover:border-muted-foreground/20',
+          : 'border-border hover:border-foreground/20',
       )}
       role="listitem"
       aria-label={`${item.name}, ${item.quantity} unidades, ${formatMoney(item.price * item.quantity)}`}
@@ -103,7 +103,7 @@ export const Cart = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 space-y-2 pr-1" role="list" aria-label="Productos en el carrito">
+        <div className="flex-1 space-y-1.5 pr-1" role="list" aria-label="Productos en el carrito">
         <AnimatePresence mode="popLayout">
           {items.map((item) => (
             <CartItemRow

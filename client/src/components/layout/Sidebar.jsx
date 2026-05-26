@@ -109,15 +109,15 @@ export const Sidebar = () => {
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-    <aside
-      className={cn(
-        'border-r border-border/40 bg-card/40 flex flex-col h-full shrink-0 transition-all duration-300 z-30',
-        isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
-      )}
-    >
+      <aside
+        className={cn(
+          'border-r border-border/30 bg-card flex flex-col h-full shrink-0 transition-all duration-300 z-30',
+          isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
+        )}
+      >
       {/* Logo */}
       <div className={cn(
-        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/40',
+        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/30',
         isCollapsed ? 'justify-center px-0' : 'px-6 justify-between',
       )}>
         <div className="flex items-center gap-3 min-w-0">
@@ -202,7 +202,7 @@ export const Sidebar = () => {
       )}
 
       {/* User section */}
-      <div className="p-4 border-t border-border/40">
+      <div className="p-4 border-t border-border/30">
         {!isCollapsed ? (
           <div className="space-y-3">
             <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors">

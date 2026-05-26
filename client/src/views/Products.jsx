@@ -5,7 +5,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useToast } from '../components/ui/Toast';
-import ErrorState from '../components/states/ErrorState';
+import { ErrorState } from '../components/ui/ErrorState';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, X } from 'lucide-react';

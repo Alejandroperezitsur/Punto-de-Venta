@@ -36,6 +36,7 @@ function Modal({
   className,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const titleId = useRef(`modal-title-${Math.random().toString(36).slice(2, 8)}`).current;
 
   useEffect(() => {
     if (!open) return;
@@ -55,7 +56,7 @@ function Modal({
     const modal = document.querySelector('[role="dialog"]');
     if (!modal) return;
     const focusable = modal.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
@@ -81,32 +82,32 @@ function Modal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.12 }}
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
           />
           <motion.div
-            initial={sheet ? { x: '100%' } : { opacity: 0, scale: 0.95, y: 10 }}
+            initial={sheet ? { x: '100%' } : { opacity: 0, scale: 0.96, y: 8 }}
             animate={sheet ? { x: 0 } : { opacity: 1, scale: 1, y: 0 }}
-            exit={sheet ? { x: '100%' } : { opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            exit={sheet ? { x: '100%' } : { opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
             className={cn(
-              'relative z-10 w-full bg-card border border-border shadow-2xl overflow-y-auto',
+              'relative z-10 w-full bg-card border border-border shadow-xl overflow-y-auto',
               sheet
                 ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
                 : fullscreen
-                  ? 'max-w-[95vw] h-[95vh] rounded-3xl'
-                  : `${sizes[size]} mx-4 rounded-3xl`,
+                  ? 'max-w-[95vw] h-[95vh] rounded-2xl'
+                  : `${sizes[size]} mx-4 rounded-2xl`,
               className,
             )}
             role="dialog"
             aria-modal="true"
-            aria-label={title}
+            aria-labelledby={title ? titleId : undefined}
           >
             {(title || description) && (
-              <div className="flex items-start justify-between p-6 pb-0">
+              <div className="flex items-start justify-between p-5 pb-0">
                 <div className="flex-1 min-w-0">
-                  {title && <h2 className="text-2xl font-bold tracking-tight">{title}</h2>}
+                  {title && <h2 id={titleId} className="text-xl font-bold tracking-tight">{title}</h2>}
                   {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
                 </div>
                 <button
@@ -118,7 +119,7 @@ function Modal({
                 </button>
               </div>
             )}
-            <div className={cn('p-6', !title && !description && '')}>
+            <div className={cn('p-5', !title && !description && '')}>
               {children}
             </div>
           </motion.div>
@@ -130,15 +131,12 @@ function Modal({
 
 function ModalSteps({ current, total, labels }: { current: number; total: number; labels?: string[] }) {
   return (
-    <div className="flex items-center gap-2 mb-6" role="progressbar" aria-valuenow={current + 1} aria-valuemin={1} aria-valuemax={total}>
+    <div className="flex items-center gap-2 mb-5" role="progressbar" aria-valuenow={current + 1} aria-valuemin={1} aria-valuemax={total}>
       {Array.from({ length: total }).map((_, i) => (
         <React.Fragment key={i}>
-          <div className={cn(
-            'flex items-center gap-2',
-            i <= current ? 'text-primary' : 'text-muted-foreground/40',
-          )}>
+          <div className={cn('flex items-center gap-2', i <= current ? 'text-primary' : 'text-muted-foreground/40')}>
             <div className={cn(
-              'size-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300',
+              'size-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-200',
               i < current
                 ? 'bg-primary text-primary-foreground border-primary'
                 : i === current
@@ -152,10 +150,7 @@ function ModalSteps({ current, total, labels }: { current: number; total: number
             )}
           </div>
           {i < total - 1 && (
-            <div className={cn(
-              'flex-1 h-0.5 rounded-full transition-colors duration-300',
-              i < current ? 'bg-primary' : 'bg-border',
-            )} />
+            <div className={cn('flex-1 h-0.5 rounded-full transition-colors duration-200', i < current ? 'bg-primary' : 'bg-border')} />
           )}
         </React.Fragment>
       ))}

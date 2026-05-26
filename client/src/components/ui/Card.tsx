@@ -1,16 +1,8 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-const variants = {
-  default: 'bg-card/60 backdrop-blur-sm text-card-foreground border border-border/40 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)]',
-  glass: 'glass text-foreground',
-  elevated: 'bg-card/80 backdrop-blur-md text-card-foreground border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.06)]',
-  interactive: 'bg-card/60 backdrop-blur-sm text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 cursor-pointer active:scale-[0.99]',
-  outline: 'bg-transparent text-foreground border border-border/50',
-};
-
 interface CardProps {
-  variant?: keyof typeof variants;
+  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline';
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -18,13 +10,17 @@ interface CardProps {
 
 function Card({ variant = 'default', className, children, onClick }: CardProps) {
   const Component = onClick ? 'button' : 'div';
+  const variants = {
+    default: 'bg-card text-card-foreground border border-border shadow-sm',
+    glass: 'glass text-foreground',
+    elevated: 'bg-card text-card-foreground border border-border shadow-md',
+    interactive:
+      'bg-card text-card-foreground border border-border/60 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 cursor-pointer active:scale-[0.99]',
+    outline: 'bg-transparent text-foreground border border-border/60',
+  };
   return (
     <Component
-      className={cn(
-        'rounded-2xl p-6 transition-all duration-300 text-left relative overflow-hidden',
-        variants[variant],
-        className,
-      )}
+      className={cn('rounded-2xl p-5 transition-all duration-200 text-left relative', variants[variant], className)}
       onClick={onClick}
       {...(onClick ? { type: 'button' as const } : {})}
     >
@@ -34,16 +30,12 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
 }
 
 function CardHeader({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn('flex flex-col space-y-1.5 mb-4', className)} {...props}>
-      {children}
-    </div>
-  );
+  return <div className={cn('flex flex-col space-y-1.5 mb-4', className)} {...props} />;
 }
 
 function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-xl font-bold tracking-tight', className)} {...props}>
+    <h3 className={cn('text-lg font-bold tracking-tight', className)} {...props}>
       {children}
     </h3>
   );
@@ -58,11 +50,7 @@ function CardDescription({ className, children, ...props }: React.HTMLAttributes
 }
 
 function CardBody({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn('', className)} {...props}>
-      {children}
-    </div>
-  );
+  return <div className={cn('', className)} {...props} />;
 }
 
 function CardFooter({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {

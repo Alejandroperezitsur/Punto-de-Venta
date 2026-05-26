@@ -48,7 +48,7 @@ export const MainLayout = ({ children }) => {
         <Sidebar />
         <div className="flex-1 flex flex-col min-w-0 bg-background/50">
           <Topbar />
-          <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 scroll-smooth" role="main">
+          <main id="main-content" className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8 scroll-smooth" role="main">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
@@ -63,7 +63,7 @@ export const MainLayout = ({ children }) => {
               </motion.div>
             </AnimatePresence>
           </main>
-          <footer className="shrink-0 py-3 px-8 border-t border-border/40 bg-transparent text-xs font-medium text-muted-foreground/60 flex justify-between items-center" role="contentinfo">
+          <footer className="shrink-0 py-3 px-6 border-t border-border/30 text-xs font-medium text-muted-foreground/60 flex justify-between items-center" role="contentinfo">
             <span>{info.copyright}</span>
             <span>v{info.version}</span>
           </footer>

@@ -26,7 +26,7 @@ export const QuickProducts = ({ onSelect }) => {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
         {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton key={i} className="aspect-square rounded-2xl" />
+          <Skeleton key={i} className="h-28 rounded-2xl" />
         ))}
       </div>
     );
@@ -38,18 +38,20 @@ export const QuickProducts = ({ onSelect }) => {
         <button
           key={p.id}
           onClick={() => onSelect(p)}
-          className="aspect-square rounded-2xl border-2 border-border bg-card hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 flex flex-col items-center justify-center p-3 transition-all duration-200 active:scale-95 group min-h-[48px]"
+          className="h-28 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 flex items-center gap-3 p-3 transition-all duration-200 active:scale-[0.98] group min-h-[44px] text-left"
           title={`Agregar ${p.name}`}
           aria-label={`Agregar ${p.name} - $${p.price?.toFixed(2)}`}
         >
-          <div className="size-14 rounded-2xl bg-muted flex items-center justify-center mb-2.5 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-200">
-            <Package className="size-7 text-muted-foreground group-hover:text-primary transition-colors" />
+          <div className="size-12 rounded-xl bg-muted flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-200">
+            <Package className="size-6 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-          <span className="text-xs font-bold text-center leading-tight line-clamp-2 px-1">{p.name}</span>
-          <span className="text-sm font-black text-primary mt-1.5">${p.price?.toFixed(2)}</span>
+          <div className="min-w-0 flex-1">
+            <span className="text-sm font-bold leading-tight line-clamp-2 block">{p.name}</span>
+            <span className="text-base font-black text-primary">${p.price?.toFixed(2)}</span>
+          </div>
         </button>
       ))}
-      <div className="aspect-square rounded-2xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground text-xs text-center p-4 font-medium">
+      <div className="h-28 rounded-2xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground text-xs text-center p-3 font-medium">
         Escanea productos<br />para verlos aquí
       </div>
     </div>

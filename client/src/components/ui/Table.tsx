@@ -138,21 +138,18 @@ function Table<T extends Record<string, any>>({
       )}
 
       <div className={cn(
-        'rounded-2xl border border-border/30 overflow-hidden bg-card/40',
+        'rounded-2xl border border-border/30 overflow-hidden bg-card',
         stickyHeader && 'relative',
       )}>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className={cn(
-              'bg-muted/30 border-b border-border/40',
-              stickyHeader && 'sticky top-0 z-10 backdrop-blur-md',
-            )}>
+            <thead className={cn('bg-muted/40 border-b border-border/40', stickyHeader && 'sticky top-0 z-10')}>
               <tr>
                 {columns.map(col => (
                   <th
                     key={col.key}
                     className={cn(
-                      'font-semibold text-muted-foreground uppercase tracking-wider select-none',
+                      'font-semibold text-muted-foreground uppercase tracking-wider select-none text-xs',
                       densityStyles[density],
                       col.sortable !== false && globallySortable && 'cursor-pointer hover:text-foreground transition-colors',
                       col.hideOnMobile && 'hidden md:table-cell',
@@ -208,11 +205,7 @@ function Table<T extends Record<string, any>>({
                     {columns.map(col => (
                       <td
                         key={col.key}
-                        className={cn(
-                          densityStyles[density],
-                          col.hideOnMobile && 'hidden md:table-cell',
-                          col.className,
-                        )}
+                        className={cn(densityStyles[density], col.hideOnMobile && 'hidden md:table-cell', col.className)}
                       >
                         {col.render ? col.render(row) : row[col.key]}
                       </td>
@@ -247,7 +240,7 @@ function Table<T extends Record<string, any>>({
                   key={pageNum}
                   variant={pageNum === page ? 'primary' : 'ghost'}
                   size="sm"
-                  className={cn('min-w-[2rem]', pageNum === page ? '' : '')}
+                  className="min-w-[2rem]"
                   onClick={() => setPage(pageNum)}
                 >
                   {pageNum}
