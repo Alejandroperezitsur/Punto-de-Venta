@@ -126,6 +126,21 @@ async function tryOfflineLoginFallback(options) {
 }
 
 export async function api(path, options = {}) {
+  const isStaticEnv = typeof window !== 'undefined' && (
+    window.location.hostname.includes('github.io') || 
+    window.location.hostname.includes('github.com')
+  );
+
+  if (isStaticEnv) {
+    try {
+      const { handleOfflineRequest } = await import('./offlineDB');
+      return await handleOfflineRequest(path, options);
+    } catch (offlineErr) {
+      console.error('[Offline Interceptor Error]', offlineErr);
+      throw offlineErr;
+    }
+  }
+
   let res;
   const { retries = 0, backoff = 500, timeoutMs = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options;
   const token = localStorage.getItem('token') || '';
@@ -142,6 +157,16 @@ export async function api(path, options = {}) {
     }
   } catch (e) {
     const message = normalizeError(e);
+    
+    // Ante cualquier error de red, intentar resolver con el motor offline completo
+    try {
+      const { handleOfflineRequest } = await import('./offlineDB');
+      const offlineResult = await handleOfflineRequest(path, options);
+      return offlineResult;
+    } catch (offlineErr) {
+      console.warn('[Offline Fallback Error]', offlineErr.message);
+    }
+
     if (path === '/auth/login') {
       try {
         const fallback = await tryOfflineLoginFallback(fetchOptions);

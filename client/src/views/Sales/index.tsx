@@ -246,7 +246,7 @@ const SalesView = () => {
   const totals = useMemo(() => getTotals(), [items, getTotals]);
 
   return (
-    <div className="h-[calc(100vh-var(--header-height)-2rem)] flex gap-4 overflow-hidden">
+    <div className="h-full min-h-0 flex gap-4 overflow-hidden">
       {/* Left Panel */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
         <div className="flex gap-3">
@@ -266,15 +266,15 @@ const SalesView = () => {
           </Button>
         </div>
 
-        <div className="flex-1 rounded-3xl border border-border bg-card p-5 overflow-y-auto">
+        <div className="flex-1 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm p-5 overflow-y-auto">
           <QuickProducts onSelect={(p) => { addItem(p); focusSearch(); }} />
         </div>
       </div>
 
       {/* Right Panel - Cart */}
-      <div className="w-[440px] flex flex-col rounded-3xl border border-border bg-card shadow-xl h-full overflow-hidden">
+      <div className="w-[440px] flex flex-col rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm shadow-lg h-full overflow-hidden">
         {/* Cart header */}
-        <div className="p-4 border-b border-border bg-muted/20 flex items-center justify-between shrink-0">
+        <div className="p-4 border-b border-border/40 bg-muted/10 flex items-center justify-between shrink-0">
           <h2 className="font-bold flex items-center gap-2" id="cart-heading">
             <ShoppingBag className="size-5" />
             Carrito
@@ -308,7 +308,7 @@ const SalesView = () => {
         )}
 
         {/* Totals + Checkout */}
-        <div className="p-5 bg-muted/20 border-t-2 border-border space-y-4 shrink-0">
+        <div className="p-5 bg-muted/10 border-t border-border/40 space-y-4 shrink-0">
           <div className="flex justify-between items-end">
             <span className="text-muted-foreground font-semibold">Total a pagar:</span>
             <motion.span
@@ -323,7 +323,7 @@ const SalesView = () => {
 
           <Button
             size="xl"
-            className="w-full h-20 text-3xl font-black shadow-lg shadow-primary/25 rounded-3xl active:scale-[0.97] transition-all flex items-center justify-center gap-4 tracking-tight"
+            className="w-full h-20 text-3xl font-black shadow-lg rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-4 tracking-tight"
             disabled={items.length === 0 || isProcessing}
             onClick={openPayModal}
             aria-label="Cobrar"
@@ -343,7 +343,7 @@ const SalesView = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="bg-card w-full max-w-md rounded-4xl border border-border shadow-2xl p-8"
+            className="bg-card w-full max-w-md rounded-3xl border border-border/40 shadow-2xl p-8"
           >
             <button
               onClick={() => setManualModalOpen(false)}

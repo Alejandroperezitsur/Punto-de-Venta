@@ -138,14 +138,14 @@ function Table<T extends Record<string, any>>({
       )}
 
       <div className={cn(
-        'rounded-2xl border border-border overflow-hidden bg-card',
+        'rounded-2xl border border-border/30 overflow-hidden bg-card/40',
         stickyHeader && 'relative',
       )}>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className={cn(
-              'bg-muted/50 border-b border-border',
-              stickyHeader && 'sticky top-0 z-10',
+              'bg-muted/30 border-b border-border/40',
+              stickyHeader && 'sticky top-0 z-10 backdrop-blur-md',
             )}>
               <tr>
                 {columns.map(col => (
@@ -172,7 +172,7 @@ function Table<T extends Record<string, any>>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-border/20">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skel-${i}`}>
@@ -200,8 +200,8 @@ function Table<T extends Record<string, any>>({
                     key={rowKey(row)}
                     className={cn(
                       'transition-colors duration-150',
-                      striped && i % 2 === 1 && 'bg-muted/20',
-                      onRowClick && 'cursor-pointer hover:bg-muted/40',
+                      striped && i % 2 === 1 && 'bg-muted/10',
+                      onRowClick && 'cursor-pointer hover:bg-muted/30',
                     )}
                     onClick={() => onRowClick?.(row)}
                   >

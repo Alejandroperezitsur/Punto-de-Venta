@@ -2,11 +2,11 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 
 const variants = {
-  default: 'bg-card text-card-foreground border border-border shadow-sm',
+  default: 'bg-card/60 backdrop-blur-sm text-card-foreground border border-border/40 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)]',
   glass: 'glass text-foreground',
-  elevated: 'bg-card text-card-foreground border border-border shadow-xl',
-  interactive: 'bg-card text-card-foreground border border-border shadow-sm hover:shadow-lg hover:-translate-y-0.5 cursor-pointer',
-  outline: 'bg-transparent text-foreground border-2 border-border',
+  elevated: 'bg-card/80 backdrop-blur-md text-card-foreground border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.06)]',
+  interactive: 'bg-card/60 backdrop-blur-sm text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 cursor-pointer active:scale-[0.99]',
+  outline: 'bg-transparent text-foreground border border-border/50',
 };
 
 interface CardProps {
@@ -21,7 +21,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
   return (
     <Component
       className={cn(
-        'rounded-3xl p-6 transition-all duration-200 text-left',
+        'rounded-2xl p-6 transition-all duration-300 text-left relative overflow-hidden',
         variants[variant],
         className,
       )}

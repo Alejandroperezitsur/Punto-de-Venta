@@ -104,8 +104,8 @@ const MyBusinessView = () => {
 
     if (loading) {
         return (
-            <div className="max-w-4xl mx-auto h-[calc(100vh-120px)] flex flex-col justify-between p-4 md:p-8">
-                <div className="text-center py-10 space-y-6">
+            <div className="max-w-4xl mx-auto flex flex-col justify-between gap-8">
+                <div className="text-center space-y-6">
                     <Skeleton className="h-4 w-48 mx-auto" />
                     <Skeleton className="h-24 w-72 mx-auto" />
                     <Skeleton className="h-6 w-80 mx-auto" />
@@ -130,7 +130,7 @@ const MyBusinessView = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto h-[calc(100vh-120px)] flex flex-col justify-between p-4 md:p-8 animate-in fade-in duration-500">
+            <div className="max-w-4xl mx-auto flex flex-col justify-between gap-8">
             <div className="text-center py-10">
                 <p className="text-sm font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Lo que ganaste hoy para ti</p>
                 <div className="flex items-center justify-center gap-4">
@@ -183,7 +183,7 @@ const MyBusinessView = () => {
                 <Button
                     onClick={() => { setIsClosing(true); setClosingStep(1); setCountedCash(''); setCloseResult(null); setCloseError(''); }}
                     size="xl"
-                    className="w-full h-24 text-2xl font-black rounded-3xl bg-foreground text-background hover:brightness-110 shadow-2xl active:scale-[0.98]"
+                    className="w-full h-24 text-2xl font-black rounded-2xl bg-foreground text-background hover:bg-foreground/90 shadow-lg active:scale-95"
                 >
                     <DoorClosed className="h-8 w-8 mr-4" />
                     CERRAR CAJA Y TERMINAR DÍA
@@ -192,7 +192,7 @@ const MyBusinessView = () => {
 
             {isClosing && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-                    <div className="bg-card border border-border rounded-4xl p-8 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in duration-300">
+                    <div className="bg-card border border-border/40 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
                         <button
                             onClick={() => { setIsClosing(false); setClosingStep(1); }}
                             className="absolute top-8 right-8 text-muted-foreground hover:text-foreground font-bold"
@@ -217,7 +217,7 @@ const MyBusinessView = () => {
                                         type="number"
                                         step="0.01"
                                         autoFocus
-                                        className="w-full h-32 bg-muted border-4 border-border rounded-4xl text-6xl font-black text-center focus-visible:border-foreground transition-all pl-24 pr-4"
+                                        className="w-full h-32 bg-muted/50 border-2 border-border/50 rounded-2xl text-6xl font-black text-center focus-visible:border-foreground transition-all pl-24 pr-4"
                                         value={countedCash}
                                         onChange={(e) => setCountedCash(e.target.value)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleCloseDay(); }}
@@ -230,7 +230,7 @@ const MyBusinessView = () => {
                                     disabled={!countedCash || closeLoading}
                                     isLoading={closeLoading}
                                     size="xl"
-                                    className="w-full h-24 text-2xl font-black rounded-3xl"
+                                    className="w-full h-24 text-2xl font-black rounded-2xl"
                                 >
                                     VERIFICAR Y CERRAR
                                 </Button>

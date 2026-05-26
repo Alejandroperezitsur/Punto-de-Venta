@@ -4,27 +4,27 @@ import { Loader2 } from 'lucide-react';
 
 const variants = {
   primary:
-    'bg-primary text-primary-foreground hover:brightness-110 shadow-glow active:scale-[0.97]',
+    'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 shadow-[0_2px_10px_-3px_hsl(var(--primary))]',
   secondary:
-    'bg-secondary text-secondary-foreground border border-border hover:bg-surface-hover active:scale-[0.97]',
+    'bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-95',
   ghost:
-    'text-muted-foreground hover:text-foreground hover:bg-surface-hover active:scale-[0.97]',
+    'text-muted-foreground hover:text-foreground hover:bg-muted/50 active:scale-95',
   danger:
-    'bg-danger text-danger-foreground hover:brightness-110 shadow-lg active:scale-[0.97]',
+    'bg-danger text-danger-foreground hover:bg-danger/90 active:scale-95',
   outline:
-    'border-2 border-primary text-primary hover:bg-primary/5 active:scale-[0.97]',
+    'border border-border/60 text-foreground hover:bg-muted/50 hover:text-foreground active:scale-95',
   success:
-    'bg-success text-success-foreground hover:brightness-110 shadow-lg active:scale-[0.97]',
+    'bg-success text-success-foreground hover:bg-success/90 active:scale-95',
   warning:
-    'bg-warning text-warning-foreground hover:brightness-110 shadow-lg active:scale-[0.97]',
+    'bg-warning text-warning-foreground hover:bg-warning/90 active:scale-95',
 };
 
 const sizes = {
-  sm: 'h-9 px-3 text-xs rounded-xl gap-1.5',
-  md: 'h-11 px-5 text-sm rounded-xl gap-2',
-  lg: 'h-13 px-7 text-base rounded-2xl gap-2.5',
-  xl: 'h-16 px-10 text-lg rounded-2xl gap-3',
-  icon: 'h-11 w-11 rounded-xl',
+  sm: 'h-9 px-3 text-xs rounded-lg gap-1.5',
+  md: 'h-10 px-4 text-sm rounded-xl gap-2',
+  lg: 'h-12 px-6 text-base rounded-xl gap-2.5',
+  xl: 'h-14 px-8 text-lg rounded-2xl gap-3',
+  icon: 'h-10 w-10 rounded-xl',
 };
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

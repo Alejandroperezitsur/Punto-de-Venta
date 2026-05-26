@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Bell, Menu, Command } from 'lucide-react';
+import { Sun, Moon, Bell, Menu } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserStore } from '../../store/userStore';
 import { Button } from '../ui/Button';
@@ -37,42 +37,54 @@ export const Topbar = () => {
     <header
       role="banner"
       className={cn(
-        'h-[var(--header-height)] border-b border-border flex items-center justify-between px-5 sticky top-0 z-40 transition-all duration-200',
+        'h-[var(--header-height)] border-b border-border/40 flex items-center justify-between px-6 sticky top-0 z-40 transition-all duration-300',
         scrolled
-          ? 'glass-strong shadow-sm'
-          : 'bg-card',
+          ? 'bg-background/70 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.03)]'
+          : 'bg-transparent',
       )}
     >
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar} aria-label="Menú">
-          <Menu className="size-5" />
-        </Button>
+      <div className="flex items-center gap-5">
+        <button
+          className="lg:hidden p-2 -ml-2 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+          onClick={toggleSidebar}
+          aria-label="Menú"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         {cashStatus ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20 shadow-sm">
-            <span className="size-2 rounded-full bg-success animate-[pulse-dot_2s_ease-in-out_infinite]" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-success/5 text-success/90 font-medium text-xs border border-success/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
             Caja Abierta
-          </span>
+          </div>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-danger/10 text-danger border border-danger/20 shadow-sm">
-            <span className="size-2 rounded-full bg-danger" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-danger/5 text-danger/90 font-medium text-xs border border-danger/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-danger opacity-70" />
             Caja Cerrada
-          </span>
+          </div>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <ConnectionStatus />
 
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="w-px h-4 bg-border/50 mx-2" />
 
-        <Button variant="ghost" size="icon" onClick={toggleDark} className="rounded-full" aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}>
-          {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
-        </Button>
+        <button
+          onClick={toggleDark}
+          className="p-2.5 rounded-xl text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-all active:scale-95"
+          aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
+        >
+          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
 
-        <Button variant="ghost" size="icon" className="rounded-full relative" aria-label="Notificaciones">
-          <Bell className="size-5" />
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-card" />
-        </Button>
+        <button
+          className="p-2.5 rounded-xl text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-all active:scale-95 relative"
+          aria-label="Notificaciones"
+        >
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 rounded-full bg-danger" />
+        </button>
       </div>
     </header>
   );

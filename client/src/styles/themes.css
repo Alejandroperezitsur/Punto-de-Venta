@@ -6,17 +6,17 @@
   --secondary-foreground: 222 47% 11%;
   --accent: 221 83% 53%;
   --accent-foreground: 210 40% 98%;
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  --background: 0 0% 100%;
+  --foreground: 222 47% 8%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 222 47% 8%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
+  --popover-foreground: 222 47% 8%;
+  --border: 215 25% 88%;
+  --input: 215 25% 88%;
   --ring: 221 83% 53%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 210 30% 94%;
+  --muted-foreground: 215 20% 38%;
   --success: 142 71% 45%;
   --success-foreground: 0 0% 100%;
   --warning: 38 92% 50%;
@@ -26,28 +26,28 @@
   --info: 199 89% 48%;
   --info-foreground: 0 0% 100%;
   --surface: 0 0% 100%;
-  --surface-hover: 210 40% 96%;
+  --surface-hover: 210 30% 94%;
   --surface-elevated: 0 0% 100%;
 }
 
 [data-theme="dark"] {
-  --primary: 221 83% 53%;
+  --primary: 217 91% 60%;
   --primary-foreground: 210 40% 98%;
   --secondary: 222 20% 12%;
   --secondary-foreground: 210 40% 98%;
-  --accent: 221 83% 53%;
+  --accent: 217 91% 60%;
   --accent-foreground: 210 40% 98%;
-  --background: 222 20% 4%;
-  --foreground: 210 40% 98%;
-  --card: 222 20% 8%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 20% 8%;
-  --popover-foreground: 210 40% 98%;
-  --border: 222 20% 16%;
-  --input: 222 20% 16%;
-  --ring: 221 83% 53%;
-  --muted: 222 20% 12%;
-  --muted-foreground: 215 20% 65%;
+  --background: 222 15% 6%;
+  --foreground: 210 30% 96%;
+  --card: 222 15% 10%;
+  --card-foreground: 210 30% 96%;
+  --popover: 222 15% 10%;
+  --popover-foreground: 210 30% 96%;
+  --border: 222 15% 18%;
+  --input: 222 15% 18%;
+  --ring: 217 91% 60%;
+  --muted: 222 15% 14%;
+  --muted-foreground: 215 15% 62%;
   --success: 142 71% 45%;
   --success-foreground: 0 0% 100%;
   --warning: 38 92% 50%;
@@ -56,9 +56,9 @@
   --danger-foreground: 0 0% 100%;
   --info: 199 89% 48%;
   --info-foreground: 0 0% 100%;
-  --surface: 222 20% 8%;
-  --surface-hover: 222 20% 12%;
-  --surface-elevated: 222 20% 12%;
+  --surface: 222 15% 10%;
+  --surface-hover: 222 15% 14%;
+  --surface-elevated: 222 15% 14%;
 }
 
 [data-theme="emerald"] {
