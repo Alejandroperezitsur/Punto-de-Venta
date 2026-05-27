@@ -5,7 +5,9 @@
   "description": "Backend POS con Express y SQLite",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "ts-node index.ts",
+    "dev": "nodemon index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -26,9 +28,19 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.9.1",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^16.5.0",
-    "prisma": "^5.22.0"
+    "nodemon": "^3.1.14",
+    "prisma": "^5.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   }
 }

@@ -38,6 +38,12 @@ model Store {
   subscriptions Subscription[]
   aiInsights    AiInsight[]
   aiConfigs     AiConfig[]
+  
+  // Phase 8 Relations
+  sessions           Session[]
+  reconciliationLogs ReconciliationLog[]
+  inventoryVersions  InventoryVersion[]
+  fraudAlerts        FraudAlert[]
 
   @@map("stores")
 }
@@ -57,6 +63,9 @@ model User {
   audits              Audit[]
   supportTickets      SupportTicket[]
   ticketMessages      TicketMessage[]
+  
+  // Phase 8 Relations
+  sessions            Session[]
 
   @@map("users")
 }
@@ -132,6 +141,9 @@ model Product {
   movements   InventoryMovement[]
   sale_items  SaleItem[]
   barcodes    ProductBarcode[]
+  
+  // Phase 8 Relations
+  inventory_versions InventoryVersion[]
 
   @@unique([store_id, sku])
   @@index([name])
@@ -375,21 +387,33 @@ model FeatureVote {
 }
 
 model Audit {
-  id         Int      @id @default(autoincrement())
-  store_id   Int      @default(1)
-  event      String
-  user_id    Int?
-  ref_type   String?
-  ref_id     Int?
-  data       String?
-  created_at DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  store_id        Int      @default(1)
+  event           String
+  event_version   Int      @default(1)
+  user_id         Int?     // Legacy compatibility
+  actor_id        Int?     // Modern naming
+  actor_ip        String?
+  actor_agent     String?
+  session_id      String?
+  ref_type        String?
+  ref_id          String?
+  data            String?
+  before_snapshot String?
+  after_snapshot  String?
+  metadata        String?
+  prev_hash       String?
+  hash            String?  @unique
+  fingerprint     String?
+  created_at      DateTime @default(now())
 
-  store      Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
-  user       User?    @relation(fields: [user_id], references: [id])
+  store           Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [user_id], references: [id])
 
   @@index([store_id, created_at])
   @@index([event])
   @@index([ref_type, ref_id])
+  @@index([hash])
   @@map("audits")
 }
 
@@ -515,35 +539,6 @@ model AiConfig {
   store                 Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
 
   @@map("ai_configs")
-}
-
-// ─── Phase 8 Enterprise Models ───
-
-model AuditEntry {
-  id              Int      @id @default(autoincrement())
-  store_id        Int
-  event           String
-  event_version   Int      @default(1)
-  actor_id        Int?
-  actor_ip        String?
-  actor_agent     String?
-  session_id      String?
-  ref_type        String?
-  ref_id          String?
-  before_snapshot String?
-  after_snapshot  String?
-  metadata        String?
-  prev_hash       String?
-  hash            String   @unique
-  fingerprint     String?
-  created_at      DateTime @default(now())
-
-  store           Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
-
-  @@index([store_id, created_at])
-  @@index([event])
-  @@index([hash])
-  @@map("audit_entries")
 }
 
 model Session {
