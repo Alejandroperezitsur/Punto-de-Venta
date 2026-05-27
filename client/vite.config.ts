@@ -13,6 +13,19 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'pos-core': ['./src/App.jsx', './src/components/sales/Cart.tsx', './src/components/sales/ProductSearch.tsx', './src/components/sales/QuickProducts.tsx', './src/components/sales/PaymentModal.tsx', './src/components/sales/ConfirmModal.tsx'],
+          'scanner-core': ['./src/hooks/useScan.ts', './src/hooks/useScanBuffer.ts', './src/hooks/useScannerFocusEngine.ts', './src/hooks/useScanSound.js'],
+          'sync-engine': ['./src/lib/syncEngineV2.ts', './src/lib/syncManager.ts', './src/lib/transactionalQueue.ts', './src/lib/snapshotManager.ts'],
+          'offline-core': ['./src/lib/offlineDB.ts', './src/lib/offlineAuth.ts', './src/lib/offlineTokenManager.ts', './src/lib/db.ts'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 300,
+  },
   plugins: [
     react(),
     VitePWA({
