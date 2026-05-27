@@ -27,10 +27,10 @@ const icons: Record<ToastVariant, React.ElementType> = {
 };
 
 const colors: Record<ToastVariant, string> = {
-  success: 'border-success/30 bg-success/10 text-success',
-  error: 'border-danger/30 bg-danger/10 text-danger',
-  warning: 'border-warning/30 bg-warning/10 text-warning',
-  info: 'border-info/30 bg-info/10 text-info',
+  success: 'border-success/20 bg-success/10 text-success',
+  error: 'border-danger/20 bg-danger/10 text-danger',
+  warning: 'border-warning/20 bg-warning/10 text-warning',
+  info: 'border-info/20 bg-info/10 text-info',
 };
 
 function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -64,20 +64,19 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
-        <AnimatePresence mode="popLayout">
+      <div className="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+        <AnimatePresence>
           {toasts.map(t => {
             const Icon = icons[t.variant];
             return (
               <motion.div
                 key={t.id}
-                layout
-                initial={{ opacity: 0, x: 100, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 100, scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 2 }}
+                transition={{ duration: 0.1 }}
                 className={cn(
-                  'pointer-events-auto flex items-start gap-3 rounded-2xl border-2 p-4 shadow-xl backdrop-blur-xl bg-card/95',
+                  'pointer-events-auto flex items-start gap-2.5 rounded-lg border p-3 shadow-sm bg-card',
                   colors[t.variant],
                 )}
               >

@@ -4,27 +4,29 @@ import { Loader2 } from 'lucide-react';
 
 const variants = {
   primary:
-    'bg-primary text-primary-foreground hover:brightness-110 shadow-glow active:scale-[0.97]',
+    'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] shadow-sm',
   secondary:
-    'bg-secondary text-secondary-foreground border border-border hover:bg-surface-hover active:scale-[0.97]',
+    'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border active:scale-[0.98]',
   ghost:
-    'text-muted-foreground hover:text-foreground hover:bg-surface-hover active:scale-[0.97]',
+    'text-muted-foreground hover:text-foreground hover:bg-surface-hover active:scale-[0.98]',
   danger:
-    'bg-danger text-danger-foreground hover:brightness-110 shadow-lg active:scale-[0.97]',
+    'bg-danger text-danger-foreground hover:bg-danger/90 active:scale-[0.98] shadow-sm',
   outline:
-    'border-2 border-primary text-primary hover:bg-primary/5 active:scale-[0.97]',
+    'border border-border text-foreground hover:bg-surface-hover active:scale-[0.98]',
   success:
-    'bg-success text-success-foreground hover:brightness-110 shadow-lg active:scale-[0.97]',
+    'bg-success text-success-foreground hover:bg-success/90 active:scale-[0.98] shadow-sm',
   warning:
-    'bg-warning text-warning-foreground hover:brightness-110 shadow-lg active:scale-[0.97]',
+    'bg-warning text-warning-foreground hover:bg-warning/90 active:scale-[0.98] shadow-sm',
 };
 
 const sizes = {
-  sm: 'h-9 px-3 text-xs rounded-xl gap-1.5',
-  md: 'h-11 px-5 text-sm rounded-xl gap-2',
-  lg: 'h-13 px-7 text-base rounded-2xl gap-2.5',
-  xl: 'h-16 px-10 text-lg rounded-2xl gap-3',
-  icon: 'h-11 w-11 rounded-xl',
+  xs: 'h-7 px-2.5 text-[11px] rounded-md gap-1',
+  sm: 'h-8 px-3 text-xs rounded-lg gap-1',
+  md: 'h-9 px-3.5 text-sm rounded-lg gap-1.5',
+  lg: 'h-11 px-4 text-sm rounded-lg gap-2',
+  xl: 'h-12 px-6 text-base rounded-xl gap-2',
+  '2xl': 'h-14 px-6 text-lg rounded-xl gap-2',
+  icon: 'h-9 w-9 rounded-lg',
 };
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -41,7 +43,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-          'inline-flex items-center justify-center font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none',
+          'inline-flex items-center justify-center font-semibold transition-all duration-75',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+          'disabled:pointer-events-none disabled:opacity-40 select-none min-h-[36px]',
           variants[variant],
           sizes[size],
           className,
@@ -49,7 +53,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         {...props}
       >
-        {isLoading && <Loader2 className="size-4 animate-spin shrink-0" />}
+        {isLoading && <Loader2 className="size-3.5 animate-spin shrink-0" />}
         {children}
       </button>
     );

@@ -6,9 +6,9 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { useToast } from '../components/ui/Toast';
 import { Badge } from '../components/ui/Badge';
-import ErrorState from '../components/states/ErrorState';
+import { ErrorState } from '../components/ui/ErrorState';
 import { Plus, Trash2, RefreshCw, Users, Phone, Mail, FileText } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../utils/cn';
 
 const CustomersView = () => {
   const [customers, setCustomers] = useState([]);
@@ -57,79 +57,71 @@ const CustomersView = () => {
   };
 
   const columns = [
-    { title: 'Nombre', key: 'name', sortable: true, className: 'font-semibold min-w-[180px]' },
+    { title: 'Nombre', key: 'name', sortable: true, className: 'font-semibold min-w-[160px]' },
     { title: 'Email', key: 'email', sortable: true, hideOnMobile: true, render: (row) =>
-      row.email ? <span className="flex items-center gap-1.5"><Mail className="size-3.5 text-muted-foreground" />{row.email}</span> : '—'
+      row.email ? <span className="flex items-center gap-1"><Mail className="size-3 text-muted-foreground" />{row.email}</span> : '—'
     },
     { title: 'Teléfono', key: 'phone', render: (row) =>
-      row.phone ? <span className="flex items-center gap-1.5"><Phone className="size-3.5 text-muted-foreground" />{row.phone}</span> : '—'
+      row.phone ? <span className="flex items-center gap-1"><Phone className="size-3 text-muted-foreground" />{row.phone}</span> : '—'
     },
     { title: 'RFC', key: 'rfc', hideOnMobile: true },
-    { title: 'Acciones', key: 'actions', width: '80px', render: (row) => (
-      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }}
-        className="text-danger hover:bg-danger/10 rounded-xl">
-        <Trash2 className="size-4" />
-      </Button>
+    { title: '', key: 'actions', width: '48px', render: (row) => (
+      <button onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }}
+        className="size-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
+        aria-label="Eliminar cliente">
+        <Trash2 className="size-3.5" />
+      </button>
     )},
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter">Clientes</h1>
-          <p className="text-muted-foreground font-medium text-sm">
+          <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
+          <p className="text-muted-foreground font-medium text-xs">
             {customers.length > 0 ? `${customers.length} registrados` : 'Gestiona tus clientes'}
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-2xl border border-border">
-            <RefreshCw className="size-5" />
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-lg border border-border">
+            <RefreshCw className="size-4" />
           </Button>
-          <Button onClick={() => setShowForm(!showForm)} size="lg" className="font-bold shadow-lg shadow-primary/20">
-            <Plus className="size-5 mr-1" /> Nuevo Cliente
+          <Button onClick={() => setShowForm(!showForm)} size="md" className="font-bold">
+            <Plus className="size-4 mr-1" /> Nuevo Cliente
           </Button>
         </div>
       </div>
 
-      <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
-          >
-            <Card className="p-6 mb-6 border-2 border-primary/20">
-              <h3 className="text-lg font-bold mb-4">Registrar Cliente</h3>
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div className="md:col-span-2">
-                  <Input placeholder="Nombre completo" value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })} required label="Nombre" />
-                </div>
-                <div>
-                  <Input placeholder="cliente@email.com" type="email" value={form.email}
-                    onChange={e => setForm({ ...form, email: e.target.value })} label="Email" />
-                </div>
-                <div>
-                  <Input placeholder="+52 555 123 4567" value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })} label="Teléfono" />
-                </div>
-                <div className="md:col-span-2">
-                  <Input placeholder="RFC (opcional)" value={form.rfc}
-                    onChange={e => setForm({ ...form, rfc: e.target.value })} label="RFC" />
-                </div>
-                <div className="flex gap-3 justify-end md:col-span-2">
-                  <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Cancelar</Button>
-                  <Button type="submit" isLoading={saving} disabled={!form.name.trim()} className="font-bold">
-                    <Plus className="size-4 mr-1" /> Registrar
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {showForm && (
+        <Card className="p-4 border border-primary/20">
+          <h3 className="text-sm font-bold mb-3">Registrar Cliente</h3>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+            <div className="md:col-span-2">
+              <Input placeholder="Nombre completo" value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })} required label="Nombre" />
+            </div>
+            <div>
+              <Input placeholder="cliente@email.com" type="email" value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })} label="Email" />
+            </div>
+            <div>
+              <Input placeholder="+52 555 123 4567" value={form.phone}
+                onChange={e => setForm({ ...form, phone: e.target.value })} label="Teléfono" />
+            </div>
+            <div className="md:col-span-2">
+              <Input placeholder="RFC (opcional)" value={form.rfc}
+                onChange={e => setForm({ ...form, rfc: e.target.value })} label="RFC" />
+            </div>
+            <div className="flex gap-2 justify-end md:col-span-2">
+              <Button type="button" variant="ghost" onClick={() => setShowForm(false)} size="sm">Cancelar</Button>
+              <Button type="submit" isLoading={saving} disabled={!form.name.trim()} className="font-bold" size="sm">
+                <Plus className="size-3.5 mr-1" /> Registrar
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
 
       {error ? (
         <ErrorState error={error.message || error} onRetry={loadCustomers} />
@@ -140,7 +132,7 @@ const CustomersView = () => {
           searchable
           searchPlaceholder="Buscar clientes..."
           pageSize={15}
-          density="comfortable"
+          density="compact"
           loading={loading}
           emptyIcon={Users}
           emptyTitle="No hay clientes"

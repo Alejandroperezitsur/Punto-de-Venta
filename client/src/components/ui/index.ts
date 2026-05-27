@@ -14,6 +14,8 @@ export { ToastProvider, useToast } from './Toast';
 export type { ToastVariant, Toast } from './Toast';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+export { ErrorState } from './ErrorState';
+export type { ErrorStateProps } from './ErrorState';
 export { Table } from './Table';
 export type { Column, TableProps } from './Table';
 export { Select } from './Select';
