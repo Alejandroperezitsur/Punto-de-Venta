@@ -582,5 +582,30 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
     };
   }
 
+  // ─── AUDITORÍA ───
+  if (path.startsWith('/audits')) {
+    if (path.startsWith('/audits/events')) {
+      return [
+        'sale_create', 'sale_delete', 'user_create', 'user_update', 'user_delete',
+        'cash_open', 'cash_close', 'cash_withdraw', 'cash_deposit', 'settings_update',
+        'config_import', 'backup_create', 'backup_delete', 'license_activate'
+      ];
+    }
+
+    if (method === 'GET') {
+      const allAudits = await db.getAll('clientAudit');
+      // Mapear al formato que espera la vista
+      return allAudits.map(a => ({
+        id: a.id,
+        created_at: new Date(a.createdAt).toISOString(),
+        action: a.event,
+        entity_type: a.refType || 'system',
+        entity_id: a.refId || '0',
+        user_id: a.actor || 'admin',
+        details: a.metadata || '{}'
+      })).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+  }
+
   throw new Error(`Ruta offline no emulada para ${method} ${path}`);
 }

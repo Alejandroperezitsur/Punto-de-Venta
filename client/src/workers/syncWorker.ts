@@ -2,6 +2,10 @@
 
 const API_BASE = self.location.origin + '/api';
 
+const isStaticEnv = self.location.hostname.includes('github.io') || 
+                   self.location.hostname.includes('github.com') ||
+                   (self.location.hostname.includes('localhost') && self.location.port === '4173');
+
 let authToken: string | null = null;
 let authStoreId: number | null = null;
 let authUserId: number | null = null;
@@ -20,6 +24,10 @@ async function trySync(
   idempotencyKey: string,
   retries = 0,
 ): Promise<{ ok: boolean; error?: string; data?: unknown }> {
+  if (isStaticEnv) {
+    return { ok: true, data: {} };
+  }
+
   const maxRetries = 5;
   const backoff = [500, 1000, 2000, 4000, 8000];
 
@@ -73,6 +81,10 @@ async function tryBatchSync(
   endpoint: string,
   batchPayload: unknown,
 ): Promise<{ ok: boolean; error?: string }> {
+  if (isStaticEnv) {
+    return { ok: true };
+  }
+
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {
       method: 'POST',

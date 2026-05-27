@@ -1,5 +1,6 @@
 import { getDB, type InventoryVersion, type ReconciliationLog } from './db';
 import { createLogger } from './structuredLogger';
+import { isStaticEnv } from '../utils/env';
 
 const logger = createLogger('Reconciliation');
 
@@ -182,6 +183,10 @@ export interface ReconciliationResult {
 }
 
 export async function runReconciliation(storeId: number): Promise<ReconciliationResult> {
+  if (isStaticEnv) {
+    return { conflicts: 0, drifts: 0, checksumMatch: true, reconciledProducts: 0 };
+  }
+
   const token = await getToken();
   if (!token) {
     logger.warn('No token, skipping reconciliation');
@@ -267,6 +272,7 @@ export async function runReconciliation(storeId: number): Promise<Reconciliation
 // ─── Checksum Verification ───
 
 async function verifyChecksum(storeId: number, serverChecksum?: string): Promise<boolean> {
+  if (isStaticEnv) return true;
   if (!serverChecksum) return true;
 
   const token = await getToken();

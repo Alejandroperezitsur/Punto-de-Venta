@@ -1,6 +1,7 @@
 import type { QueueItem } from './db';
 import { TransactionalQueue, type QueueProcessor } from './transactionalQueue';
 import { createLogger } from './structuredLogger';
+import { isStaticEnv } from '../utils/env';
 
 const logger = createLogger('SyncEngineV2');
 
@@ -34,6 +35,10 @@ interface BatchResult {
 async function sendBatch(endpoint: string, items: Array<{ id: string; payload: unknown; idempotencyKey: string }>): Promise<BatchResult[]> {
   const results: BatchResult[] = [];
   if (items.length === 0) return results;
+
+  if (isStaticEnv) {
+    return items.map(i => ({ id: i.id, ok: true }));
+  }
 
   const correlationId = crypto.randomUUID?.() || 'corr-' + Date.now();
 
