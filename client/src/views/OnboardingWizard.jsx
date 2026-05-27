@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { useToast } from '../components/ui/Toast';
+import { cn } from '../utils/cn';
 import {
     ChevronRight, ChevronLeft, Check, Building, User, Package,
     ShoppingCart, Percent, Sparkles, PartyPopper
@@ -22,7 +23,7 @@ const STEPS = [
 const OnboardingWizard = () => {
     const navigate = useNavigate();
     const { login } = useUserStore();
-    const { toast } = useToast();
+    const toast = useToast();
     const [step, setStep] = useState(0);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState({
@@ -216,7 +217,5 @@ const OnboardingWizard = () => {
         </div>
     );
 };
-
-import { cn } from '../utils/cn';
 
 export default OnboardingWizard;

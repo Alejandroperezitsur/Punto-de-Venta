@@ -25,7 +25,7 @@ const SettingsSection = ({ title, icon: Icon, children }) => (
 
 const BusinessSettings = () => {
   const { isDark, toggleDark, setTheme, themes, theme } = useTheme();
-  const { toast } = useToast();
+  const toast = useToast();
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -35,7 +35,7 @@ const BusinessSettings = () => {
     setLoading(true);
     try {
       const data = await api('/settings');
-      setSettings(data);
+      setSettings(data || {});
     } catch (e) {
       console.error(e);
     } finally {
@@ -60,10 +60,10 @@ const BusinessSettings = () => {
         body: JSON.stringify(settings)
       });
       setSaved(true);
-      toast({ title: 'Configuración guardada', description: 'Los cambios se han aplicado correctamente.' });
+      toast('Configuración guardada correctamente', 'success');
       setTimeout(() => setSaved(false), 3000);
     } catch (e) {
-      toast({ title: 'Error al guardar', description: e.message, variant: 'error' });
+      toast('Error al guardar: ' + e.message, 'error');
     } finally {
       setSaving(false);
     }

@@ -13,7 +13,7 @@ const Branding = () => {
     primaryColor: '#3b82f6',
   });
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const toast = useToast();
 
   // Load branding from localStorage
   useEffect(() => {
@@ -31,9 +31,9 @@ const Branding = () => {
     try {
       localStorage.setItem('app_branding', JSON.stringify(newBranding));
       setBranding(newBranding);
-      toast('success', 'Personalización guardada correctamente');
+      toast('Personalización guardada correctamente', 'success');
     } catch (e) {
-      toast('error', 'Error al guardar personalización');
+      toast('Error al guardar personalización', 'error');
       console.error(e);
     }
   };
@@ -44,13 +44,13 @@ const Branding = () => {
 
     // Validate file size (max 500KB)
     if (file.size > 500 * 1024) {
-      toast('error', 'La imagen no debe exceder 500KB');
+      toast('La imagen no debe exceder 500KB', 'error');
       return;
     }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast('error', 'Solo se permiten archivos de imagen');
+      toast('Solo se permiten archivos de imagen', 'error');
       return;
     }
 
@@ -65,7 +65,7 @@ const Branding = () => {
     };
 
     reader.onerror = () => {
-      toast('error', 'Error al leer el archivo');
+      toast('Error al leer el archivo', 'error');
       setLoading(false);
     };
 
@@ -97,7 +97,7 @@ const Branding = () => {
         primaryColor: '#3b82f6',
       };
       saveBranding(defaults);
-      toast('success', 'Configuración restaurada');
+      toast('Configuración restaurada', 'success');
     }
   };
 
