@@ -8,6 +8,15 @@ import { initGlobalErrorHandler, setCorrelationId } from './lib/structuredLogger
 import { getHealthMonitor } from './lib/healthMonitor';
 import { attemptCrashRecovery, attemptCartRollback, safeQueueReplay, runIntegrityCheck } from './lib/snapshotManager';
 import { restoreOfflineSession } from './lib/offlineAuth';
+import { performanceTelemetry } from './lib/performanceTelemetry';
+import { interactionTracker } from './lib/interactionTracker';
+import { deviceDetector } from './lib/deviceDetector';
+import { configureBudget, initBudgetMonitor } from './lib/performanceBudget';
+import { offlineRecoveryEngine } from './lib/offlineRecoveryEngine';
+import { dataConsistency } from './lib/dataConsistency';
+import { hardwareAdapter } from './lib/hardwareAdapter';
+import { productionDiagnostics } from './lib/productionDiagnostics';
+import { PerformanceOverlay } from './components/dev/PerformanceOverlay';
 
 // Views
 import Login from './views/Login';
@@ -68,6 +77,7 @@ const PublicOnly = ({ children }) => {
 };
 
 import { LoadingFallback } from './components/common/LoadingFallback';
+import { POSErrorBoundary, ScannerErrorBoundary, AdminErrorBoundary, ReportsErrorBoundary, SelfHealingBoundary } from './components/error/ErrorBoundaries';
 
 // const LoadingFallback = () => <Splash />; // Replaced with enhanced component
 
@@ -88,25 +98,59 @@ function App() {
                 }
 
                 hydrate();
-                initSyncManager(); // delegates to syncEngineV2
+                initSyncManager();
                 initSyncEngineV2();
                 getHealthMonitor().init();
+
+                await hardwareAdapter.init();
+
+                initBudgetMonitor();
 
                 const recovery = await attemptCrashRecovery();
                 if (recovery.recovered && recovery.restoredItems > 0) {
                     console.log(`[Recovery] Restored ${recovery.restoredItems} items from snapshot`);
                 }
+
+                const offlineRecovery = await offlineRecoveryEngine.runRecovery();
+                if (offlineRecovery.recovered) {
+                    console.log(`[Recovery] Offline recovery: ${offlineRecovery.actions.filter(a => a.executed).length} actions`);
+                    productionDiagnostics.recordRecovery(true);
+                } else if (offlineRecovery.errors.length > 0) {
+                    console.warn('[Recovery] Offline recovery issues:', offlineRecovery.errors);
+                    productionDiagnostics.recordRecovery(false);
+                }
+
                 const cartRollback = await attemptCartRollback();
                 if (cartRollback.rolledBack) {
                     console.log(`[Recovery] Cart rolled back: ${cartRollback.reason}`);
                 }
+
                 const integrity = await runIntegrityCheck();
                 if (!integrity.queueConsistent || !integrity.snapshotValid) {
                     console.warn(`[Integrity] Issues found: ${integrity.details.join(', ')}`);
                     await safeQueueReplay();
                 }
+
+                const consistencyCheck = await dataConsistency.runFullCheck();
+                if (consistencyCheck.overall !== 'pass') {
+                    const repaired = await dataConsistency.repairInvalidState();
+                    if (repaired > 0) {
+                        console.log(`[Consistency] Repaired ${repaired} items`);
+                    }
+                }
+
+                const diagnosticInterval = setInterval(() => {
+                    productionDiagnostics.captureSnapshot();
+                }, 300000);
+                window.__diagnosticInterval = diagnosticInterval;
+
+                document.addEventListener('click', (e) => {
+                    const target = e.target instanceof HTMLElement ? e.target.tagName + (e.target.id ? '#' + e.target.id : '') : 'unknown'
+                    interactionTracker.trackClick(target)
+                }, { passive: true })
             } catch (e) {
                 console.error('[Init] Recovery error:', e);
+                productionDiagnostics.recordError(e);
             }
         };
 
@@ -114,12 +158,14 @@ function App() {
 
         return () => {
             getHealthMonitor().destroy();
+            if (window.__diagnosticInterval) clearInterval(window.__diagnosticInterval);
         };
     }, [hydrate]);
 
     return (
         <>
             <DynamicBranding />
+            <PerformanceOverlay />
             <React.Suspense fallback={<LoadingFallback />}>
                 <Routes>
                     <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
@@ -134,25 +180,33 @@ function App() {
 
                     <Route path="/ventas" element={
                         <RequireAuth requiredPermission="sales:view">
-                            <SalesView />
+                            <POSErrorBoundary>
+                                <SalesView />
+                            </POSErrorBoundary>
                         </RequireAuth>
                     } />
 
                     <Route path="/productos" element={
                         <RequireAuth requiredPermission="products:view">
-                            <ProductsView />
+                            <SelfHealingBoundary domain="Products">
+                                <ProductsView />
+                            </SelfHealingBoundary>
                         </RequireAuth>
                     } />
 
                     <Route path="/clientes" element={
                         <RequireAuth requiredPermission="customers:view">
-                            <CustomersView />
+                            <SelfHealingBoundary domain="Customers">
+                                <CustomersView />
+                            </SelfHealingBoundary>
                         </RequireAuth>
                     } />
 
                     <Route path="/reportes" element={
                         <RequireAuth requiredPermission="reports:view">
-                            <MyBusiness />
+                            <ReportsErrorBoundary>
+                                <MyBusiness />
+                            </ReportsErrorBoundary>
                         </RequireAuth>
                     } />
 
@@ -194,7 +248,9 @@ function App() {
 
                     <Route path="/admin/metrics" element={
                         <RequireAuth>
-                            <MetricsDashboard />
+                            <AdminErrorBoundary>
+                                <MetricsDashboard />
+                            </AdminErrorBoundary>
                         </RequireAuth>
                     } />
 
