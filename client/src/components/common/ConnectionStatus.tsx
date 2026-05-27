@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Wifi, WifiOff, RefreshCw, AlertTriangle, Skull, Activity } from 'lucide-react';
+import { Wifi, WifiOff, RefreshCw, Activity } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { forceSyncNow, getSyncStatusV2 } from '../../lib/syncEngineV2';
 import { getHealthMonitor } from '../../lib/healthMonitor';
@@ -9,7 +9,6 @@ export const ConnectionStatus: React.FC = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
-  const [deadLetterCount, setDeadLetterCount] = useState(0);
   const [networkQuality, setNetworkQuality] = useState<string>('good');
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -18,7 +17,6 @@ export const ConnectionStatus: React.FC = () => {
     try {
       const status = await getSyncStatusV2();
       setPendingCount(status.queueStats.pending);
-      setDeadLetterCount(status.queueStats.deadLetterCount);
       setNetworkQuality(status.networkQuality);
       setHealth((await getHealthMonitor().check()));
     } catch {
@@ -57,48 +55,41 @@ export const ConnectionStatus: React.FC = () => {
     setTimeout(() => setIsSyncing(false), 2000);
   };
 
-  const qualityColor = networkQuality === 'good' ? 'bg-success' :
-    networkQuality === 'degraded' ? 'bg-warning' :
-    networkQuality === 'poor' ? 'bg-orange-500' : 'bg-danger';
+  const getStatusLabel = (): { label: string; variant: string } => {
+    if (!isOnline) return { label: 'Sin conexión', variant: 'offline' };
+    if (isSyncing) return { label: 'Guardando...', variant: 'syncing' };
+    if (pendingCount > 0) return { label: `${pendingCount} cambio${pendingCount !== 1 ? 's' : ''} pendiente${pendingCount !== 1 ? 's' : ''}`, variant: 'pending' };
+    if (networkQuality === 'degraded' || networkQuality === 'poor') return { label: 'Conexión lenta', variant: 'degraded' };
+    return { label: 'En línea', variant: 'online' };
+  };
 
-  const hasErrors = (health?.checks.sync.errorRate ?? 0) > 0 || (deadLetterCount > 0);
+  const status = getStatusLabel();
 
-  const badgeClass = (base: string, error: boolean) =>
-    cn(
-      'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border shadow-sm transition-all',
-      base,
-    );
+  const variantStyles = {
+    online: 'bg-success/10 text-success border-success/20',
+    syncing: 'bg-primary/10 text-primary border-primary/20',
+    pending: 'bg-warning/10 text-warning border-warning/20',
+    degraded: 'bg-warning/10 text-warning border-warning/20',
+    offline: 'bg-danger/10 text-danger border-danger/20',
+  };
 
-  const pillClass = (online: boolean, errors: boolean, syncing: boolean) =>
-    cn(
-      'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm transition-all',
-      syncing && 'opacity-70 cursor-wait',
-      !online && 'bg-danger/10 text-danger border-danger/20',
-      online && errors && 'bg-warning/10 text-warning border-warning/20',
-      online && !errors && 'bg-success/10 text-success border-success/20',
-    );
+  const handleDetailsClick = useCallback(() => {
+    setShowDetails(!showDetails);
+  }, []);
 
   return (
     <div className="flex items-center gap-2 relative">
-      {deadLetterCount > 0 && (
-        <span className={badgeClass('bg-danger/10 text-danger border-danger/20', true)}>
-          <Skull className="size-2.5" />
-          {deadLetterCount} muertos
-        </span>
-      )}
-      {pendingCount > 0 && (
-        <span className={badgeClass('bg-warning/10 text-warning border-warning/20', false)}>
-          {pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}
-        </span>
-      )}
       <div className="flex items-center gap-1.5">
-        <span className={cn('size-2 rounded-full', qualityColor)} />
         <button
           onClick={handleSync}
           disabled={!isOnline || isSyncing}
-          className={pillClass(isOnline, hasErrors, isSyncing)}
-          title={isOnline ? `Red: ${networkQuality}. Sync: ${pendingCount} pendientes, ${deadLetterCount} fallos` : "Sin conexión"}
-          aria-label={`Estado: ${isOnline ? 'En línea' : 'Sin conexión'}. ${pendingCount} pendientes.`}
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm transition-all',
+            isSyncing && 'opacity-70 cursor-wait',
+            variantStyles[status.variant as keyof typeof variantStyles],
+          )}
+          title={isOnline ? `${pendingCount} cambio${pendingCount !== 1 ? 's' : ''} pendiente${pendingCount !== 1 ? 's' : ''}` : 'Sin conexión'}
+          aria-label={`Estado: ${status.label}`}
         >
           {isSyncing ? (
             <RefreshCw className="size-3 animate-spin" />
@@ -107,41 +98,41 @@ export const ConnectionStatus: React.FC = () => {
           ) : (
             <WifiOff className="size-3" />
           )}
-          <span>{isOnline ? (isSyncing ? 'Sync...' : networkQuality === 'good' ? 'Online' : networkQuality === 'degraded' ? 'Lenta' : 'Mala') : 'Offline'}</span>
+          <span>{status.label}</span>
         </button>
       </div>
       <button
-        onClick={() => setShowDetails(!showDetails)}
+        onClick={handleDetailsClick}
         className="p-1.5 rounded-md hover:bg-surface-hover text-muted-foreground transition-colors"
-        title="Detalles de salud del sistema"
-        aria-label="Detalles de salud"
+        title="Detalles del sistema"
+        aria-label="Detalles del sistema"
       >
         <Activity className="size-3.5" />
       </button>
       {showDetails && health && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-card rounded-lg shadow-xl border border-border p-4 z-50 text-xs" role="dialog" aria-label="Detalles de salud">
+        <div className="absolute top-full right-0 mt-2 w-80 bg-card rounded-lg shadow-xl border border-border p-4 z-50 text-xs" role="dialog" aria-label="Detalles del sistema">
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="font-bold text-foreground">Servidor:</span>
               <span className={health.checks.server.ok ? 'text-success' : 'text-danger'}>
-                {health.checks.server.ok ? `${health.checks.server.latencyMs}ms` : health.checks.server.error}
+                {health.checks.server.ok ? `${health.checks.server.latencyMs}ms` : 'Desconectado'}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold text-foreground">IndexedDB:</span>
+              <span className="font-bold text-foreground">Datos locales:</span>
               <span className={health.checks.indexedDB.ok ? 'text-success' : 'text-danger'}>
-                {health.checks.indexedDB.ok ? `${health.checks.indexedDB.latencyMs}ms` : 'Error'}
+                {health.checks.indexedDB.ok ? 'Funcionando' : 'Error'}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold text-foreground">Sync:</span>
+              <span className="font-bold text-foreground">Sincronización:</span>
               <span className={health.checks.sync.ok ? 'text-success' : 'text-warning'}>
-                {pendingCount} pend, {deadLetterCount} fallos
+                {pendingCount} pendientes
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold text-foreground">Queue:</span>
-              <span className="text-foreground">{health.checks.queue.queueDepth} items</span>
+              <span className="font-bold text-foreground">Cola:</span>
+              <span className="text-foreground">{health.checks.queue.queueDepth} elementos</span>
             </div>
             <div className="flex justify-between">
               <span className="font-bold text-foreground">Memoria:</span>
@@ -150,14 +141,10 @@ export const ConnectionStatus: React.FC = () => {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold text-foreground">Auditoría:</span>
-              <span className={health.checks.audit.ok ? 'text-success' : 'text-danger'}>
-                {health.checks.audit.chainValid ? `${health.checks.audit.totalEvents} eventos` : '¡Cadena rota!'}
-              </span>
-            </div>
-            <div className="flex justify-between">
               <span className="font-bold text-foreground">Red:</span>
-              <span className="text-foreground capitalize">{networkQuality}</span>
+              <span className="text-foreground capitalize">
+                {networkQuality === 'good' ? 'Buena' : networkQuality === 'degraded' ? 'Regular' : 'Mala'}
+              </span>
             </div>
           </div>
         </div>

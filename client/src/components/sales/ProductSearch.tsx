@@ -12,15 +12,15 @@ export const ProductSearch = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
-  const [scannerStatus, setScannerStatus] = useState('ready');
-  const [isScannerIdle, setIsScannerIdle] = useState(false);
-  const inputRef = useRef(null);
+  const [scannerStatus, setScannerStatus] = useState<'ready' | 'scanning' | 'error' | 'idle'>('ready');
+  const inputRef = useRef<HTMLInputElement>(null);
   const addItem = useCartStore(state => state.addItem);
   const { playSuccess, playWarning } = useScanSound();
 
   const focusInput = useCallback(() => {
     if (inputRef.current) {
       inputRef.current.focus();
+      inputRef.current.select();
     }
   }, []);
 
@@ -28,7 +28,7 @@ export const ProductSearch = () => {
     focusInput();
   }, [focusInput]);
 
-  const handleScan = useCallback(async (code, qty = 1) => {
+  const handleScan = useCallback(async (code: string, qty = 1) => {
     setLoading(true);
     setError('');
     setScannerStatus('scanning');
@@ -52,7 +52,6 @@ export const ProductSearch = () => {
   }, [addItem, playSuccess, playWarning, focusInput]);
 
   const onScannerIdle = useCallback(() => {
-    setIsScannerIdle(true);
     setScannerStatus('idle');
   }, []);
 
@@ -60,11 +59,11 @@ export const ProductSearch = () => {
 
   useEffect(() => {
     if (scannerStatus === 'idle' || scannerStatus === 'ready') return;
-    const t = setTimeout(() => setIsScannerIdle(false), 3000);
+    const t = setTimeout(() => setScannerStatus('ready'), 2000);
     return () => clearTimeout(t);
   }, [scannerStatus]);
 
-  const handleSearch = useCallback(async (e) => {
+  const handleSearch = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
     let code = query;
@@ -96,10 +95,9 @@ export const ProductSearch = () => {
   }, [error, addItem, playSuccess, focusInput]);
 
   const scannerIndicator = () => {
-    if (isScannerIdle) return 'bg-warning animate-pulse';
     if (scannerStatus === 'scanning') return 'bg-primary animate-pulse';
     if (scannerStatus === 'error') return 'bg-danger';
-    return 'bg-success';
+    return 'bg-muted-foreground/30';
   };
 
   return (
@@ -112,7 +110,7 @@ export const ProductSearch = () => {
             scanner
             placeholder="Escanear o buscar producto..."
             value={query}
-            onChange={(e) => { setQuery(e.target.value); if (error) setError(''); if (isScannerIdle) setIsScannerIdle(false); }}
+            onChange={(e) => { setQuery(e.target.value); if (error) setError(''); if (scannerStatus === 'error') setScannerStatus('ready'); }}
             disabled={loading}
             className={cn(
               loading && 'animate-pulse',
@@ -121,10 +119,11 @@ export const ProductSearch = () => {
             )}
             data-scan-input="true"
             aria-label="Buscar o escanear producto"
+            autoComplete="off"
           />
-          {isScannerIdle ? (
+          {scannerStatus === 'idle' ? (
             <div className="absolute right-3 top-1/2 -translate-y-1/2" title="Scanner no detectado">
-              <WifiOff className="size-4 text-warning" />
+              <WifiOff className="size-4 text-muted-foreground/50" />
             </div>
           ) : (
             <div className={cn(

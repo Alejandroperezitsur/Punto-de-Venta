@@ -18,7 +18,14 @@ interface SelectProps {
   searchable?: boolean;
   error?: string;
   className?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
+
+const controlHeights = {
+  sm: 'h-8',
+  md: 'h-9',
+  lg: 'h-11',
+};
 
 function Select({
   options,
@@ -29,11 +36,14 @@ function Select({
   searchable = false,
   error,
   className,
+  size = 'md',
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const selected = options.find(o => o.value === value);
 
@@ -54,10 +64,40 @@ function Select({
     if (!open) setQuery('');
   }, [open, searchable]);
 
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [query]);
+
+  useEffect(() => {
+    if (!open) return;
+    const el = listRef.current?.children[highlightedIndex] as HTMLElement;
+    el?.scrollIntoView({ block: 'nearest' });
+  }, [highlightedIndex, open]);
+
   const handleSelect = useCallback((opt: SelectOption) => {
     onChange?.(opt.value);
     setOpen(false);
   }, [onChange]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedIndex(i => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(i => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (open && filtered[highlightedIndex]) {
+        handleSelect(filtered[highlightedIndex]);
+      } else {
+        setOpen(true);
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setOpen(false);
+    }
+  }, [open, filtered, highlightedIndex, handleSelect]);
 
   const Icon = selected?.icon;
 
@@ -71,15 +111,18 @@ function Select({
       <button
         type="button"
         onClick={() => setOpen(!open)}
+        onKeyDown={handleKeyDown}
         className={cn(
-          'flex items-center w-full h-[var(--control-md)] px-3 rounded-md border border-input bg-card text-left transition-all duration-150',
+          'flex items-center w-full px-3 rounded-md border border-input bg-card text-left transition-all duration-150',
           'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20',
           open && 'border-ring ring-2 ring-ring/20',
           error && 'border-danger',
           'hover:border-foreground/20',
+          controlHeights[size],
         )}
         aria-expanded={open}
         aria-haspopup="listbox"
+        aria-activedescendant={open && filtered[highlightedIndex] ? `option-${filtered[highlightedIndex].value}` : undefined}
       >
         {Icon && <Icon className="size-4 mr-2 text-muted-foreground shrink-0" />}
         <span className={cn('flex-1 text-sm font-medium truncate', !selected && 'text-muted-foreground/50')}>
@@ -113,19 +156,22 @@ function Select({
                 </div>
               </div>
             )}
-            <div className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
+            <div ref={listRef} className="max-h-60 overflow-y-auto p-1.5 space-y-0.5">
               {filtered.length === 0 ? (
                 <p className="px-3 py-6 text-sm text-muted-foreground text-center">Sin resultados</p>
               ) : (
-                filtered.map(opt => {
+                filtered.map((opt, i) => {
                   const OptIcon = opt.icon;
+                  const isHighlighted = i === highlightedIndex;
                   return (
                     <button
                       key={opt.value}
+                      id={`option-${opt.value}`}
                       onClick={() => handleSelect(opt)}
+                      onMouseEnter={() => setHighlightedIndex(i)}
                       className={cn(
                         'flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors',
-                        opt.value === value
+                        isHighlighted
                           ? 'bg-primary/10 text-primary'
                           : 'text-foreground hover:bg-muted',
                       )}

@@ -63,7 +63,11 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed top-3 right-3 z-[200] flex flex-col gap-1 max-w-xs w-full pointer-events-none">
+      <div className={cn(
+        'fixed z-[200] flex flex-col gap-1 pointer-events-none',
+        'top-3 right-3 max-w-xs w-full',
+        'max-sm:bottom-3 max-sm:top-auto max-sm:left-3 max-sm:right-3 max-sm:max-w-none',
+      )}>
         {toasts.map(t => {
           const Icon = icons[t.variant];
           return (

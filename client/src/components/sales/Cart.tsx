@@ -27,7 +27,7 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-xs font-semibold truncate">{item.name}</span>
+          <span className="text-xs font-semibold truncate" title={item.name}>{item.name}</span>
           <span className="text-[10px] text-muted-foreground/50 shrink-0">@ {formatMoney(item.price)}</span>
         </div>
         {isLowStock && (

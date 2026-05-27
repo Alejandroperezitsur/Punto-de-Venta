@@ -2,7 +2,16 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 import { Search, Barcode, Eye, EyeOff } from 'lucide-react';
 
+const inputSizes = {
+  xs: 'h-7 px-2 text-[11px] rounded-md',
+  sm: 'h-8 px-2.5 text-xs rounded-lg',
+  md: 'h-9 px-3 text-sm rounded-lg',
+  lg: 'h-11 px-3.5 text-sm rounded-lg',
+  xl: 'h-12 px-4 text-base rounded-xl',
+};
+
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  size?: keyof typeof inputSizes;
   icon?: React.ElementType;
   iconRight?: React.ElementType;
   error?: string;
@@ -13,7 +22,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, icon: Icon, iconRight: IconRight, error, label, floatingLabel, scanner, onIconClick, type, ...props }, ref) => {
+  ({ className, size = 'md', icon: Icon, iconRight: IconRight, error, label, floatingLabel, scanner, onIconClick, type, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
     const inputType = type === 'password' && showPassword ? 'text' : type;
 
@@ -39,11 +48,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={inputType}
             className={cn(
-              'flex w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm font-medium text-foreground',
+              'flex w-full border border-input bg-card font-medium text-foreground',
               'placeholder:text-muted-foreground/50 transition-colors duration-75',
               'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/20',
               'disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-muted/30',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
+              inputSizes[size],
               Icon && 'pl-9',
               scanner && 'pl-9 h-12 text-base font-semibold',
               IconRight && 'pr-9',
