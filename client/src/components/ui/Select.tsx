@@ -72,7 +72,7 @@ function Select({
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          'flex items-center w-full h-11 px-4 rounded-2xl border border-input bg-card text-left transition-all duration-150',
+          'flex items-center w-full h-[var(--control-md)] px-3 rounded-md border border-input bg-card text-left transition-all duration-150',
           'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20',
           open && 'border-ring ring-2 ring-ring/20',
           error && 'border-danger',

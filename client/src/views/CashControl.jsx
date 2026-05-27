@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
+import { ViewContainer } from '../components/layout/ViewContainer';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
@@ -145,14 +146,14 @@ const CashControlView = () => {
     };
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <ViewContainer maxWidth="md">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">Control de Caja</h1>
                 <div className="flex gap-2">
-                    <Button variant="ghost" onClick={loadHistory} isLoading={historyLoading}>
+                    <Button variant="ghost" onClick={loadHistory} isLoading={historyLoading} size="sm">
                         <History className="h-4 w-4 mr-2" /> Historial
                     </Button>
-                    <Button variant="ghost" onClick={loadStatus} isLoading={loading}>
+                    <Button variant="ghost" onClick={loadStatus} isLoading={loading} size="sm">
                         <RefreshCw className="h-4 w-4 mr-2" /> Actualizar
                     </Button>
                 </div>
@@ -305,33 +306,36 @@ const CashControlView = () => {
             )}
 
             {isClosing && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-4xl p-8 max-w-md w-full shadow-2xl relative">
+                <div
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
+                    onKeyDown={(e) => { if (e.key === 'Escape') { setIsClosing(false); setCloseStep('input'); } }}
+                >
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-lg p-6 max-w-md w-full shadow-lg relative">
                         <button
                             onClick={() => { setIsClosing(false); setCloseStep('input'); }}
-                            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground font-bold text-sm"
+                            className="absolute top-4 right-4 text-xs text-muted-foreground hover:text-foreground font-semibold"
                         >
                             CANCELAR
                         </button>
 
                         {closeStep === 'input' ? (
-                            <div className="text-center space-y-10">
-                                <h2 className="text-4xl font-black tracking-tight">¿Cuánto dinero hay en el cajón?</h2>
-                                <p className="text-muted-foreground font-medium italic">Cuenta tu efectivo físicamente antes de continuar.</p>
+                            <div className="text-center space-y-6">
+                                <h2 className="text-xl font-bold text-foreground">¿Cuánto dinero hay en el cajón?</h2>
+                                <p className="text-sm text-muted-foreground">Cuenta tu efectivo físicamente antes de continuar.</p>
 
                                 {closeError && (
-                                    <div className="bg-danger/10 border-2 border-danger/20 rounded-2xl text-danger font-bold p-4">
+                                    <div className="bg-danger/10 border border-danger/20 rounded-md text-danger font-semibold p-3 text-sm">
                                         {closeError}
                                     </div>
                                 )}
 
                                 <div className="relative">
-                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black text-muted-foreground/60">$</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-foreground/50">$</span>
                                     <input
                                         type="number"
                                         step="0.01"
                                         autoFocus
-                                        className="w-full h-24 bg-muted border-4 border-border rounded-4xl text-5xl font-black text-center focus:outline-none focus:border-primary transition-all"
+                                        className="w-full h-14 bg-muted border-2 border-border rounded-md text-2xl font-bold text-center focus:outline-none focus:border-primary transition-all"
                                         value={countedCash}
                                         onChange={(e) => setCountedCash(e.target.value)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleCloseSubmit(); }}
@@ -343,45 +347,46 @@ const CashControlView = () => {
                                     onClick={handleCloseSubmit}
                                     disabled={!countedCash || closeLoading}
                                     isLoading={closeLoading}
-                                    className="w-full h-24 text-2xl font-black rounded-3xl"
+                                    size="lg"
+                                    className="w-full font-bold"
                                 >
                                     VERIFICAR Y CERRAR CAJA
                                 </Button>
                             </div>
                         ) : closeResult ? (
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-8">
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-6">
                                 {Math.abs(closeResult.difference) < 0.01 ? (
                                     <>
-                                        <div className="h-32 w-32 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-                                            <CheckCircle2 className="h-16 w-16 stroke-[3]" />
+                                        <div className="size-16 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto">
+                                            <CheckCircle2 className="size-8" />
                                         </div>
-                                        <h2 className="text-5xl font-black tracking-tighter">Caja Cerrada</h2>
-                                        <p className="text-xl text-muted-foreground font-medium">
-                                            Todo cuadra perfectamente. Diferencia: <span className="text-success font-black">$0.00</span>
+                                        <h2 className="text-2xl font-bold text-foreground">Caja Cerrada</h2>
+                                        <p className="text-sm text-muted-foreground">
+                                            Todo cuadra perfectamente. Diferencia: <span className="text-success font-bold">$0.00</span>
                                         </p>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="h-32 w-32 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-                                            <AlertCircle className="h-16 w-16 stroke-[3]" />
+                                        <div className="size-16 bg-warning/10 text-warning rounded-full flex items-center justify-center mx-auto">
+                                            <AlertCircle className="size-8" />
                                         </div>
-                                        <h2 className="text-5xl font-black tracking-tighter">Discrepancia Detectada</h2>
-                                        <p className="text-xl text-muted-foreground font-medium">
+                                        <h2 className="text-2xl font-bold text-foreground">Discrepancia Detectada</h2>
+                                        <p className="text-sm text-muted-foreground">
                                             {closeResult.difference > 0 ? (
-                                                <>Sobran <span className="text-success font-black">${closeResult.difference.toFixed(2)}</span></>
+                                                <>Sobran <span className="text-success font-bold">${closeResult.difference.toFixed(2)}</span></>
                                             ) : (
-                                                <>Faltan <span className="text-danger font-black">${Math.abs(closeResult.difference).toFixed(2)}</span></>
+                                                <>Faltan <span className="text-danger font-bold">${Math.abs(closeResult.difference).toFixed(2)}</span></>
                                             )}
                                             <br />
-                                            <span className="text-sm">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
+                                            <span className="text-xs">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
                                         </p>
                                     </>
                                 )}
 
-                                <div className="pt-6 border-t border-border">
+                                <div className="pt-4 border-t border-border">
                                     <Button
                                         onClick={() => { setIsClosing(false); setCloseStep('input'); }}
-                                        className="w-full h-16 text-xl font-black rounded-2xl"
+                                        className="w-full"
                                     >
                                         VOLVER AL CONTROL DE CAJA
                                     </Button>
@@ -393,8 +398,11 @@ const CashControlView = () => {
             )}
 
             {showHistory && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-4xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+                <div
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
+                    onKeyDown={(e) => { if (e.key === 'Escape') setShowHistory(false); }}
+                >
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-lg">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold">Historial de Cierres</h2>
                             <Button variant="ghost" onClick={() => setShowHistory(false)}>
@@ -429,7 +437,7 @@ const CashControlView = () => {
                     </motion.div>
                 </div>
             )}
-        </div>
+        </ViewContainer>
     );
 };
 

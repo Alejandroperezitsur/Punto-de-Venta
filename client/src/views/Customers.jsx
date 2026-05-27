@@ -8,6 +8,8 @@ import { useToast } from '../components/ui/Toast';
 import { Badge } from '../components/ui/Badge';
 import { ErrorState } from '../components/ui/ErrorState';
 import { Plus, Trash2, RefreshCw, Users, Phone, Mail, FileText } from 'lucide-react';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
 import { cn } from '../utils/cn';
 
 const CustomersView = () => {
@@ -75,23 +77,18 @@ const CustomersView = () => {
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
-          <p className="text-muted-foreground font-medium text-xs">
-            {customers.length > 0 ? `${customers.length} registrados` : 'Gestiona tus clientes'}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-lg border border-border">
-            <RefreshCw className="size-4" />
-          </Button>
-          <Button onClick={() => setShowForm(!showForm)} size="md" className="font-bold">
-            <Plus className="size-4 mr-1" /> Nuevo Cliente
-          </Button>
-        </div>
-      </div>
+    <ViewContainer>
+      <ViewHeader
+        title="Clientes"
+        description={customers.length > 0 ? `${customers.length} registrados` : 'Gestiona tus clientes'}
+      >
+        <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-md border border-border">
+          <RefreshCw className="size-4" />
+        </Button>
+        <Button onClick={() => setShowForm(!showForm)} size="md" className="font-bold">
+          <Plus className="size-4 mr-1" /> Nuevo Cliente
+        </Button>
+      </ViewHeader>
 
       {showForm && (
         <Card className="p-4 border border-primary/20">
@@ -140,7 +137,7 @@ const CustomersView = () => {
           emptyAction={{ label: 'Crear Cliente', onClick: () => setShowForm(true) }}
         />
       )}
-    </div>
+    </ViewContainer>
   );
 };
 

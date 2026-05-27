@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -27,10 +26,10 @@ const icons: Record<ToastVariant, React.ElementType> = {
 };
 
 const colors: Record<ToastVariant, string> = {
-  success: 'border-success/20 bg-success/10 text-success',
-  error: 'border-danger/20 bg-danger/10 text-danger',
-  warning: 'border-warning/20 bg-warning/10 text-warning',
-  info: 'border-info/20 bg-info/10 text-info',
+  success: 'border-l-success bg-success/8 text-success',
+  error: 'border-l-danger bg-danger/8 text-danger',
+  warning: 'border-l-warning bg-warning/8 text-warning',
+  info: 'border-l-info bg-info/8 text-info',
 };
 
 function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -46,7 +45,7 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
   const toast = useCallback((
     message: string,
     variant: ToastVariant = 'info',
-    duration = 4000,
+    duration = 3000,
     action?: Toast['action'],
   ) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -64,43 +63,37 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
-        <AnimatePresence>
-          {toasts.map(t => {
-            const Icon = icons[t.variant];
-            return (
-              <motion.div
-                key={t.id}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 2 }}
-                transition={{ duration: 0.1 }}
-                className={cn(
-                  'pointer-events-auto flex items-start gap-2.5 rounded-lg border p-3 shadow-sm bg-card',
-                  colors[t.variant],
-                )}
-              >
-                <Icon className="size-5 shrink-0 mt-0.5" />
-                <p className="flex-1 text-sm font-semibold">{t.message}</p>
-                {t.action && (
-                  <button
-                    onClick={t.action.onClick}
-                    className="text-sm font-bold underline underline-offset-2 hover:opacity-70 shrink-0"
-                  >
-                    {t.action.label}
-                  </button>
-                )}
+      <div className="fixed top-3 right-3 z-[200] flex flex-col gap-1 max-w-xs w-full pointer-events-none">
+        {toasts.map(t => {
+          const Icon = icons[t.variant];
+          return (
+            <div
+              key={t.id}
+              className={cn(
+                'pointer-events-auto flex items-start gap-2 rounded-md border-l-4 border-border bg-card py-2 pl-2.5 pr-2 shadow-sm',
+                colors[t.variant],
+              )}
+            >
+              <Icon className="size-3.5 shrink-0 mt-0.5" />
+              <p className="flex-1 text-xs font-semibold leading-tight">{t.message}</p>
+              {t.action && (
                 <button
-                  onClick={() => removeToast(t.id)}
-                  className="shrink-0 p-0.5 rounded-md hover:bg-black/5 transition-colors"
-                  aria-label="Cerrar"
+                  onClick={t.action.onClick}
+                  className="text-[11px] font-bold underline underline-offset-2 hover:opacity-70 shrink-0"
                 >
-                  <X className="size-4" />
+                  {t.action.label}
                 </button>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+              )}
+              <button
+                onClick={() => removeToast(t.id)}
+                className="shrink-0 p-px rounded hover:bg-black/5 transition-colors"
+                aria-label="Cerrar"
+              >
+                <X className="size-3" />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </ToastContext.Provider>
   );

@@ -89,50 +89,25 @@ const Login = () => {
 
   return (
     <div className="min-h-screen w-full flex bg-background relative overflow-hidden font-sans">
-      {/* Background ambient light */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary/10 via-background to-background" />
-      </div>
 
       {/* Left side - Branding */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-8 relative overflow-hidden z-10 border-r border-border/5">
-        <div className="absolute inset-0 pointer-events-none">
-          <motion.div
-            animate={{ x: [0, 30, -20, 0], y: [0, -30, 20, 0] }}
-            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute top-[10%] left-[10%] w-[40%] h-[40%] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)',
-              filter: 'blur(80px)',
-            }}
-          />
-          <motion.div
-            animate={{ x: [0, -20, 30, 0], y: [0, 20, -30, 0] }}
-            transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-[10%] right-[10%] w-[45%] h-[45%] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, hsl(var(--primary) / 0.1) 0%, transparent 70%)',
-              filter: 'blur(100px)',
-            }}
-          />
-        </div>
-
+      <div className="hidden lg:flex flex-1 items-center justify-center p-8 relative z-10 border-r border-border/5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.4 }}
           className="relative z-10 flex flex-col items-center text-center max-w-lg mx-auto px-6"
         >
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30, delay: 0.2 }}
-            className="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-primary/30 ring-1 ring-white/10"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="size-28 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-10 shadow-lg"
           >
             {branding.logo ? (
               <img src={branding.logo} alt="Logo" className="w-full h-full object-contain p-3" />
             ) : (
-              <Store className="w-14 h-14 text-white drop-shadow-md" />
+              <Store className="size-14 text-primary" />
             )}
           </motion.div>
           <h2 className="text-5xl font-extrabold tracking-tight mb-4 text-foreground drop-shadow-sm">
@@ -153,28 +128,25 @@ const Login = () => {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="w-full max-w-[440px] bg-card/60 backdrop-blur-2xl border border-border/50 rounded-[2.5rem] p-8 md:p-12 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] relative overflow-hidden"
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-[440px] bg-card border border-border/50 rounded-lg p-6 md:p-8 shadow-lg relative"
         >
-          {/* Subtle top glare */}
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
           {/* Mobile Logo */}
-          <div className="lg:hidden flex flex-col items-center text-center mb-10">
+          <div className="lg:hidden flex flex-col items-center text-center mb-8">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 20 }}
-              className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/25"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="size-16 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4"
             >
               {branding.logo ? (
                 <img src={branding.logo} alt="Logo" className="w-full h-full object-contain p-2" />
               ) : (
-                <Store className="w-10 h-10 text-white" />
+                <Store className="size-8 text-primary" />
               )}
             </motion.div>
-            <h1 className="text-3xl font-extrabold tracking-tight">{branding.businessName}</h1>
-            <p className="text-xs font-bold text-primary uppercase tracking-widest mt-2">
+            <h1 className="text-2xl font-bold text-foreground">{branding.businessName}</h1>
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider mt-1">
               {branding.businessSubtitle}
             </p>
           </div>
@@ -214,7 +186,7 @@ const Login = () => {
                     Usuario
                   </label>
                   <div className={cn(
-                    'flex items-center gap-3 px-4 h-14 rounded-2xl border border-border/60 bg-background/50 transition-all duration-300',
+                    'flex items-center gap-3 px-4 h-[var(--control-lg)] rounded-md border border-border/60 bg-background/50 transition-all duration-150',
                     'hover:border-border hover:bg-background/80',
                     'focus-within:!border-primary focus-within:!bg-background focus-within:ring-4 focus-within:ring-primary/10',
                   )}>
@@ -237,7 +209,7 @@ const Login = () => {
                     </label>
                   </div>
                   <div className={cn(
-                    'flex items-center gap-3 px-4 h-14 rounded-2xl border border-border/60 bg-background/50 transition-all duration-300',
+                    'flex items-center gap-3 px-4 h-[var(--control-lg)] rounded-md border border-border/60 bg-background/50 transition-all duration-150',
                     'hover:border-border hover:bg-background/80',
                     'focus-within:!border-primary focus-within:!bg-background focus-within:ring-4 focus-within:ring-primary/10',
                   )}>
@@ -252,7 +224,7 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-muted-foreground/70 hover:text-foreground transition-colors p-1 rounded-lg hover:bg-muted/50"
+                      className="text-muted-foreground/70 hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/50"
                       tabIndex={-1}
                       aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
                     >
@@ -269,8 +241,8 @@ const Login = () => {
                       exit={{ opacity: 0, y: -10, height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="flex items-center gap-3 px-4 py-3.5 mt-2 rounded-2xl bg-danger/10 border border-danger/20 text-danger">
-                        <span className="w-1.5 h-1.5 rounded-full bg-danger shrink-0 shadow-[0_0_8px_rgba(var(--danger),0.8)]" />
+                      <div className="flex items-center gap-3 px-4 py-3.5 mt-2 rounded-md bg-danger/10 border border-danger/20 text-danger">
+                        <span className="size-1.5 rounded-full bg-danger shrink-0" />
                         <p className="text-sm font-semibold">{error}</p>
                       </div>
                     </motion.div>
@@ -281,22 +253,22 @@ const Login = () => {
                   type="submit"
                   disabled={loading}
                   className={cn(
-                    'w-full h-14 mt-4 rounded-2xl font-bold text-base transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group',
-                    'bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_20px_-4px_hsl(var(--primary))]',
-                    'disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-primary',
+                    'w-full h-[var(--control-lg)] mt-4 rounded-md font-bold text-sm transition-all duration-150 flex items-center justify-center gap-2',
+                    'bg-primary text-primary-foreground hover:brightness-110 shadow-sm',
+                    'disabled:opacity-60 disabled:cursor-not-allowed',
                     'active:scale-[0.98]',
                   )}
                 >
                   {loading ? (
                     <>
-                      <span className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      <span className="size-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
                       Iniciando...
                     </>
                   ) : (
                     <>
-                      <span className="relative z-10 flex items-center gap-2">
+                      <span className="flex items-center gap-2">
                         Iniciar Sesión
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="size-4" />
                       </span>
                     </>
                   )}
@@ -331,13 +303,12 @@ const Login = () => {
                         onClick={() => handleSelectStore(store.id)}
                         disabled={loading}
                         className={cn(
-                          'w-full flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-background/50 text-left transition-all duration-300 group',
-                          'hover:border-primary/40 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/5',
+                          'w-full flex items-center gap-4 p-4 rounded-md border border-border/60 bg-background/50 text-left transition-all duration-150 group',
+                          'hover:border-primary/40 hover:bg-primary/5',
                           'active:scale-[0.98]',
                           loading && 'opacity-50 cursor-not-allowed',
-                        )}
-                      >
-                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                        )}>
+                        <div className="size-12 rounded-md bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
                           <Store className="w-6 h-6 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -355,7 +326,7 @@ const Login = () => {
                 </div>
                 <button
                   onClick={() => { setStep('login'); setPassword(''); setError(''); }}
-                  className="w-full h-14 rounded-2xl font-bold text-sm border border-border/60 bg-background/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-[0.98]"
+                  className="w-full h-[var(--control-lg)] rounded-md font-bold text-sm border border-border/60 bg-background/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-[0.98]"
                 >
                   Volver al login
                 </button>
@@ -370,10 +341,10 @@ const Login = () => {
             </p>
             <button
               onClick={toggleDark}
-              className="p-2.5 rounded-xl bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95"
+              className="p-2 rounded-md bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95"
               aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </button>
           </div>
         </motion.div>
