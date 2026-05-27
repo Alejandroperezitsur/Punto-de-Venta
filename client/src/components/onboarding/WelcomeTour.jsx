@@ -5,7 +5,7 @@ export function WelcomeTour() {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        const seen = localStorage.getItem('ventify_tour_seen');
+        const seen = localStorage.getItem('pos_tour_seen');
         if (!seen) {
             // Small delay to allow UI to load
             const timer = setTimeout(() => setVisible(true), 1500);
@@ -16,14 +16,14 @@ export function WelcomeTour() {
     const handleNext = () => setStep(s => s + 1);
     const handleClose = () => {
         setVisible(false);
-        localStorage.setItem('ventify_tour_seen', 'true');
+        localStorage.setItem('pos_tour_seen', 'true');
     };
 
     if (!visible) return null;
 
     const steps = [
         {
-            title: '¡Bienvenido a Ventify! 🚀',
+            title: '¡Bienvenido a POS Pro! 🚀',
             content: 'El sistema que crece contigo. Simplificamos tus ventas para que tú te enfoques en crecer.',
             position: 'center'
         },

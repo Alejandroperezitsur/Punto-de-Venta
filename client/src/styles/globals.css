@@ -40,14 +40,15 @@
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
 
-  --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --radius-2xl: var(--radius-2xl);
-  --radius-3xl: var(--radius-3xl);
-  --radius-4xl: var(--radius-4xl);
+  --radius-full: var(--radius-full);
+
+  /* semantic control heights */
+  --height-sm: var(--control-sm);
+  --height-md: var(--control-md);
+  --height-lg: var(--control-lg);
 
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
@@ -191,7 +192,7 @@ img {
   padding: 8px 16px;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 600;
   transition: top 0.2s;
