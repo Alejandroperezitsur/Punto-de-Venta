@@ -15,17 +15,17 @@ function EmptyState({ icon: Icon, title, description, action, className, childre
   return (
     <div className={cn(
       'flex flex-col items-center justify-center py-16 px-8 text-center',
-      'rounded-3xl border-2 border-dashed border-border bg-card/50',
+      'rounded-2xl border-2 border-dashed border-border bg-card/50',
       className,
     )}>
       {Icon && (
-        <div className="size-20 rounded-full bg-muted flex items-center justify-center mb-6 shadow-inner">
-          <Icon className="size-10 text-muted-foreground/60" />
+        <div className="size-16 rounded-full bg-muted flex items-center justify-center mb-5">
+          <Icon className="size-8 text-muted-foreground/50" strokeWidth={1.5} />
         </div>
       )}
-      <h3 className="text-2xl font-bold tracking-tight mb-2">{title}</h3>
+      <h3 className="text-xl font-bold tracking-tight mb-1.5">{title}</h3>
       {description && (
-        <p className="text-muted-foreground max-w-md mb-6">{description}</p>
+        <p className="text-muted-foreground text-sm max-w-md mb-6">{description}</p>
       )}
       {action && (
         <Button variant="primary" size="lg" onClick={action.onClick}>

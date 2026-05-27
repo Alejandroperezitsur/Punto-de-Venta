@@ -7,21 +7,20 @@ import { ToastProvider } from '../ui/Toast';
 import { FeedbackWidget } from '../common/FeedbackWidget';
 import { AiAssistant } from '../ai/AiAssistant';
 
+import { api } from '../../lib/api';
+
 const prefersReducedMotion = typeof window !== 'undefined'
   ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
   : false;
 
 const pageVariants = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -8 },
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 const pageTransition = {
-  type: 'spring',
-  stiffness: 350,
-  damping: 30,
-  duration: 0.2,
+  duration: 0.1,
 };
 
 export const MainLayout = ({ children }) => {
@@ -29,8 +28,7 @@ export const MainLayout = ({ children }) => {
   const [info, setInfo] = useState({ copyright: '', version: '' });
 
   useEffect(() => {
-    fetch('/api/settings')
-      .then(res => res.json())
+    api('/settings')
       .then(data => setInfo({
         copyright: data.app_copyright || '© 2026 POS Pro',
         version: data.app_version || '1.0.0',
@@ -45,9 +43,9 @@ export const MainLayout = ({ children }) => {
           Ir al contenido principal
         </a>
         <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 bg-background/50">
           <Topbar />
-          <main id="main-content" className="flex-1 overflow-y-auto p-5 md:p-6 scroll-smooth" role="main">
+          <main id="main-content" className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8 scroll-smooth" role="main">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
@@ -56,13 +54,13 @@ export const MainLayout = ({ children }) => {
                 animate={prefersReducedMotion ? {} : 'animate'}
                 exit={prefersReducedMotion ? undefined : 'exit'}
                 transition={pageTransition}
-                className="max-w-[1600px] mx-auto"
+                className="max-w-[1600px] mx-auto h-full"
               >
                 {children}
               </motion.div>
             </AnimatePresence>
           </main>
-          <footer className="shrink-0 py-2 px-6 border-t border-border bg-card text-xs text-muted-foreground flex justify-between items-center" role="contentinfo">
+          <footer className="shrink-0 py-3 px-6 border-t border-border/30 text-xs font-medium text-muted-foreground/60 flex justify-between items-center" role="contentinfo">
             <span>{info.copyright}</span>
             <span>v{info.version}</span>
           </footer>

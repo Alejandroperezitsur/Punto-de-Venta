@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Sun, Moon, Bell, Menu, Command } from 'lucide-react';
+import { Sun, Moon, Bell, Menu } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserStore } from '../../store/userStore';
 import { Button } from '../ui/Button';
@@ -37,42 +37,54 @@ export const Topbar = () => {
     <header
       role="banner"
       className={cn(
-        'h-[var(--header-height)] border-b border-border flex items-center justify-between px-5 sticky top-0 z-40 transition-all duration-200',
+        'h-11 border-b border-border/30 flex items-center justify-between px-3 sticky top-0 z-40 transition-colors',
         scrolled
-          ? 'glass-strong shadow-sm'
-          : 'bg-card',
+          ? 'bg-background/80 shadow-sm'
+          : 'bg-transparent',
       )}
     >
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="lg:hidden" onClick={toggleSidebar} aria-label="Menú">
-          <Menu className="size-5" />
-        </Button>
+      <div className="flex items-center gap-3">
+        <button
+          className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+          onClick={toggleSidebar}
+          aria-label="Menú"
+        >
+          <Menu className="w-4 h-4" />
+        </button>
+
         {cashStatus ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20 shadow-sm">
-            <span className="size-2 rounded-full bg-success animate-[pulse-dot_2s_ease-in-out_infinite]" />
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-success/5 text-success/90 font-medium text-[10px] border border-success/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-success" />
             Caja Abierta
-          </span>
+          </div>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-danger/10 text-danger border border-danger/20 shadow-sm">
-            <span className="size-2 rounded-full bg-danger" />
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-danger/5 text-danger/90 font-medium text-[10px] border border-danger/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-danger opacity-70" />
             Caja Cerrada
-          </span>
+          </div>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <ConnectionStatus />
 
-        <div className="w-px h-5 bg-border mx-1" />
+        <div className="w-px h-3 bg-border/50 mx-1.5" />
 
-        <Button variant="ghost" size="icon" onClick={toggleDark} className="rounded-full" aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}>
-          {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
-        </Button>
+        <button
+          onClick={toggleDark}
+          className="p-1.5 rounded-lg text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-colors"
+          aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
+        >
+          {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+        </button>
 
-        <Button variant="ghost" size="icon" className="rounded-full relative" aria-label="Notificaciones">
-          <Bell className="size-5" />
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-card" />
-        </Button>
+        <button
+          className="p-1.5 rounded-lg text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-colors relative"
+          aria-label="Notificaciones"
+        >
+          <Bell className="w-3.5 h-3.5" />
+          <span className="absolute top-2 right-2 w-1 h-1 rounded-full bg-danger" />
+        </button>
       </div>
     </header>
   );

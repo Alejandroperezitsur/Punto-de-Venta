@@ -90,6 +90,30 @@ export async function persistOfflineLogin(username: string, password: string, us
 export async function signInOffline(username: string, password: string): Promise<{ token: string; user: any }> {
   const deviceFingerprint = await getDeviceFingerprint();
 
+  // Buscar en usuarios locales dinámicos creados offline
+  const localUsersRaw = localStorage.getItem('pos_offline_users_v1');
+  if (localUsersRaw) {
+    try {
+      const users = JSON.parse(localUsersRaw);
+      const matchedUser = users.find((u: any) => u.username === username.trim());
+      if (matchedUser && matchedUser.passwordHash === password) {
+        const token = `offline-token-${matchedUser.username}`;
+        const userObj = {
+          id: matchedUser.id,
+          username: matchedUser.username,
+          role: matchedUser.role,
+          storeId: 1,
+          storeName: 'Punto de Venta Offline',
+        };
+        storeToken(token);
+        localStorage.setItem('user', JSON.stringify(userObj));
+        return { token, user: userObj };
+      }
+    } catch (e) {
+      console.error('Error parsing local users offline:', e);
+    }
+  }
+
   if (username === 'admin' && password === 'admin123') {
     const token = OFFLINE_ADMIN_TOKEN;
     const user = OFFLINE_ADMIN_USER;

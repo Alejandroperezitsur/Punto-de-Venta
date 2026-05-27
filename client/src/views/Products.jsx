@@ -5,53 +5,47 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useToast } from '../components/ui/Toast';
-import ErrorState from '../components/states/ErrorState';
+import { ErrorState } from '../components/ui/ErrorState';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, X } from 'lucide-react';
 import { formatMoney } from '../utils/format';
 import { MovementHistoryModal } from '../components/products/MovementHistoryModal';
 import { cn } from '../utils/cn';
-import { motion, AnimatePresence } from 'framer-motion';
 
-const ProductCard = memo(function ProductCard({ p, onEdit }) {
+const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="group relative rounded-3xl border-2 border-border bg-card p-5 hover:border-primary/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col items-center text-center cursor-pointer"
+    <div className="relative rounded-xl border border-border bg-card p-3 hover:border-primary/30 transition-colors flex flex-col cursor-pointer"
       onClick={() => onEdit(p)}
     >
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button className="p-2 rounded-xl hover:bg-muted text-muted-foreground" onClick={(e) => { e.stopPropagation(); onEdit(p); }}>
-          <Edit3 className="size-4" />
-        </button>
-      </div>
+      <button className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-muted text-muted-foreground opacity-60 hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); onEdit(p); }}
+        aria-label="Editar producto">
+        <Edit3 className="size-3.5" />
+      </button>
 
-      <div className="size-24 rounded-2xl bg-muted flex items-center justify-center mb-4 group-hover:scale-110 transition-transform overflow-hidden border border-border">
+      <div className="size-16 rounded-lg bg-muted flex items-center justify-center mb-3 border border-border mx-auto">
         {p.image_url ? (
-          <img src={p.image_url} alt="" className="size-full object-cover" />
+          <img src={p.image_url} alt="" className="size-full object-cover rounded-lg" />
         ) : (
-          <Package className="size-10 text-muted-foreground/50" />
+          <Package className="size-7 text-muted-foreground/50" />
         )}
       </div>
 
-      <h3 className="font-bold text-base mb-1 line-clamp-2 min-h-[2.5rem] leading-tight">{p.name}</h3>
+      <h3 className="font-semibold text-sm mb-1 line-clamp-2 min-h-[2.2rem] leading-tight text-center">{p.name}</h3>
 
-      <div className="mt-auto pt-3 space-y-2.5 w-full">
-        <p className="text-2xl font-black text-primary tracking-tighter">
+      <div className="mt-auto pt-2 space-y-1.5 w-full text-center">
+        <p className="text-lg font-bold text-primary tracking-tight">
           {formatMoney(p.price)}
         </p>
         <Badge
           variant={p.stock <= 5 ? 'warning' : 'success'}
           size="sm"
-          className="text-[10px]"
+          className="text-[9px]"
         >
           Stock: {Number(p.stock).toFixed(0)}
         </Badge>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -157,34 +151,34 @@ const ProductsView = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter">Inventario</h1>
-          <p className="text-muted-foreground font-medium text-sm">
+          <h1 className="text-2xl font-bold tracking-tight">Inventario</h1>
+          <p className="text-muted-foreground font-medium text-xs">
             {pagination.total > 0 ? `${pagination.total} productos` : 'Gestiona tus productos'}
           </p>
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
-          <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-2xl border border-border">
-            <RefreshCw className={cn('size-5', loading && 'animate-spin')} />
+        <div className="flex gap-2 w-full md:w-auto">
+          <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-lg border border-border">
+            <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
           </Button>
           <Button onClick={() => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); }}
-            size="lg" className="font-bold shadow-lg shadow-primary/20">
-            <Plus className="size-5 mr-1" /> Nuevo Producto
+            size="md" className="font-bold">
+            <Plus className="size-4 mr-1" /> Nuevo Producto
           </Button>
         </div>
       </div>
 
       {/* Search */}
-      <div className="relative group">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
         <input
           ref={searchRef}
           type="text"
           placeholder="Buscar por nombre o código de barras..."
-          className="w-full h-16 pl-14 pr-6 rounded-3xl border-2 border-border bg-card text-lg font-bold focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/40"
+          className="w-full h-12 pl-10 pr-4 rounded-lg border border-border bg-card text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors placeholder:text-muted-foreground/40"
           value={search}
           onChange={handleSearch}
         />
@@ -194,9 +188,9 @@ const ProductsView = () => {
       {error ? (
         <ErrorState error={error.message || error} onRetry={() => loadData(null)} />
       ) : loading && products.length === 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="aspect-square rounded-3xl" />
+            <Skeleton key={i} className="aspect-[3/4] rounded-xl" />
           ))}
         </div>
       ) : products.length === 0 ? (
@@ -208,17 +202,15 @@ const ProductsView = () => {
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
-            <AnimatePresence mode="popLayout">
-              {products.map((p) => (
-                <ProductCard key={p.id} p={p} onEdit={handleEdit} />
-              ))}
-            </AnimatePresence>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+            {products.map((p) => (
+              <ProductCard key={p.id} p={p} onEdit={handleEdit} onDelete={handleDelete} />
+            ))}
           </div>
 
           {pagination.hasMore && (
-            <div className="flex justify-center pt-4">
-              <Button variant="secondary" onClick={() => loadData(pagination.nextCursor)} isLoading={loadingMore} size="lg" className="font-bold border-2">
+            <div className="flex justify-center pt-3">
+              <Button variant="secondary" onClick={() => loadData(pagination.nextCursor)} isLoading={loadingMore} size="md" className="font-bold border">
                 {loadingMore ? 'Cargando...' : 'Cargar más productos'}
               </Button>
             </div>
@@ -228,65 +220,61 @@ const ProductsView = () => {
 
       {/* Product modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="bg-card w-full max-w-xl rounded-4xl border border-border shadow-2xl p-8"
-          >
-            <button onClick={() => setModalOpen(false)} className="float-right p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors" aria-label="Cerrar">
-              <X className="size-5" />
-            </button>
-
-            <div className="mb-6">
-              <h2 className="text-2xl font-black tracking-tighter">
-                {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-              </h2>
-              <p className="text-muted-foreground text-sm font-medium">Nombre y precio, el resto es automático</p>
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]">
+          <div className="bg-card w-full max-w-lg rounded-xl border border-border shadow-lg p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-base font-bold">
+                  {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+                </h2>
+                <p className="text-muted-foreground text-xs font-medium">Nombre y precio, el resto es automático</p>
+              </div>
+              <button onClick={() => setModalOpen(false)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors" aria-label="Cerrar">
+                <X className="size-4" />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Nombre del producto</label>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Nombre del producto</label>
                 <Input placeholder="Ej: Coca Cola 600ml..." value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                  required autoFocus={!editingProduct} size="lg" />
+                  required autoFocus={!editingProduct} />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Precio de venta</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">Precio de venta</label>
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground z-10">$</span>
-                    <Input className="pl-8" placeholder="0.00" type="number" step="0.01" min="0"
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10">$</span>
+                    <Input className="pl-7" placeholder="0.00" type="number" step="0.01" min="0"
                       value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required />
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Stock inicial</label>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-muted-foreground">Stock inicial</label>
                   <Input placeholder="999" type="number" min="0"
                     value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
                 </div>
               </div>
 
               {editingProduct && (
-                <div className="flex justify-between items-center pt-2">
-                  <Button type="button" variant="ghost" className="text-danger hover:bg-danger/10 font-bold"
+                <div className="flex justify-between items-center pt-1">
+                  <button type="button" className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1 rounded-lg transition-colors"
                     onClick={() => handleDelete(editingProduct.id)}>
-                    <Trash2 className="size-4 mr-1" /> Archivar
-                  </Button>
-                  <Button type="button" variant="ghost" className="text-info hover:bg-info/10 font-bold"
+                    <Trash2 className="size-3.5 inline mr-1" /> Archivar
+                  </button>
+                  <button type="button" className="text-xs font-semibold text-info hover:bg-info/10 px-2 py-1 rounded-lg transition-colors"
                     onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}>
-                    <History className="size-4 mr-1" /> Historial
-                  </Button>
+                    <History className="size-3.5 inline mr-1" /> Historial
+                  </button>
                 </div>
               )}
 
-              <Button type="submit" isLoading={saving} disabled={!form.name.trim()} size="xl" className="w-full font-bold shadow-lg shadow-primary/20">
+              <Button type="submit" isLoading={saving} disabled={!form.name.trim()} size="md" className="w-full font-bold">
                 {editingProduct ? 'Guardar Cambios' : 'Guardar Producto'}
               </Button>
             </form>
-          </motion.div>
+          </div>
         </div>
       )}
 
