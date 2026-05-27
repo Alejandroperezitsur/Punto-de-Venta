@@ -13,16 +13,14 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const STORAGE_KEY = 'theme';
 const DEFAULT_THEME = 'light';
-const THEMES = ['light', 'dark', 'emerald', 'violet', 'orange', 'graphite', 'midnight', 'rose', 'cyber', 'corporate'];
+const THEMES = ['light', 'dark', 'corporate'];
 
 async function persistTheme(name: string) {
   try {
     localStorage.setItem(STORAGE_KEY, name);
     const db = await getDB();
     await db.put('settings', { key: 'theme', value: name });
-  } catch {
-    /* offline or storage full */
-  }
+  } catch {}
 }
 
 function getInitialTheme(): string {
@@ -30,13 +28,12 @@ function getInitialTheme(): string {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && THEMES.includes(stored)) return stored;
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
-  } catch { /* noop */ }
+  } catch {}
   return DEFAULT_THEME;
 }
 
 function isDarkTheme(name: string): boolean {
-  if (name === 'dark' || name === 'midnight' || name === 'cyber') return true;
-  return false;
+  return name === 'dark';
 }
 
 function applyTheme(name: string) {
@@ -45,6 +42,7 @@ function applyTheme(name: string) {
   root.setAttribute('data-theme', name);
   root.setAttribute('data-mode', dark ? 'dark' : 'light');
   root.style.colorScheme = dark ? 'dark' : 'light';
+  root.style.setProperty('--motion-duration', '0.01ms');
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -62,8 +60,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [syncTheme]);
 
   const toggleDark = useCallback(async () => {
-    const isDark = isDarkTheme(theme);
-    const newTheme = isDark ? 'light' : 'dark';
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
     await syncTheme(newTheme);
   }, [theme, syncTheme]);
 
