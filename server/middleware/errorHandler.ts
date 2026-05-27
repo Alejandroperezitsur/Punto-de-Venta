@@ -1,16 +1,17 @@
-const { logger } = require('../logger');
+import { Request, Response, NextFunction } from 'express';
+import { logger } from '../logger';
 
 /**
  * Global Error Handler Middleware
  * Centralizes error handling for the entire application
  */
 
-function errorHandler(err, req, res, next) {
+export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   const statusCode = err.status || err.statusCode || 500;
   const isServerErr = statusCode >= 500;
 
   // Utilize the request logger if available for context
-  const log = req.log || logger;
+  const log = (req as any).log || logger;
 
   if (isServerErr) {
     log.error({
@@ -29,7 +30,7 @@ function errorHandler(err, req, res, next) {
   }
 
   // Response structure
-  const response = {
+  const response: any = {
     error: isServerErr ? 'Error interno del servidor' : err.message,
     code: err.code || (isServerErr ? 'INTERNAL_ERROR' : 'BAD_REQUEST'),
   };
@@ -46,20 +47,18 @@ function errorHandler(err, req, res, next) {
   }
 
   res.status(statusCode).json(response);
-}
+};
 
-function notFoundHandler(req, res) {
+export const notFoundHandler = (req: Request, res: Response) => {
   res.status(404).json({
     error: 'Recurso no encontrado',
     code: 'NOT_FOUND',
     path: req.path
   });
-}
+};
 
-function asyncHandler(fn) {
-  return (req, res, next) => {
+export const asyncHandler = (fn: Function) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
-}
-
-module.exports = { errorHandler, notFoundHandler, asyncHandler };
+};

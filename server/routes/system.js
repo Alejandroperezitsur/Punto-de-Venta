@@ -297,10 +297,10 @@ router.post('/import-config', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT)
         }
 
         // Protected keys that shouldn't be imported
-        const protected = ['license_key', 'machine_id', 'license_type'];
+        const protectedKeys = ['license_key', 'machine_id', 'license_type'];
 
         Object.entries(config).forEach(([key, value]) => {
-            if (!protected.includes(key)) {
+            if (!protectedKeys.includes(key)) {
                 db.run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, String(value)]);
             }
         });
