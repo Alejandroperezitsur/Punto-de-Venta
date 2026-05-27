@@ -16,6 +16,11 @@ import { offlineRecoveryEngine } from './lib/offlineRecoveryEngine';
 import { dataConsistency } from './lib/dataConsistency';
 import { hardwareAdapter } from './lib/hardwareAdapter';
 import { productionDiagnostics } from './lib/productionDiagnostics';
+import { incidentForensics } from './lib/incidentForensics';
+import { degradedModeEngine } from './lib/degradedModeEngine';
+import { storageLifecycleManager } from './lib/storageLifecycleManager';
+import { syncStateMachine } from './lib/syncStateMachine';
+import { productionGovernor } from './lib/productionGovernor';
 import { PerformanceOverlay } from './components/dev/PerformanceOverlay';
 
 // Views
@@ -139,10 +144,32 @@ function App() {
                     }
                 }
 
+                incidentForensics.recordEvent('recovery', { action: 'system_bootstrap', success: true });
+
+                syncStateMachine.init();
+                productionGovernor.init();
+                degradedModeEngine.init();
+                storageLifecycleManager.init();
+
                 const diagnosticInterval = setInterval(() => {
                     productionDiagnostics.captureSnapshot();
                 }, 300000);
                 window.__diagnosticInterval = diagnosticInterval;
+
+                window.addEventListener('online', () => {
+                    incidentForensics.setConnectivity('online');
+                    incidentForensics.recordEvent('reconnect', { durationMs: 0 });
+                });
+                window.addEventListener('offline', () => {
+                    incidentForensics.setConnectivity('offline');
+                    incidentForensics.recordEvent('critical_error', { error: 'Network offline' });
+                });
+                degradedModeEngine.subscribe((info) => {
+                    incidentForensics.setDegradedMode(info.status);
+                    if (info.status !== 'normal') {
+                        productionDiagnostics.recordError(new Error(`Status: ${info.status}`));
+                    }
+                });
 
                 document.addEventListener('click', (e) => {
                     const target = e.target instanceof HTMLElement ? e.target.tagName + (e.target.id ? '#' + e.target.id : '') : 'unknown'
@@ -158,6 +185,10 @@ function App() {
 
         return () => {
             getHealthMonitor().destroy();
+            syncStateMachine.destroy();
+            productionGovernor.destroy();
+            degradedModeEngine.destroy();
+            storageLifecycleManager.destroy();
             if (window.__diagnosticInterval) clearInterval(window.__diagnosticInterval);
         };
     }, [hydrate]);
