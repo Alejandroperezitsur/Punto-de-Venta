@@ -7,6 +7,7 @@ import { useCartStore } from '../../store/cartStore';
 import { useUserStore } from '../../store/userStore';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
 import { CommandPalette, ShortcutsOverlay, useKeyboardShortcuts } from '../../components/common/CommandPalette';
 import { api } from '../../lib/api';
@@ -14,6 +15,14 @@ import { enqueueSale, initSyncManager } from '../../lib/syncManager';
 import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
+
+function useScannerFocus() {
+  const focusSearch = useCallback(() => {
+    const input = document.querySelector('[data-scan-input]');
+    if (input instanceof HTMLElement) input.focus();
+  }, []);
+  return focusSearch;
+}
 
 const SalesView = () => {
   const { items, getTotals, clearCart, addItem, validateStock, generateCheckoutId, updateQuantity, hydrate, setDiscount, discount } = useCartStore();
@@ -29,11 +38,7 @@ const SalesView = () => {
   const [saleComplete, setSaleComplete] = useState<{ total: number; change: number; method: string } | null>(null);
   const toast = useToast();
   const saleCompleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const focusSearch = useCallback(() => {
-    const input = document.querySelector('[data-scan-input]');
-    if (input instanceof HTMLElement) input.focus();
-  }, []);
+  const focusSearch = useScannerFocus();
 
   const handleShortcutAction = useCallback((action: string) => {
     switch (action) {
@@ -98,8 +103,14 @@ const SalesView = () => {
   const showSaleComplete = useCallback((total: number, change: number, method: string) => {
     setSaleComplete({ total, change, method });
     if (saleCompleteTimer.current) clearTimeout(saleCompleteTimer.current);
-    saleCompleteTimer.current = setTimeout(() => setSaleComplete(null), 2000);
+    saleCompleteTimer.current = setTimeout(() => setSaleComplete(null), 4000);
   }, []);
+
+  const dismissSaleComplete = useCallback(() => {
+    setSaleComplete(null);
+    if (saleCompleteTimer.current) clearTimeout(saleCompleteTimer.current);
+    focusSearch();
+  }, [focusSearch]);
 
   const handleApplyDiscount = useCallback(() => {
     const val = parseFloat(discountValue);
@@ -227,7 +238,7 @@ const SalesView = () => {
       printTicket({ items, totals, payments, change: paymentData.change || 0, date: new Date(), id: ticketId });
       clearCart();
       showSaleComplete(totals.total, paymentData.change || 0, paymentData.method);
-      if (offlineMode) toast('Venta guardada localmente', 'warning');
+      if (offlineMode) toast('Venta guardada localmente hasta que haya internet', 'info');
       focusSearch();
     } catch (e) {
       const msg = 'Error al procesar la venta: ' + (e instanceof Error ? e.message : '');
@@ -270,6 +281,8 @@ const SalesView = () => {
 
   const totals = useMemo(() => getTotals(), [items, getTotals]);
 
+  const hasItems = items.length > 0;
+
   return (
     <div className="h-full min-h-0 flex gap-2 overflow-hidden">
       {/* Left Panel */}
@@ -295,7 +308,7 @@ const SalesView = () => {
       </div>
 
       {/* Right Panel - Cart */}
-      <div className="w-[380px] flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden">
+      <div className="w-full max-w-[380px] lg:max-w-[420px] xl:max-w-[440px] flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden min-w-[280px]">
         <div className="px-3 py-2 border-b border-border/20 flex items-center justify-between shrink-0">
           <h2 className="font-bold text-xs flex items-center gap-1.5" id="cart-heading">
             <ShoppingBag className="size-3.5" />
@@ -307,7 +320,7 @@ const SalesView = () => {
           <div className="flex items-center gap-0.5">
             <button
               onClick={() => setDiscountOpen(true)}
-              disabled={items.length === 0}
+              disabled={!hasItems}
               className="text-[10px] font-semibold text-info hover:bg-info/10 px-2 py-1 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5"
               title="Descuento (F5)"
             >
@@ -315,7 +328,7 @@ const SalesView = () => {
             </button>
             <button
               onClick={() => { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); }}
-              disabled={items.length === 0}
+              disabled={!hasItems}
               className="text-[10px] font-semibold text-danger hover:bg-danger/10 px-2 py-1 rounded-md transition-colors disabled:opacity-30"
               aria-label="Vaciar carrito"
             >
@@ -341,7 +354,7 @@ const SalesView = () => {
           </div>
         )}
 
-        <div className="px-4 py-3 border-t border-border/20 space-y-2 shrink-0">
+        <div className="px-4 py-3 border-t border-border/20 space-y-2 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
           <div className="flex items-baseline justify-between">
             <span className="text-xs text-muted-foreground font-medium">Total a pagar:</span>
             <span className="text-4xl font-black text-foreground tracking-tight tabular-nums">
@@ -349,16 +362,23 @@ const SalesView = () => {
             </span>
           </div>
 
+          {!hasItems && (
+            <p className="text-[10px] text-muted-foreground/60 text-center font-medium">
+              Escanee o busque productos para comenzar
+            </p>
+          )}
+
           <button
             className={cn(
               'w-full h-14 text-lg font-bold rounded-lg transition-all flex items-center justify-center gap-3',
-              items.length > 0 && !isProcessing
+              hasItems && !isProcessing
                 ? 'bg-primary text-primary-foreground hover:brightness-110 active:brightness-90 shadow-sm'
                 : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
             )}
-            disabled={items.length === 0 || isProcessing}
+            disabled={!hasItems || isProcessing}
             onClick={openPayModal}
-            aria-label="Cobrar"
+            aria-label={hasItems ? 'Cobrar' : 'Agregue productos primero'}
+            title={!hasItems ? 'Agregue productos al carrito primero' : undefined}
           >
             <span>COBRAR</span>
             <span className="text-xs font-bold opacity-60 bg-black/15 px-1.5 py-0.5 rounded">F2</span>
@@ -366,10 +386,15 @@ const SalesView = () => {
         </div>
       </div>
 
-      {/* Sale complete feedback overlay */}
+      {/* Sale complete feedback overlay - persists 4s */}
       {saleComplete && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 pointer-events-none">
-          <div className="bg-card rounded-xl border border-success/30 shadow-2xl px-8 py-6 text-center max-w-xs">
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40"
+          onClick={dismissSaleComplete}
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="bg-card rounded-xl border border-success/30 shadow-2xl px-8 py-6 text-center max-w-xs animate-in">
             <div className="size-10 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-3">
               <Check className="size-6 text-success" />
             </div>
@@ -383,103 +408,83 @@ const SalesView = () => {
             <p className="text-xs text-muted-foreground/60 mt-2 font-medium">
               {saleComplete.method === 'cash' ? 'Efectivo' : saleComplete.method === 'card' ? 'Tarjeta' : saleComplete.method === 'transfer' ? 'Transferencia' : 'Mixto'}
             </p>
+            <p className="text-[10px] text-muted-foreground/40 mt-4 font-medium">
+              Toque en cualquier parte para continuar
+            </p>
           </div>
         </div>
       )}
 
-      {/* Manual product modal */}
-      {isManualModalOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Producto manual"
-          onKeyDown={(e) => { if (e.key === 'Escape') { setManualModalOpen(false); focusSearch(); } }}
-        >
-          <div className="bg-card w-full max-w-sm rounded-lg border border-border shadow-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold">Producto Manual</h2>
-              <button onClick={() => { setManualModalOpen(false); focusSearch(); }} className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors">
-                <Plus className="size-4 rotate-45" />
-              </button>
-            </div>
-            <form onSubmit={handleAddManual} className="space-y-3">
-              <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-muted-foreground">Nombre</label>
-                <Input placeholder="Nombre del producto..." value={manualForm.name} onChange={e => setManualForm({ ...manualForm, name: e.target.value })} autoFocus required />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-muted-foreground">Precio</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10 text-sm">$</span>
-                  <Input className="pl-7" type="number" step="0.01" min="0" placeholder="0.00" value={manualForm.price} onChange={e => setManualForm({ ...manualForm, price: e.target.value })} required />
-                </div>
-              </div>
-              <Button type="submit" size="lg" className="w-full font-bold text-sm">
-                Agregar al Carrito
-              </Button>
-            </form>
+      {/* Manual product modal - unified */}
+      <Modal
+        open={isManualModalOpen}
+        onClose={() => { setManualModalOpen(false); focusSearch(); }}
+        title="Producto Manual"
+        size="sm"
+        onRestoreFocus={focusSearch}
+      >
+        <form onSubmit={handleAddManual} className="space-y-3">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground">Nombre del producto</label>
+            <Input placeholder="Nombre del producto..." value={manualForm.name} onChange={e => setManualForm({ ...manualForm, name: e.target.value })} autoFocus required />
           </div>
-        </div>
-      )}
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground">Precio</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10 text-sm">$</span>
+              <Input className="pl-7" type="number" step="0.01" min="0" placeholder="0.00" value={manualForm.price} onChange={e => setManualForm({ ...manualForm, price: e.target.value })} required />
+            </div>
+          </div>
+          <Button type="submit" size="lg" className="w-full font-bold text-sm">
+            Agregar al Carrito
+          </Button>
+        </form>
+      </Modal>
 
-      {/* Discount modal */}
-      {isDiscountOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Descuento"
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') { setDiscountOpen(false); focusSearch(); }
-            if (e.key === 'Enter') { e.preventDefault(); handleApplyDiscount(); }
-          }}
-        >
-          <div className="bg-card w-full max-w-xs rounded-lg border border-border shadow-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold">Descuento</h2>
-              <button onClick={() => { setDiscountOpen(false); focusSearch(); }} className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors">
-                <XCircle className="size-4" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-muted-foreground">Monto</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10 text-sm">$</span>
-                  <Input
-                    className="pl-7"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={discountValue}
-                    onChange={e => setDiscountValue(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') handleApplyDiscount(); }}
-                    autoFocus
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" className="flex-1 text-xs" onClick={() => { setDiscountOpen(false); focusSearch(); }}>
-                  Cancelar
-                </Button>
-                <Button className="flex-1 text-xs" onClick={handleApplyDiscount} disabled={!discountValue || parseFloat(discountValue) <= 0}>
-                  Aplicar
-                </Button>
-              </div>
-              {discount > 0 && (
-                <button
-                  onClick={() => { setDiscount(0); setDiscountOpen(false); toast('Descuento eliminado', 'info'); focusSearch(); }}
-                  className="w-full text-[10px] font-semibold text-danger hover:bg-danger/10 py-1.5 rounded-md transition-colors"
-                >
-                  Quitar descuento ({formatMoney(discount)})
-                </button>
-              )}
+      {/* Discount modal - unified */}
+      <Modal
+        open={isDiscountOpen}
+        onClose={() => { setDiscountOpen(false); focusSearch(); }}
+        title="Descuento"
+        size="sm"
+        onRestoreFocus={focusSearch}
+      >
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground">Monto a descontar</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10 text-sm">$</span>
+              <Input
+                className="pl-7"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                value={discountValue}
+                onChange={e => setDiscountValue(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleApplyDiscount(); }}
+                autoFocus
+              />
             </div>
           </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" className="flex-1 text-xs" onClick={() => { setDiscountOpen(false); focusSearch(); }}>
+              Cancelar
+            </Button>
+            <Button className="flex-1 text-xs" onClick={handleApplyDiscount} disabled={!discountValue || parseFloat(discountValue) <= 0}>
+              Aplicar
+            </Button>
+          </div>
+          {discount > 0 && (
+            <button
+              onClick={() => { setDiscount(0); setDiscountOpen(false); toast('Descuento eliminado', 'info'); focusSearch(); }}
+              className="w-full text-xs font-semibold text-danger hover:bg-danger/10 py-1.5 rounded-md transition-colors"
+            >
+              Quitar descuento ({formatMoney(discount)})
+            </button>
+          )}
         </div>
-      )}
+      </Modal>
 
       {isPayModalOpen && (
         <PaymentModal

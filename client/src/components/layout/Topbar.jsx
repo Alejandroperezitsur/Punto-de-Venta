@@ -28,9 +28,11 @@ export const Topbar = () => {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const main = document.querySelector('main');
+    if (!main) return;
+    const onScroll = () => setScrolled(main.scrollTop > 10);
+    main.addEventListener('scroll', onScroll, { passive: true });
+    return () => main.removeEventListener('scroll', onScroll);
   }, []);
 
   return (

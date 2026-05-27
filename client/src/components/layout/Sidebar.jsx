@@ -115,6 +115,7 @@ export const Sidebar = ({ onNavigate }) => {
           'border-r border-border/30 bg-card flex flex-col h-full shrink-0 transition-[width] ease-linear z-30',
           isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
         )}
+        aria-label="Navegación principal"
       >
       {/* Logo */}
       <div className={cn(

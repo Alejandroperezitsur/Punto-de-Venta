@@ -2,6 +2,7 @@ import React, { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { Modal } from '../components/ui/Modal';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { useToast } from '../components/ui/Toast';
@@ -214,71 +215,55 @@ const ProductsView = () => {
         </>
       )}
 
-      {/* Product modal */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
-          onKeyDown={(e) => { if (e.key === 'Escape') setModalOpen(false); }}
-          role="dialog"
-          aria-modal="true"
-          aria-label={editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-        >
-          <div className="bg-card w-full max-w-lg rounded-lg border border-border shadow-lg p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-base font-bold">
-                  {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
-                </h2>
-                <p className="text-muted-foreground text-xs font-medium">Nombre y precio, el resto es automático</p>
+      {/* Product modal - unified */}
+      <Modal
+        open={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        title={editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+        description="Nombre y precio, el resto es automático"
+        size="lg"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground">Nombre del producto</label>
+            <Input placeholder="Ej: Coca Cola 600ml..." value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+              required autoFocus={!editingProduct} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-muted-foreground">Precio de venta</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10">$</span>
+                <Input className="pl-7" placeholder="0.00" type="number" step="0.01" min="0"
+                  value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required />
               </div>
-              <button onClick={() => setModalOpen(false)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors" aria-label="Cerrar">
-                <X className="size-4" />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-muted-foreground">Stock inicial</label>
+              <Input placeholder="999" type="number" min="0"
+                value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
+            </div>
+          </div>
+
+          {editingProduct && (
+            <div className="flex justify-between items-center pt-1">
+              <button type="button" className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1 rounded-lg transition-colors"
+                onClick={() => handleDelete(editingProduct.id)}>
+                <Trash2 className="size-3.5 inline mr-1" /> Archivar
+              </button>
+              <button type="button" className="text-xs font-semibold text-info hover:bg-info/10 px-2 py-1 rounded-lg transition-colors"
+                onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}>
+                <History className="size-3.5 inline mr-1" /> Historial
               </button>
             </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-muted-foreground">Nombre del producto</label>
-                <Input placeholder="Ej: Coca Cola 600ml..." value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                  required autoFocus={!editingProduct} />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-muted-foreground">Precio de venta</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10">$</span>
-                    <Input className="pl-7" placeholder="0.00" type="number" step="0.01" min="0"
-                      value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} required />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-muted-foreground">Stock inicial</label>
-                  <Input placeholder="999" type="number" min="0"
-                    value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
-                </div>
-              </div>
-
-              {editingProduct && (
-                <div className="flex justify-between items-center pt-1">
-                  <button type="button" className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1 rounded-lg transition-colors"
-                    onClick={() => handleDelete(editingProduct.id)}>
-                    <Trash2 className="size-3.5 inline mr-1" /> Archivar
-                  </button>
-                  <button type="button" className="text-xs font-semibold text-info hover:bg-info/10 px-2 py-1 rounded-lg transition-colors"
-                    onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}>
-                    <History className="size-3.5 inline mr-1" /> Historial
-                  </button>
-                </div>
-              )}
-
-              <Button type="submit" isLoading={saving} disabled={!form.name.trim()} size="md" className="w-full font-bold">
-                {editingProduct ? 'Guardar Cambios' : 'Guardar Producto'}
-              </Button>
-            </form>
-          </div>
-        </div>
-      )}
+          <Button type="submit" isLoading={saving} disabled={!form.name.trim()} size="md" className="w-full font-bold">
+            {editingProduct ? 'Guardar Cambios' : 'Guardar Producto'}
+          </Button>
+        </form>
+      </Modal>
 
       {kardexProduct && (
         <MovementHistoryModal product={kardexProduct} onClose={() => setKardexProduct(null)} />

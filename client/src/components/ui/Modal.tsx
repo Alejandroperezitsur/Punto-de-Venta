@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -11,18 +11,6 @@ const sizes = {
   '2xl': 'max-w-2xl',
   full: 'max-w-[95vw] h-[95vh]',
 };
-
-interface ModalProps {
-  open: boolean;
-  onClose: () => void;
-  title?: string;
-  description?: string;
-  size?: keyof typeof sizes;
-  fullscreen?: boolean;
-  sheet?: boolean;
-  children?: React.ReactNode;
-  className?: string;
-}
 
 const overlayVariants = {
   hidden: { opacity: 0 },
@@ -42,6 +30,65 @@ const sheetVariants = {
   exit: { x: '100%', transition: { duration: 0.1 } },
 };
 
+interface ModalProps {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  description?: string;
+  size?: keyof typeof sizes;
+  fullscreen?: boolean;
+  sheet?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  onRestoreFocus?: () => void;
+  hideClose?: boolean;
+  zIndex?: number;
+}
+
+function useFocusTrap(open: boolean, onClose: () => void) {
+  const previousFocus = useRef<HTMLElement | null>(null);
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    previousFocus.current = document.activeElement as HTMLElement;
+
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    const focusable = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (first) first.focus();
+
+    const trap = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab' || !first || !last) return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', trap);
+    return () => {
+      document.removeEventListener('keydown', trap);
+      if (previousFocus.current) previousFocus.current.focus();
+    };
+  }, [open, onClose]);
+}
+
 function Modal({
   open,
   onClose,
@@ -52,49 +99,36 @@ function Modal({
   sheet,
   children,
   className,
+  onRestoreFocus,
+  hideClose = false,
+  zIndex = 100,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useRef(`modal-title-${Math.random().toString(36).slice(2, 8)}`).current;
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', handler);
-      document.body.style.overflow = '';
-    };
-  }, [open, onClose]);
+  useFocusTrap(open, onClose);
 
   useEffect(() => {
     if (!open) return;
-    const modal = document.querySelector('[role="dialog"]');
-    if (!modal) return;
-    const focusable = modal.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-    );
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const trap = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
-      if (e.shiftKey) {
-        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
-      } else {
-        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
-      }
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+      if (onRestoreFocus) onRestoreFocus();
     };
-    document.addEventListener('keydown', trap);
-    first?.focus();
-    return () => document.removeEventListener('keydown', trap);
-  }, [open]);
+  }, [open, onRestoreFocus]);
+
+  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === overlayRef.current) onClose();
+  }, [onClose]);
 
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ zIndex }}
+        >
           <motion.div
             ref={overlayRef}
             variants={overlayVariants}
@@ -102,20 +136,23 @@ function Modal({
             animate="visible"
             exit="exit"
             className="absolute inset-0 bg-black/50"
-            onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+            onClick={handleOverlayClick}
           />
           <motion.div
+            ref={panelRef}
             variants={sheet ? sheetVariants : panelVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
             className={cn(
-              'relative z-10 w-full bg-card border border-border shadow-lg overflow-y-auto',
+              'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
               sheet
                 ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
                 : fullscreen
                   ? 'max-w-[95vw] h-[95vh] rounded-xl'
                   : `${sizes[size]} mx-4 rounded-xl`,
+              'pb-[env(safe-area-inset-bottom,0px)]',
+              'max-h-[95vh]',
               className,
             )}
             role="dialog"
@@ -128,13 +165,15 @@ function Modal({
                   {title && <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>}
                   {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
                 </div>
-                <button
-                  onClick={onClose}
-                  className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0"
-                  aria-label="Cerrar"
-                >
-                  <X className="size-4" />
-                </button>
+                {!hideClose && (
+                  <button
+                    onClick={onClose}
+                    className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0"
+                    aria-label="Cerrar"
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
               </div>
             )}
             <div className={cn('p-4', !title && !description && '')}>
