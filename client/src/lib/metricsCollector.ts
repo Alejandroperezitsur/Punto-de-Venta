@@ -196,3 +196,7 @@ class MetricsCollector {
 }
 
 export const metrics = new MetricsCollector();
+
+export function getAllMetrics(): MetricPoint[] {
+  return metrics.getAllMetrics();
+}
