@@ -15,7 +15,7 @@ import {
 
 export default function ThemeStudio() {
   const { theme, setTheme, isDark, toggleDark } = useTheme();
-  const { toast } = useToast();
+  const toast = useToast();
   
   const [activeTab, setActiveTab] = useState('themes');
   const [customAccent, setCustomAccent] = useState(() => {
