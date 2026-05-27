@@ -9,7 +9,7 @@ import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
 import { useUserStore } from '../../store/userStore';
 import { Badge } from '../ui/Badge';
 
-const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCollapsed }) => {
+const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCollapsed, onNavigate }) => {
   if (!show) return null;
   return (
     <NavLink
@@ -154,13 +154,13 @@ export const Sidebar = ({ onNavigate }) => {
             Principal
           </p>
         )}
-        <NavItem to="/ventas" icon={ShoppingCart} shortcut="F2" show={hasPermission(PERMISSIONS.SALES_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/ventas" icon={ShoppingCart} shortcut="F2" show={hasPermission(PERMISSIONS.SALES_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Ventas
         </NavItem>
-        <NavItem to="/productos" icon={Package} shortcut="F3" show={hasPermission(PERMISSIONS.PRODUCTS_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/productos" icon={Package} shortcut="F3" show={hasPermission(PERMISSIONS.PRODUCTS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Inventario
         </NavItem>
-        <NavItem to="/clientes" icon={Users} shortcut="F4" show={hasPermission(PERMISSIONS.CUSTOMERS_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/clientes" icon={Users} shortcut="F4" show={hasPermission(PERMISSIONS.CUSTOMERS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Clientes
         </NavItem>
 
@@ -169,22 +169,22 @@ export const Sidebar = ({ onNavigate }) => {
             Administración
           </p>
         )}
-        <NavItem to="/caja" icon={Wallet} show={hasPermission(PERMISSIONS.CASH_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/caja" icon={Wallet} show={hasPermission(PERMISSIONS.CASH_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Caja
         </NavItem>
-        <NavItem to="/reportes" icon={BarChart3} show={hasPermission(PERMISSIONS.REPORTS_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/reportes" icon={BarChart3} show={hasPermission(PERMISSIONS.REPORTS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Mi Negocio
         </NavItem>
-        <NavItem to="/usuarios" icon={Shield} show={hasPermission(PERMISSIONS.USERS_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/usuarios" icon={Shield} show={hasPermission(PERMISSIONS.USERS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Usuarios
         </NavItem>
-        <NavItem to="/audits" icon={ClipboardList} show={hasPermission(PERMISSIONS.AUDITS_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/audits" icon={ClipboardList} show={hasPermission(PERMISSIONS.AUDITS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Auditoría
         </NavItem>
-        <NavItem to="/config" icon={Settings} shortcut="F10" show={hasPermission(PERMISSIONS.SETTINGS_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/config" icon={Settings} shortcut="F10" show={hasPermission(PERMISSIONS.SETTINGS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Configuración
         </NavItem>
-        <NavItem to="/branding" icon={Palette} show={hasPermission(PERMISSIONS.SETTINGS_VIEW)} isCollapsed={isCollapsed}>
+        <NavItem to="/branding" icon={Palette} show={hasPermission(PERMISSIONS.SETTINGS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Personalización
         </NavItem>
       </nav>
