@@ -55,20 +55,22 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && isReady) {
+      const isInputFocused = document.activeElement?.tagName === 'INPUT';
+
+      if (e.key === 'Enter' && isReady && !isInputFocused) {
         e.preventDefault();
         handleConfirm();
       }
       if (e.key === 'Escape') onClose();
-      if (e.key === 'F2') { e.preventDefault(); handleConfirm(); }
+      if (e.key === 'F2' && !isInputFocused) { e.preventDefault(); handleConfirm(); }
       if (/^[0-9]$/.test(e.key)) {
-        if (document.activeElement?.tagName !== 'INPUT') handleKeypress(e.key);
+        if (!isInputFocused) handleKeypress(e.key);
       }
       if (e.key === '.') handleKeypress('.');
       if (e.key === 'Backspace') handleKeypress('DEL');
-      if (e.key === 'c' || e.key === 'C') setMethod('cash');
-      if (e.key === 't' || e.key === 'T') setMethod('card');
-      if (e.key === 'r' || e.key === 'R') setMethod('transfer');
+      if ((e.key === 'c' || e.key === 'C') && !isInputFocused) setMethod('cash');
+      if ((e.key === 't' || e.key === 'T') && !isInputFocused) setMethod('card');
+      if ((e.key === 'r' || e.key === 'R') && !isInputFocused) setMethod('transfer');
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -148,12 +150,19 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
                 </div>
               </div>
 
+              <button
+                onClick={() => setReceived(total.toString())}
+                className="w-full h-10 rounded-md bg-primary/10 text-primary border border-primary/20 font-bold text-sm hover:bg-primary/20 transition-colors"
+              >
+                Exacto: {formatMoney(total)}
+              </button>
+
               <div className="grid grid-cols-3 gap-1.5">
-                {quickAmounts.map(amt => (
+                {quickAmounts.filter(a => a !== total).map(amt => (
                   <button
                     key={amt}
                     onClick={() => setReceived(amt.toString())}
-                    className="h-12 rounded-lg bg-success/10 text-success border border-success/20 font-semibold text-xs hover:bg-success/20 transition-colors"
+                    className="h-10 rounded-md bg-success/10 text-success border border-success/20 font-semibold text-xs hover:bg-success/20 transition-colors"
                   >
                     {formatMoney(amt)}
                   </button>

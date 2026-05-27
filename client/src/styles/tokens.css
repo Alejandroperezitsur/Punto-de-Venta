@@ -55,17 +55,19 @@
   --space-24:  6rem;
   --space-28:  7rem;
 
-  /* ── Border radius ── */
+  /* ── Border radius — 3-tier system ── */
   --radius-none: 0px;
-  --radius-xs:   0.25rem;
   --radius-sm:   0.375rem;
   --radius-md:   0.5rem;
-  --radius-lg:   0.625rem;
-  --radius-xl:   0.75rem;
-  --radius-2xl:  1rem;
-  --radius-3xl:  1.25rem;
-  --radius-4xl:  1.5rem;
+  --radius-lg:   0.75rem;
   --radius-full: 9999px;
+
+  /* ── Legacy aliases (deprecated — use sm/md/lg) ── */
+  --radius-xs:   var(--radius-sm);
+  --radius-xl:   var(--radius-lg);
+  --radius-2xl:  var(--radius-lg);
+  --radius-3xl:  var(--radius-lg);
+  --radius-4xl:  var(--radius-lg);
 
   /* ── Shadows ── */
   --shadow-xs:   0 1px 2px 0 rgb(0 0 0 / 0.03);
@@ -86,13 +88,32 @@
   --duration-normal: 150ms;
   --duration-slow:   200ms;
 
+  /* ── Control heights — 3-tier ── */
+  --control-sm: 2rem;
+  --control-md: 2.5rem;
+  --control-lg: 3rem;
+
+  /* ── Semantic spacing — stack/inset ── */
+  --stack-xs:   0.25rem;
+  --stack-sm:   0.5rem;
+  --stack-md:   1rem;
+  --stack-lg:   1.5rem;
+  --stack-xl:   2rem;
+
+  --inset-sm:   0.75rem;
+  --inset-md:   1rem;
+  --inset-lg:   1.5rem;
+
+  /* ── Section spacing ── */
+  --section-gap: 1rem;
+
   /* ── Layout ── */
-  --header-height: 3.5rem;
+  --header-height: 3rem;
   --sidebar-width: 15rem;
   --sidebar-collapsed: 4.5rem;
 
   /* ── POS-specific ── */
-  --pos-total-height: 5rem;
+  --pos-total-height: 4.5rem;
   --pos-cart-width: 26rem;
-  --pos-btn-checkout-height: 4.5rem;
+  --pos-btn-checkout-height: 3.5rem;
 }

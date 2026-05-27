@@ -20,7 +20,7 @@ const ConfirmModal = ({ open, title, message, confirmLabel = 'Confirmar', cancel
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="bg-card w-full max-w-sm rounded-xl border border-border shadow-lg p-4">
+      <div className="bg-card w-full max-w-sm rounded-md border border-border shadow-lg p-4">
         <button onClick={onCancel} className="float-right p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors" aria-label="Cerrar">
           <X className="size-4" />
         </button>

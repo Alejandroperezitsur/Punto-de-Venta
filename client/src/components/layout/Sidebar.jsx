@@ -14,6 +14,7 @@ const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCol
   return (
     <NavLink
       to={to}
+      onClick={onNavigate}
       className={({ isActive }) =>
         cn(
           'flex items-center justify-between rounded-xl text-sm font-medium transition-colors group relative',
@@ -56,7 +57,7 @@ const RoleBadge = ({ role }) => {
   return <Badge variant={v.variant} size="sm" className="opacity-80 scale-90 origin-left">{v.label}</Badge>;
 };
 
-export const Sidebar = () => {
+export const Sidebar = ({ onNavigate }) => {
   const { hasPermission, role } = usePermissions();
   const { user, logout } = useUserStore();
   const navigate = useNavigate();

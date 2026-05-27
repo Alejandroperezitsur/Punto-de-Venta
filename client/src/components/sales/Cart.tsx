@@ -42,21 +42,21 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
         </div>
       </div>
 
-      <div className="flex items-center gap-1 bg-muted/30 p-0.5 rounded-lg border border-border">
+      <div className="flex items-center gap-1 bg-muted/30 p-0.5 rounded-md border border-border">
         <button
-          className="size-12 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover transition-colors"
+          className="size-9 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover transition-colors"
           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity === 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
         >
-          {item.quantity === 1 ? <Trash2 className="size-4 text-danger" /> : <Minus className="size-4" />}
+          {item.quantity === 1 ? <Trash2 className="size-3.5 text-danger" /> : <Minus className="size-3.5" />}
         </button>
-        <span className="w-8 text-center text-base font-bold tabular-nums select-none" aria-live="polite">{item.quantity}</span>
+        <span className="w-8 text-center text-sm font-bold tabular-nums select-none" aria-live="polite">{item.quantity}</span>
         <button
-          className="size-12 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover transition-colors"
+          className="size-9 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover transition-colors"
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
         >
-          <Plus className="size-4" />
+          <Plus className="size-3.5" />
         </button>
       </div>
 

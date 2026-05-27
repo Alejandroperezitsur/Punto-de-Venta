@@ -11,6 +11,8 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, X } from 'lucide-react';
 import { formatMoney } from '../utils/format';
 import { MovementHistoryModal } from '../components/products/MovementHistoryModal';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
 import { cn } from '../utils/cn';
 
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
@@ -151,25 +153,19 @@ const ProductsView = () => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Inventario</h1>
-          <p className="text-muted-foreground font-medium text-xs">
-            {pagination.total > 0 ? `${pagination.total} productos` : 'Gestiona tus productos'}
-          </p>
-        </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-lg border border-border">
-            <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
-          </Button>
-          <Button onClick={() => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); }}
-            size="md" className="font-bold">
-            <Plus className="size-4 mr-1" /> Nuevo Producto
-          </Button>
-        </div>
-      </div>
+    <ViewContainer>
+      <ViewHeader
+        title="Inventario"
+        description={pagination.total > 0 ? `${pagination.total} productos` : 'Gestiona tus productos'}
+      >
+        <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-md border border-border">
+          <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
+        </Button>
+        <Button onClick={() => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); }}
+          size="md" className="font-bold">
+          <Plus className="size-4 mr-1" /> Nuevo Producto
+        </Button>
+      </ViewHeader>
 
       {/* Search */}
       <div className="relative">
@@ -220,8 +216,14 @@ const ProductsView = () => {
 
       {/* Product modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]">
-          <div className="bg-card w-full max-w-lg rounded-xl border border-border shadow-lg p-5">
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
+          onKeyDown={(e) => { if (e.key === 'Escape') setModalOpen(false); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+        >
+          <div className="bg-card w-full max-w-lg rounded-lg border border-border shadow-lg p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-base font-bold">
@@ -281,7 +283,7 @@ const ProductsView = () => {
       {kardexProduct && (
         <MovementHistoryModal product={kardexProduct} onClose={() => setKardexProduct(null)} />
       )}
-    </div>
+    </ViewContainer>
   );
 };
 

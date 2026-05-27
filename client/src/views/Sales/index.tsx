@@ -337,14 +337,14 @@ const SalesView = () => {
         <div className="p-4 pt-3 border-t border-border/30 space-y-3 shrink-0">
           <div className="flex justify-between items-end">
             <span className="text-muted-foreground font-medium text-xs">Total a pagar:</span>
-            <span className="text-2xl font-bold text-primary tracking-tight tabular-nums">
+            <span className="text-3xl font-bold text-primary tracking-tight tabular-nums">
               {formatMoney(totals.total)}
             </span>
           </div>
 
           <button
             className={cn(
-              'w-full h-14 text-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-3',
+              'w-full h-14 text-lg font-bold rounded-md shadow-sm transition-all flex items-center justify-center gap-3',
               items.length > 0 && !isProcessing
                 ? 'bg-primary text-primary-foreground hover:brightness-110'
                 : 'bg-muted text-muted-foreground/50 cursor-not-allowed',
@@ -362,8 +362,14 @@ const SalesView = () => {
 
       {/* Manual product modal */}
       {isManualModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]" role="dialog" aria-modal="true" aria-label="Producto manual">
-          <div className="bg-card w-full max-w-md rounded-xl border border-border shadow-lg p-5">
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Producto manual"
+          onKeyDown={(e) => { if (e.key === 'Escape') { setManualModalOpen(false); focusSearch(); } }}
+        >
+          <div className="bg-card w-full max-w-md rounded-lg border border-border shadow-lg p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">Producto Manual</h2>
               <button onClick={() => { setManualModalOpen(false); focusSearch(); }} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors">
@@ -392,8 +398,14 @@ const SalesView = () => {
 
       {/* Discount modal */}
       {isDiscountOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]" role="dialog" aria-modal="true" aria-label="Descuento">
-          <div className="bg-card w-full max-w-sm rounded-xl border border-border shadow-lg p-5">
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Descuento"
+          onKeyDown={(e) => { if (e.key === 'Escape') { setDiscountOpen(false); focusSearch(); } }}
+        >
+          <div className="bg-card w-full max-w-sm rounded-lg border border-border shadow-lg p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">Descuento</h2>
               <button onClick={() => { setDiscountOpen(false); focusSearch(); }} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors">
