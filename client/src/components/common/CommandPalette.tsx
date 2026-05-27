@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, ShoppingCart, Package, Users, DollarSign, FileText, Settings,
@@ -24,7 +24,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
     if (input) (input as HTMLInputElement).focus();
   }, []);
 
-  const commands: Command[] = [
+  const commands = useMemo<Command[]>(() => [
     { id: 'sales', label: 'Ir a Ventas', description: 'Pantalla principal de ventas', icon: <ShoppingCart className="h-4 w-4" />, action: () => { navigate('/ventas'); onClose(); }, shortcut: 'G,V', keywords: ['ventas', 'cobrar', 'vender', 'punto de venta'] },
     { id: 'products', label: 'Buscar Producto', description: 'Buscar producto por nombre o SKU', icon: <Package className="h-4 w-4" />, action: () => { navigate('/ventas'); onClose(); setTimeout(() => focusSearch(), 100); }, shortcut: 'F3', keywords: ['producto', 'buscar', 'sku', 'codigo', 'scanner'] },
     { id: 'manual', label: 'Producto Manual', description: 'Agregar producto no registrado', icon: <Zap className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-manual-product')); onClose(); }, shortcut: 'F4', keywords: ['manual', 'generico', 'no registrado'] },
@@ -37,26 +37,29 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
     { id: 'clear-cart', label: 'Vaciar Carrito', description: 'Eliminar todos los productos del carrito', icon: <X className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-clear-cart')); onClose(); }, shortcut: 'F7', keywords: ['vaciar', 'carrito', 'limpiar', 'clear'] },
     { id: 'checkout', label: 'Cobrar', description: 'Procesar pago del carrito actual', icon: <ArrowRight className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-checkout')); onClose(); }, shortcut: 'F2', keywords: ['cobrar', 'pago', 'pagar', 'checkout', 'payment', 'total'] },
     { id: 'discount', label: 'Descuento', description: 'Aplicar descuento a la venta', icon: <DollarSign className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-discount')); onClose(); }, shortcut: 'F5', keywords: ['descuento', 'discount', 'rebaja', 'promocion'] },
-  ];
+  ], [navigate, onClose, focusSearch]);
 
-  const filtered = query.trim() === ''
-    ? commands
-    : commands.filter((cmd) => {
-        const q = query.toLowerCase();
-        return cmd.label.toLowerCase().includes(q) ||
-          cmd.keywords.some((k) => k.toLowerCase().includes(q));
-      });
+  const filtered = useMemo(() =>
+    query.trim() === ''
+      ? commands
+      : commands.filter((cmd) => {
+          const q = query.toLowerCase();
+          return cmd.label.toLowerCase().includes(q) ||
+            cmd.keywords.some((k) => k.toLowerCase().includes(q));
+        }),
+    [commands, query],
+  );
 
   useEffect(() => {
     if (open) { setQuery(''); setSelectedIndex(0); setTimeout(() => inputRef.current?.focus(), 50); }
   }, [open]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedIndex((i) => Math.min(i + 1, filtered.length - 1)); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedIndex((i) => Math.max(i - 1, 0)); }
     else if (e.key === 'Enter' && filtered[selectedIndex]) { e.preventDefault(); filtered[selectedIndex].action(); }
     else if (e.key === 'Escape') { onClose(); }
-  };
+  }, [filtered, selectedIndex, onClose]);
 
   if (!open) return null;
 
@@ -121,31 +124,28 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   );
 };
 
-// ─── Keyboard Shortcuts Hook ───
-
 export function useKeyboardShortcuts(onAction: (action: string) => void): void {
+  const onActionRef = useRef(onAction);
+  useEffect(() => { onActionRef.current = onAction; }, [onAction]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
 
-      if (e.key === 'F2') { e.preventDefault(); onAction('checkout'); }
-      if (e.key === 'F3' && !isInput) { e.preventDefault(); onAction('focus-search'); }
-      if (e.key === 'F4' && !isInput) { e.preventDefault(); onAction('manual-product'); }
-      if (e.key === 'F5' && !isInput) { e.preventDefault(); onAction('discount'); }
-      if (e.key === 'F6' && !isInput) { e.preventDefault(); onAction('customer'); }
-      if (e.key === 'F7') { e.preventDefault(); onAction('clear-cart'); }
-      if (e.key === 'F8') { e.preventDefault(); onAction('clear-cart'); }
-      if (e.key === 'F1' && !isInput) { e.preventDefault(); onAction('show-shortcuts'); }
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); onAction('command-palette'); }
-      if (e.key === 'Escape') { onAction('escape'); }
+      if (e.key === 'F2') { e.preventDefault(); onActionRef.current('checkout'); }
+      if (e.key === 'F3' && !isInput) { e.preventDefault(); onActionRef.current('focus-search'); }
+      if (e.key === 'F4' && !isInput) { e.preventDefault(); onActionRef.current('manual-product'); }
+      if (e.key === 'F5' && !isInput) { e.preventDefault(); onActionRef.current('discount'); }
+      if (e.key === 'F7') { e.preventDefault(); onActionRef.current('clear-cart'); }
+      if (e.key === 'F1' && !isInput) { e.preventDefault(); onActionRef.current('show-shortcuts'); }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); onActionRef.current('command-palette'); }
+      if (e.key === 'Escape') { onActionRef.current('escape'); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onAction]);
+  }, []);
 }
-
-// ─── Shortcuts Overlay ───
 
 export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   if (!open) return null;
@@ -156,10 +156,8 @@ export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> 
     { key: 'F3', label: 'Buscar producto' },
     { key: 'F4', label: 'Producto manual' },
     { key: 'F5', label: 'Descuento' },
-    { key: 'F6', label: 'Cliente' },
     { key: 'F7', label: 'Vaciar carrito' },
-    { key: 'F8', label: 'Cancelar venta' },
-    { key: '⌘K', label: 'Paleta de comandos' },
+    { key: '\u2318K', label: 'Paleta de comandos' },
     { key: 'C', label: 'Efectivo (en cobro)' },
     { key: 'T', label: 'Tarjeta (en cobro)' },
     { key: 'R', label: 'Transferencia (en cobro)' },

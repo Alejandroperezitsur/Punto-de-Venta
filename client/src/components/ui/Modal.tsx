@@ -12,22 +12,19 @@ const sizes = {
   full: 'max-w-[95vw] h-[95vh]',
 };
 
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 const overlayVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.08 } },
-  exit: { opacity: 0, transition: { duration: 0.06 } },
+  visible: { opacity: 1, transition: { duration: 0.06 } },
+  exit: { opacity: 0, transition: { duration: 0.04 } },
 };
 
 const panelVariants = {
-  hidden: { opacity: 0, y: 4 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.1 } },
-  exit: { opacity: 0, y: 2, transition: { duration: 0.08 } },
-};
-
-const sheetVariants = {
-  hidden: { x: '100%' },
-  visible: { x: 0, transition: { duration: 0.12 } },
-  exit: { x: '100%', transition: { duration: 0.1 } },
+  hidden: { opacity: 0, y: 2 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.08 } },
+  exit: { opacity: 0, y: 1, transition: { duration: 0.06 } },
 };
 
 interface ModalProps {
@@ -51,9 +48,7 @@ function useFocusTrap(open: boolean, onClose: () => void) {
 
   useEffect(() => {
     if (!open) return;
-
     previousFocus.current = document.activeElement as HTMLElement;
-
     const modal = modalRef.current;
     if (!modal) return;
 
@@ -66,18 +61,12 @@ function useFocusTrap(open: boolean, onClose: () => void) {
     if (first) first.focus();
 
     const trap = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-        return;
-      }
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
       if (e.key !== 'Tab' || !first || !last) return;
       if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
+        e.preventDefault(); last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
+        e.preventDefault(); first.focus();
       }
     };
 
@@ -90,22 +79,13 @@ function useFocusTrap(open: boolean, onClose: () => void) {
 }
 
 function Modal({
-  open,
-  onClose,
-  title,
-  description,
-  size = 'md',
-  fullscreen,
-  sheet,
-  children,
-  className,
-  onRestoreFocus,
-  hideClose = false,
-  zIndex = 100,
+  open, onClose, title, description, size = 'md', fullscreen, sheet,
+  children, className, onRestoreFocus, hideClose = false, zIndex = 100,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useRef(`modal-title-${Math.random().toString(36).slice(2, 8)}`).current;
+  const reduced = prefersReducedMotion();
 
   useFocusTrap(open, onClose);
 
@@ -114,7 +94,7 @@ function Modal({
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = '';
-      if (onRestoreFocus) onRestoreFocus();
+      if (onRestoreFocus) requestAnimationFrame(onRestoreFocus);
     };
   }, [open, onRestoreFocus]);
 
@@ -122,42 +102,69 @@ function Modal({
     if (e.target === overlayRef.current) onClose();
   }, [onClose]);
 
+  if (reduced) {
+    return (
+      <>
+        {open && (
+          <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex }}>
+            <div className="absolute inset-0 bg-black/50" onClick={handleOverlayClick} />
+            <div
+              ref={panelRef}
+              className={cn(
+                'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
+                sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
+                  : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-xl'
+                    : `${sizes[size]} mx-4 rounded-xl`,
+                'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
+                className,
+              )}
+              role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}
+            >
+              {(title || description) && (
+                <div className="flex items-start justify-between p-4 pb-0">
+                  <div className="flex-1 min-w-0">
+                    {title && <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>}
+                    {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
+                  </div>
+                  {!hideClose && (
+                    <button onClick={onClose} className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
+                      <X className="size-4" />
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className={cn('p-4', !title && !description && '')}>{children}</div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
   return (
     <AnimatePresence>
       {open && (
-        <div
-          className="fixed inset-0 flex items-center justify-center"
-          style={{ zIndex }}
-        >
+        <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex }}>
           <motion.div
             ref={overlayRef}
             variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial="hidden" animate="visible" exit="exit"
             className="absolute inset-0 bg-black/50"
             onClick={handleOverlayClick}
           />
           <motion.div
             ref={panelRef}
-            variants={sheet ? sheetVariants : panelVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            variants={sheet ? { hidden: { x: '100%' }, visible: { x: 0, transition: { duration: 0.1 } }, exit: { x: '100%', transition: { duration: 0.08 } } } : panelVariants}
+            initial="hidden" animate="visible" exit="exit"
             className={cn(
               'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
-              sheet
-                ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
-                : fullscreen
-                  ? 'max-w-[95vw] h-[95vh] rounded-xl'
+              sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
+                : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-xl'
                   : `${sizes[size]} mx-4 rounded-xl`,
-              'pb-[env(safe-area-inset-bottom,0px)]',
-              'max-h-[95vh]',
+              'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
               className,
             )}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={title ? titleId : undefined}
+            role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}
           >
             {(title || description) && (
               <div className="flex items-start justify-between p-4 pb-0">
@@ -166,19 +173,13 @@ function Modal({
                   {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
                 </div>
                 {!hideClose && (
-                  <button
-                    onClick={onClose}
-                    className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0"
-                    aria-label="Cerrar"
-                  >
+                  <button onClick={onClose} className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
                     <X className="size-4" />
                   </button>
                 )}
               </div>
             )}
-            <div className={cn('p-4', !title && !description && '')}>
-              {children}
-            </div>
+            <div className={cn('p-4', !title && !description && '')}>{children}</div>
           </motion.div>
         </div>
       )}
@@ -194,21 +195,15 @@ function ModalSteps({ current, total, labels }: { current: number; total: number
           <div className={cn('flex items-center gap-1.5', i <= current ? 'text-primary' : 'text-muted-foreground/40')}>
             <div className={cn(
               'size-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors',
-              i < current
-                ? 'bg-primary text-primary-foreground border-primary'
-                : i === current
-                  ? 'bg-primary/10 text-primary border-primary'
+              i < current ? 'bg-primary text-primary-foreground border-primary'
+                : i === current ? 'bg-primary/10 text-primary border-primary'
                   : 'bg-muted text-muted-foreground border-border',
             )}>
               {i + 1}
             </div>
-            {labels?.[i] && (
-              <span className="text-[10px] font-semibold hidden sm:inline">{labels[i]}</span>
-            )}
+            {labels?.[i] && <span className="text-[10px] font-semibold hidden sm:inline">{labels[i]}</span>}
           </div>
-          {i < total - 1 && (
-            <div className={cn('w-6 h-px', i < current ? 'bg-primary' : 'bg-border')} />
-          )}
+          {i < total - 1 && <div className={cn('w-6 h-px', i < current ? 'bg-primary' : 'bg-border')} />}
         </React.Fragment>
       ))}
     </div>

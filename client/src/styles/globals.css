@@ -45,7 +45,6 @@
   --radius-lg: var(--radius-lg);
   --radius-full: var(--radius-full);
 
-  /* semantic control heights */
   --height-sm: var(--control-sm);
   --height-md: var(--control-md);
   --height-lg: var(--control-lg);
@@ -56,9 +55,6 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
-
-  --animate-in: fadeIn 0.15s var(--ease-out);
-  --animate-out: fadeOut 0.1s var(--ease-in);
 }
 
 *,
@@ -96,29 +92,26 @@ body {
   color: hsl(var(--foreground));
 }
 
-/* ── Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.25);
+  background: hsl(var(--muted-foreground) / 0.2);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.4);
+  background: hsl(var(--muted-foreground) / 0.35);
 }
 
-/* ── Focus visible ── */
 :focus-visible {
   outline: 2.5px solid hsl(var(--ring));
   outline-offset: 2px;
 }
 
-/* ── Typography ── */
 h1 { font-weight: 900; line-height: 1.2; letter-spacing: -0.03em; }
 h2 { font-weight: 800; line-height: 1.25; letter-spacing: -0.025em; }
 h3 { font-weight: 700; line-height: 1.3; letter-spacing: -0.02em; }
@@ -129,7 +122,7 @@ h6 { font-weight: 600; line-height: 1.4; letter-spacing: -0.01em; }
 a {
   color: hsl(var(--primary));
   text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-out);
+  transition: color 60ms var(--ease-out);
 }
 
 img {
@@ -138,22 +131,6 @@ img {
   display: block;
 }
 
-/* ── Glass utility ── */
-.glass {
-  background: hsl(var(--card) / 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid hsl(var(--border) / 0.5);
-}
-
-.glass-strong {
-  background: hsl(var(--card) / 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid hsl(var(--border) / 0.6);
-}
-
-/* ── Dark shadows ── */
 [data-mode="dark"] {
   --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.3);
@@ -161,29 +138,6 @@ img {
   --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.3);
   --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.3);
   --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
-  --shadow-glow: 0 0 24px hsl(var(--primary) / 0.25);
-}
-
-/* ── Animations ── */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 .skip-to-content {
@@ -203,7 +157,6 @@ img {
   top: 16px;
 }
 
-/* ── POS motion: instant by default ── */
 [data-motion="reduced"] *, [data-motion="reduced"] *::before, [data-motion="reduced"] *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
@@ -219,18 +172,26 @@ img {
   }
 }
 
-/* ── POS touch target minimum ── */
-@layer base {
+@media (pointer: coarse) {
   button, a, [role="button"], input, select, textarea {
-    @media (pointer: coarse) {
-      min-height: 48px;
-      min-width: 48px;
-    }
+    min-height: 44px;
+    min-width: 44px;
   }
+  .size-5 { min-height: 44px; min-width: 44px; }
+  .size-6 { min-height: 44px; min-width: 44px; }
 }
 
-/* ── Print ── */
 @media print {
   .no-print { display: none !important; }
   body { background: white; color: black; }
+}
+
+@media (max-width: 1024px) {
+  .pos-layout {
+    flex-direction: column;
+  }
+  .pos-cart-panel {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
 }

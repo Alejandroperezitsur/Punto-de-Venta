@@ -10,21 +10,14 @@ import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
 import { CommandPalette, ShortcutsOverlay, useKeyboardShortcuts } from '../../components/common/CommandPalette';
+import { useScannerFocusEngine } from '../../hooks/useScannerFocusEngine';
 import { api } from '../../lib/api';
 import { enqueueSale, initSyncManager } from '../../lib/syncManager';
 import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
 
-function useScannerFocus() {
-  const focusSearch = useCallback(() => {
-    const input = document.querySelector('[data-scan-input]');
-    if (input instanceof HTMLElement) input.focus();
-  }, []);
-  return focusSearch;
-}
-
-const SalesView = () => {
+const SalesView = React.memo(function SalesView() {
   const { items, getTotals, clearCart, addItem, validateStock, generateCheckoutId, updateQuantity, hydrate, setDiscount, discount } = useCartStore();
   const [isPayModalOpen, setPayModalOpen] = useState(false);
   const [isProcessing, setProcessing] = useState(false);
@@ -38,7 +31,12 @@ const SalesView = () => {
   const [saleComplete, setSaleComplete] = useState<{ total: number; change: number; method: string } | null>(null);
   const toast = useToast();
   const saleCompleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const focusSearch = useScannerFocus();
+  const { forceFocusToScanner, restoreAfterModal, restoreAfterSaleComplete } = useScannerFocusEngine();
+
+  const focusSearch = useCallback(() => {
+    const input = document.querySelector('[data-scan-input]');
+    if (input instanceof HTMLElement) input.focus();
+  }, []);
 
   const handleShortcutAction = useCallback((action: string) => {
     switch (action) {
@@ -109,8 +107,8 @@ const SalesView = () => {
   const dismissSaleComplete = useCallback(() => {
     setSaleComplete(null);
     if (saleCompleteTimer.current) clearTimeout(saleCompleteTimer.current);
-    focusSearch();
-  }, [focusSearch]);
+    restoreAfterSaleComplete();
+  }, [restoreAfterSaleComplete]);
 
   const handleApplyDiscount = useCallback(() => {
     const val = parseFloat(discountValue);
@@ -119,8 +117,8 @@ const SalesView = () => {
     setDiscountOpen(false);
     setDiscountValue('');
     if (val > 0) toast(`Descuento de ${formatMoney(val)} aplicado`, 'info');
-    focusSearch();
-  }, [discountValue, setDiscount, toast, focusSearch]);
+    restoreAfterModal();
+  }, [discountValue, setDiscount, toast, restoreAfterModal]);
 
   const printTicket = useCallback((data: any) => {
     const iframe = document.createElement('iframe');
@@ -239,7 +237,7 @@ const SalesView = () => {
       clearCart();
       showSaleComplete(totals.total, paymentData.change || 0, paymentData.method);
       if (offlineMode) toast('Venta guardada localmente hasta que haya internet', 'info');
-      focusSearch();
+      restoreAfterSaleComplete();
     } catch (e) {
       const msg = 'Error al procesar la venta: ' + (e instanceof Error ? e.message : '');
       setPayError(msg);
@@ -248,7 +246,7 @@ const SalesView = () => {
     } finally {
       setProcessing(false);
     }
-  }, [items, validateStock, getTotals, generateCheckoutId, printTicket, clearCart, focusSearch, toast, showSaleComplete]);
+  }, [items, validateStock, getTotals, generateCheckoutId, printTicket, clearCart, toast, showSaleComplete, restoreAfterSaleComplete]);
 
   const handleAddManual = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -265,8 +263,8 @@ const SalesView = () => {
     setManualForm({ name: '', price: '' });
     setManualModalOpen(false);
     toast(`"${manualForm.name}" agregado`, 'success');
-    focusSearch();
-  }, [manualForm, addItem, focusSearch, toast]);
+    restoreAfterModal();
+  }, [manualForm, addItem, toast, restoreAfterModal]);
 
   const openPayModal = useCallback(() => {
     const validation = validateStock();
@@ -280,12 +278,10 @@ const SalesView = () => {
   }, [validateStock, toast]);
 
   const totals = useMemo(() => getTotals(), [items, getTotals]);
-
   const hasItems = items.length > 0;
 
   return (
     <div className="h-full min-h-0 flex gap-2 overflow-hidden">
-      {/* Left Panel */}
       <div className="flex-1 flex flex-col gap-2 min-w-0">
         <div className="flex gap-2">
           <div className="flex-1">
@@ -307,9 +303,8 @@ const SalesView = () => {
         </div>
       </div>
 
-      {/* Right Panel - Cart */}
-      <div className="w-full max-w-[380px] lg:max-w-[420px] xl:max-w-[440px] flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden min-w-[280px]">
-        <div className="px-3 py-2 border-b border-border/20 flex items-center justify-between shrink-0">
+      <div className="w-full max-w-[360px] lg:max-w-[400px] xl:max-w-[420px] flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden min-w-[260px] pos-cart-panel">
+        <div className="px-2.5 py-1.5 border-b border-border/20 flex items-center justify-between shrink-0">
           <h2 className="font-bold text-xs flex items-center gap-1.5" id="cart-heading">
             <ShoppingBag className="size-3.5" />
             Carrito
@@ -321,7 +316,7 @@ const SalesView = () => {
             <button
               onClick={() => setDiscountOpen(true)}
               disabled={!hasItems}
-              className="text-[10px] font-semibold text-info hover:bg-info/10 px-2 py-1 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5"
+              className="text-[10px] font-semibold text-info hover:bg-info/10 px-1.5 py-1 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5"
               title="Descuento (F5)"
             >
               <Percent className="size-3" />Dto
@@ -329,7 +324,7 @@ const SalesView = () => {
             <button
               onClick={() => { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); }}
               disabled={!hasItems}
-              className="text-[10px] font-semibold text-danger hover:bg-danger/10 px-2 py-1 rounded-md transition-colors disabled:opacity-30"
+              className="text-[10px] font-semibold text-danger hover:bg-danger/10 px-1.5 py-1 rounded-md transition-colors disabled:opacity-30"
               aria-label="Vaciar carrito"
             >
               Vaciar
@@ -337,27 +332,27 @@ const SalesView = () => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-1" role="region" aria-labelledby="cart-heading" aria-live="polite">
+        <div className="flex-1 overflow-y-auto px-2.5 py-0.5" role="region" aria-labelledby="cart-heading" aria-live="polite">
           <Cart />
         </div>
 
         {discount > 0 && (
-          <div className="px-3 py-1 bg-info/10 border-t border-info/20 flex items-center justify-between text-[11px]">
+          <div className="px-2.5 py-1 bg-info/10 border-t border-info/20 flex items-center justify-between text-[11px]">
             <span className="font-semibold text-info">Descuento</span>
             <span className="font-bold text-info tabular-nums">-{formatMoney(discount)}</span>
           </div>
         )}
 
         {payError && (
-          <div className="px-3 py-1.5 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-1.5" role="alert">
+          <div className="px-2.5 py-1.5 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-1.5" role="alert">
             <span className="text-[11px] font-semibold text-danger">{payError}</span>
           </div>
         )}
 
-        <div className="px-4 py-3 border-t border-border/20 space-y-2 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-3 py-2 border-t border-border/20 space-y-1.5 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
           <div className="flex items-baseline justify-between">
-            <span className="text-xs text-muted-foreground font-medium">Total a pagar:</span>
-            <span className="text-4xl font-black text-foreground tracking-tight tabular-nums">
+            <span className="text-[11px] text-muted-foreground font-medium">Total:</span>
+            <span className="text-3xl font-black text-foreground tracking-tight tabular-nums">
               {formatMoney(totals.total)}
             </span>
           </div>
@@ -370,7 +365,7 @@ const SalesView = () => {
 
           <button
             className={cn(
-              'w-full h-14 text-lg font-bold rounded-lg transition-all flex items-center justify-center gap-3',
+              'w-full h-12 text-base font-bold rounded-lg transition-all flex items-center justify-center gap-3',
               hasItems && !isProcessing
                 ? 'bg-primary text-primary-foreground hover:brightness-110 active:brightness-90 shadow-sm'
                 : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
@@ -380,13 +375,15 @@ const SalesView = () => {
             aria-label={hasItems ? 'Cobrar' : 'Agregue productos primero'}
             title={!hasItems ? 'Agregue productos al carrito primero' : undefined}
           >
-            <span>COBRAR</span>
-            <span className="text-xs font-bold opacity-60 bg-black/15 px-1.5 py-0.5 rounded">F2</span>
+            {isProcessing ? (
+              <><span className="size-2 rounded-full bg-current animate-pulse" />Procesando...</>
+            ) : (
+              <><span>COBRAR</span><span className="text-xs font-bold opacity-60 bg-black/15 px-1.5 py-0.5 rounded ml-1">F2</span></>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Sale complete feedback overlay - persists 4s */}
       {saleComplete && (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40"
@@ -394,34 +391,33 @@ const SalesView = () => {
           role="alert"
           aria-live="assertive"
         >
-          <div className="bg-card rounded-xl border border-success/30 shadow-2xl px-8 py-6 text-center max-w-xs animate-in">
-            <div className="size-10 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-3">
+          <div className="bg-card rounded-xl border border-success/30 shadow-2xl px-6 py-5 text-center max-w-xs">
+            <div className="size-10 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-2">
               <Check className="size-6 text-success" />
             </div>
-            <p className="text-lg font-black text-foreground mb-1">VENTA COMPLETADA</p>
-            <p className="text-2xl font-black text-success tabular-nums mb-2">{formatMoney(saleComplete.total)}</p>
+            <p className="text-base font-black text-foreground mb-0.5">VENTA COMPLETADA</p>
+            <p className="text-2xl font-black text-success tabular-nums mb-1">{formatMoney(saleComplete.total)}</p>
             {saleComplete.change > 0 && (
               <p className="text-sm font-semibold text-muted-foreground">
                 Cambio: <span className="text-foreground tabular-nums">{formatMoney(saleComplete.change)}</span>
               </p>
             )}
-            <p className="text-xs text-muted-foreground/60 mt-2 font-medium">
+            <p className="text-xs text-muted-foreground/60 mt-1 font-medium">
               {saleComplete.method === 'cash' ? 'Efectivo' : saleComplete.method === 'card' ? 'Tarjeta' : saleComplete.method === 'transfer' ? 'Transferencia' : 'Mixto'}
             </p>
-            <p className="text-[10px] text-muted-foreground/40 mt-4 font-medium">
+            <p className="text-[10px] text-muted-foreground/40 mt-3 font-medium">
               Toque en cualquier parte para continuar
             </p>
           </div>
         </div>
       )}
 
-      {/* Manual product modal - unified */}
       <Modal
         open={isManualModalOpen}
-        onClose={() => { setManualModalOpen(false); focusSearch(); }}
+        onClose={() => { setManualModalOpen(false); restoreAfterModal(); }}
         title="Producto Manual"
         size="sm"
-        onRestoreFocus={focusSearch}
+        onRestoreFocus={restoreAfterModal}
       >
         <form onSubmit={handleAddManual} className="space-y-3">
           <div className="space-y-1">
@@ -441,13 +437,12 @@ const SalesView = () => {
         </form>
       </Modal>
 
-      {/* Discount modal - unified */}
       <Modal
         open={isDiscountOpen}
-        onClose={() => { setDiscountOpen(false); focusSearch(); }}
+        onClose={() => { setDiscountOpen(false); restoreAfterModal(); }}
         title="Descuento"
         size="sm"
-        onRestoreFocus={focusSearch}
+        onRestoreFocus={restoreAfterModal}
       >
         <div className="space-y-3">
           <div className="space-y-1">
@@ -468,7 +463,7 @@ const SalesView = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="secondary" className="flex-1 text-xs" onClick={() => { setDiscountOpen(false); focusSearch(); }}>
+            <Button variant="secondary" className="flex-1 text-xs" onClick={() => { setDiscountOpen(false); restoreAfterModal(); }}>
               Cancelar
             </Button>
             <Button className="flex-1 text-xs" onClick={handleApplyDiscount} disabled={!discountValue || parseFloat(discountValue) <= 0}>
@@ -477,7 +472,7 @@ const SalesView = () => {
           </div>
           {discount > 0 && (
             <button
-              onClick={() => { setDiscount(0); setDiscountOpen(false); toast('Descuento eliminado', 'info'); focusSearch(); }}
+              onClick={() => { setDiscount(0); setDiscountOpen(false); toast('Descuento eliminado', 'info'); restoreAfterModal(); }}
               className="w-full text-xs font-semibold text-danger hover:bg-danger/10 py-1.5 rounded-md transition-colors"
             >
               Quitar descuento ({formatMoney(discount)})
@@ -490,16 +485,16 @@ const SalesView = () => {
         <PaymentModal
           total={totals.total}
           items={items}
-          onClose={() => { setPayModalOpen(false); setPayError(''); focusSearch(); }}
+          onClose={() => { setPayModalOpen(false); setPayError(''); restoreAfterModal(); }}
           onConfirm={handleCheckout}
           isLoading={isProcessing}
         />
       )}
 
-      <CommandPalette open={isCmdPaletteOpen} onClose={() => { setCmdPaletteOpen(false); focusSearch(); }} />
-      <ShortcutsOverlay open={isShortcutsOpen} onClose={() => { setShortcutsOpen(false); focusSearch(); }} />
+      <CommandPalette open={isCmdPaletteOpen} onClose={() => { setCmdPaletteOpen(false); restoreAfterModal(); }} />
+      <ShortcutsOverlay open={isShortcutsOpen} onClose={() => { setShortcutsOpen(false); restoreAfterModal(); }} />
     </div>
   );
-};
+});
 
 export default SalesView;
