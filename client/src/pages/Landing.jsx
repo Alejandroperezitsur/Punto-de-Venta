@@ -8,7 +8,7 @@ export function Landing() {
             {/* Navigation Stub */}
             <nav className="border-b bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                    <span className="text-2xl font-bold text-indigo-600">Ventify</span>
+                    <span className="text-2xl font-bold text-indigo-600">POS Pro</span>
                     <div className="space-x-4">
                         <Link to="/login" className="text-gray-500 hover:text-gray-900 font-medium">Iniciar Sesión</Link>
                         <Link to="/register" className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 font-medium">Empezar Gratis</Link>
@@ -25,7 +25,7 @@ export function Landing() {
                             <span className="block text-indigo-600">sin complicaciones</span>
                         </h1>
                         <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                            Ventify es la plataforma todo-en-uno para gestionar ventas, inventario, facturación y pagos.
+                            POS Pro es la plataforma todo-en-uno para gestionar ventas, inventario, facturación y pagos.
                             Diseñado para crecer desde un pequeño kiosco hasta una cadena de sucursales.
                         </p>
                         <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">

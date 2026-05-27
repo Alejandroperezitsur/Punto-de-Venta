@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Search, Loader2, Plus, Barcode, ScanLine } from 'lucide-react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Search, Loader2, Plus, ScanLine, WifiOff } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { useScan } from '../../hooks/useScan';
@@ -13,8 +13,20 @@ export const ProductSearch = () => {
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [scannerStatus, setScannerStatus] = useState('ready');
+  const [isScannerIdle, setIsScannerIdle] = useState(false);
+  const inputRef = useRef(null);
   const addItem = useCartStore(state => state.addItem);
-  const { playSuccess, playError, playWarning } = useScanSound();
+  const { playSuccess, playWarning } = useScanSound();
+
+  const focusInput = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    focusInput();
+  }, [focusInput]);
 
   const handleScan = useCallback(async (code, qty = 1) => {
     setLoading(true);
@@ -31,26 +43,38 @@ export const ProductSearch = () => {
       }
     } catch {
       setError(code);
-      setScannerStatus('ready');
+      setScannerStatus('error');
       playWarning();
     } finally {
       setLoading(false);
+      focusInput();
     }
-  }, [addItem, playSuccess, playWarning]);
+  }, [addItem, playSuccess, playWarning, focusInput]);
 
-  useScan(handleScan);
+  const onScannerIdle = useCallback(() => {
+    setIsScannerIdle(true);
+    setScannerStatus('idle');
+  }, []);
 
-  const handleSearch = async (e) => {
+  useScan(handleScan, onScannerIdle);
+
+  useEffect(() => {
+    if (scannerStatus === 'idle' || scannerStatus === 'ready') return;
+    const t = setTimeout(() => setIsScannerIdle(false), 3000);
+    return () => clearTimeout(t);
+  }, [scannerStatus]);
+
+  const handleSearch = useCallback(async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
     let code = query;
     let qty = 1;
-    const match = query.match(/^(\d+)\*(.+)$/);
+    const match = query.match(/^(\d{1,3})\*(.+)$/);
     if (match) { qty = parseInt(match[1], 10); code = match[2]; }
     await handleScan(code, qty);
-  };
+  }, [query, handleScan]);
 
-  const handleQuickCreate = async () => {
+  const handleQuickCreate = useCallback(async () => {
     if (!error) return;
     setLoading(true);
     try {
@@ -65,7 +89,17 @@ export const ProductSearch = () => {
       setError('');
       setQuery('');
       playSuccess();
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+      focusInput();
+    }
+  }, [error, addItem, playSuccess, focusInput]);
+
+  const scannerIndicator = () => {
+    if (isScannerIdle) return 'bg-warning animate-pulse';
+    if (scannerStatus === 'scanning') return 'bg-primary animate-pulse';
+    if (scannerStatus === 'error') return 'bg-danger';
+    return 'bg-success';
   };
 
   return (
@@ -73,24 +107,31 @@ export const ProductSearch = () => {
       <form onSubmit={handleSearch} role="search" aria-label="Buscar producto">
         <div className="relative">
           <Input
-            icon={scannerStatus === 'scanning' ? Loader2 : scannerStatus === 'ready' ? ScanLine : Barcode}
+            ref={inputRef}
+            icon={loading ? Loader2 : ScanLine}
             scanner
             placeholder="Escanear o buscar producto..."
             value={query}
-            onChange={(e) => { setQuery(e.target.value); if (error) setError(''); }}
+            onChange={(e) => { setQuery(e.target.value); if (error) setError(''); if (isScannerIdle) setIsScannerIdle(false); }}
             disabled={loading}
-            autoFocus
             className={cn(
               loading && 'animate-pulse',
               scannerStatus === 'scanning' && 'border-primary',
+              scannerStatus === 'error' && 'border-danger',
             )}
             data-scan-input="true"
             aria-label="Buscar o escanear producto"
           />
-          <div className={cn(
-            'absolute right-3 top-1/2 -translate-y-1/2 size-2 rounded-full transition-colors',
-            scannerStatus === 'ready' ? 'bg-success' : scannerStatus === 'scanning' ? 'bg-primary animate-pulse' : 'bg-muted-foreground',
-          )} />
+          {isScannerIdle ? (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2" title="Scanner no detectado">
+              <WifiOff className="size-4 text-warning" />
+            </div>
+          ) : (
+            <div className={cn(
+              'absolute right-3 top-1/2 -translate-y-1/2 size-2.5 rounded-full transition-colors',
+              scannerIndicator(),
+            )} />
+          )}
         </div>
       </form>
 
@@ -103,7 +144,7 @@ export const ProductSearch = () => {
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-warning truncate">Producto no encontrado</p>
-                <p className="text-[10px] font-medium text-warning/70">¿Agregarlo?</p>
+                <p className="text-[10px] font-medium text-warning/70">Código: {error}</p>
               </div>
             </div>
             <Button

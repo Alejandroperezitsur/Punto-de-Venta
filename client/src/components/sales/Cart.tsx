@@ -1,33 +1,26 @@
-import React, { useEffect, useState, useRef, useCallback, memo } from 'react';
+import React, { useState, useRef, useCallback, memo, useEffect } from 'react';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
-import { Button } from '../ui/Button';
 import { formatMoney } from '../../utils/format';
 import { cn } from '../../utils/cn';
-import { motion, AnimatePresence } from 'framer-motion';
 
 const LOW_STOCK_THRESHOLD = 5;
 
-const fadeItem = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.08 } },
-  exit: { opacity: 0, transition: { duration: 0.06 } },
-};
+interface CartItemRowProps {
+  item: any;
+  isRecent: boolean;
+  onUpdateQuantity: (id: string, qty: number) => void;
+  onRemove: (id: string) => void;
+}
 
-const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity, onRemove }) {
+const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity, onRemove }: CartItemRowProps) {
   const isLowStock = item.stock !== undefined && item.stock <= LOW_STOCK_THRESHOLD;
 
   return (
-    <motion.div
-      variants={fadeItem}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
+    <div
       className={cn(
-        'flex items-center gap-2 p-2 rounded-lg border transition-colors bg-card',
-        isRecent
-          ? 'border-success/40 bg-success/[0.04]'
-          : 'border-border',
+        'flex items-center gap-2 p-2 rounded-lg border bg-card transition-colors',
+        isRecent ? 'border-success/40 bg-success/[0.04]' : 'border-border',
       )}
       role="listitem"
       aria-label={`${item.name}, ${item.quantity} unidades, ${formatMoney(item.price * item.quantity)}`}
@@ -51,44 +44,48 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
 
       <div className="flex items-center gap-1 bg-muted/30 p-0.5 rounded-lg border border-border">
         <button
-          className="size-9 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover active:scale-95 transition-all min-h-[36px] min-w-[36px]"
+          className="size-12 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover transition-colors"
           onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity === 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
         >
-          {item.quantity === 1 ? <Trash2 className="size-3.5 text-danger" /> : <Minus className="size-3.5" />}
+          {item.quantity === 1 ? <Trash2 className="size-4 text-danger" /> : <Minus className="size-4" />}
         </button>
-        <span className="w-6 text-center text-sm font-bold" aria-live="polite">{item.quantity}</span>
+        <span className="w-8 text-center text-base font-bold tabular-nums select-none" aria-live="polite">{item.quantity}</span>
         <button
-          className="size-9 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover active:scale-95 transition-all min-h-[36px] min-w-[36px]"
+          className="size-12 flex items-center justify-center rounded-md bg-card border border-border hover:bg-surface-hover transition-colors"
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-4" />
         </button>
       </div>
 
-      <div className="text-right min-w-[65px]">
-        <p className="font-bold text-sm">{formatMoney(item.price * item.quantity)}</p>
+      <div className="text-right min-w-[70px]">
+        <p className="font-bold text-sm tabular-nums">{formatMoney(item.price * item.quantity)}</p>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
 export const Cart = () => {
   const { items, removeItem, updateQuantity, getTotals } = useCartStore();
   const totals = getTotals();
-  const [recentlyAdded, setRecentlyAdded] = useState(null);
-  const prevItemsRef = useRef(items.length);
+  const [recentId, setRecentId] = useState(null);
+  const recentTimer = useRef(null);
 
   useEffect(() => {
-    if (items.length > prevItemsRef.current) {
-      const newItem = items[items.length - 1];
-      setRecentlyAdded(newItem?.id || null);
-      const timer = setTimeout(() => setRecentlyAdded(null), 1500);
-      return () => clearTimeout(timer);
+    if (items.length === 0) {
+      setRecentId(null);
+      return;
     }
-    prevItemsRef.current = items.length;
-  }, [items]);
+    const last = items[items.length - 1];
+    setRecentId(last?.id || null);
+    if (recentTimer.current) clearTimeout(recentTimer.current);
+    recentTimer.current = setTimeout(() => setRecentId(null), 600);
+    return () => {
+      if (recentTimer.current) clearTimeout(recentTimer.current);
+    };
+  }, [items.length]);
 
   const handleUpdateQuantity = useCallback((id, qty) => updateQuantity(id, qty), [updateQuantity]);
 
@@ -106,32 +103,30 @@ export const Cart = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 space-y-1 pr-1" role="list" aria-label="Productos en el carrito">
-        <AnimatePresence mode="sync">
-          {items.map((item) => (
-            <CartItemRow
-              key={item.id}
-              item={item}
-              isRecent={recentlyAdded === item.id}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemove={removeItem}
-            />
-          ))}
-        </AnimatePresence>
+      <div className="flex-1 space-y-1" role="list" aria-label="Productos en el carrito">
+        {items.map((item) => (
+          <CartItemRow
+            key={item.id}
+            item={item}
+            isRecent={recentId === item.id}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemove={removeItem}
+          />
+        ))}
       </div>
 
       <div className="mt-3 pt-3 border-t border-border space-y-1">
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground font-medium">Subtotal ({items.length} artículo{items.length !== 1 ? 's' : ''})</span>
-          <span className="font-semibold">{formatMoney(totals.subtotal)}</span>
+          <span className="font-semibold tabular-nums">{formatMoney(totals.subtotal)}</span>
         </div>
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground font-medium">IVA (16%)</span>
-          <span className="font-semibold">{formatMoney(totals.tax)}</span>
+          <span className="font-semibold tabular-nums">{formatMoney(totals.tax)}</span>
         </div>
         <div className="flex justify-between text-base font-bold pt-2 border-t border-border/50">
           <span>Total</span>
-          <span className="text-primary">{formatMoney(totals.total)}</span>
+          <span className="text-primary tabular-nums">{formatMoney(totals.total)}</span>
         </div>
       </div>
     </div>

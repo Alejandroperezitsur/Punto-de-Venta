@@ -1,76 +1,44 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '../ui/Button';
-import { X, Check, ArrowRight, ShoppingBag, CreditCard, Banknote, Smartphone, CheckCircle2 } from 'lucide-react';
+import { X, Check, CreditCard, Banknote, Smartphone, ShoppingBag } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
 
-const QUICK_AMOUNTS = (total) => {
+const BILL_AMOUNTS = [20, 50, 100, 200, 500, 1000];
+
+const getQuickAmounts = (total: number): number[] => {
   const exact = total;
-  const next5 = Math.ceil(total / 5) * 5;
-  const next10 = Math.ceil(total / 10) * 10;
-  const next50 = Math.ceil(total / 50) * 50;
-  const next100 = Math.ceil(total / 100) * 100;
-  const next200 = Math.ceil(total / 200) * 200;
-  const next500 = Math.ceil(total / 500) * 500;
-  return [...new Set([exact, next5, next10, next50, next100, next200, next500])]
-    .filter(a => a >= total)
-    .sort((a, b) => a - b)
-    .slice(0, 5);
-};
-
-const fade = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.08 } },
-  exit: { opacity: 0, transition: { duration: 0.06 } },
-};
-
-const slideUp = {
-  hidden: { opacity: 0, y: 4 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.1 } },
-  exit: { opacity: 0, y: 2, transition: { duration: 0.08 } },
+  const amounts = [exact];
+  for (const bill of BILL_AMOUNTS) {
+    const next = Math.ceil(total / bill) * bill;
+    if (next > exact && !amounts.includes(next)) amounts.push(next);
+  }
+  return amounts.filter(a => a >= total).slice(0, 6);
 };
 
 export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) => {
-  const [step, setStep] = useState(0);
-  const [received, setReceived] = useState(total.toString());
+  const [received, setReceived] = useState(total <= 0 ? '' : total.toString());
   const [method, setMethod] = useState('cash');
   const [confirmError, setConfirmError] = useState('');
-  const [showSuccess, setShowSuccess] = useState(false);
+  const confirmButtonRef = useRef(null);
 
   const receivedNum = parseFloat(received) || 0;
   const change = Math.max(0, receivedNum - total);
-  const isReady = receivedNum >= total || method !== 'cash';
-  const quickAmounts = useMemo(() => QUICK_AMOUNTS(total), [total]);
+  const isReady = method !== 'cash' || receivedNum >= total;
+  const quickAmounts = useMemo(() => getQuickAmounts(total), [total]);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (step !== 0) return;
-      if (e.key === 'Enter' && isReady) handleProceed();
-      if (e.key === 'Escape') onClose();
-      if (/[0-9]/.test(e.key)) handleKeypress(e.key);
-      if (e.key === '.') handleKeypress('.');
-      if (e.key === 'Backspace') handleKeypress('DEL');
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [received, isReady, step]);
-
-  const handleKeypress = useCallback((val) => {
+  const handleKeypress = useCallback((val: string) => {
     if (val === 'DEL') {
       setReceived(prev => prev.length > 1 ? prev.slice(0, -1) : '0');
     } else if (val === '.') {
-      if (!received.includes('.')) setReceived(prev => prev + '.');
+      setReceived(prev => prev.includes('.') ? prev : prev + '.');
     } else {
-      setReceived(prev => (prev === '0' || prev === total.toString()) ? val : prev + val);
+      setReceived(prev => (prev === '0' || parseFloat(prev) === total) ? val : prev + val);
     }
-  }, [received, total]);
-
-  const handleProceed = useCallback(() => {
-    if (isReady) setStep(1);
-  }, [isReady]);
+  }, [total]);
 
   const handleConfirm = useCallback(async () => {
+    if (!isReady || isLoading) return;
     setConfirmError('');
     try {
       await onConfirm({
@@ -79,27 +47,36 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
         change: method === 'cash' ? change : 0,
         payments: [{ method, amount: total }],
       });
-      setShowSuccess(true);
-      setTimeout(() => {
-        onClose();
-        setStep(0);
-        setReceived(total.toString());
-        setShowSuccess(false);
-      }, 400);
+      onClose();
     } catch (e) {
       setConfirmError(e.message || 'Error al procesar el pago');
     }
-  }, [method, receivedNum, change, total, onConfirm, onClose]);
+  }, [isReady, isLoading, method, receivedNum, change, total, onConfirm, onClose]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && isReady) {
+        e.preventDefault();
+        handleConfirm();
+      }
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'F2') { e.preventDefault(); handleConfirm(); }
+      if (/^[0-9]$/.test(e.key)) {
+        if (document.activeElement?.tagName !== 'INPUT') handleKeypress(e.key);
+      }
+      if (e.key === '.') handleKeypress('.');
+      if (e.key === 'Backspace') handleKeypress('DEL');
+      if (e.key === 'c' || e.key === 'C') setMethod('cash');
+      if (e.key === 't' || e.key === 'T') setMethod('card');
+      if (e.key === 'r' || e.key === 'R') setMethod('transfer');
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isReady, handleConfirm, onClose, handleKeypress]);
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100]">
-      <motion.div
-        variants={slideUp}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        className="bg-card text-foreground rounded-xl w-full max-w-4xl overflow-hidden border border-border shadow-lg flex flex-col md:flex-row max-h-[95vh]"
-      >
+      <div className="bg-card text-foreground rounded-xl w-full max-w-4xl overflow-hidden border border-border shadow-lg flex flex-col md:flex-row max-h-[95vh]">
         {/* Left Panel */}
         <div className="flex-1 p-4 bg-muted/30 border-r-0 md:border-r border-border flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -111,14 +88,14 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
 
           <div className="p-4 rounded-xl bg-card border border-border">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Total</p>
-            <p className="text-3xl font-bold tracking-tight">${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            <p className="text-3xl font-bold tracking-tight tabular-nums">{formatMoney(total)}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             {[
-              { id: 'cash', label: 'EFECTIVO', icon: Banknote },
-              { id: 'card', label: 'TARJETA', icon: CreditCard },
-              { id: 'transfer', label: 'TRANSF.', icon: Smartphone },
+              { id: 'cash', label: 'EFECTIVO', icon: Banknote, key: 'C' },
+              { id: 'card', label: 'TARJETA', icon: CreditCard, key: 'T' },
+              { id: 'transfer', label: 'TRANSF.', icon: Smartphone, key: 'R' },
               { id: 'mixed', label: 'MIXTO', icon: ShoppingBag },
             ].map(m => {
               const Icon = m.icon;
@@ -127,7 +104,7 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
                   key={m.id}
                   onClick={() => setMethod(m.id)}
                   className={cn(
-                    'h-14 rounded-xl border-2 font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 min-h-[48px]',
+                    'h-14 rounded-xl border-2 font-bold text-xs transition-all flex flex-col items-center justify-center gap-1',
                     method === m.id
                       ? 'bg-primary text-primary-foreground border-primary'
                       : 'bg-card border-border text-muted-foreground hover:border-muted-foreground/30',
@@ -137,6 +114,7 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
                 >
                   <Icon className="size-5" />
                   <span className="text-[9px] tracking-widest font-bold">{m.label}</span>
+                  {m.key && <span className="text-[8px] opacity-50">{m.key}</span>}
                 </button>
               );
             })}
@@ -152,8 +130,8 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
               <p className="text-[10px] font-semibold uppercase tracking-wider opacity-70 mb-0.5">
                 {change >= 0 ? 'Cambio' : 'Falta'}
               </p>
-              <p className="text-2xl font-bold tracking-tight">
-                ${Math.abs(change).toFixed(2)}
+              <p className="text-2xl font-bold tracking-tight tabular-nums">
+                {formatMoney(Math.abs(change))}
               </p>
             </div>
           )}
@@ -170,14 +148,14 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
                 </div>
               </div>
 
-              <div className="grid grid-cols-5 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {quickAmounts.map(amt => (
                   <button
                     key={amt}
                     onClick={() => setReceived(amt.toString())}
-                    className="h-9 rounded-lg bg-success/10 text-success border border-success/20 font-semibold text-xs hover:bg-success/20 active:scale-95 transition-all min-h-[36px]"
+                    className="h-12 rounded-lg bg-success/10 text-success border border-success/20 font-semibold text-xs hover:bg-success/20 transition-colors"
                   >
-                    ${amt.toFixed(2)}
+                    {formatMoney(amt)}
                   </button>
                 ))}
               </div>
@@ -188,8 +166,8 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
                     key={k}
                     onClick={() => handleKeypress(k === 'DEL' ? 'DEL' : k.toString())}
                     className={cn(
-                      'rounded-lg border border-border text-lg font-bold transition-all active:scale-95 flex items-center justify-center shadow-sm min-h-[48px]',
-                      k === 'DEL' ? 'bg-danger/10 text-danger border-danger/20 text-xs' : 'bg-card hover:bg-muted text-foreground',
+                      'rounded-lg border border-border text-lg font-bold transition-colors flex items-center justify-center shadow-sm',
+                      k === 'DEL' ? 'bg-danger/10 text-danger border-danger/20 text-xs h-12' : 'bg-card hover:bg-muted text-foreground h-12',
                     )}
                     aria-label={k === 'DEL' ? 'Borrar' : k.toString()}
                   >
@@ -201,13 +179,13 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-6 rounded-xl bg-primary/[0.03] border border-dashed border-primary/20">
               <div className="size-14 rounded-full bg-card flex items-center justify-center mb-4">
-                <ArrowRight className="size-6 text-primary" />
+                <Check className="size-6 text-primary" />
               </div>
               <h3 className="text-base font-bold mb-2">Pago con {method === 'card' ? 'tarjeta' : 'transferencia'}</h3>
               <p className="text-sm text-muted-foreground font-medium">
                 {method === 'card' ? 'Cobra primero en la terminal bancaria.' : 'Solicita la transferencia al cliente.'}
               </p>
-              <p className="font-bold text-2xl mt-4 text-primary">${total.toFixed(2)}</p>
+              <p className="font-bold text-2xl mt-4 text-primary tabular-nums">{formatMoney(total)}</p>
             </div>
           )}
 
@@ -218,115 +196,28 @@ export const PaymentModal = ({ total, items, onClose, onConfirm, isLoading }) =>
           )}
 
           <button
-            onClick={handleProceed}
+            ref={confirmButtonRef}
+            onClick={handleConfirm}
             disabled={!isReady || isLoading}
             className={cn(
-              'w-full h-14 text-base font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98] min-h-[48px]',
+              'w-full h-14 text-base font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-2',
               isReady
                 ? 'bg-primary text-primary-foreground hover:brightness-110'
                 : 'bg-muted text-muted-foreground/50 cursor-not-allowed',
             )}
-            aria-label="Revisar y cobrar"
+            aria-label="Confirmar cobro"
           >
-            <span>COBRAR</span>
-            <ArrowRight className="size-5" />
+            {isLoading ? (
+              <span className="animate-pulse">Procesando...</span>
+            ) : (
+              <>
+                <span>COBRAR</span>
+                <span className="text-[10px] opacity-60">Enter</span>
+              </>
+            )}
           </button>
         </div>
-      </motion.div>
-
-      {/* Confirm overlay - single layer, no nested blur */}
-      <AnimatePresence>
-        {step === 1 && (
-          <motion.div
-            variants={fade}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-[110]"
-          >
-            <motion.div
-              variants={slideUp}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="bg-card border border-border w-full max-w-sm rounded-xl shadow-lg p-4 mx-4"
-            >
-              {showSuccess ? (
-                <div className="flex flex-col items-center justify-center py-6">
-                  <CheckCircle2 className="size-12 text-success" />
-                  <p className="text-lg font-bold mt-2">Pagado</p>
-                  <p className="text-sm text-muted-foreground">${total.toFixed(2)}</p>
-                </div>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <ShoppingBag className="size-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold">Confirmar Cobro</h3>
-                      <p className="text-xs text-muted-foreground">Revisa antes de continuar</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 mb-4">
-                    <div className="bg-muted/30 rounded-lg p-3 space-y-1.5 border border-border">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">Método</span>
-                        <span className="font-semibold uppercase">{method === 'cash' ? 'EFECTIVO' : method === 'card' ? 'TARJETA' : method === 'transfer' ? 'TRANSFERENCIA' : 'MIXTO'}</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">Total</span>
-                        <span className="font-bold">${total.toFixed(2)}</span>
-                      </div>
-                      {method === 'cash' && (
-                        <div className="flex justify-between text-xs">
-                          <span className="text-muted-foreground">Recibido</span>
-                          <span className="font-semibold">${receivedNum.toFixed(2)}</span>
-                        </div>
-                      )}
-                      {method === 'cash' && change > 0 && (
-                        <div className="flex justify-between text-xs pt-1.5 border-t border-border">
-                          <span className="text-success font-semibold">Cambio</span>
-                          <span className="font-bold text-success">${change.toFixed(2)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {items.length > 0 && (
-                      <div className="bg-muted/30 rounded-lg p-3 border border-border">
-                        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                          Productos ({items.length})
-                        </p>
-                        <div className="max-h-24 overflow-y-auto space-y-0.5">
-                          {items.slice(0, 8).map(item => (
-                            <div key={item.id} className="flex justify-between text-xs py-0.5">
-                              <span className="truncate mr-1 font-medium">{item.name} x{item.quantity}</span>
-                              <span className="font-semibold shrink-0">${(Number(item.price) * Number(item.quantity)).toFixed(2)}</span>
-                            </div>
-                          ))}
-                          {items.length > 8 && (
-                            <p className="text-[9px] text-muted-foreground">+{items.length - 8} más</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button variant="secondary" className="flex-1 h-11 text-sm font-bold rounded-lg" onClick={() => setStep(0)}>
-                      Cancelar
-                    </Button>
-                    <Button className="flex-1 h-11 text-sm font-bold rounded-lg bg-success hover:brightness-110" onClick={handleConfirm} isLoading={isLoading}>
-                      {isLoading ? 'Procesando...' : 'Confirmar Pago'}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 };

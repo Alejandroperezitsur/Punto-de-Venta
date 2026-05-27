@@ -1,30 +1,41 @@
 import { useCallback, useRef } from 'react';
 
-/**
- * Hook for playing scan beep sounds
- * Uses Web Audio API for instant sound playback
- */
+const IDLE_CLOSE_MS = 30000;
+
 export const useScanSound = () => {
     const audioContextRef = useRef(null);
     const gainNodeRef = useRef(null);
+    const idleTimerRef = useRef(null);
+
+    const closeAudioContext = useCallback(() => {
+        if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+            try { audioContextRef.current.close(); } catch {}
+        }
+        audioContextRef.current = null;
+        gainNodeRef.current = null;
+    }, []);
 
     const initAudio = useCallback(() => {
-        if (!audioContextRef.current) {
+        if (idleTimerRef.current) {
+            clearTimeout(idleTimerRef.current);
+            idleTimerRef.current = null;
+        }
+        if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
             audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
             gainNodeRef.current = audioContextRef.current.createGain();
             gainNodeRef.current.connect(audioContextRef.current.destination);
-            gainNodeRef.current.gain.value = 0.3;
+            gainNodeRef.current.gain.value = 0.25;
         }
+        if (audioContextRef.current.state === 'suspended') {
+            audioContextRef.current.resume();
+        }
+        idleTimerRef.current = setTimeout(closeAudioContext, IDLE_CLOSE_MS);
         return audioContextRef.current;
-    }, []);
+    }, [closeAudioContext]);
 
-    const playBeep = useCallback((frequency = 1200, duration = 0.15) => {
+    const playBeep = useCallback((frequency = 1200, duration = 0.08) => {
         try {
             const ctx = initAudio();
-            if (ctx.state === 'suspended') {
-                ctx.resume();
-            }
-
             const oscillator = ctx.createOscillator();
             const gainNode = ctx.createGain();
 
@@ -34,36 +45,28 @@ export const useScanSound = () => {
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
 
-            gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+            gainNode.gain.setValueAtTime(0.25, ctx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
 
             oscillator.start(ctx.currentTime);
             oscillator.stop(ctx.currentTime + duration);
-        } catch (e) {
-            console.warn('Audio playback failed:', e);
-        }
+        } catch {}
     }, [initAudio]);
 
     const playSuccess = useCallback(() => {
-        playBeep(1200, 0.1);
-        setTimeout(() => playBeep(1500, 0.1), 100);
+        playBeep(1200, 0.06);
     }, [playBeep]);
 
     const playError = useCallback(() => {
-        playBeep(400, 0.2);
+        playBeep(400, 0.15);
     }, [playBeep]);
 
     const playWarning = useCallback(() => {
-        playBeep(600, 0.1);
-        setTimeout(() => playBeep(600, 0.1), 150);
+        playBeep(600, 0.08);
+        setTimeout(() => playBeep(600, 0.08), 120);
     }, [playBeep]);
 
-    return {
-        playBeep,
-        playSuccess,
-        playError,
-        playWarning,
-    };
+    return { playBeep, playSuccess, playError, playWarning };
 };
 
 export default useScanSound;

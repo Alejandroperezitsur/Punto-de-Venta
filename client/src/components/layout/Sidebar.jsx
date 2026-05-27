@@ -16,7 +16,7 @@ const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCol
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex items-center justify-between rounded-xl text-sm font-medium transition-all duration-300 group relative',
+          'flex items-center justify-between rounded-xl text-sm font-medium transition-colors group relative',
           isCollapsed ? 'px-0 py-3 justify-center' : 'px-4 py-3',
           isActive
             ? 'bg-primary/10 text-primary font-semibold'
@@ -29,7 +29,7 @@ const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCol
       {({ isActive }) => (
         <>
           <div className={cn('flex items-center gap-3.5', isCollapsed && 'justify-center')}>
-            <Icon className={cn("size-5 shrink-0 transition-transform duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
+            <Icon className={cn("size-5 shrink-0", isActive ? "scale-110" : "")} />
             {!isCollapsed && <span className="truncate">{children}</span>}
           </div>
           {shortcut && !isCollapsed && (
@@ -38,7 +38,7 @@ const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCol
             </span>
           )}
           {isActive && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
           )}
         </>
       )}
@@ -111,7 +111,7 @@ export const Sidebar = () => {
   return (
       <aside
         className={cn(
-          'border-r border-border/30 bg-card flex flex-col h-full shrink-0 transition-all duration-300 z-30',
+          'border-r border-border/30 bg-card flex flex-col h-full shrink-0 transition-[width] ease-linear z-30',
           isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
         )}
       >
