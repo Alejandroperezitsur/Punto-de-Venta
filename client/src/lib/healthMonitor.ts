@@ -108,6 +108,15 @@ export class HealthMonitor {
   }
 
   async checkServer(): Promise<ServerHealth> {
+    const isStaticEnv = typeof window !== 'undefined' && (
+      window.location.hostname.includes('github.io') || 
+      window.location.hostname.includes('github.com')
+    );
+
+    if (isStaticEnv) {
+      return { ok: true, latencyMs: 0, error: null };
+    }
+
     startTimer('health-server');
     try {
       const res = await fetch(`${API_BASE}/health/ready`, {
