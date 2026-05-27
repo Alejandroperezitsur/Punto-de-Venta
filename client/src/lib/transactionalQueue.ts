@@ -10,6 +10,8 @@ import {
   type QueueLock,
 } from './db';
 
+import { isStaticEnv } from '../utils/env';
+
 // ─── Configuration ───
 
 export interface QueueConfig {
@@ -62,11 +64,6 @@ export class NetworkQualityDetector {
   async measure(): Promise<NetworkQuality> {
     if (this.measuring) return this.estimate();
     
-    const isStaticEnv = typeof window !== 'undefined' && (
-      window.location.hostname.includes('github.io') || 
-      window.location.hostname.includes('github.com')
-    );
-
     if (isStaticEnv) {
       return { latencyMs: 0, packetLoss: 0, quality: 'good', timestamp: Date.now() };
     }
@@ -77,7 +74,8 @@ export class NetworkQualityDetector {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
       try {
-        await fetch('/api/health/ping', {
+        const pingUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api') + '/health/ping';
+        await fetch(pingUrl, {
           method: 'HEAD',
           signal: controller.signal,
           cache: 'no-store',
@@ -87,7 +85,6 @@ export class NetworkQualityDetector {
         this.samples.push({ latency, success: true });
       } catch {
         clearTimeout(timeout);
-        // Don't push failure on first fetch error (could be test/dev env)
         if (this.samples.length > 0) {
           this.samples.push({ latency: 5000, success: false });
         }

@@ -133,11 +133,19 @@ const AuditsView = () => {
             {
               key: 'details',
               title: 'Detalles',
-              render: (row) => (
-                <span className="text-xs text-muted-foreground max-w-xs truncate block">
-                  {row.details ? JSON.stringify(JSON.parse(row.details)) : '-'}
-                </span>
-              ),
+              render: (row) => {
+                if (!row.details) return '-';
+                try {
+                  const parsed = typeof row.details === 'string' ? JSON.parse(row.details) : row.details;
+                  return (
+                    <span className="text-xs text-muted-foreground max-w-xs truncate block">
+                      {JSON.stringify(parsed)}
+                    </span>
+                  );
+                } catch {
+                  return <span className="text-xs text-muted-foreground max-w-xs truncate block">{row.details}</span>;
+                }
+              },
             },
           ]}
           data={sorted.slice(0, 100)}
@@ -145,7 +153,7 @@ const AuditsView = () => {
           searchable
           searchPlaceholder="Buscar en auditoría..."
           emptyMessage="No se encontraron registros de auditoría"
-          emptyIcon={<ClipboardList className="size-12" />}
+          emptyIcon={ClipboardList}
         />
       </Card>
 
