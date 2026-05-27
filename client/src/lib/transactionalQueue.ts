@@ -61,6 +61,16 @@ export class NetworkQualityDetector {
 
   async measure(): Promise<NetworkQuality> {
     if (this.measuring) return this.estimate();
+    
+    const isStaticEnv = typeof window !== 'undefined' && (
+      window.location.hostname.includes('github.io') || 
+      window.location.hostname.includes('github.com')
+    );
+
+    if (isStaticEnv) {
+      return { latencyMs: 0, packetLoss: 0, quality: 'good', timestamp: Date.now() };
+    }
+
     this.measuring = true;
     try {
       const start = performance.now();
