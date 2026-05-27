@@ -14,7 +14,6 @@ import { api } from '../../lib/api';
 import { enqueueSale, initSyncManager } from '../../lib/syncManager';
 import { Plus, Zap, AlertTriangle, ShoppingBag, Command } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { motion } from 'framer-motion';
 
 const SalesView = () => {
   const { items, getTotals, clearCart, addItem, validateStock, generateCheckoutId, hydrate } = useCartStore();
@@ -199,11 +198,11 @@ const SalesView = () => {
       clearCart();
       toast(
         offlineMode
-          ? 'Venta guardada localmente y se sincronizará cuando vuelva la conexión'
-          : 'Venta completada exitosamente',
+          ? 'Venta guardada localmente'
+          : 'Venta completada',
         offlineMode ? 'warning' : 'success',
       );
-      setTimeout(focusSearch, 100);
+      setTimeout(focusSearch, 50);
     } catch (e) {
       const msg = 'Error al procesar la venta: ' + e.message;
       setPayError(msg);
@@ -228,7 +227,7 @@ const SalesView = () => {
 
     setManualForm({ name: '', price: '' });
     setManualModalOpen(false);
-    toast(`"${manualForm.name}" agregado al carrito`, 'success');
+    toast(`"${manualForm.name}" agregado`, 'success');
     focusSearch();
   }, [manualForm, addItem, focusSearch, toast]);
 
@@ -246,145 +245,117 @@ const SalesView = () => {
   const totals = useMemo(() => getTotals(), [items, getTotals]);
 
   return (
-    <div className="h-full min-h-0 flex gap-4 overflow-hidden">
+    <div className="h-full min-h-0 flex gap-3 overflow-hidden">
       {/* Left Panel */}
-      <div className="flex-1 flex flex-col gap-4 min-w-0">
-        <div className="flex gap-3">
+      <div className="flex-1 flex flex-col gap-3 min-w-0">
+        <div className="flex gap-2">
           <div className="flex-1">
             <ProductSearch />
           </div>
-          <Button
+          <button
             onClick={() => setManualModalOpen(true)}
-            variant="warning"
-            size="lg"
-            className="shrink-0 h-16 px-6 font-bold min-h-[56px]"
-            title="Producto manual (no registrado)"
+            className="shrink-0 h-12 px-4 text-sm font-bold rounded-lg bg-warning/10 text-warning border border-warning/20 hover:bg-warning/20 active:scale-95 transition-all min-h-[44px]"
+            title="Producto manual"
             aria-label="Agregar producto manual"
           >
-            <Zap className="size-5" />
-            <span className="hidden lg:inline">Manual</span>
-          </Button>
+            <Zap className="size-4" />
+            <span className="hidden lg:inline ml-1">Manual</span>
+          </button>
         </div>
 
-        <div className="flex-1 rounded-2xl border border-border/30 bg-card p-5 overflow-y-auto">
+        <div className="flex-1 rounded-lg border border-border/30 bg-card p-3 overflow-y-auto">
           <QuickProducts onSelect={(p) => { addItem(p); focusSearch(); }} />
         </div>
       </div>
 
       {/* Right Panel - Cart */}
-      <div className="w-[var(--pos-cart-width)] flex flex-col rounded-2xl border border-border/30 bg-card shadow-sm h-full overflow-hidden">
+      <div className="w-[var(--pos-cart-width)] flex flex-col rounded-lg border border-border/30 bg-card shadow-sm h-full overflow-hidden">
         {/* Cart header */}
-        <div className="p-4 border-b border-border/30 flex items-center justify-between shrink-0">
-          <h2 className="font-bold flex items-center gap-2" id="cart-heading">
-            <ShoppingBag className="size-5" />
+        <div className="p-3 border-b border-border/30 flex items-center justify-between shrink-0">
+          <h2 className="font-bold text-sm flex items-center gap-1.5" id="cart-heading">
+            <ShoppingBag className="size-4" />
             Carrito
-            <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full shadow-sm font-bold min-w-[24px] text-center" aria-live="polite">
+            <span className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[20px] text-center" aria-live="polite">
               {items.length}
             </span>
           </h2>
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => { if (items.length > 0) setClearConfirmOpen(true); }}
             disabled={items.length === 0}
-            className="text-danger hover:bg-danger/10 font-bold"
+            className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1 rounded-lg transition-colors disabled:opacity-30 min-h-[36px]"
             aria-label="Vaciar carrito"
           >
             Vaciar
-          </Button>
+          </button>
         </div>
 
         {/* Cart items */}
-        <div className="flex-1 overflow-y-auto p-4" role="region" aria-labelledby="cart-heading" aria-live="polite">
+        <div className="flex-1 overflow-y-auto p-3" role="region" aria-labelledby="cart-heading" aria-live="polite">
           <Cart />
         </div>
 
         {/* Error */}
         {payError && (
-          <div className="px-5 py-3 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-2" role="alert">
-            <AlertTriangle className="size-5 text-danger shrink-0" />
-            <p className="text-sm font-bold text-danger">{payError}</p>
+          <div className="px-4 py-2 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-2" role="alert">
+            <AlertTriangle className="size-4 text-danger shrink-0" />
+            <p className="text-xs font-semibold text-danger">{payError}</p>
           </div>
         )}
 
         {/* Totals + Checkout */}
-        <div className="p-5 border-t border-border/30 space-y-4 shrink-0">
+        <div className="p-4 pt-3 border-t border-border/30 space-y-3 shrink-0">
           <div className="flex justify-between items-end">
-            <span className="text-muted-foreground font-semibold">Total a pagar:</span>
-            <motion.span
-              key={totals.total}
-              initial={{ scale: 1.1 }}
-              animate={{ scale: 1 }}
-              className="text-5xl font-black text-primary tracking-tighter"
-            >
+            <span className="text-muted-foreground font-medium text-xs">Total a pagar:</span>
+            <span className="text-2xl font-bold text-primary tracking-tight">
               ${totals.total.toFixed(2)}
-            </motion.span>
+            </span>
           </div>
 
-          <Button
-            size="xl"
-            className="w-full h-20 text-3xl font-black shadow-lg rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-4 tracking-tight"
+          <button
+            className={cn(
+              'w-full h-14 text-lg font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-3 active:scale-[0.98] min-h-[48px]',
+              items.length > 0 && !isProcessing
+                ? 'bg-primary text-primary-foreground hover:brightness-110'
+                : 'bg-muted text-muted-foreground/50 cursor-not-allowed',
+            )}
             disabled={items.length === 0 || isProcessing}
             onClick={openPayModal}
             aria-label="Cobrar"
           >
             <span>COBRAR</span>
-            <div className="h-8 w-px bg-primary-foreground/20" />
-            <span className="text-xl font-bold opacity-80">F2</span>
-          </Button>
+            <div className="h-5 w-px bg-primary-foreground/20" />
+            <span className="text-xs font-bold opacity-80">F2</span>
+          </button>
         </div>
       </div>
 
       {/* Manual product modal */}
       {isManualModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]" role="dialog" aria-modal="true" aria-label="Producto manual">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="bg-card w-full max-w-md rounded-3xl border border-border/40 shadow-2xl p-8"
-          >
-            <button
-              onClick={() => setManualModalOpen(false)}
-              className="float-right p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors"
-              aria-label="Cerrar"
-            >
-              <Plus className="size-6 rotate-45" />
-            </button>
-            <h2 className="text-2xl font-black mb-6 tracking-tight">Producto Manual</h2>
-            <form onSubmit={handleAddManual} className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Nombre</label>
-                <Input
-                  placeholder="Nombre del producto..."
-                  value={manualForm.name}
-                  onChange={e => setManualForm({ ...manualForm, name: e.target.value })}
-                  autoFocus
-                  required
-                />
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]" role="dialog" aria-modal="true" aria-label="Producto manual">
+          <div className="bg-card w-full max-w-md rounded-xl border border-border shadow-lg p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold">Producto Manual</h2>
+              <button onClick={() => setManualModalOpen(false)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors">
+                <Plus className="size-4 rotate-45" />
+              </button>
+            </div>
+            <form onSubmit={handleAddManual} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Nombre</label>
+                <Input placeholder="Nombre del producto..." value={manualForm.name} onChange={e => setManualForm({ ...manualForm, name: e.target.value })} autoFocus required />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Precio</label>
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">Precio</label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground z-10">$</span>
-                  <Input
-                    className="pl-8"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    value={manualForm.price}
-                    onChange={e => setManualForm({ ...manualForm, price: e.target.value })}
-                    required
-                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10">$</span>
+                  <Input className="pl-7" type="number" step="0.01" min="0" placeholder="0.00" value={manualForm.price} onChange={e => setManualForm({ ...manualForm, price: e.target.value })} required />
                 </div>
               </div>
-              <Button type="submit" size="xl" className="w-full font-bold">
+              <Button type="submit" size="lg" className="w-full font-bold">
                 Agregar al Carrito
               </Button>
             </form>
-          </motion.div>
+          </div>
         </div>
       )}
 
@@ -392,7 +363,7 @@ const SalesView = () => {
       <ConfirmModal
         open={isClearConfirmOpen}
         title="Vaciar carrito"
-        message="Se eliminarán todos los productos del carrito. Esta acción no se puede deshacer."
+        message="Se eliminarán todos los productos del carrito."
         confirmLabel="Vaciar"
         variant="danger"
         onConfirm={() => { clearCart(); setClearConfirmOpen(false); toast('Carrito vaciado', 'info'); }}
@@ -413,15 +384,15 @@ const SalesView = () => {
       <ShortcutsOverlay open={isShortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* Command palette trigger */}
-      <div className="fixed bottom-4 left-4 z-40">
+      <div className="fixed bottom-3 left-3 z-40">
         <button
           onClick={() => setCmdPaletteOpen(true)}
-          className="flex items-center gap-2 px-3 py-2.5 rounded-2xl glass-strong shadow-lg text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
+          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-card border border-border shadow-sm text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
           title="Paleta de comandos (⌘K)"
           aria-label="Abrir paleta de comandos"
         >
-          <Command className="size-3.5" />
-          <kbd className="text-[10px] font-bold bg-muted px-1.5 py-0.5 rounded-lg">⌘K</kbd>
+          <Command className="size-3" />
+          <kbd className="text-[9px] font-bold bg-muted px-1 py-0.5 rounded">⌘K</kbd>
         </button>
       </div>
     </div>

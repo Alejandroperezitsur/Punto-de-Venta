@@ -64,20 +64,19 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-5 right-5 z-[200] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
-        <AnimatePresence mode="popLayout">
+      <div className="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+        <AnimatePresence>
           {toasts.map(t => {
             const Icon = icons[t.variant];
             return (
               <motion.div
                 key={t.id}
-                layout
-                initial={{ opacity: 0, x: 80, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 80, scale: 0.95 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 2 }}
+                transition={{ duration: 0.1 }}
                 className={cn(
-                  'pointer-events-auto flex items-start gap-3 rounded-2xl border-2 p-4 shadow-lg backdrop-blur-xl bg-card/95',
+                  'pointer-events-auto flex items-start gap-2.5 rounded-lg border p-3 shadow-sm bg-card',
                   colors[t.variant],
                 )}
               >

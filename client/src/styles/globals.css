@@ -81,7 +81,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 #root {
@@ -201,7 +200,13 @@ img {
   top: 16px;
 }
 
-/* ── Reduced motion ── */
+/* ── POS motion: instant by default ── */
+[data-motion="reduced"] *, [data-motion="reduced"] *::before, [data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -215,7 +220,8 @@ img {
 @layer base {
   button, a, [role="button"], input, select, textarea {
     @media (pointer: coarse) {
-      min-height: 44px;
+      min-height: 48px;
+      min-width: 48px;
     }
   }
 }

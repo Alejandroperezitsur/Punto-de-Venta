@@ -20,7 +20,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
   };
   return (
     <Component
-      className={cn('rounded-2xl p-5 transition-all duration-200 text-left relative', variants[variant], className)}
+      className={cn('rounded-xl p-4 transition-colors text-left relative', variants[variant], className)}
       onClick={onClick}
       {...(onClick ? { type: 'button' as const } : {})}
     >

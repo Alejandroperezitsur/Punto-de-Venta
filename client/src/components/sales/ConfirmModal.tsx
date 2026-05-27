@@ -19,25 +19,25 @@ const ConfirmModal = ({ open, title, message, confirmLabel = 'Confirmar', cancel
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="bg-card w-full max-w-md rounded-3xl border border-border shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-200">
-        <button onClick={onCancel} className="float-right p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors" aria-label="Cerrar">
-          <X className="size-5" />
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]" role="dialog" aria-modal="true" aria-label={title}>
+      <div className="bg-card w-full max-w-sm rounded-xl border border-border shadow-lg p-4">
+        <button onClick={onCancel} className="float-right p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors" aria-label="Cerrar">
+          <X className="size-4" />
         </button>
 
-        <div className="text-center mb-6 mt-2">
-          <div className={cn('size-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg', iconStyles[variant])}>
-            <AlertTriangle className="size-8" />
+        <div className="text-center mb-4 mt-1">
+          <div className={cn('size-12 rounded-xl flex items-center justify-center mx-auto mb-3', iconStyles[variant])}>
+            <AlertTriangle className="size-6" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-          <p className="text-muted-foreground mt-2 text-sm">{message}</p>
+          <h2 className="text-base font-bold">{title}</h2>
+          <p className="text-muted-foreground mt-1 text-xs">{message}</p>
         </div>
 
-        <div className="flex gap-3">
-          <Button variant="secondary" className="flex-1 h-12 text-base font-bold rounded-2xl" onClick={onCancel} disabled={isLoading}>
+        <div className="flex gap-2">
+          <Button variant="secondary" className="flex-1 h-10 text-sm font-bold rounded-lg" onClick={onCancel} disabled={isLoading}>
             {cancelLabel}
           </Button>
-          <Button className={cn('flex-1 h-12 text-base font-bold rounded-2xl shadow-lg', variantStyles[variant])} onClick={onConfirm} isLoading={isLoading}>
+          <Button className={cn('flex-1 h-10 text-sm font-bold rounded-lg', variantStyles[variant])} onClick={onConfirm} isLoading={isLoading}>
             {confirmLabel}
           </Button>
         </div>

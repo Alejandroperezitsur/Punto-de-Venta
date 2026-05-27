@@ -38,12 +38,12 @@ function Dropdown({ trigger, items, align = 'end', className }: DropdownProps) {
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -4 }}
-            transition={{ duration: 0.1 }}
+            initial={{ opacity: 0, y: -2 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -1 }}
+            transition={{ duration: 0.08 }}
             className={cn(
-              'absolute z-50 mt-2 min-w-[200px] rounded-2xl border border-border bg-card shadow-lg overflow-hidden p-1.5',
+              'absolute z-50 mt-1 min-w-[200px] rounded-lg border border-border bg-card shadow-md overflow-hidden p-1',
               align === 'end' ? 'right-0' : 'left-0',
             )}
           >

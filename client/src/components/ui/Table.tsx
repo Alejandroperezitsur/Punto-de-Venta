@@ -43,8 +43,8 @@ function Table<T extends Record<string, any>>({
   data,
   searchable = true,
   searchPlaceholder = 'Buscar...',
-  pageSize = 10,
-  density = 'comfortable',
+  pageSize = 20,
+  density = 'compact',
   striped = true,
   loading = false,
   emptyTitle = 'No se encontraron resultados',
@@ -63,9 +63,9 @@ function Table<T extends Record<string, any>>({
   const [sortDir, setSortDir] = useState<SortDirection>(null);
 
   const densityStyles = {
-    compact: 'py-2 px-3 text-xs',
-    comfortable: 'py-3 px-4 text-sm',
-    spacious: 'py-4 px-5 text-base',
+    compact: 'py-1.5 px-3 text-xs',
+    comfortable: 'py-2.5 px-4 text-sm',
+    spacious: 'py-3.5 px-5 text-base',
   };
 
   const filtered = useMemo(() => {
@@ -115,15 +115,15 @@ function Table<T extends Record<string, any>>({
   const SortIcon = ({ column }: { column: Column<T> }) => {
     if (!column.sortable && !globallySortable) return null;
     const active = sortKey === column.key;
-    if (!active) return <ChevronsUpDown className="size-3.5 opacity-40" />;
-    return sortDir === 'asc' ? <ChevronUp className="size-3.5 text-primary" /> : <ChevronDown className="size-3.5 text-primary" />;
+    if (!active) return <ChevronsUpDown className="size-3 opacity-30" />;
+    return sortDir === 'asc' ? <ChevronUp className="size-3 text-primary" /> : <ChevronDown className="size-3 text-primary" />;
   };
 
   return (
-    <div className={cn('w-full space-y-4', className)}>
+    <div className={cn('w-full space-y-3', className)}>
       {searchable && (
-        <div className="flex items-center justify-between gap-4">
-          <div className="w-72 max-w-full">
+        <div className="flex items-center justify-between gap-3">
+          <div className="w-64 max-w-full">
             <Input
               icon={Search}
               placeholder={searchPlaceholder}
@@ -131,14 +131,14 @@ function Table<T extends Record<string, any>>({
               onChange={e => { setQuery(e.target.value); setPage(1); }}
             />
           </div>
-          <span className="text-sm text-muted-foreground font-medium whitespace-nowrap">
+          <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
             {sorted.length} registro{sorted.length !== 1 ? 's' : ''}
           </span>
         </div>
       )}
 
       <div className={cn(
-        'rounded-2xl border border-border/30 overflow-hidden bg-card',
+        'rounded-lg border border-border/30 overflow-hidden bg-card',
         stickyHeader && 'relative',
       )}>
         <div className="overflow-x-auto">
@@ -149,7 +149,7 @@ function Table<T extends Record<string, any>>({
                   <th
                     key={col.key}
                     className={cn(
-                      'font-semibold text-muted-foreground uppercase tracking-wider select-none text-xs',
+                      'font-semibold text-muted-foreground uppercase tracking-wider select-none text-[10px]',
                       densityStyles[density],
                       col.sortable !== false && globallySortable && 'cursor-pointer hover:text-foreground transition-colors',
                       col.hideOnMobile && 'hidden md:table-cell',
@@ -161,7 +161,7 @@ function Table<T extends Record<string, any>>({
                     }}
                     scope="col"
                   >
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1">
                       <span>{col.title}</span>
                       {(col.sortable !== false && globallySortable) && <SortIcon column={col} />}
                     </div>
@@ -175,14 +175,14 @@ function Table<T extends Record<string, any>>({
                   <tr key={`skel-${i}`}>
                     {columns.map(col => (
                       <td key={col.key} className={cn(densityStyles[density], col.hideOnMobile && 'hidden md:table-cell')}>
-                        <div className="h-4 rounded bg-muted/60 animate-[shimmer_1.5s_ease-in-out_infinite] bg-gradient-to-r from-muted/40 via-muted/60 to-muted/40 bg-[length:200%_100%]" style={{ width: `${40 + Math.random() * 40}%` }} />
+                        <div className="h-3.5 rounded bg-muted/60 animate-[shimmer_1.5s_ease-in-out_infinite] bg-gradient-to-r from-muted/40 via-muted/60 to-muted/40 bg-[length:200%_100%]" style={{ width: `${40 + Math.random() * 40}%` }} />
                       </td>
                     ))}
                   </tr>
                 ))
               ) : paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="p-8">
+                  <td colSpan={columns.length} className="p-6">
                     <EmptyState
                       title={emptyTitle}
                       description={emptyDescription}
@@ -196,9 +196,9 @@ function Table<T extends Record<string, any>>({
                   <tr
                     key={rowKey(row)}
                     className={cn(
-                      'transition-colors duration-150',
-                      striped && i % 2 === 1 && 'bg-muted/10',
-                      onRowClick && 'cursor-pointer hover:bg-muted/30',
+                      'transition-colors duration-75',
+                      striped && i % 2 === 1 && 'bg-foreground/[0.02]',
+                      onRowClick && 'cursor-pointer hover:bg-muted/20',
                     )}
                     onClick={() => onRowClick?.(row)}
                   >
@@ -220,41 +220,40 @@ function Table<T extends Record<string, any>>({
 
       {totalPages > 1 && !loading && (
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             Página {page} de {totalPages}
           </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
+          <div className="flex items-center gap-1">
+            <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
+              className="size-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors disabled:opacity-30"
             >
               <ChevronLeft className="size-4" />
-            </Button>
+            </button>
             {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
               const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
               if (pageNum > totalPages) return null;
               return (
-                <Button
+                <button
                   key={pageNum}
-                  variant={pageNum === page ? 'primary' : 'ghost'}
-                  size="sm"
-                  className="min-w-[2rem]"
+                  className={cn(
+                    'size-8 rounded-lg text-xs font-semibold transition-colors',
+                    pageNum === page ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover',
+                  )}
                   onClick={() => setPage(pageNum)}
                 >
                   {pageNum}
-                </Button>
+                </button>
               );
             })}
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
+              className="size-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors disabled:opacity-30"
             >
               <ChevronRight className="size-4" />
-            </Button>
+            </button>
           </div>
         </div>
       )}

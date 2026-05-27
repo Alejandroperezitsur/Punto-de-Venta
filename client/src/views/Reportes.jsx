@@ -132,48 +132,48 @@ const MyBusinessView = () => {
     return (
             <div className="max-w-4xl mx-auto flex flex-col justify-between gap-8">
             <div className="text-center py-10">
-                <p className="text-sm font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Lo que ganaste hoy para ti</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.15em] mb-4">Lo que ganaste hoy para ti</p>
                 <div className="flex items-center justify-center gap-4">
-                    <span className="text-9xl font-black tracking-tighter text-foreground">
+                    <span className="text-7xl font-bold tracking-tight text-foreground">
                         ${data.gain.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </span>
                 </div>
-                <p className="mt-6 text-xl font-medium text-muted-foreground">¡Buen trabajo! Es un día sólido.</p>
+                <p className="mt-4 text-base font-medium text-muted-foreground">¡Buen trabajo! Es un día sólido.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-10 border-y-2 border-border">
                 <div className="text-center md:text-right md:pr-12 md:border-r-2 md:border-border">
-                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Efectivo en caja</p>
-                    <p className="text-5xl font-black text-foreground">${data.cash.toLocaleString()}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Efectivo en caja</p>
+                    <p className="text-4xl font-bold text-foreground">${data.cash.toLocaleString()}</p>
                 </div>
                 <div className="text-center md:text-left md:pl-12 flex flex-col items-center md:items-start">
-                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
-                    <div className="flex items-center gap-3">
-                        <p className="text-5xl font-black text-foreground uppercase">{data.status}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-4xl font-bold text-foreground uppercase">{data.status}</p>
                         {data.status === 'mejor' ? (
-                            <ArrowUpRight className="h-10 w-10 text-success stroke-[3]" />
+                            <ArrowUpRight className="h-8 w-8 text-success stroke-[3]" />
                         ) : (
-                            <ArrowDownRight className="h-10 w-10 text-warning stroke-[3]" />
+                            <ArrowDownRight className="h-8 w-8 text-warning stroke-[3]" />
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="space-y-6 py-10">
-                <Card className="flex items-center gap-4 bg-blue-50 border-blue-100">
-                    <div className="h-12 w-12 bg-card rounded-2xl flex items-center justify-center shadow-sm shrink-0">
-                        <Sun className="h-6 w-6 text-blue-500" />
+            <div className="space-y-4 py-10">
+                <Card className="flex items-center gap-3 p-4 border border-primary/10">
+                    <div className="size-10 bg-card rounded-lg flex items-center justify-center shadow-sm shrink-0 border border-border">
+                        <Sun className="size-5 text-primary" />
                     </div>
-                    <p className="text-lg font-bold text-blue-900 leading-tight">
+                    <p className="text-sm font-semibold leading-tight text-foreground">
                         Tu mejor hora fue a las 2:00 PM. Mañana podrías vender más si refuerzas esa hora.
                     </p>
                 </Card>
 
-                <Card className="flex items-center gap-4 bg-orange-50 border-orange-100">
-                    <div className="h-12 w-12 bg-card rounded-2xl flex items-center justify-center shadow-sm shrink-0">
-                        <Coffee className="h-6 w-6 text-orange-500" />
+                <Card className="flex items-center gap-3 p-4 border border-warning/10">
+                    <div className="size-10 bg-card rounded-lg flex items-center justify-center shadow-sm shrink-0 border border-border">
+                        <Coffee className="size-5 text-warning" />
                     </div>
-                    <p className="text-lg font-bold text-orange-900 leading-tight">
+                    <p className="text-sm font-semibold leading-tight text-foreground">
                         Tu producto estrella hoy fue <span className="underline decoration-2">{data.topProduct}</span>.
                     </p>
                 </Card>
@@ -182,42 +182,42 @@ const MyBusinessView = () => {
             <div className="pt-6">
                 <Button
                     onClick={() => { setIsClosing(true); setClosingStep(1); setCountedCash(''); setCloseResult(null); setCloseError(''); }}
-                    size="xl"
-                    className="w-full h-24 text-2xl font-black rounded-2xl bg-foreground text-background hover:bg-foreground/90 shadow-lg active:scale-95"
+                    size="2xl"
+                    className="w-full font-bold bg-foreground text-background hover:bg-foreground/90 shadow-lg active:scale-95"
                 >
-                    <DoorClosed className="h-8 w-8 mr-4" />
+                    <DoorClosed className="h-6 w-6 mr-3" />
                     CERRAR CAJA Y TERMINAR DÍA
                 </Button>
             </div>
 
             {isClosing && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[100]">
-                    <div className="bg-card border border-border/40 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]">
+                    <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full shadow-lg relative">
                         <button
                             onClick={() => { setIsClosing(false); setClosingStep(1); }}
-                            className="absolute top-8 right-8 text-muted-foreground hover:text-foreground font-bold"
+                            className="absolute top-6 right-6 text-muted-foreground hover:text-foreground font-bold text-xs"
                         >
                             CANCELAR
                         </button>
 
                         {closingStep === 1 ? (
-                            <div className="w-full text-center space-y-10">
-                                <h2 className="text-4xl font-black tracking-tight text-foreground">¿Cuánto dinero hay en el cajón?</h2>
-                                <p className="text-muted-foreground font-medium italic">Cuenta tu efectivo físicamente ahora mismo.</p>
+                            <div className="w-full text-center space-y-6">
+                                <h2 className="text-2xl font-bold tracking-tight text-foreground">¿Cuánto dinero hay en el cajón?</h2>
+                                <p className="text-sm text-muted-foreground font-medium italic">Cuenta tu efectivo físicamente ahora mismo.</p>
 
                                 {closeError && (
-                                    <div className="p-4 bg-danger/10 border-2 border-danger/20 rounded-2xl text-danger font-bold">
+                                    <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg text-danger text-sm font-semibold">
                                         {closeError}
                                     </div>
                                 )}
 
                                 <div className="relative">
-                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-4xl font-black text-muted-foreground/50 z-10">$</span>
+                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-3xl font-bold text-muted-foreground/50 z-10">$</span>
                                     <Input
                                         type="number"
                                         step="0.01"
                                         autoFocus
-                                        className="w-full h-32 bg-muted/50 border-2 border-border/50 rounded-2xl text-6xl font-black text-center focus-visible:border-foreground transition-all pl-24 pr-4"
+                                        className="w-full h-24 bg-muted/50 border border-border rounded-lg text-4xl font-bold text-center focus-visible:border-foreground transition-colors pl-16 pr-4"
                                         value={countedCash}
                                         onChange={(e) => setCountedCash(e.target.value)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleCloseDay(); }}
@@ -230,49 +230,49 @@ const MyBusinessView = () => {
                                     disabled={!countedCash || closeLoading}
                                     isLoading={closeLoading}
                                     size="xl"
-                                    className="w-full h-24 text-2xl font-black rounded-2xl"
+                                    className="w-full font-bold"
                                 >
                                     VERIFICAR Y CERRAR
                                 </Button>
                             </div>
                         ) : closeResult ? (
-                            <div className="w-full text-center space-y-8">
+                            <div className="w-full text-center space-y-6">
                                 {Math.abs(closeResult.difference) < 0.01 ? (
                                     <>
-                                        <div className="h-32 w-32 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-                                            <CheckCircle2 className="h-16 w-16 stroke-[3]" />
+                                        <div className="h-20 w-20 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto shadow-lg">
+                                            <CheckCircle2 className="h-10 w-10 stroke-[3]" />
                                         </div>
-                                        <h2 className="text-5xl font-black tracking-tighter text-foreground">¡Caja Cerrada!</h2>
-                                        <p className="text-xl text-muted-foreground font-medium">
-                                            Todo cuadra perfectamente. Puedes irte a descansar con total tranquilidad.
+                                        <h2 className="text-3xl font-bold tracking-tight text-foreground">¡Caja Cerrada!</h2>
+                                        <p className="text-base text-muted-foreground font-medium">
+                                            Todo cuadra perfectamente.
                                         </p>
-                                        <p className="text-sm text-muted-foreground/60">
+                                        <p className="text-xs text-muted-foreground/60">
                                             Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}
                                         </p>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="h-32 w-32 bg-warning/10 text-warning rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl">
-                                            <AlertCircle className="h-16 w-16 stroke-[3]" />
+                                        <div className="h-20 w-20 bg-warning/10 text-warning rounded-full flex items-center justify-center mx-auto shadow-lg">
+                                            <AlertCircle className="h-10 w-10 stroke-[3]" />
                                         </div>
-                                        <h2 className="text-5xl font-black tracking-tighter text-foreground">Discrepancia Detectada</h2>
-                                        <p className="text-xl text-muted-foreground font-medium">
+                                        <h2 className="text-3xl font-bold tracking-tight text-foreground">Discrepancia Detectada</h2>
+                                        <p className="text-base text-muted-foreground font-medium">
                                             {closeResult.difference > 0 ? (
-                                                <>Sobran <span className="text-success font-black">${closeResult.difference.toFixed(2)}</span></>
+                                                <>Sobran <span className="text-success font-bold">${closeResult.difference.toFixed(2)}</span></>
                                             ) : (
-                                                <>Faltan <span className="text-danger font-black">${Math.abs(closeResult.difference).toFixed(2)}</span></>
+                                                <>Faltan <span className="text-danger font-bold">${Math.abs(closeResult.difference).toFixed(2)}</span></>
                                             )}
                                             <br />
-                                            <span className="text-sm">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
+                                            <span className="text-xs">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
                                         </p>
                                     </>
                                 )}
 
-                                <div className="pt-10">
+                                <div className="pt-6">
                                     <Button
                                         onClick={() => navigate('/caja')}
                                         size="xl"
-                                        className="w-full h-20 text-xl font-black rounded-2xl bg-foreground text-background hover:brightness-110"
+                                        className="w-full font-bold bg-foreground text-background hover:brightness-110"
                                     >
                                         IR A CONTROL DE CAJA
                                     </Button>

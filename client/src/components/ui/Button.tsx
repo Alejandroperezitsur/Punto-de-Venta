@@ -20,13 +20,13 @@ const variants = {
 };
 
 const sizes = {
-  xs: 'h-8 px-3 text-xs rounded-lg gap-1.5',
-  sm: 'h-9 px-3.5 text-sm rounded-xl gap-1.5',
-  md: 'h-10 px-4 text-sm rounded-xl gap-2',
-  lg: 'h-12 px-5 text-base rounded-2xl gap-2.5',
-  xl: 'h-14 px-7 text-lg rounded-2xl gap-3',
-  '2xl': 'h-16 px-8 text-xl rounded-3xl gap-3',
-  icon: 'h-10 w-10 rounded-xl',
+  xs: 'h-7 px-2.5 text-[11px] rounded-md gap-1',
+  sm: 'h-8 px-3 text-xs rounded-lg gap-1',
+  md: 'h-9 px-3.5 text-sm rounded-lg gap-1.5',
+  lg: 'h-11 px-4 text-sm rounded-lg gap-2',
+  xl: 'h-12 px-6 text-base rounded-xl gap-2',
+  '2xl': 'h-14 px-6 text-lg rounded-xl gap-2',
+  icon: 'h-9 w-9 rounded-lg',
 };
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -43,9 +43,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-          'inline-flex items-center justify-center font-semibold transition-all duration-150',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          'disabled:pointer-events-none disabled:opacity-40 select-none',
+          'inline-flex items-center justify-center font-semibold transition-all duration-75',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+          'disabled:pointer-events-none disabled:opacity-40 select-none min-h-[36px]',
           variants[variant],
           sizes[size],
           className,
@@ -53,7 +53,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         {...props}
       >
-        {isLoading && <Loader2 className="size-4 animate-spin shrink-0" />}
+        {isLoading && <Loader2 className="size-3.5 animate-spin shrink-0" />}
         {children}
       </button>
     );

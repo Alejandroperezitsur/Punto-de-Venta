@@ -91,11 +91,11 @@ function Select({
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -4 }}
-            transition={{ duration: 0.12 }}
-            className="absolute z-50 mt-2 w-full min-w-[200px] rounded-2xl border border-border bg-card shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: -2 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -1 }}
+            transition={{ duration: 0.08 }}
+            className="absolute z-50 mt-1 w-full min-w-[200px] rounded-lg border border-border bg-card shadow-md overflow-hidden"
             role="listbox"
           >
             {searchable && (
