@@ -1,3 +1,7 @@
+/**
+ * POS Pro — Punto de Venta Profesional
+ * © Alejandro Pérez Vázquez — APV Labs
+ */
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Sistema Profesional de Punto de Venta",
   "main": "electron/main.js",
-  "author": "POS Pro Team",
+  "author": "Alejandro Pérez Vázquez — APV Labs",
   "license": "MIT",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
