@@ -10,7 +10,7 @@ import { useToast } from '../components/ui/Toast';
 import { ErrorState } from '../components/ui/ErrorState';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Skeleton } from '../components/ui/Skeleton';
-import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, X } from 'lucide-react';
+import { Plus, Trash2, RefreshCw, History, Package, Search, Edit3, X, ScanLine } from 'lucide-react';
 import { formatMoney } from '../utils/format';
 import { MovementHistoryModal } from '../components/products/MovementHistoryModal';
 import { ViewContainer } from '../components/layout/ViewContainer';
@@ -41,6 +41,11 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
         <p className="text-lg font-bold text-primary tracking-tight">
           {formatMoney(p.price)}
         </p>
+        {(p.barcodes?.length > 0 || p.sku) && (
+          <p className="text-[10px] text-muted-foreground/60 font-mono truncate">
+            {p.barcodes?.[0]?.code || p.sku}
+          </p>
+        )}
         <Badge
           variant={p.stock <= 0 ? 'danger' : p.stock <= 5 ? 'warning' : 'success'}
           size="sm"
@@ -62,7 +67,7 @@ const ProductsView = () => {
   const [search, setSearch] = useState('');
   const searchTimerRef = useRef(null);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [form, setForm] = useState({ name: '', price: '', stock: '999', sku: '' });
+  const [form, setForm] = useState({ name: '', price: '', stock: '999', sku: '', barcode: '' });
   const [saving, setSaving] = useState(false);
   const [kardexProduct, setKardexProduct] = useState(null);
   const [error, setError] = useState(null);
@@ -113,11 +118,13 @@ const ProductsView = () => {
     if (!form.name.trim()) return;
     setSaving(true);
     try {
+      const barcodeValue = form.barcode.trim();
       const payload = {
-        ...form,
+        name: form.name,
         price: parseFloat(form.price) || 0,
         stock: parseFloat(form.stock) || 0,
-        sku: form.sku || `SKU-${Date.now()}`,
+        sku: form.sku || barcodeValue || `SKU-${Date.now()}`,
+        barcodes: barcodeValue ? [barcodeValue] : [],
       };
 
       if (editingProduct) {
@@ -128,7 +135,7 @@ const ProductsView = () => {
         toast('Producto creado', 'success');
       }
 
-      setForm({ name: '', price: '', stock: '999', sku: '' });
+      setForm({ name: '', price: '', stock: '999', sku: '', barcode: '' });
       setEditingProduct(null);
       setModalOpen(false);
       await loadData(null);
@@ -139,7 +146,8 @@ const ProductsView = () => {
 
   const handleEdit = useCallback((p) => {
     setEditingProduct(p);
-    setForm({ name: p.name, price: p.price.toString(), stock: p.stock.toString(), sku: p.sku || '' });
+    const existingBarcode = (p.barcodes && p.barcodes.length > 0) ? (typeof p.barcodes[0] === 'string' ? p.barcodes[0] : p.barcodes[0]?.code || '') : '';
+    setForm({ name: p.name, price: p.price.toString(), stock: p.stock.toString(), sku: p.sku || '', barcode: existingBarcode });
     setModalOpen(true);
   }, []);
 
@@ -248,6 +256,19 @@ const ProductsView = () => {
               <Input placeholder="999" type="number" min="0"
                 value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+              <ScanLine className="size-3" /> Codigo de barras
+            </label>
+            <Input
+              placeholder="Escanear o escribir codigo de barras..."
+              value={form.barcode}
+              onChange={e => setForm({ ...form, barcode: e.target.value })}
+              autoComplete="off"
+            />
+            <p className="text-[10px] text-muted-foreground/60">Escribe o escanea el codigo de barras del producto</p>
           </div>
 
           {editingProduct && (
