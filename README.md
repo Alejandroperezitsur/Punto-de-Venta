@@ -1,89 +1,59 @@
-# POS Pro - Sistema Profesional de Punto de Venta
+# POS Pro — Punto de Venta Profesional
 
-Sistema de punto de venta moderno, rápido y profesional para retail y supermercados.
+Sistema de punto de venta moderno para retail y supermercados con soporte offline, multi-sucursal y roles de usuario.
 
-## 🚀 Características
+**Live demo:** https://alejandroperezitsur.github.io/Punto-de-Venta/
 
-### Ventas
-- ✅ Escaneo rápido de productos (código de barras y búsqueda)
-- ✅ Sintaxis rápida: `3*SKU` para agregar cantidades
-- ✅ Pagos mixtos (efectivo, tarjeta, transferencia)
-- ✅ Tickets profesionales con logo
+## Stack
 
-### Inventario
-- ✅ Gestión de productos con imágenes
-- ✅ Categorías y subcategorías
-- ✅ Kardex (historial de movimientos de stock)
-- ✅ Alertas de stock bajo
+| Capa | Tecnología |
+|------|-----------|
+| Frontend | React 18, Zustand, TailwindCSS 4, Recharts |
+| Backend | Express, SQLite (better-sqlite3), JWT |
+| Desktop | Electron + electron-builder |
+| Offline | IndexedDB (idb), Workbox (PWA) |
+| Build | Vite 5, TypeScript 6 |
 
-### Caja
-- ✅ Apertura y cierre de caja
-- ✅ Depósitos y retiros
-- ✅ Auditoría de movimientos
+## Funcionalidades
 
-### Reportes
-- ✅ Dashboard con gráficos (tendencias, métodos de pago)
-- ✅ KPIs: ventas totales, ticket promedio
-- ✅ Exportación CSV/Excel
+- **Ventas** — Escaneo de código de barras, búsqueda rápida, sintaxis `3*SKU`, pago mixto (efectivo/tarjeta/transferencia), ticket PDF con logo
+- **Inventario** — Productos con imágenes, categorías/subcategorías, kardex de movimientos, alertas de stock bajo, códigos de barras múltiples
+- **Caja** — Apertura/cierre, depósitos/retiros, auditoría de movimientos, conciliación
+- **Dashboard** — KPIs (ventas totales, ticket promedio), gráficos de tendencias y métodos de pago, exportación CSV
+- **Seguridad** — Multi-usuario con roles (Admin, Supervisor, Cajero), permisos granulares por endpoint, auditoría completa
+- **Offline first** — Operación sin conexión con sincronización automática al recuperar conexión
+- **PWA** — Instalable, service worker con estrategias cache-first
+- **Personalización** — Logo, nombre de negocio, temas de color, branding dinámico
+- **Distribución** — Web (GitHub Pages), escritorio (Windows/Mac/Linux via Electron)
 
-### Seguridad
-- ✅ Multi-usuario con roles (Admin, Supervisor, Cajero)
-- ✅ Permisos granulares por endpoint
-- ✅ Auditoría completa de acciones
-
-### Distribución
-- ✅ PWA instalable
-- ✅ Electron para escritorio (Windows, Mac, Linux)
-
-## 📦 Instalación
+## Desarrollo
 
 ```bash
-# Clonar repositorio
-git clone https://github.com/your-repo/pos-pro.git
-cd pos-pro
-
-# Instalar dependencias
-npm run setup
-
-# Iniciar en desarrollo
-npm start
+git clone <repo>
+cd Punto-de-Venta
+npm run setup    # instala dependencias (root + client + server)
+npm start        # servidor + cliente en dev
 ```
 
-## 🔧 Scripts Disponibles
+## Scripts
 
 | Script | Descripción |
 |--------|-------------|
 | `npm start` | Inicia servidor y cliente en desarrollo |
-| `npm run build:pwa` | Genera build PWA optimizado |
-| `npm run build:desktop` | Genera ejecutables Electron |
+| `npm run build` | Build de producción (cliente + servidor) |
+| `npm run build:pwa` | Build PWA optimizado |
+| `npm run build:desktop` | Build ejecutables Electron |
+| `npm run lint` | ESLint |
+| `npm run deploy:web` | Build + deploy a GitHub Pages (rama gh-pages) |
 | `npm run reset-db` | Reinicia la base de datos |
-| `npm run setup` | Instala todas las dependencias |
 
-## 🛠 Tecnologías
-
-- **Frontend**: React 18, Zustand, TailwindCSS, Recharts
-- **Backend**: Express, SQLite (better-sqlite3), JWT
-- **Desktop**: Electron
-- **PWA**: Vite PWA Plugin, Workbox
-
-## 👥 Roles y Permisos
-
-| Permiso | Admin | Supervisor | Cajero |
-|---------|:-----:|:----------:|:------:|
-| Ventas | ✅ | ✅ | ✅ |
-| Inventario | ✅ | ✅ | 👁️ |
-| Reportes | ✅ | ✅ | ❌ |
-| Caja | ✅ | ✅ | ✅ |
-| Usuarios | ✅ | ❌ | ❌ |
-| Configuración | ✅ | ❌ | ❌ |
-
-## 📝 Credenciales por defecto
+## Credenciales por defecto
 
 ```
-Usuario: admin
+Usuario:   admin
 Contraseña: admin123
 ```
 
-## 📄 Licencia
+## Licencia
 
-MIT License - Uso libre para proyectos comerciales y personales.
+MIT

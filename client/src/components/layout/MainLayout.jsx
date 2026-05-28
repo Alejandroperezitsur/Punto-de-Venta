@@ -57,7 +57,10 @@ const MainLayout = memo(function MainLayout({ children }) {
           </main>
           <footer className="shrink-0 py-3 px-3 md:px-4 border-t border-border/30 text-[10px] font-medium text-muted-foreground/60 flex justify-between items-center" role="contentinfo">
             <span>{info.copyright}</span>
-            <span>v{info.version}</span>
+            <span className="flex items-center gap-2">
+              <span className="text-[9px] opacity-40 select-none">APV Labs</span>
+              <span>v{info.version}</span>
+            </span>
           </footer>
         </div>
       </div>
