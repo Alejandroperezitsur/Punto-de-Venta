@@ -111,33 +111,42 @@ function App() {
 
                 initBudgetMonitor();
 
-                const recovery = await attemptCrashRecovery();
-                if (recovery.recovered && recovery.restoredItems > 0) {
-                    console.log(`[Recovery] Restored ${recovery.restoredItems} items from snapshot`);
+                const [recovery, offlineRecovery, cartRollback, integrity, consistencyCheck] = await Promise.allSettled([
+                    attemptCrashRecovery(),
+                    offlineRecoveryEngine.runRecovery(),
+                    attemptCartRollback(),
+                    runIntegrityCheck(),
+                    dataConsistency.runFullCheck(),
+                ]);
+
+                if (recovery.status === 'fulfilled' && recovery.value.recovered && recovery.value.restoredItems > 0) {
+                    console.log(`[Recovery] Restored ${recovery.value.restoredItems} items from snapshot`);
                 }
 
-                const offlineRecovery = await offlineRecoveryEngine.runRecovery();
-                if (offlineRecovery.recovered) {
-                    console.log(`[Recovery] Offline recovery: ${offlineRecovery.actions.filter(a => a.executed).length} actions`);
-                    productionDiagnostics.recordRecovery(true);
-                } else if (offlineRecovery.errors.length > 0) {
-                    console.warn('[Recovery] Offline recovery issues:', offlineRecovery.errors);
-                    productionDiagnostics.recordRecovery(false);
+                if (offlineRecovery.status === 'fulfilled') {
+                    const or = offlineRecovery.value;
+                    if (or.recovered) {
+                        console.log(`[Recovery] Offline recovery: ${or.actions.filter(a => a.executed).length} actions`);
+                        productionDiagnostics.recordRecovery(true);
+                    } else if (or.errors.length > 0) {
+                        console.warn('[Recovery] Offline recovery issues:', or.errors);
+                        productionDiagnostics.recordRecovery(false);
+                    }
                 }
 
-                const cartRollback = await attemptCartRollback();
-                if (cartRollback.rolledBack) {
-                    console.log(`[Recovery] Cart rolled back: ${cartRollback.reason}`);
+                if (cartRollback.status === 'fulfilled' && cartRollback.value.rolledBack) {
+                    console.log(`[Recovery] Cart rolled back: ${cartRollback.value.reason}`);
                 }
 
-                const integrity = await runIntegrityCheck();
-                if (!integrity.queueConsistent || !integrity.snapshotValid) {
-                    console.warn(`[Integrity] Issues found: ${integrity.details.join(', ')}`);
-                    await safeQueueReplay();
+                if (integrity.status === 'fulfilled') {
+                    const int = integrity.value;
+                    if (!int.queueConsistent || !int.snapshotValid) {
+                        console.warn(`[Integrity] Issues found: ${int.details.join(', ')}`);
+                        await safeQueueReplay();
+                    }
                 }
 
-                const consistencyCheck = await dataConsistency.runFullCheck();
-                if (consistencyCheck.overall !== 'pass') {
+                if (consistencyCheck.status === 'fulfilled' && consistencyCheck.value.overall !== 'pass') {
                     const repaired = await dataConsistency.repairInvalidState();
                     if (repaired > 0) {
                         console.log(`[Consistency] Repaired ${repaired} items`);
@@ -171,7 +180,11 @@ function App() {
                     }
                 });
 
+                let clickThrottle = 0;
                 document.addEventListener('click', (e) => {
+                    const now = Date.now();
+                    if (now - clickThrottle < 100) return;
+                    clickThrottle = now;
                     const target = e.target instanceof HTMLElement ? e.target.tagName + (e.target.id ? '#' + e.target.id : '') : 'unknown'
                     interactionTracker.trackClick(target)
                 }, { passive: true })

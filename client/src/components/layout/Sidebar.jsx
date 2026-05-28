@@ -9,7 +9,7 @@ import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
 import { useUserStore } from '../../store/userStore';
 import { Badge } from '../ui/Badge';
 
-const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCollapsed, onNavigate }) => {
+const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut = null, show = true, isCollapsed, onNavigate }) {
   if (!show) return null;
   return (
     <NavLink
@@ -45,7 +45,7 @@ const NavItem = ({ to, icon: Icon, children, shortcut = null, show = true, isCol
       )}
     </NavLink>
   );
-};
+});
 
 const RoleBadge = ({ role }) => {
   const variants = {
@@ -57,7 +57,7 @@ const RoleBadge = ({ role }) => {
   return <Badge variant={v.variant} size="sm" className="opacity-80">{v.label}</Badge>;
 };
 
-export const Sidebar = ({ onNavigate }) => {
+export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
   const { hasPermission, role } = usePermissions();
   const { user, logout } = useUserStore();
   const navigate = useNavigate();
@@ -236,4 +236,4 @@ export const Sidebar = ({ onNavigate }) => {
       </div>
     </aside>
   );
-};
+});

@@ -78,7 +78,7 @@ export function useScannerFocusEngine() {
     if (document.visibilityState === 'visible') {
       refocusAttempts = 0;
       globalRefocusTimer = setInterval(() => {
-        if (refocusAttempts >= REFOCUS_ATTEMPT_LIMIT) {
+        if (refocusAttempts >= 1) {
           if (globalRefocusTimer) clearInterval(globalRefocusTimer);
           return;
         }
@@ -107,15 +107,23 @@ export function useScannerFocusEngine() {
   }, [handleVisibilityChange]);
 
   useEffect(() => {
+    const mainContent = document.querySelector('#main-content') || document.body;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     observerRef.current = new MutationObserver(() => {
-      const input = getScanInput();
-      if (!input && globalRefocusTimer) {
-        clearInterval(globalRefocusTimer);
-        globalRefocusTimer = null;
-      }
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const input = getScanInput();
+        if (!input && globalRefocusTimer) {
+          clearInterval(globalRefocusTimer);
+          globalRefocusTimer = null;
+        }
+      }, 300);
     });
-    observerRef.current.observe(document.body, { childList: true, subtree: true });
-    return () => observerRef.current?.disconnect();
+    observerRef.current.observe(mainContent, { childList: true, subtree: true });
+    return () => {
+      observerRef.current?.disconnect();
+      if (debounceTimer) clearTimeout(debounceTimer);
+    };
   }, [getScanInput]);
 
   useEffect(() => {

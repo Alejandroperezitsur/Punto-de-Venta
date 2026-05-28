@@ -90,11 +90,13 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deferredQuery, setDeferredQuery] = useState('');
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<'default' | 'recent' | 'top'>('default');
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -118,13 +120,13 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
   }, [onSelect]);
 
   const filteredProducts = useMemo(() => {
-    if (!searchQuery) return products;
-    const q = searchQuery.toLowerCase().trim();
+    if (!deferredQuery) return products;
+    const q = deferredQuery.toLowerCase().trim();
     return products.filter(p =>
       p.name.toLowerCase().includes(q) ||
       p.id?.toLowerCase().includes(q)
     );
-  }, [products, searchQuery]);
+  }, [products, deferredQuery]);
 
   const { recentProducts, topProducts, restProducts } = useMemo(() => {
     const recent = recentIds
@@ -137,11 +139,11 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
   }, [products, recentIds]);
 
   const displayProducts = useMemo(() => {
-    if (searchQuery) return filteredProducts;
+    if (deferredQuery) return filteredProducts;
     if (sortMode === 'recent' && recentProducts.length > 0) return recentProducts;
     if (sortMode === 'top') return topProducts;
     return restProducts;
-  }, [searchQuery, filteredProducts, sortMode, recentProducts, topProducts, restProducts]);
+  }, [deferredQuery, filteredProducts, sortMode, recentProducts, topProducts, restProducts]);
 
   const paginatedProducts = displayProducts.slice(0, page * ITEMS_PER_PAGE);
   const hasMore = paginatedProducts.length < displayProducts.length;
@@ -190,6 +192,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
       case 'Escape':
         e.preventDefault();
         setSearchQuery('');
+        setDeferredQuery('');
         searchInputRef.current?.blur();
         return;
       default:
@@ -242,7 +245,13 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
             ref={searchInputRef}
             type="text"
             value={searchQuery}
-            onChange={e => { setSearchQuery(e.target.value); setFocusedIndex(0); }}
+            onChange={e => {
+              const val = e.target.value;
+              setSearchQuery(val);
+              setFocusedIndex(0);
+              if (debounceRef.current) clearTimeout(debounceRef.current);
+              debounceRef.current = setTimeout(() => setDeferredQuery(val), 150);
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Buscar productos..."
             className="flex-1 h-[var(--control-sm)] px-2 text-xs rounded-md border border-border/30 bg-card font-medium text-foreground placeholder:text-muted-foreground/40 focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/20"
@@ -275,9 +284,9 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
         </div>
       )}
 
-      {filteredProducts.length === 0 && searchQuery && (
+      {filteredProducts.length === 0 && deferredQuery && (
         <div className="h-10 flex items-center justify-center text-muted-foreground">
-          <p className="text-xs font-medium">Sin resultados para "{searchQuery}"</p>
+          <p className="text-xs font-medium">Sin resultados para "{deferredQuery}"</p>
         </div>
       )}
 
@@ -295,7 +304,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
           aria-label="Lista de productos"
           role="grid"
         >
-          {searchQuery ? (
+          {deferredQuery ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1">
               {paginatedProducts.map((p, i) => (
                 <div key={p.id} data-product-index={i}>
@@ -324,7 +333,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
         </div>
       )}
 
-      {hasMore && !searchQuery && (
+      {hasMore && !deferredQuery && (
         <button
           onClick={() => setPage(p => p + 1)}
           className="text-[10px] font-semibold text-primary hover:text-primary/80 transition-colors py-2 touch-target"
