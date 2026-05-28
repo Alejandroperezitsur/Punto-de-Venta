@@ -1,0 +1,1 @@
+import{j as x,c as m}from"./index-BAjDQvP8.js";const t={sm:"max-w-2xl",md:"max-w-4xl",lg:"max-w-6xl",full:"max-w-full"};function e({children:l,className:a,maxWidth:s="full"}){return x.jsx("div",{className:m("space-y-4 w-full",t[s],a),children:l})}export{e as V};

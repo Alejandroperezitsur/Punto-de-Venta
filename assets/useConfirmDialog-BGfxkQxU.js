@@ -1,0 +1,1 @@
+import{r as e}from"./scanner-core-CRIQe73x.js";function c(){const[a,t]=e.useState(!1),[l,s]=e.useState(null),n=e.useCallback((r=null)=>{s(r),t(!0)},[]),o=e.useCallback(()=>{t(!1),s(null)},[]);return{isOpen:a,target:l,open:n,close:o}}export{c as u};
