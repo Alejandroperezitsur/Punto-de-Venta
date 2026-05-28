@@ -3,7 +3,8 @@ import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
-import { Card } from '../components/ui/Card';
+import { ConfirmModal } from '../components/sales/ConfirmModal';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { Badge } from '../components/ui/Badge';
 import { useToast } from '../components/ui/Toast';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -18,7 +19,7 @@ import { cn } from '../utils/cn';
 
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
   return (
-    <div className="relative rounded-xl border border-border bg-card p-3 hover:border-primary/30 transition-colors flex flex-col cursor-pointer"
+    <div className="relative rounded-lg border border-border bg-card p-3 hover:border-primary/30 transition-colors flex flex-col cursor-pointer"
       onClick={() => onEdit(p)}
     >
       <button className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-muted text-muted-foreground opacity-60 hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); onEdit(p); }}
@@ -28,9 +29,9 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
 
       <div className="size-16 rounded-lg bg-muted flex items-center justify-center mb-3 border border-border mx-auto">
         {p.image_url ? (
-          <img src={p.image_url} alt="" className="size-full object-cover rounded-lg" />
+          <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-lg" />
         ) : (
-          <Package className="size-7 text-muted-foreground/50" />
+          <Package className="size-7 text-muted-foreground/50" aria-hidden="true" />
         )}
       </div>
 
@@ -41,7 +42,7 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
           {formatMoney(p.price)}
         </p>
         <Badge
-          variant={p.stock <= 5 ? 'warning' : 'success'}
+          variant={p.stock <= 0 ? 'danger' : p.stock <= 5 ? 'warning' : 'success'}
           size="sm"
           className="text-[9px]"
         >
@@ -57,6 +58,7 @@ const ProductsView = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const deleteDialog = useConfirmDialog();
   const [search, setSearch] = useState('');
   const [searchTimer, setSearchTimer] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -142,11 +144,16 @@ const ProductsView = () => {
     setModalOpen(true);
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Archivar este producto?')) return;
+  const handleDeleteRequest = (id) => {
+    deleteDialog.open(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.target) return;
     try {
-      await api(`/products/${id}`, { method: 'DELETE' });
+      await api(`/products/${deleteDialog.target}`, { method: 'DELETE' });
       toast('Producto archivado', 'success');
+      deleteDialog.close();
       await loadData(null);
     } catch (e) {
       toast('Error al archivar: ' + e.message, 'error');
@@ -168,26 +175,25 @@ const ProductsView = () => {
         </Button>
       </ViewHeader>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
         <input
           ref={searchRef}
           type="text"
           placeholder="Buscar por nombre o código de barras..."
-          className="w-full h-12 pl-10 pr-4 rounded-lg border border-border bg-card text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors placeholder:text-muted-foreground/40"
+          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-md border border-border bg-card text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors placeholder:text-muted-foreground/40"
           value={search}
           onChange={handleSearch}
+          aria-label="Buscar productos"
         />
       </div>
 
-      {/* Content */}
       {error ? (
         <ErrorState error={error.message || error} onRetry={() => loadData(null)} />
       ) : loading && products.length === 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="aspect-[3/4] rounded-xl" />
+            <Skeleton key={i} className="aspect-[3/4] rounded-lg" />
           ))}
         </div>
       ) : products.length === 0 ? (
@@ -201,7 +207,7 @@ const ProductsView = () => {
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
             {products.map((p) => (
-              <ProductCard key={p.id} p={p} onEdit={handleEdit} onDelete={handleDelete} />
+              <ProductCard key={p.id} p={p} onEdit={handleEdit} onDelete={handleDeleteRequest} />
             ))}
           </div>
 
@@ -215,7 +221,6 @@ const ProductsView = () => {
         </>
       )}
 
-      {/* Product modal - unified */}
       <Modal
         open={isModalOpen}
         onClose={() => setModalOpen(false)}
@@ -248,11 +253,11 @@ const ProductsView = () => {
 
           {editingProduct && (
             <div className="flex justify-between items-center pt-1">
-              <button type="button" className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1 rounded-lg transition-colors"
-                onClick={() => handleDelete(editingProduct.id)}>
+              <button type="button" className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1.5 rounded-md transition-colors touch-target"
+                onClick={() => handleDeleteRequest(editingProduct.id)}>
                 <Trash2 className="size-3.5 inline mr-1" /> Archivar
               </button>
-              <button type="button" className="text-xs font-semibold text-info hover:bg-info/10 px-2 py-1 rounded-lg transition-colors"
+              <button type="button" className="text-xs font-semibold text-info hover:bg-info/10 px-2 py-1.5 rounded-md transition-colors touch-target"
                 onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}>
                 <History className="size-3.5 inline mr-1" /> Historial
               </button>
@@ -264,6 +269,16 @@ const ProductsView = () => {
           </Button>
         </form>
       </Modal>
+
+      <ConfirmModal
+        open={deleteDialog.isOpen}
+        title="Archivar Producto"
+        message="¿Estás seguro de archivar este producto? Podrás recuperarlo después."
+        confirmLabel="Archivar"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={deleteDialog.close}
+      />
 
       {kardexProduct && (
         <MovementHistoryModal product={kardexProduct} onClose={() => setKardexProduct(null)} />

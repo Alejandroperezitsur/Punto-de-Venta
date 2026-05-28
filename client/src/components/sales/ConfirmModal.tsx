@@ -18,9 +18,9 @@ interface ConfirmModalProps {
 
 const ConfirmModal = ({ open, title, message, confirmLabel = 'Confirmar', cancelLabel = 'Cancelar', variant = 'danger', isLoading = false, onConfirm, onCancel }: ConfirmModalProps) => {
   const variantStyles: Record<string, string> = {
-    danger: 'bg-danger hover:brightness-110 text-white',
-    warning: 'bg-warning hover:brightness-110 text-white',
-    info: 'bg-primary hover:brightness-110 text-white',
+    danger: 'bg-danger hover:bg-danger/90 text-white',
+    warning: 'bg-warning hover:bg-warning/90 text-white',
+    info: 'bg-primary hover:bg-primary/90 text-white',
   };
 
   const iconStyles: Record<string, string> = {
@@ -40,10 +40,10 @@ const ConfirmModal = ({ open, title, message, confirmLabel = 'Confirmar', cancel
       </div>
 
       <div className="flex gap-2">
-        <Button variant="secondary" className="flex-1 h-10 text-sm font-bold rounded-lg" onClick={onCancel} disabled={isLoading}>
+        <Button variant="secondary" className="flex-1 h-[var(--control-lg)] text-sm font-bold rounded-lg" onClick={onCancel} disabled={isLoading}>
           {cancelLabel}
         </Button>
-        <Button className={cn('flex-1 h-10 text-sm font-bold rounded-lg', variantStyles[variant])} onClick={onConfirm} isLoading={isLoading}>
+        <Button className={cn('flex-1 h-[var(--control-lg)] text-sm font-bold rounded-lg', variantStyles[variant])} onClick={onConfirm} isLoading={isLoading}>
           {confirmLabel}
         </Button>
       </div>

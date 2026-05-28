@@ -3,11 +3,11 @@ import { cn } from '../../utils/cn';
 import { Search, Barcode, Eye, EyeOff } from 'lucide-react';
 
 const inputSizes = {
-  xs: 'h-7 px-2 text-[11px] rounded-md',
-  sm: 'h-8 px-2.5 text-xs rounded-lg',
-  md: 'h-9 px-3 text-sm rounded-lg',
-  lg: 'h-11 px-3.5 text-sm rounded-lg',
-  xl: 'h-12 px-4 text-base rounded-xl',
+  xs: 'h-[var(--control-sm)] px-2 text-xs rounded-md',
+  sm: 'h-[var(--control-sm)] px-2.5 text-xs rounded-md',
+  md: 'h-[var(--control-md)] px-3 text-sm rounded-md',
+  lg: 'h-[var(--control-lg)] px-3.5 text-sm rounded-md',
+  xl: 'h-[var(--control-xl)] px-4 text-base rounded-lg',
 };
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -55,7 +55,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               inputSizes[size],
               Icon && 'pl-9',
-              scanner && 'pl-9 h-12 text-base font-semibold',
+              scanner && 'pl-9 h-[var(--control-xl)] text-base font-semibold',
               IconRight && 'pr-9',
               type === 'password' && 'pr-9',
               error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/20',
@@ -69,7 +69,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
               tabIndex={-1}
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             >
@@ -80,7 +80,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={onIconClick}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
               tabIndex={-1}
             >
               <IconRight className="size-4" />

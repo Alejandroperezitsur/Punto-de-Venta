@@ -307,7 +307,7 @@ const CashControlView = () => {
 
             {isClosing && (
                 <div
-                    className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
+                    className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[var(--z-modal)]"
                     onKeyDown={(e) => { if (e.key === 'Escape') { setIsClosing(false); setCloseStep('input'); } }}
                 >
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-lg p-6 max-w-md w-full shadow-lg relative">

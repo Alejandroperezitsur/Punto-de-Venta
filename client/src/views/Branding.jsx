@@ -3,6 +3,7 @@ import { Upload, Download, RotateCcw, Store } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../utils/cn';
 import { useToast } from '../components/ui/Toast';
+import { ConfirmModal } from '../components/sales/ConfirmModal';
 
 const Branding = () => {
   const [branding, setBranding] = useState({
@@ -13,6 +14,7 @@ const Branding = () => {
     primaryColor: '#3b82f6',
   });
   const [loading, setLoading] = useState(false);
+  const [isResetOpen, setResetOpen] = useState(false);
   const toast = useToast();
 
   // Load branding from localStorage
@@ -88,20 +90,24 @@ const Branding = () => {
   };
 
   const handleReset = () => {
-    if (window.confirm('¿Restaurar configuración predeterminada?')) {
-      const defaults = {
-        logo: null,
-        banner: null,
-        businessName: 'Punto de Venta',
-        businessSubtitle: 'Sistema Profesional de Gestión',
-        primaryColor: '#3b82f6',
-      };
-      saveBranding(defaults);
-      toast('Configuración restaurada', 'success');
-    }
+    setResetOpen(true);
+  };
+
+  const handleResetConfirm = () => {
+    const defaults = {
+      logo: null,
+      banner: null,
+      businessName: 'Punto de Venta',
+      businessSubtitle: 'Sistema Profesional de Gestión',
+      primaryColor: '#3b82f6',
+    };
+    saveBranding(defaults);
+    toast('Configuración restaurada', 'success');
+    setResetOpen(false);
   };
 
   return (
+    <>
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
@@ -349,7 +355,17 @@ const Branding = () => {
           </div>
         </motion.div>
       </div>
-    </div>
+      </div>
+      <ConfirmModal
+        open={isResetOpen}
+        title="Restaurar Configuración"
+        message="¿Restaurar configuración predeterminada? Se perderán tus personalizaciones."
+        confirmLabel="Restaurar"
+        variant="warning"
+        onConfirm={handleResetConfirm}
+        onCancel={() => setResetOpen(false)}
+      />
+    </>
   );
 };
 

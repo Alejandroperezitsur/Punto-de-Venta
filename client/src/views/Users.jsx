@@ -10,6 +10,8 @@ import { Table } from '../components/ui/Table';
 import { Select } from '../components/ui/Select';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit2, X, Check } from 'lucide-react';
+import { ConfirmModal } from '../components/sales/ConfirmModal';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
 const UsersView = () => {
     const [users, setUsers] = useState([]);
@@ -18,6 +20,7 @@ const UsersView = () => {
     const [editingId, setEditingId] = useState(null);
     const [form, setForm] = useState({ username: '', password: '', role: 'cajero' });
     const [saving, setSaving] = useState(false);
+    const deleteDialog = useConfirmDialog();
     const toast = useToast();
 
     const loadUsers = async () => {
@@ -72,18 +75,24 @@ const UsersView = () => {
         setShowForm(true);
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('¿Eliminar este usuario?')) return;
+    const handleDelete = async () => {
+        if (!deleteDialog.target) return;
         try {
-            await api(`/auth/users/${id}`, { method: 'DELETE' });
+            await api(`/auth/users/${deleteDialog.target}`, { method: 'DELETE' });
+            deleteDialog.close();
             await loadUsers();
         } catch (e) {
             toast('Error: ' + e.message, 'error');
         }
     };
 
+    const handleDeleteRequest = (id) => {
+        deleteDialog.open(id);
+    };
+
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <>
+            <div className="space-y-6 max-w-4xl mx-auto">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
                 <Button onClick={() => { setShowForm(!showForm); setEditingId(null); setForm({ username: '', password: '', role: 'cajero' }); }}>
@@ -168,7 +177,7 @@ const UsersView = () => {
                                         <Edit2 className="size-4" />
                                     </Button>
                                     {row.username !== 'admin' && (
-                                        <Button variant="ghost" size="sm" onClick={() => handleDelete(row.id)} className="text-danger hover:bg-danger/10">
+                                        <Button variant="ghost" size="sm" onClick={() => handleDeleteRequest(row.id)} className="text-danger hover:bg-danger/10">
                                             <Trash2 className="size-4" />
                                         </Button>
                                     )}
@@ -182,7 +191,18 @@ const UsersView = () => {
                     />
                 )}
             </Card>
-        </div>
+            </div>
+
+            <ConfirmModal
+                open={deleteDialog.isOpen}
+                title="Eliminar Usuario"
+                message="¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer."
+                confirmLabel="Eliminar"
+                variant="danger"
+                onConfirm={handleDelete}
+                onCancel={deleteDialog.close}
+            />
+        </>
     );
 };
 

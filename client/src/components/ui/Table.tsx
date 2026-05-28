@@ -141,7 +141,7 @@ function Table<T extends Record<string, any>>({
       )}>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className={cn('bg-muted/30 border-b border-border/30', stickyHeader && 'sticky top-0 z-10')}>
+            <thead className={cn('bg-muted/30 border-b border-border/30', stickyHeader && 'sticky top-0 z-[var(--z-sticky)]')}>
               <tr>
                 {columns.map(col => (
                   <th
@@ -172,8 +172,8 @@ function Table<T extends Record<string, any>>({
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skel-${i}`}>
                     {columns.map(col => (
-                      <td key={col.key} className={cn(densityStyles[density], 'opacity-20', col.hideOnMobile && 'hidden md:table-cell')}>
-                        <div className="h-3 rounded bg-muted/60" style={{ width: `${40 + (i * 7) % 40}%` }} />
+                      <td key={col.key} className={cn(densityStyles[density], col.hideOnMobile && 'hidden md:table-cell')}>
+                        <div className="h-3 rounded bg-muted/60" style={{ width: `${50 + (i * 5) % 30}%` }} />
                       </td>
                     ))}
                   </tr>
@@ -227,7 +227,8 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors disabled:opacity-30"
+              className="touch-target size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors disabled:opacity-30"
+              aria-label="Página anterior"
             >
               <ChevronLeft className="size-3.5" />
             </button>
@@ -238,10 +239,12 @@ function Table<T extends Record<string, any>>({
                 <button
                   key={pageNum}
                   className={cn(
-                    'size-7 rounded-md text-[10px] font-semibold transition-colors',
+                    'touch-target size-7 rounded-md text-[10px] font-semibold transition-colors',
                     pageNum === page ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover',
                   )}
                   onClick={() => setPage(pageNum)}
+                  aria-label={`Ir a página ${pageNum}`}
+                  aria-current={pageNum === page ? 'page' : undefined}
                 >
                   {pageNum}
                 </button>
@@ -250,7 +253,8 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors disabled:opacity-30"
+              className="touch-target size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors disabled:opacity-30"
+              aria-label="Página siguiente"
             >
               <ChevronRight className="size-3.5" />
             </button>

@@ -30,10 +30,11 @@ function ErrorState({
     <div
       className={cn(
         'flex flex-col items-center justify-center py-16 px-8 text-center',
-        'rounded-2xl border border-border',
+        'rounded-lg border border-border',
         variants[variant],
         className,
       )}
+      role="alert"
     >
       <div className={cn(
         'size-14 rounded-2xl flex items-center justify-center mb-5',
@@ -47,7 +48,7 @@ function ErrorState({
       <h3 className="text-lg font-bold mb-1">{title}</h3>
       <p className="text-sm text-muted-foreground max-w-sm mb-2">{description}</p>
       {error && (
-        <p className="text-xs text-muted-foreground/60 max-w-sm mb-5 font-mono bg-muted px-3 py-1.5 rounded-xl">
+        <p className="text-xs text-muted-foreground/60 max-w-sm mb-5 font-mono bg-muted px-3 py-1.5 rounded-md">
           {error}
         </p>
       )}

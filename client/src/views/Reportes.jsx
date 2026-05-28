@@ -191,7 +191,7 @@ const MyBusinessView = () => {
             </div>
 
             {isClosing && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4" style={{ zIndex: 'var(--z-modal)' }}>
                     <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full shadow-lg relative">
                         <button
                             onClick={() => { setIsClosing(false); setClosingStep(1); }}

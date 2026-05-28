@@ -80,7 +80,7 @@ function useFocusTrap(open: boolean, onClose: () => void) {
 
 function Modal({
   open, onClose, title, description, size = 'md', fullscreen, sheet,
-  children, className, onRestoreFocus, hideClose = false, zIndex = 100,
+  children, className, onRestoreFocus, hideClose = false, zIndex = 300,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -113,8 +113,8 @@ function Modal({
               className={cn(
                 'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
                 sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
-                  : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-xl'
-                    : `${sizes[size]} mx-4 rounded-xl`,
+                  : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-lg'
+                    : `${sizes[size]} mx-4 rounded-lg`,
                 'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
                 className,
               )}
@@ -127,13 +127,13 @@ function Modal({
                     {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
                   </div>
                   {!hideClose && (
-                    <button onClick={onClose} className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
+                    <button onClick={onClose} className="ml-3 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
                       <X className="size-4" />
                     </button>
                   )}
                 </div>
               )}
-              <div className={cn('p-4', !title && !description && '')}>{children}</div>
+              <div className="p-4">{children}</div>
             </div>
           </div>
         )}
@@ -159,8 +159,8 @@ function Modal({
             className={cn(
               'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
               sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
-                : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-xl'
-                  : `${sizes[size]} mx-4 rounded-xl`,
+                : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-lg'
+                  : `${sizes[size]} mx-4 rounded-lg`,
               'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
               className,
             )}
@@ -173,13 +173,13 @@ function Modal({
                   {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
                 </div>
                 {!hideClose && (
-                  <button onClick={onClose} className="ml-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
+                  <button onClick={onClose} className="ml-3 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
                     <X className="size-4" />
                   </button>
                 )}
               </div>
             )}
-            <div className={cn('p-4', !title && !description && '')}>{children}</div>
+            <div className="p-4">{children}</div>
           </motion.div>
         </div>
       )}

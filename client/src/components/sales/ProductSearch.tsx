@@ -69,7 +69,7 @@ const ProductSearch = React.memo(function ProductSearch() {
         setQuery('');
         setScannerStatus('ready');
         playSuccess();
-        if (navigator.vibrate) navigator.vibrate(10);
+        if (navigator.vibrate) navigator.vibrate(15);
         showFeedback({ type: 'success', message: product.name, code });
       }
     } catch (err) {
@@ -186,8 +186,8 @@ const ProductSearch = React.memo(function ProductSearch() {
       {feedback && (
         <div
           className={cn(
-            'absolute top-full left-0 right-0 mt-1 z-20 animate-in',
-            'px-2 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5',
+            'absolute top-full left-0 right-0 mt-1 z-[var(--z-dropdown)] animate-in',
+            'px-2 py-1.5 rounded-md border text-xs font-semibold flex items-center gap-1.5',
             feedback.type === 'success' && 'bg-success/10 border-success/20 text-success',
             feedback.type === 'warning' && 'bg-warning/10 border-warning/20 text-warning',
             feedback.type === 'error' && 'bg-danger/10 border-danger/20 text-danger',
@@ -204,7 +204,7 @@ const ProductSearch = React.memo(function ProductSearch() {
           )}
           <button
             onClick={clearFeedback}
-            className="shrink-0 ml-1 p-0.5 rounded hover:bg-black/10"
+            className="shrink-0 ml-1 p-1 rounded hover:bg-black/10 touch-target"
             aria-label="Descartar"
           >
             <span className="size-3 block text-center leading-none">&times;</span>
@@ -213,10 +213,10 @@ const ProductSearch = React.memo(function ProductSearch() {
       )}
 
       {error && !feedback && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-10">
-          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-warning/10 border border-warning/20">
+        <div className="absolute top-full left-0 right-0 mt-1 z-[var(--z-dropdown)]">
+          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md bg-warning/10 border border-warning/20">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="size-8 rounded-lg bg-warning/20 flex items-center justify-center shrink-0">
+              <div className="size-8 rounded-md bg-warning/20 flex items-center justify-center shrink-0">
                 <Plus className="size-4 text-warning" />
               </div>
               <div className="min-w-0">
@@ -228,7 +228,7 @@ const ProductSearch = React.memo(function ProductSearch() {
               size="sm"
               variant="warning"
               onClick={handleQuickCreate}
-              className="shrink-0 font-bold text-xs h-8"
+              className="shrink-0 font-bold text-xs h-[var(--control-sm)]"
               aria-label={`Agregar "${error}" como producto manual`}
             >
               + Agregar

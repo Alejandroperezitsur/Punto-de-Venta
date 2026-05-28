@@ -17,6 +17,39 @@ import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check } from 'lucide
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
 
+const CheckoutButton = React.memo(function CheckoutButton({
+  hasItems,
+  isProcessing,
+  totals,
+  onCheckout,
+}: {
+  hasItems: boolean;
+  isProcessing: boolean;
+  totals: { total: number };
+  onCheckout: () => void;
+}) {
+  return (
+    <button
+      className={cn(
+        'w-full min-h-[var(--pos-btn-checkout-height)] text-base font-bold rounded-lg transition-all flex items-center justify-center gap-3',
+        hasItems && !isProcessing
+          ? 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-sm'
+          : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
+      )}
+      disabled={!hasItems || isProcessing}
+      onClick={onCheckout}
+      aria-label={hasItems ? 'Cobrar' : 'Agregue productos primero'}
+      title={!hasItems ? 'Agregue productos al carrito primero' : undefined}
+    >
+      {isProcessing ? (
+        <><span className="size-2 rounded-full bg-current animate-pulse" />Procesando...</>
+      ) : (
+        <><span>COBRAR</span><span className="text-xs font-bold opacity-60 bg-black/15 px-1.5 py-0.5 rounded ml-1">F2</span></>
+      )}
+    </button>
+  );
+});
+
 const SalesView = React.memo(function SalesView() {
   const { items, getTotals, clearCart, addItem, validateStock, generateCheckoutId, updateQuantity, hydrate, setDiscount, discount } = useCartStore();
   const [isPayModalOpen, setPayModalOpen] = useState(false);
@@ -113,12 +146,17 @@ const SalesView = React.memo(function SalesView() {
   const handleApplyDiscount = useCallback(() => {
     const val = parseFloat(discountValue);
     if (isNaN(val) || val < 0) return;
+    const totals = getTotals();
+    if (val > totals.total) {
+      toast(`El descuento no puede superar el total de ${formatMoney(totals.total)}`, 'warning');
+      return;
+    }
     setDiscount(val);
     setDiscountOpen(false);
     setDiscountValue('');
     if (val > 0) toast(`Descuento de ${formatMoney(val)} aplicado`, 'info');
     restoreAfterModal();
-  }, [discountValue, setDiscount, toast, restoreAfterModal]);
+  }, [discountValue, getTotals, setDiscount, toast, restoreAfterModal]);
 
   const printTicket = useCallback((data: any) => {
     const iframe = document.createElement('iframe');
@@ -281,15 +319,15 @@ const SalesView = React.memo(function SalesView() {
   const hasItems = items.length > 0;
 
   return (
-    <div className="h-full min-h-0 flex gap-2 overflow-hidden">
-      <div className="flex-1 flex flex-col gap-2 min-w-0">
+    <div className="h-full min-h-0 flex gap-2.5 overflow-hidden">
+      <div className="flex-1 flex flex-col gap-2.5 min-w-0">
         <div className="flex gap-2">
           <div className="flex-1">
             <ProductSearch />
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 h-11 px-3 text-xs font-bold rounded-lg bg-warning/10 text-warning border border-warning/20 hover:bg-warning/20 transition-colors flex items-center gap-1"
+            className="shrink-0 min-h-[var(--control-xl)] px-3 text-xs font-bold rounded-lg bg-warning/10 text-warning border border-warning/20 hover:bg-warning/20 transition-colors flex items-center gap-1 touch-target"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -303,8 +341,8 @@ const SalesView = React.memo(function SalesView() {
         </div>
       </div>
 
-      <div className="w-full max-w-[360px] lg:max-w-[400px] xl:max-w-[420px] flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden min-w-[260px] pos-cart-panel">
-        <div className="px-2.5 py-1.5 border-b border-border/20 flex items-center justify-between shrink-0">
+      <div className="w-full max-w-[360px] lg:max-w-[400px] xl:max-w-[420px] flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden min-w-[280px] pos-cart-panel">
+        <div className="px-3 py-2 border-b border-border/20 flex items-center justify-between shrink-0">
           <h2 className="font-bold text-xs flex items-center gap-1.5" id="cart-heading">
             <ShoppingBag className="size-3.5" />
             Carrito
@@ -312,11 +350,11 @@ const SalesView = React.memo(function SalesView() {
               {items.length}
             </span>
           </h2>
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setDiscountOpen(true)}
               disabled={!hasItems}
-              className="text-[10px] font-semibold text-info hover:bg-info/10 px-1.5 py-1 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5"
+              className="text-[10px] font-semibold text-info hover:bg-info/10 px-2 py-1.5 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5 touch-target"
               title="Descuento (F5)"
             >
               <Percent className="size-3" />Dto
@@ -324,7 +362,7 @@ const SalesView = React.memo(function SalesView() {
             <button
               onClick={() => { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); }}
               disabled={!hasItems}
-              className="text-[10px] font-semibold text-danger hover:bg-danger/10 px-1.5 py-1 rounded-md transition-colors disabled:opacity-30"
+              className="text-[10px] font-semibold text-danger hover:bg-danger/10 px-2 py-1.5 rounded-md transition-colors disabled:opacity-30 touch-target"
               aria-label="Vaciar carrito"
             >
               Vaciar
@@ -332,67 +370,50 @@ const SalesView = React.memo(function SalesView() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-2.5 py-0.5" role="region" aria-labelledby="cart-heading" aria-live="polite">
+        <div className="flex-1 overflow-y-auto px-3 py-1" role="region" aria-labelledby="cart-heading" aria-live="polite">
           <Cart />
         </div>
 
         {discount > 0 && (
-          <div className="px-2.5 py-1 bg-info/10 border-t border-info/20 flex items-center justify-between text-[11px]">
+          <div className="px-3 py-1.5 bg-info/10 border-t border-info/20 flex items-center justify-between text-xs">
             <span className="font-semibold text-info">Descuento</span>
             <span className="font-bold text-info tabular-nums">-{formatMoney(discount)}</span>
           </div>
         )}
 
         {payError && (
-          <div className="px-2.5 py-1.5 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-1.5" role="alert">
-            <span className="text-[11px] font-semibold text-danger">{payError}</span>
+          <div className="px-3 py-2 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-1.5" role="alert">
+            <span className="text-xs font-semibold text-danger">{payError}</span>
           </div>
         )}
 
-        <div className="px-3 py-2 border-t border-border/20 space-y-1.5 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-3 py-2 border-t border-border/20 space-y-2 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
           <div className="flex items-baseline justify-between">
-            <span className="text-[11px] text-muted-foreground font-medium">Total:</span>
+            <span className="text-xs text-muted-foreground font-medium">Total:</span>
             <span className="text-3xl font-black text-foreground tracking-tight tabular-nums">
               {formatMoney(totals.total)}
             </span>
           </div>
 
           {!hasItems && (
-            <p className="text-[10px] text-muted-foreground/60 text-center font-medium">
+            <p className="text-xs text-muted-foreground/60 text-center font-medium">
               Escanee o busque productos para comenzar
             </p>
           )}
 
-          <button
-            className={cn(
-              'w-full h-12 text-base font-bold rounded-lg transition-all flex items-center justify-center gap-3',
-              hasItems && !isProcessing
-                ? 'bg-primary text-primary-foreground hover:brightness-110 active:brightness-90 shadow-sm'
-                : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
-            )}
-            disabled={!hasItems || isProcessing}
-            onClick={openPayModal}
-            aria-label={hasItems ? 'Cobrar' : 'Agregue productos primero'}
-            title={!hasItems ? 'Agregue productos al carrito primero' : undefined}
-          >
-            {isProcessing ? (
-              <><span className="size-2 rounded-full bg-current animate-pulse" />Procesando...</>
-            ) : (
-              <><span>COBRAR</span><span className="text-xs font-bold opacity-60 bg-black/15 px-1.5 py-0.5 rounded ml-1">F2</span></>
-            )}
-          </button>
+          <CheckoutButton hasItems={hasItems} isProcessing={isProcessing} totals={totals} onCheckout={openPayModal} />
         </div>
       </div>
 
       {saleComplete && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40"
+          className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/40"
           onClick={dismissSaleComplete}
           role="alert"
           aria-live="assertive"
         >
-          <div className="bg-card rounded-xl border border-success/30 shadow-2xl px-6 py-5 text-center max-w-xs">
-            <div className="size-10 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-2">
+          <div className="bg-card rounded-lg border border-success/30 shadow-2xl px-6 py-5 text-center max-w-xs">
+            <div className="size-12 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-2">
               <Check className="size-6 text-success" />
             </div>
             <p className="text-base font-black text-foreground mb-0.5">VENTA COMPLETADA</p>
@@ -473,7 +494,7 @@ const SalesView = React.memo(function SalesView() {
           {discount > 0 && (
             <button
               onClick={() => { setDiscount(0); setDiscountOpen(false); toast('Descuento eliminado', 'info'); restoreAfterModal(); }}
-              className="w-full text-xs font-semibold text-danger hover:bg-danger/10 py-1.5 rounded-md transition-colors"
+              className="w-full text-xs font-semibold text-danger hover:bg-danger/10 py-2 rounded-md transition-colors touch-target"
             >
               Quitar descuento ({formatMoney(discount)})
             </button>

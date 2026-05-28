@@ -12,7 +12,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
   const Component = onClick ? 'button' : 'div';
   const variants = {
     default: 'bg-card text-card-foreground border border-border shadow-sm',
-    glass: 'glass text-foreground',
+    glass: 'backdrop-blur-md bg-surface/80 text-foreground border border-border/30',
     elevated: 'bg-card text-card-foreground border border-border shadow-md',
     interactive:
       'bg-card text-card-foreground border border-border/60 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 cursor-pointer active:scale-[0.99]',
