@@ -1,5 +1,4 @@
-import React, { useRef, useCallback, memo, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useRef, useCallback, memo, useEffect, useMemo, useState } from 'react';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
 import { formatMoney } from '../../utils/format';
@@ -50,7 +49,7 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     <div
       ref={rowRef}
       className={cn(
-        'flex items-center gap-2 py-1.5 border-b border-border/10 last:border-0 min-h-[var(--touch-target-min)]',
+        'flex items-center gap-2 py-1.5 border-b border-border/10 last:border-0 min-h-[var(--touch-target-min)] cart-item-enter',
         isRecent && 'bg-success/[0.04]',
         isOutOfStock && 'opacity-50',
       )}
@@ -99,16 +98,22 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
 });
 
 export const Cart = memo(function Cart() {
-  const { items, removeItem, updateQuantity } = useCartStore();
-  const [recentId, setRecentId] = React.useState<string | null>(null);
+  const items = useCartStore(s => s.items);
+  const removeItem = useCartStore(s => s.removeItem);
+  const updateQuantity = useCartStore(s => s.updateQuantity);
+  const [recentId, setRecentId] = useState<string | null>(null);
   const recentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevItemsLen = useRef(items.length);
 
   useEffect(() => {
-    if (items.length === 0) { setRecentId(null); return; }
-    const last = items[items.length - 1];
-    setRecentId(last?.id || null);
-    if (recentTimer.current) clearTimeout(recentTimer.current);
-    recentTimer.current = setTimeout(() => setRecentId(null), 800);
+    if (items.length === 0) { setRecentId(null); prevItemsLen.current = 0; return; }
+    if (items.length > prevItemsLen.current) {
+      const last = items[items.length - 1];
+      setRecentId(last?.id || null);
+      if (recentTimer.current) clearTimeout(recentTimer.current);
+      recentTimer.current = setTimeout(() => setRecentId(null), 800);
+    }
+    prevItemsLen.current = items.length;
     return () => { if (recentTimer.current) clearTimeout(recentTimer.current); };
   }, [items]);
 
@@ -129,25 +134,20 @@ export const Cart = memo(function Cart() {
 
   return (
     <div className="flex flex-col gap-px" role="list" aria-label="Productos en el carrito">
-      <AnimatePresence initial={false}>
-        {items.map((item, i) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -40, height: 0, marginBottom: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
-          >
-            <CartItemRow
-              item={item}
-              index={i}
-              isRecent={recentId === item.id}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemove={handleRemove}
-            />
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      {items.map((item, i) => (
+        <div
+          key={item.id}
+          className="cart-item-enter"
+        >
+          <CartItemRow
+            item={item}
+            index={i}
+            isRecent={recentId === item.id}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemove={handleRemove}
+          />
+        </div>
+      ))}
     </div>
   );
 });

@@ -51,7 +51,15 @@ const CheckoutButton = React.memo(function CheckoutButton({
 });
 
 const SalesView = React.memo(function SalesView() {
-  const { items, getTotals, clearCart, addItem, validateStock, generateCheckoutId, updateQuantity, hydrate, setDiscount, discount } = useCartStore();
+  const items = useCartStore(s => s.items);
+  const addItem = useCartStore(s => s.addItem);
+  const clearCart = useCartStore(s => s.clearCart);
+  const updateQuantity = useCartStore(s => s.updateQuantity);
+  const validateStock = useCartStore(s => s.validateStock);
+  const generateCheckoutId = useCartStore(s => s.generateCheckoutId);
+  const hydrate = useCartStore(s => s.hydrate);
+  const setDiscount = useCartStore(s => s.setDiscount);
+  const discount = useCartStore(s => s.discount);
   const [isPayModalOpen, setPayModalOpen] = useState(false);
   const [isProcessing, setProcessing] = useState(false);
   const [isManualModalOpen, setManualModalOpen] = useState(false);
@@ -65,6 +73,8 @@ const SalesView = React.memo(function SalesView() {
   const toast = useToast();
   const saleCompleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { forceFocusToScanner, restoreAfterModal, restoreAfterSaleComplete } = useScannerFocusEngine();
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   const focusSearch = useCallback(() => {
     const input = document.querySelector('[data-scan-input]');
@@ -74,12 +84,12 @@ const SalesView = React.memo(function SalesView() {
   const handleShortcutAction = useCallback((action: string) => {
     switch (action) {
       case 'checkout':
-        if (items.length > 0) setPayModalOpen(true);
+        if (itemsRef.current.length > 0) setPayModalOpen(true);
         break;
       case 'focus-search': focusSearch(); break;
       case 'manual-product': setManualModalOpen(true); break;
       case 'clear-cart':
-        if (items.length > 0) {
+        if (itemsRef.current.length > 0) {
           clearCart();
           toast('Carrito vaciado', 'info');
           focusSearch();
@@ -91,14 +101,14 @@ const SalesView = React.memo(function SalesView() {
       case 'show-shortcuts': setShortcutsOpen(true); break;
       case 'escape': setCmdPaletteOpen(false); setShortcutsOpen(false); setDiscountOpen(false); break;
     }
-  }, [items, clearCart, focusSearch, toast]);
+  }, [clearCart, focusSearch, toast]);
 
   useKeyboardShortcuts(handleShortcutAction);
 
   useEffect(() => {
     const handleManual = () => setManualModalOpen(true);
-    const handleCheckout = () => { if (items.length > 0) setPayModalOpen(true); };
-    const handleClearCart = () => { if (items.length > 0) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } };
+    const handleCheckout = () => { if (itemsRef.current.length > 0) setPayModalOpen(true); };
+    const handleClearCart = () => { if (itemsRef.current.length > 0) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } };
     const handleShortcuts = () => setShortcutsOpen(true);
     const handleLogout = () => { useUserStore.getState().logout(); window.location.href = '/login'; };
     const handleDiscount = () => setDiscountOpen(true);
@@ -117,7 +127,7 @@ const SalesView = React.memo(function SalesView() {
       document.removeEventListener('trigger-logout', handleLogout);
       document.removeEventListener('trigger-discount', handleDiscount);
     };
-  }, [items, clearCart, focusSearch, toast]);
+  }, [clearCart, focusSearch, toast]);
 
   useEffect(() => {
     hydrate();
@@ -146,9 +156,10 @@ const SalesView = React.memo(function SalesView() {
   const handleApplyDiscount = useCallback(() => {
     const val = parseFloat(discountValue);
     if (isNaN(val) || val < 0) return;
-    const totals = getTotals();
-    if (val > totals.total) {
-      toast(`El descuento no puede superar el total de ${formatMoney(totals.total)}`, 'warning');
+    const currentItems = itemsRef.current;
+    const subtotal = currentItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+    if (val > subtotal) {
+      toast(`El descuento no puede superar el total de ${formatMoney(subtotal)}`, 'warning');
       return;
     }
     setDiscount(val);
@@ -156,7 +167,7 @@ const SalesView = React.memo(function SalesView() {
     setDiscountValue('');
     if (val > 0) toast(`Descuento de ${formatMoney(val)} aplicado`, 'info');
     restoreAfterModal();
-  }, [discountValue, getTotals, setDiscount, toast, restoreAfterModal]);
+  }, [discountValue, setDiscount, toast, restoreAfterModal]);
 
   const printTicket = useCallback((data: any) => {
     const iframe = document.createElement('iframe');
@@ -217,6 +228,7 @@ const SalesView = React.memo(function SalesView() {
     setProcessing(true);
     setPayError('');
 
+    const currentItems = itemsRef.current;
     const validation = validateStock();
     if (!validation.valid) {
       setPayError(validation.message);
@@ -225,12 +237,25 @@ const SalesView = React.memo(function SalesView() {
     }
 
     try {
-      const totals = getTotals();
-      const payments = paymentData.payments || [{ method: paymentData.method, amount: totals.total }];
+      const subtotal = currentItems.reduce((acc, item) => {
+        const price = Number(item.price) || 0;
+        const qty = Number(item.quantity) || 0;
+        return acc + price * qty;
+      }, 0);
+      const tax = subtotal * 0.16;
+      const safeDiscount = Math.max(0, Number(useCartStore.getState().discount) || 0);
+      const total = Math.max(0, subtotal + tax - safeDiscount);
+      const computedTotals = {
+        subtotal: Math.round(subtotal * 100) / 100,
+        tax: Math.round(tax * 100) / 100,
+        discount: safeDiscount,
+        total: Math.round(total * 100) / 100,
+      };
+      const payments = paymentData.payments || [{ method: paymentData.method, amount: computedTotals.total }];
 
       const payload = {
-        items: items.map(i => ({ product_id: i.id, quantity: i.quantity, unit_price: i.price })),
-        discount: totals.discount,
+        items: currentItems.map(i => ({ product_id: i.id, quantity: i.quantity, unit_price: i.price })),
+        discount: computedTotals.discount,
         payment_method: paymentData.method,
         payments,
       };
@@ -260,10 +285,10 @@ const SalesView = React.memo(function SalesView() {
         }
 
         await enqueueSale({
-          items: items.map((i: any) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
-          total: totals.total,
-          tax: totals.tax,
-          discount: totals.discount,
+          items: currentItems.map((i: any) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+          total: computedTotals.total,
+          tax: computedTotals.tax,
+          discount: computedTotals.discount,
           payment_method: paymentData.method,
           created_at: new Date(),
           idempotency_key: idempotencyKey,
@@ -271,9 +296,9 @@ const SalesView = React.memo(function SalesView() {
         offlineMode = true;
       }
 
-      printTicket({ items, totals, payments, change: paymentData.change || 0, date: new Date(), id: ticketId });
+      printTicket({ items: currentItems, totals: computedTotals, payments, change: paymentData.change || 0, date: new Date(), id: ticketId });
       clearCart();
-      showSaleComplete(totals.total, paymentData.change || 0, paymentData.method);
+      showSaleComplete(computedTotals.total, paymentData.change || 0, paymentData.method);
       if (offlineMode) toast('Venta guardada localmente hasta que haya internet', 'info');
       restoreAfterSaleComplete();
     } catch (e) {
@@ -284,7 +309,7 @@ const SalesView = React.memo(function SalesView() {
     } finally {
       setProcessing(false);
     }
-  }, [items, validateStock, getTotals, generateCheckoutId, printTicket, clearCart, toast, showSaleComplete, restoreAfterSaleComplete]);
+  }, [validateStock, generateCheckoutId, printTicket, clearCart, toast, showSaleComplete, restoreAfterSaleComplete]);
 
   const handleAddManual = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -315,7 +340,22 @@ const SalesView = React.memo(function SalesView() {
     setPayModalOpen(true);
   }, [validateStock, toast]);
 
-  const totals = useMemo(() => getTotals(), [items, getTotals]);
+  const totals = useMemo(() => {
+    const subtotal = items.reduce((acc, item) => {
+      const price = Number(item.price) || 0;
+      const qty = Number(item.quantity) || 0;
+      return acc + price * qty;
+    }, 0);
+    const tax = subtotal * 0.16;
+    const safeDiscount = Math.max(0, Number(discount) || 0);
+    const total = Math.max(0, subtotal + tax - safeDiscount);
+    return {
+      subtotal: Math.round(subtotal * 100) / 100,
+      tax: Math.round(tax * 100) / 100,
+      discount: safeDiscount,
+      total: Math.round(total * 100) / 100,
+    };
+  }, [items, discount]);
   const hasItems = items.length > 0;
 
   return (

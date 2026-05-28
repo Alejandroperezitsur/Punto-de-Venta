@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Sun, Moon, Bell, Menu } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserStore } from '../../store/userStore';
@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { ConnectionStatus } from '../common/ConnectionStatus';
 import { cn } from '../../utils/cn';
 
-export const Topbar = () => {
+export const Topbar = React.memo(function Topbar() {
   const { isDark, toggleDark } = useTheme();
   const { toggleSidebar } = useUserStore();
   const [cashStatus, setCashStatus] = useState(null);
@@ -21,7 +21,7 @@ export const Topbar = () => {
       } catch { /* noop */ }
     };
     checkCash();
-    const interval = setInterval(checkCash, 60000);
+    const interval = setInterval(checkCash, 120000);
     const onCashUpdate = () => checkCash();
     window.addEventListener('cash-status', onCashUpdate);
     return () => { clearInterval(interval); window.removeEventListener('cash-status', onCashUpdate); };
@@ -30,7 +30,16 @@ export const Topbar = () => {
   useEffect(() => {
     const main = document.querySelector('main');
     if (!main) return;
-    const onScroll = () => setScrolled(main.scrollTop > 10);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrolled(main.scrollTop > 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     main.addEventListener('scroll', onScroll, { passive: true });
     return () => main.removeEventListener('scroll', onScroll);
   }, []);
@@ -90,4 +99,4 @@ export const Topbar = () => {
       </div>
     </header>
   );
-};
+});

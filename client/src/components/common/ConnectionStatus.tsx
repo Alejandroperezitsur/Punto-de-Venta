@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Wifi, WifiOff, RefreshCw, Activity } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { forceSyncNow, getSyncStatusV2 } from '../../lib/syncEngineV2';
 import { getHealthMonitor } from '../../lib/healthMonitor';
 import type { HealthStatus } from '../../lib/healthMonitor';
 
-export const ConnectionStatus: React.FC = () => {
+export const ConnectionStatus: React.FC = memo(function ConnectionStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isSyncing, setIsSyncing] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
@@ -40,7 +40,7 @@ export const ConnectionStatus: React.FC = () => {
       setHealth(e.detail);
     }) as EventListener);
 
-    const interval = setInterval(refresh, 15000);
+    const interval = setInterval(refresh, 30000);
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -151,4 +151,4 @@ export const ConnectionStatus: React.FC = () => {
       )}
     </div>
   );
-};
+});
