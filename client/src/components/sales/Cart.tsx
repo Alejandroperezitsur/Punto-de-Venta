@@ -109,10 +109,10 @@ export const Cart = memo(function Cart() {
   const prevItemsLen = useRef(items.length);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const shouldVirtualize = deferredItems.length > VIRTUALIZE_THRESHOLD;
+  const shouldVirtualize = items.length > VIRTUALIZE_THRESHOLD;
 
   const virtualizer = useVirtualizer({
-    count: deferredItems.length,
+    count: items.length,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => ROW_HEIGHT,
     overscan: 5,
