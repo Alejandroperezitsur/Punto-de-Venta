@@ -180,7 +180,7 @@ export const degradedModeEngine = {
         condition: () => {
           const mem = (performance as any).memory
           if (!mem) return false
-          return (mem.usedJSHeapSize / mem.totalJSHeapSize) > 0.85
+          return (mem.usedJSHeapSize / mem.totalJSHeapSize) > 0.92
         },
         level: 'degraded',
         description: 'High memory pressure, disabling non-critical systems',
