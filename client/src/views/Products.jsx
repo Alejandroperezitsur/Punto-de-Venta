@@ -29,7 +29,7 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
 
       <div className="size-16 rounded-lg bg-muted flex items-center justify-center mb-3 border border-border mx-auto">
         {p.image_url ? (
-          <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-lg" />
+          <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-lg" loading="lazy" />
         ) : (
           <Package className="size-7 text-muted-foreground/50" aria-hidden="true" />
         )}
@@ -60,7 +60,7 @@ const ProductsView = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const deleteDialog = useConfirmDialog();
   const [search, setSearch] = useState('');
-  const [searchTimer, setSearchTimer] = useState(null);
+  const searchTimerRef = useRef(null);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form, setForm] = useState({ name: '', price: '', stock: '999', sku: '' });
   const [saving, setSaving] = useState(false);
@@ -102,12 +102,11 @@ const ProductsView = () => {
   const handleSearch = useCallback((e) => {
     const value = e.target.value;
     setSearch(value);
-    if (searchTimer) clearTimeout(searchTimer);
-    const timer = setTimeout(() => loadData(null), 300);
-    setSearchTimer(timer);
-  }, [searchTimer, loadData]);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => loadData(null), 300);
+  }, [loadData]);
 
-  useEffect(() => () => { if (searchTimer) clearTimeout(searchTimer); }, [searchTimer]);
+  useEffect(() => () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

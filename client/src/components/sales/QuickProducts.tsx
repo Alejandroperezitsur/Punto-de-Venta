@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { api } from '../../lib/api';
 import { Skeleton } from '../ui/Skeleton';
 import { ErrorState } from '../ui/ErrorState';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
 
-const ITEMS_PER_PAGE = 36;
 const RECENT_MAX = 8;
+const LANE_COUNTS = { sm: 2, md: 3, lg: 4, xl: 6 };
+const ROW_HEIGHT = 44;
 
 interface QuickProduct {
   id: string;
@@ -17,24 +19,24 @@ interface QuickProduct {
   sales_count?: number;
 }
 
+interface FlatItem {
+  type: 'header' | 'product';
+  product?: QuickProduct;
+  category?: string;
+  globalIndex: number;
+}
+
 interface QuickProductButtonProps {
   product: QuickProduct;
   onSelect: (p: QuickProduct) => void;
-  isFocused: boolean;
 }
 
-const QuickProductButton = memo(function QuickProductButton({ product, onSelect, isFocused }: QuickProductButtonProps) {
+const QuickProductButton = memo(function QuickProductButton({ product, onSelect }: QuickProductButtonProps) {
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
   const isLowStock = product.stock !== undefined && product.stock <= 5 && product.stock > 0;
-  const ref = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (isFocused && ref.current) ref.current.focus({ preventScroll: true });
-  }, [isFocused]);
 
   return (
     <button
-      ref={ref}
       onClick={() => !isOutOfStock && onSelect(product)}
       disabled={isOutOfStock}
       className={cn(
@@ -56,45 +58,15 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect,
   );
 });
 
-interface CategorizedSectionProps {
-  label: string;
-  products: QuickProduct[];
-  onSelect: (p: QuickProduct) => void;
-  focusedIndex: number;
-  startIndex: number;
-}
-
-const CategorizedSection = memo(function CategorizedSection({ label, products, onSelect, focusedIndex, startIndex }: CategorizedSectionProps) {
-  return (
-    <div className="mb-1.5">
-      <div className="sticky top-0 z-[var(--z-sticky)] bg-card/95 backdrop-blur-sm text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1 py-1 border-b border-border/10">
-        {label}
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1 mt-1">
-        {products.map((p, i) => (
-          <QuickProductButton
-            key={p.id}
-            product={p}
-            onSelect={onSelect}
-            isFocused={focusedIndex === startIndex + i}
-          />
-        ))}
-      </div>
-    </div>
-  );
-});
-
 export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { onSelect: (product: QuickProduct) => void }) {
   const [products, setProducts] = useState<QuickProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [deferredQuery, setDeferredQuery] = useState('');
-  const [focusedIndex, setFocusedIndex] = useState(-1);
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<'default' | 'recent' | 'top'>('default');
-  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -145,74 +117,53 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
     return restProducts;
   }, [deferredQuery, filteredProducts, sortMode, recentProducts, topProducts, restProducts]);
 
-  const paginatedProducts = displayProducts.slice(0, page * ITEMS_PER_PAGE);
-  const hasMore = paginatedProducts.length < displayProducts.length;
+  const flatItems = useMemo(() => {
+    const items: FlatItem[] = [];
+    let globalIndex = 0;
 
-  const categorizedProducts = useMemo(() => {
-    const map = new Map<string, QuickProduct[]>();
-    for (const p of paginatedProducts) {
-      const cat = p.category || 'General';
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat)!.push(p);
+    if (deferredQuery) {
+      for (const p of displayProducts) {
+        items.push({ type: 'product', product: p, globalIndex: globalIndex++ });
+      }
+    } else {
+      const categories = new Map<string, QuickProduct[]>();
+      for (const p of displayProducts) {
+        const cat = p.category || 'General';
+        if (!categories.has(cat)) categories.set(cat, []);
+        categories.get(cat)!.push(p);
+      }
+      for (const [cat, prods] of categories) {
+        items.push({ type: 'header', category: cat, globalIndex: globalIndex++ });
+        for (const p of prods) {
+          items.push({ type: 'product', product: p, globalIndex: globalIndex++ });
+        }
+      }
     }
-    return Array.from(map.entries());
-  }, [paginatedProducts]);
+    return items;
+  }, [displayProducts, deferredQuery]);
 
-  const flatProductCount = useMemo(() => {
-    return categorizedProducts.reduce((acc, [_, prods]) => acc + prods.length, 0);
-  }, [categorizedProducts]);
+  const virtualizer = useVirtualizer({
+    count: flatItems.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5,
+  });
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    const gridCols = 6;
-    let newIndex = focusedIndex;
-
-    switch (e.key) {
-      case 'ArrowRight':
-        e.preventDefault();
-        newIndex = Math.min(focusedIndex + 1, flatProductCount - 1);
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        newIndex = Math.max(focusedIndex - 1, 0);
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        newIndex = Math.min(focusedIndex + gridCols, flatProductCount - 1);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        newIndex = Math.max(focusedIndex - gridCols, 0);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (focusedIndex >= 0 && focusedIndex < paginatedProducts.length) {
-          handleSelect(paginatedProducts[focusedIndex]);
-        }
-        return;
-      case 'Escape':
-        e.preventDefault();
-        setSearchQuery('');
-        setDeferredQuery('');
-        searchInputRef.current?.blur();
-        return;
-      default:
-        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
-          setSearchQuery(prev => prev + e.key);
-          setFocusedIndex(0);
-          return;
-        }
-        return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setSearchQuery('');
+      setDeferredQuery('');
+      searchInputRef.current?.blur();
+      return;
     }
-
-    setFocusedIndex(newIndex);
-    const el = containerRef.current?.querySelector(`[data-product-index="${newIndex}"]`);
-    if (el instanceof HTMLElement) {
-      el.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      setSearchQuery(prev => prev + e.key);
+      return;
     }
-  }, [focusedIndex, flatProductCount, paginatedProducts, handleSelect]);
+  }, []);
 
   const handleRetry = useCallback(() => {
-    setPage(1);
     load();
   }, [load]);
 
@@ -238,9 +189,9 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
   }
 
   return (
-    <div className="flex flex-col gap-1.5" ref={containerRef}>
+    <div className="flex flex-col gap-1.5 h-full">
       {products.length > 0 && (
-        <div className="flex items-center gap-1.5 px-0.5">
+        <div className="flex items-center gap-1.5 px-0.5 shrink-0">
           <input
             ref={searchInputRef}
             type="text"
@@ -248,7 +199,6 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
             onChange={e => {
               const val = e.target.value;
               setSearchQuery(val);
-              setFocusedIndex(0);
               if (debounceRef.current) clearTimeout(debounceRef.current);
               debounceRef.current = setTimeout(() => setDeferredQuery(val), 150);
             }}
@@ -285,8 +235,8 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
       )}
 
       {filteredProducts.length === 0 && deferredQuery && (
-        <div className="h-10 flex items-center justify-center text-muted-foreground">
-          <p className="text-xs font-medium">Sin resultados para "{deferredQuery}"</p>
+        <div className="h-10 flex items-center justify-center text-muted-foreground shrink-0">
+          <p className="text-xs font-medium">Sin resultados para &quot;{deferredQuery}&quot;</p>
         </div>
       )}
 
@@ -296,50 +246,62 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
         </div>
       )}
 
-      {filteredProducts.length > 0 && (
+      {flatItems.length > 0 && (
         <div
-          className="outline-none"
+          ref={scrollContainerRef}
+          className="flex-1 min-h-0 overflow-y-auto outline-none"
           tabIndex={0}
           onKeyDown={handleKeyDown}
           aria-label="Lista de productos"
           role="grid"
         >
-          {deferredQuery ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1">
-              {paginatedProducts.map((p, i) => (
-                <div key={p.id} data-product-index={i}>
+          <div style={{ height: virtualizer.getTotalSize(), position: 'relative', width: '100%' }}>
+            {virtualizer.getVirtualItems().map(virtualRow => {
+              const item = flatItems[virtualRow.index];
+              if (item.type === 'header') {
+                return (
+                  <div
+                    key={`header-${item.category}`}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: virtualRow.size,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    <div className="sticky top-0 z-[var(--z-sticky)] bg-card/95 backdrop-blur-sm text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1 py-1 border-b border-border/10">
+                      {item.category}
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div
+                  key={item.product!.id}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: virtualRow.size,
+                    transform: `translateY(${virtualRow.start}px)`,
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                    gap: '4px',
+                    padding: '2px 0',
+                  }}
+                >
                   <QuickProductButton
-                    product={p}
+                    product={item.product!}
                     onSelect={handleSelect}
-                    isFocused={focusedIndex === i}
                   />
                 </div>
-              ))}
-            </div>
-          ) : (
-            categorizedProducts.map(([cat, prods]) => (
-              <CategorizedSection
-                key={cat}
-                label={cat}
-                products={prods}
-                onSelect={handleSelect}
-                focusedIndex={focusedIndex}
-                startIndex={categorizedProducts
-                  .slice(0, categorizedProducts.findIndex(([c]) => c === cat))
-                  .reduce((acc, [_, p]) => acc + p.length, 0)}
-              />
-            ))
-          )}
+              );
+            })}
+          </div>
         </div>
-      )}
-
-      {hasMore && !deferredQuery && (
-        <button
-          onClick={() => setPage(p => p + 1)}
-          className="text-[10px] font-semibold text-primary hover:text-primary/80 transition-colors py-2 touch-target"
-        >
-          Ver más ({displayProducts.length - paginatedProducts.length} restantes)
-        </button>
       )}
     </div>
   );

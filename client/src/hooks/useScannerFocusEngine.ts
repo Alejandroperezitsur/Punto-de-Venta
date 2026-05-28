@@ -5,11 +5,12 @@ type FocusSource = 'scan' | 'modal' | 'toast' | 'route' | 'reconnect' | 'sale-co
 interface FocusLock {
   source: FocusSource;
   priority: number;
+  acquiredAt: number;
 }
 
 const FOCUS_SOURCE_PRIORITY: Record<FocusSource, number> = {
   scan: 100,
-  sale: 99,
+  'sale-complete': 99,
   manual: 98,
   modal: 50,
   toast: 40,
@@ -18,17 +19,15 @@ const FOCUS_SOURCE_PRIORITY: Record<FocusSource, number> = {
 };
 
 const SCAN_INPUT_SELECTOR = '[data-scan-input]';
-const REFOCUS_INTERVAL_MS = 3000;
-const REFOCUS_ATTEMPT_LIMIT = 3;
-
-let globalFocusLock: FocusLock | null = null;
-let globalRefocusTimer: ReturnType<typeof setInterval> | null = null;
-let refocusAttempts = 0;
 
 export function useScannerFocusEngine() {
+  const focusLockRef = useRef<FocusLock | null>(null);
+  const refocusTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const refocusAttemptsRef = useRef(0);
   const lastFocusTime = useRef(0);
   const observerRef = useRef<MutationObserver | null>(null);
   const isRefocusing = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getScanInput = useCallback((): HTMLInputElement | null => {
     return document.querySelector<HTMLInputElement>(SCAN_INPUT_SELECTOR);
@@ -41,13 +40,13 @@ export function useScannerFocusEngine() {
 
   const acquireFocusLock = useCallback((source: FocusSource): boolean => {
     const priority = FOCUS_SOURCE_PRIORITY[source];
-    if (globalFocusLock && globalFocusLock.priority > priority) return false;
-    globalFocusLock = { source, priority };
+    if (focusLockRef.current && focusLockRef.current.priority > priority) return false;
+    focusLockRef.current = { source, priority, acquiredAt: Date.now() };
     return true;
   }, []);
 
   const releaseFocusLock = useCallback((source: FocusSource) => {
-    if (globalFocusLock?.source === source) globalFocusLock = null;
+    if (focusLockRef.current?.source === source) focusLockRef.current = null;
   }, []);
 
   const forceFocusToScanner = useCallback((source: FocusSource = 'scan') => {
@@ -76,23 +75,24 @@ export function useScannerFocusEngine() {
 
   const handleVisibilityChange = useCallback(() => {
     if (document.visibilityState === 'visible') {
-      refocusAttempts = 0;
-      globalRefocusTimer = setInterval(() => {
-        if (refocusAttempts >= 1) {
-          if (globalRefocusTimer) clearInterval(globalRefocusTimer);
+      refocusAttemptsRef.current = 0;
+      if (refocusTimerRef.current) clearInterval(refocusTimerRef.current);
+      refocusTimerRef.current = setInterval(() => {
+        if (refocusAttemptsRef.current >= 1) {
+          if (refocusTimerRef.current) clearInterval(refocusTimerRef.current);
           return;
         }
         if (!isScanInputFocused()) {
           forceFocusToScanner('scan');
-          refocusAttempts++;
+          refocusAttemptsRef.current++;
         } else {
-          if (globalRefocusTimer) clearInterval(globalRefocusTimer);
+          if (refocusTimerRef.current) clearInterval(refocusTimerRef.current);
         }
       }, 200);
     } else {
-      if (globalRefocusTimer) {
-        clearInterval(globalRefocusTimer);
-        globalRefocusTimer = null;
+      if (refocusTimerRef.current) {
+        clearInterval(refocusTimerRef.current);
+        refocusTimerRef.current = null;
       }
     }
   }, [isScanInputFocused, forceFocusToScanner]);
@@ -102,39 +102,46 @@ export function useScannerFocusEngine() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (globalRefocusTimer) clearInterval(globalRefocusTimer);
+      if (refocusTimerRef.current) clearInterval(refocusTimerRef.current);
     };
   }, [handleVisibilityChange]);
 
   useEffect(() => {
-    const mainContent = document.querySelector('#main-content') || document.body;
+    const scanInput = getScanInput();
+    const container = scanInput?.parentElement || document.querySelector('#main-content') || document.body;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     observerRef.current = new MutationObserver(() => {
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
         const input = getScanInput();
-        if (!input && globalRefocusTimer) {
-          clearInterval(globalRefocusTimer);
-          globalRefocusTimer = null;
+        if (!input && refocusTimerRef.current) {
+          clearInterval(refocusTimerRef.current);
+          refocusTimerRef.current = null;
         }
       }, 300);
     });
-    observerRef.current.observe(mainContent, { childList: true, subtree: true });
+    observerRef.current.observe(container, { childList: true, subtree: true });
     return () => {
       observerRef.current?.disconnect();
       if (debounceTimer) clearTimeout(debounceTimer);
     };
   }, [getScanInput]);
 
+  const isScanInputFocusedRef = useRef(isScanInputFocused);
+  isScanInputFocusedRef.current = isScanInputFocused;
+
+  const forceFocusToScannerRef = useRef(forceFocusToScanner);
+  forceFocusToScannerRef.current = forceFocusToScanner;
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab' && !isScanInputFocused()) {
-        setTimeout(() => forceFocusToScanner('scan'), 0);
+      if (e.key === 'Tab' && !isScanInputFocusedRef.current) {
+        setTimeout(() => forceFocusToScannerRef.current('scan'), 0);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isScanInputFocused, forceFocusToScanner]);
+  }, []);
 
   const restoreAfterModal = useCallback(() => {
     requestAnimationFrame(() => forceFocusToScanner('modal'));

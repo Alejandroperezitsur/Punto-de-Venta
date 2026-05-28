@@ -205,3 +205,16 @@ img {
     width: 100% !important;
   }
 }
+
+/* GPU-safe transition utilities for modal/dropdown/select */
+.duration-60 { transition-duration: 60ms; }
+.duration-80 { transition-duration: 80ms; }
+
+/* Ensure all animations use transform/opacity for GPU compositing */
+.cart-item-enter,
+[role="dialog"] > div:first-child,
+[role="dialog"] > div:last-child,
+[role="listbox"],
+[aria-haspopup="listbox"] + div {
+  will-change: opacity, transform;
+}

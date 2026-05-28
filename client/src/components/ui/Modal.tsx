@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -10,21 +9,6 @@ const sizes = {
   xl: 'max-w-xl',
   '2xl': 'max-w-2xl',
   full: 'max-w-[95vw] h-[95vh]',
-};
-
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.06 } },
-  exit: { opacity: 0, transition: { duration: 0.04 } },
-};
-
-const panelVariants = {
-  hidden: { opacity: 0, y: 2 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.08 } },
-  exit: { opacity: 0, y: 1, transition: { duration: 0.06 } },
 };
 
 interface ModalProps {
@@ -85,105 +69,96 @@ function Modal({
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useRef(`modal-title-${Math.random().toString(36).slice(2, 8)}`).current;
-  const reduced = prefersReducedMotion();
+  const [shouldRender, setShouldRender] = useState(false);
+  const [animState, setAnimState] = useState<'entering' | 'entered' | 'exiting' | 'exited'>('exited');
+  const isReduced = useRef(
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ).current;
 
   useFocusTrap(open, onClose);
 
   useEffect(() => {
-    if (!open) return;
+    if (open) {
+      setShouldRender(true);
+      if (isReduced) {
+        setAnimState('entered');
+      } else {
+        setAnimState('entering');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setAnimState('entered'));
+        });
+      }
+    } else if (shouldRender) {
+      setAnimState('exiting');
+      const timer = setTimeout(() => {
+        setAnimState('exited');
+        setShouldRender(false);
+      }, isReduced ? 0 : 80);
+      return () => clearTimeout(timer);
+    }
+  }, [open, isReduced]);
+
+  useEffect(() => {
+    if (!shouldRender) return;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = '';
       if (onRestoreFocus) requestAnimationFrame(onRestoreFocus);
     };
-  }, [open, onRestoreFocus]);
+  }, [shouldRender, onRestoreFocus]);
 
   const handleOverlayClick = useCallback((e: React.MouseEvent) => {
     if (e.target === overlayRef.current) onClose();
   }, [onClose]);
 
-  if (reduced) {
-    return (
-      <>
-        {open && (
-          <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex }}>
-            <div className="absolute inset-0 bg-black/50" onClick={handleOverlayClick} />
-            <div
-              ref={panelRef}
-              className={cn(
-                'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
-                sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
-                  : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-lg'
-                    : `${sizes[size]} mx-4 rounded-lg`,
-                'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
-                className,
-              )}
-              role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}
-            >
-              {(title || description) && (
-                <div className="flex items-start justify-between p-4 pb-0">
-                  <div className="flex-1 min-w-0">
-                    {title && <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>}
-                    {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
-                  </div>
-                  {!hideClose && (
-                    <button onClick={onClose} className="ml-3 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
-                      <X className="size-4" />
-                    </button>
-                  )}
-                </div>
-              )}
-              <div className="p-4">{children}</div>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  }
+  if (!shouldRender) return null;
+
+  const isOpen = animState === 'entered';
 
   return (
-    <AnimatePresence>
-      {open && (
-        <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex }}>
-          <motion.div
-            ref={overlayRef}
-            variants={overlayVariants}
-            initial="hidden" animate="visible" exit="exit"
-            className="absolute inset-0 bg-black/50"
-            onClick={handleOverlayClick}
-          />
-          <motion.div
-            ref={panelRef}
-            variants={sheet ? { hidden: { x: '100%' }, visible: { x: 0, transition: { duration: 0.1 } }, exit: { x: '100%', transition: { duration: 0.08 } } } : panelVariants}
-            initial="hidden" animate="visible" exit="exit"
-            className={cn(
-              'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
-              sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
-                : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-lg'
-                  : `${sizes[size]} mx-4 rounded-lg`,
-              'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
-              className,
+    <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex }}>
+      <div
+        ref={overlayRef}
+        className={cn(
+          'absolute inset-0 bg-black/50 transition-opacity',
+          isReduced ? '' : 'duration-60',
+          isOpen ? 'opacity-100' : 'opacity-0'
+        )}
+        onClick={handleOverlayClick}
+      />
+      <div
+        ref={panelRef}
+        className={cn(
+          'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
+          'transition-all',
+          isReduced ? '' : 'duration-80',
+          isOpen
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-[2px]',
+          sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
+            : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-lg'
+              : `${sizes[size]} mx-4 rounded-lg`,
+          'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
+          className,
+        )}
+        role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}
+      >
+        {(title || description) && (
+          <div className="flex items-start justify-between p-4 pb-0">
+            <div className="flex-1 min-w-0">
+              {title && <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>}
+              {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
+            </div>
+            {!hideClose && (
+              <button onClick={onClose} className="ml-3 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
+                <X className="size-4" />
+              </button>
             )}
-            role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}
-          >
-            {(title || description) && (
-              <div className="flex items-start justify-between p-4 pb-0">
-                <div className="flex-1 min-w-0">
-                  {title && <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>}
-                  {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
-                </div>
-                {!hideClose && (
-                  <button onClick={onClose} className="ml-3 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
-                    <X className="size-4" />
-                  </button>
-                )}
-              </div>
-            )}
-            <div className="p-4">{children}</div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+          </div>
+        )}
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
   );
 }
 

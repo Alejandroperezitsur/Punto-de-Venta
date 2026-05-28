@@ -11,7 +11,15 @@ interface QueuedScan {
   code: string;
   quantity: number;
   timestamp: number;
+  sequence: number;
   id: string;
+}
+
+interface ScanSession {
+  id: string;
+  startTime: number;
+  scanCount: number;
+  lastScanTime: number;
 }
 
 const DEFAULT_OPTIONS: Required<ScanBufferOptions> = {
@@ -20,6 +28,8 @@ const DEFAULT_OPTIONS: Required<ScanBufferOptions> = {
   dedupWindow: 400,
   maxBufferSize: 50,
 };
+
+let globalSequence = 0;
 
 export function useScanBuffer(
   onScan: (code: string, quantity?: number) => void,
@@ -38,6 +48,12 @@ export function useScanBuffer(
   const onScanRef = useRef(onScan);
   const onIdleRef = useRef(onScannerIdle);
   const enabledRef = useRef(true);
+  const sessionRef = useRef<ScanSession>({
+    id: crypto.randomUUID?.() || Date.now().toString(),
+    startTime: Date.now(),
+    scanCount: 0,
+    lastScanTime: 0,
+  });
 
   useEffect(() => { onScanRef.current = onScan; }, [onScan]);
   useEffect(() => { onIdleRef.current = onScannerIdle; }, [onScannerIdle]);
@@ -52,13 +68,17 @@ export function useScanBuffer(
     idleTimerRef.current = setTimeout(() => onIdleRef.current?.(), 5000);
   }, []);
 
-  const processQueue = useCallback(() => {
+  const processQueue = useCallback(async () => {
     if (processingRef.current || queueRef.current.length === 0) return;
     processingRef.current = true;
 
     const batch = queueRef.current.splice(0, Math.min(queueRef.current.length, 5));
     for (const item of batch) {
-      onScanRef.current(item.code, item.quantity);
+      try {
+        await onScanRef.current(item.code, item.quantity);
+      } catch {
+        // Scanner must be resilient — log but don't crash
+      }
     }
 
     processingRef.current = false;
@@ -69,8 +89,14 @@ export function useScanBuffer(
 
   const enqueueScan = useCallback((code: string, quantity: number) => {
     const now = Date.now();
+    const seq = ++globalSequence;
     if (queueRef.current.length >= opts.maxBufferSize) queueRef.current.shift();
-    queueRef.current.push({ code, quantity, timestamp: now, id: `${code}-${now}` });
+    queueRef.current.push({ code, quantity, timestamp: now, sequence: seq, id: `${seq}-${code}` });
+
+    const session = sessionRef.current;
+    session.scanCount++;
+    session.lastScanTime = now;
+
     processQueue();
   }, [processQueue, opts.maxBufferSize]);
 

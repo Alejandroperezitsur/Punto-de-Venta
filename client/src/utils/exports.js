@@ -1,5 +1,3 @@
-import jsPDF from 'jspdf';
-
 export const downloadCsv = (rows, headers, filename) => {
     const cols = Object.keys(headers);
     const head = cols.map(k => headers[k]).join(',');

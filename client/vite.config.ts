@@ -16,15 +16,40 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'pos-core': ['./src/App.jsx', './src/components/sales/Cart.tsx', './src/components/sales/ProductSearch.tsx', './src/components/sales/QuickProducts.tsx', './src/components/sales/PaymentModal.tsx', './src/components/sales/ConfirmModal.tsx'],
-          'scanner-core': ['./src/hooks/useScan.ts', './src/hooks/useScanBuffer.ts', './src/hooks/useScannerFocusEngine.ts', './src/hooks/useScanSound.js'],
-          'sync-engine': ['./src/lib/syncEngineV2.ts', './src/lib/syncManager.ts', './src/lib/transactionalQueue.ts', './src/lib/snapshotManager.ts'],
-          'offline-core': ['./src/lib/offlineDB.ts', './src/lib/offlineAuth.ts', './src/lib/offlineTokenManager.ts', './src/lib/db.ts'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (/react(-dom|router)/.test(id)) return 'vendor-react';
+            if (/recharts/.test(id)) return 'vendor-charts';
+            if (/jspdf/.test(id)) return 'vendor-pdf';
+            if (/lucide-react/.test(id)) return 'vendor-icons';
+            if (/date-fns/.test(id)) return 'vendor-date';
+          }
+          if (id.includes('src/lib/performance') || id.includes('src/lib/metricsCollector') ||
+              id.includes('src/lib/healthMonitor') || id.includes('src/lib/productionGovernor') ||
+              id.includes('src/lib/degradedModeEngine') || id.includes('src/lib/storageLifecycleManager') ||
+              id.includes('src/lib/syncStateMachine') || id.includes('src/lib/interactionTracker') ||
+              id.includes('src/lib/deviceDetector') || id.includes('src/lib/hardwareAdapter') ||
+              id.includes('src/lib/structuredLogger') || id.includes('src/lib/incidentForensics') ||
+              id.includes('src/lib/productionDiagnostics') || id.includes('src/lib/selfHealingUI') ||
+              id.includes('src/lib/lifecycleGuard') || id.includes('src/lib/alertingEngine') ||
+              id.includes('src/lib/auditLogger') || id.includes('src/lib/metricsCollector')) {
+            return 'monitoring-core';
+          }
+          if (id.includes('src/hooks/useScan')) return 'scanner-core';
+          if (id.includes('src/hooks/useScannerFocusEngine')) return 'scanner-core';
+          if (id.includes('src/hooks/useScanSound')) return 'scanner-core';
+          if (id.includes('src/lib/syncEngineV2') || id.includes('src/lib/syncManager') ||
+              id.includes('src/lib/transactionalQueue') || id.includes('src/lib/snapshotManager')) {
+            return 'sync-engine';
+          }
+          if (id.includes('src/lib/offlineDB') || id.includes('src/lib/offlineAuth') ||
+              id.includes('src/lib/offlineTokenManager') || id.includes('src/lib/db')) {
+            return 'offline-core';
+          }
         },
       },
     },
-    chunkSizeWarningLimit: 300,
+    chunkSizeWarningLimit: 200,
   },
   plugins: [
     react(),
