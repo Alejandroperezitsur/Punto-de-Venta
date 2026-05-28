@@ -257,12 +257,14 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
 
     // POST /products
     if (method === 'POST') {
+      const barcodeValue = body.barcodes && Array.isArray(body.barcodes) && body.barcodes.length > 0 ? body.barcodes : [];
       const newProd = {
         id: body.id || `prod-${Date.now()}`,
         name: body.name,
         price: Number(body.price) || 0,
         stock: Number(body.stock) || 0,
         sku: body.sku || `SKU-${Date.now()}`,
+        barcodes: barcodeValue,
         image_url: body.image_url || null,
         active: 1
       };
@@ -289,6 +291,7 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
         price: body.price !== undefined ? Number(body.price) : existing.price,
         stock: body.stock !== undefined ? Number(body.stock) : existing.stock,
         sku: body.sku !== undefined ? body.sku : existing.sku,
+        barcodes: body.barcodes !== undefined ? body.barcodes : (existing.barcodes || []),
         image_url: body.image_url !== undefined ? body.image_url : existing.image_url,
       };
 
