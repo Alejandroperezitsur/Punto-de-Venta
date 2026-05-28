@@ -23,11 +23,11 @@ import { syncStateMachine } from './lib/syncStateMachine';
 import { productionGovernor } from './lib/productionGovernor';
 import { PerformanceOverlay } from './components/dev/PerformanceOverlay';
 
-// Views
+// Views (core views lazy-loaded for code splitting)
 import Login from './views/Login';
-import SalesView from './views/Sales';
-import ProductsView from './views/Products';
-import CustomersView from './views/Customers';
+const SalesView = React.lazy(() => import('./views/Sales'));
+const ProductsView = React.lazy(() => import('./views/Products'));
+const CustomersView = React.lazy(() => import('./views/Customers'));
 
 // Commercial Pages
 import { Landing } from './pages/Landing';
@@ -94,6 +94,8 @@ function App() {
         setCorrelationId(crypto.randomUUID?.() || 'app-' + Date.now());
         initGlobalErrorHandler();
 
+        let cleanupFns = [];
+
         const bootstrap = async () => {
             try {
                 const session = await restoreOfflineSession();
@@ -109,7 +111,8 @@ function App() {
 
                 await hardwareAdapter.init();
 
-                initBudgetMonitor();
+                const cleanupBudget = initBudgetMonitor();
+                if (cleanupBudget) cleanupFns.push(cleanupBudget);
 
                 const [recovery, offlineRecovery, cartRollback, integrity, consistencyCheck] = await Promise.allSettled([
                     attemptCrashRecovery(),
@@ -165,15 +168,18 @@ function App() {
                 }, 300000);
                 window.__diagnosticInterval = diagnosticInterval;
 
-                window.addEventListener('online', () => {
+                const onlineHandler = () => {
                     incidentForensics.setConnectivity('online');
                     incidentForensics.recordEvent('reconnect', { durationMs: 0 });
-                });
-                window.addEventListener('offline', () => {
+                };
+                const offlineHandler = () => {
                     incidentForensics.setConnectivity('offline');
                     incidentForensics.recordEvent('critical_error', { error: 'Network offline' });
-                });
-                degradedModeEngine.subscribe((info) => {
+                };
+                window.addEventListener('online', onlineHandler);
+                window.addEventListener('offline', offlineHandler);
+
+                const unsubscribeDegraded = degradedModeEngine.subscribe((info) => {
                     incidentForensics.setDegradedMode(info.status);
                     if (info.status !== 'normal') {
                         productionDiagnostics.recordError(new Error(`Status: ${info.status}`));
@@ -181,13 +187,21 @@ function App() {
                 });
 
                 let clickThrottle = 0;
-                document.addEventListener('click', (e) => {
+                const clickHandler = (e) => {
                     const now = Date.now();
                     if (now - clickThrottle < 100) return;
                     clickThrottle = now;
                     const target = e.target instanceof HTMLElement ? e.target.tagName + (e.target.id ? '#' + e.target.id : '') : 'unknown'
                     interactionTracker.trackClick(target)
-                }, { passive: true })
+                };
+                document.addEventListener('click', clickHandler, { passive: true });
+
+                cleanupFns.push(
+                    () => window.removeEventListener('online', onlineHandler),
+                    () => window.removeEventListener('offline', offlineHandler),
+                    () => unsubscribeDegraded(),
+                    () => document.removeEventListener('click', clickHandler),
+                );
             } catch (e) {
                 console.error('[Init] Recovery error:', e);
                 productionDiagnostics.recordError(e);
@@ -197,6 +211,8 @@ function App() {
         bootstrap();
 
         return () => {
+            cleanupFns.forEach(fn => fn());
+            cleanupFns = [];
             getHealthMonitor().destroy();
             syncStateMachine.destroy();
             productionGovernor.destroy();

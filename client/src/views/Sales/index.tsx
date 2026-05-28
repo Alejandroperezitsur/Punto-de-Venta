@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, startTransition } from 'react';
+import { useDeferredValue } from 'react';
 import { ProductSearch } from '../../components/sales/ProductSearch';
 import { Cart } from '../../components/sales/Cart';
 import { PaymentModal } from '../../components/sales/PaymentModal';
 import { QuickProducts } from '../../components/sales/QuickProducts';
 import { useCartStore } from '../../store/cartStore';
 import { useUserStore } from '../../store/userStore';
+import { shallow } from 'zustand/shallow';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
@@ -51,15 +53,20 @@ const CheckoutButton = React.memo(function CheckoutButton({
 });
 
 const SalesView = React.memo(function SalesView() {
-  const items = useCartStore(s => s.items);
-  const addItem = useCartStore(s => s.addItem);
-  const clearCart = useCartStore(s => s.clearCart);
-  const updateQuantity = useCartStore(s => s.updateQuantity);
-  const validateStock = useCartStore(s => s.validateStock);
-  const generateCheckoutId = useCartStore(s => s.generateCheckoutId);
-  const hydrate = useCartStore(s => s.hydrate);
-  const setDiscount = useCartStore(s => s.setDiscount);
-  const discount = useCartStore(s => s.discount);
+  const { items, addItem, clearCart, updateQuantity, validateStock, generateCheckoutId, hydrate, setDiscount, discount } = useCartStore(
+    (s) => ({
+      items: s.items,
+      addItem: s.addItem,
+      clearCart: s.clearCart,
+      updateQuantity: s.updateQuantity,
+      validateStock: s.validateStock,
+      generateCheckoutId: s.generateCheckoutId,
+      hydrate: s.hydrate,
+      setDiscount: s.setDiscount,
+      discount: s.discount,
+    }),
+    shallow
+  );
   const [isPayModalOpen, setPayModalOpen] = useState(false);
   const [isProcessing, setProcessing] = useState(false);
   const [isManualModalOpen, setManualModalOpen] = useState(false);

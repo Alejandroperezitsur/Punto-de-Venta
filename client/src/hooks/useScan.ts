@@ -75,14 +75,10 @@ export const useScan = (
           return;
         }
 
-        if (burstDetected) {
-          burstDetected = false;
-          scanCount = 0;
-        }
-
         lastScannedCode = finalCode;
         lastScanTime = now;
         scanCount = 0;
+        burstDetected = false;
 
         onScanRef.current(finalCode, quantity);
       } else {

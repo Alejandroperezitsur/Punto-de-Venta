@@ -21,8 +21,11 @@ class MetricsCollector {
   private histograms: Map<string, number[]> = new Map();
   private summaries: Map<string, number[]> = new Map();
   private readonly maxSummarySize = 100;
+  private readonly maxHistogramSize = 1000;
   private readonly flushIntervalMs = 30000;
   private flushTimer: ReturnType<typeof setInterval> | null = null;
+  private memoryTimer: ReturnType<typeof setInterval> | null = null;
+  private offlineCleanupFns: Array<() => void> = [];
 
   readonly definitions: MetricDefinition[] = [
     { name: 'pos_sales_per_minute', help: 'Sales completed per minute', type: 'gauge', labels: ['store_id'] },
@@ -58,6 +61,12 @@ class MetricsCollector {
       clearInterval(this.flushTimer);
       this.flushTimer = null;
     }
+    if (this.memoryTimer) {
+      clearInterval(this.memoryTimer);
+      this.memoryTimer = null;
+    }
+    this.offlineCleanupFns.forEach(fn => fn());
+    this.offlineCleanupFns = [];
   }
 
   // Counter
@@ -143,7 +152,7 @@ class MetricsCollector {
 
   private startMemoryMonitoring(): void {
     if ('memory' in performance && (performance as any).memory) {
-      setInterval(() => {
+      this.memoryTimer = setInterval(() => {
         const mem = (performance as any).memory;
         this.setGauge('pos_memory_usage_mb', { type: 'js' }, Math.round(mem.usedJSHeapSize / 1048576));
         this.setGauge('pos_memory_usage_mb', { type: 'total' }, Math.round(mem.totalJSHeapSize / 1048576));
@@ -162,16 +171,20 @@ class MetricsCollector {
 
   private startOfflineMonitoring(): void {
     let offlineStart: number | null = null;
-    window.addEventListener('offline', () => {
-      offlineStart = Date.now();
-    });
-    window.addEventListener('online', () => {
+    const onOffline = () => { offlineStart = Date.now(); };
+    const onOnline = () => {
       if (offlineStart) {
         this.observeHistogram('pos_offline_duration_ms', {}, Date.now() - offlineStart);
         this.incrementCounter('pos_reconnect_count');
         offlineStart = null;
       }
-    });
+    };
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+    this.offlineCleanupFns.push(
+      () => window.removeEventListener('offline', onOffline),
+      () => window.removeEventListener('online', onOnline),
+    );
   }
 
   private encodeKey(name: string, labels: Record<string, string>): string {

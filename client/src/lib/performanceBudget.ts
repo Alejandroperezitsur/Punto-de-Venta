@@ -106,7 +106,7 @@ export function getActiveWarnings(): BudgetViolation[] {
   return getBudgetViolations().filter(v => v.type === 'warn')
 }
 
-export function initBudgetMonitor(): void {
+export function initBudgetMonitor(): (() => void) | void {
   baselineMemory = ((performance as any)?.memory?.usedJSHeapSize as number) || 0
   if (!baselineMemory) return
 
