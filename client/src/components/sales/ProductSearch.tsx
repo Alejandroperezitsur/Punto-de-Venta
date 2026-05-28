@@ -56,11 +56,9 @@ const ProductSearch = React.memo(function ProductSearch() {
   const handleScan = useCallback(async (code: string, qty = 1) => {
     pendingScans.current++;
     const scanId = ++scanCounter.current;
-    startTransition(() => {
-      setLoading(true);
-      setError('');
-      setScannerStatus('scanning');
-    });
+    setLoading(true);
+    setError('');
+    setScannerStatus('scanning');
 
     try {
       const product = await api(`/products/scan/${encodeURIComponent(code)}`, { retries: 1 });
@@ -68,10 +66,8 @@ const ProductSearch = React.memo(function ProductSearch() {
 
       if (product) {
         addItem(product, qty);
-        startTransition(() => {
-          setQuery('');
-          setScannerStatus('ready');
-        });
+        setQuery('');
+        setScannerStatus('ready');
         playSuccess();
         if (navigator.vibrate) navigator.vibrate(15);
         showFeedback({ type: 'success', message: product.name, code });
@@ -80,21 +76,19 @@ const ProductSearch = React.memo(function ProductSearch() {
       if (scanId !== scanCounter.current) return;
       const msg = err instanceof Error ? err.message : String(err);
       if (/not found|404/i.test(msg)) {
-        startTransition(() => {
-          setError(code);
-          setScannerStatus('error');
-        });
+        setError(code);
+        setScannerStatus('error');
         playWarning();
         showFeedback({ type: 'warning', message: 'Producto no encontrado', code });
       } else {
-        startTransition(() => setScannerStatus('error'));
+        setScannerStatus('error');
         playError();
         showFeedback({ type: 'error', message: 'Error de conexión', code });
       }
     } finally {
       pendingScans.current--;
       if (pendingScans.current <= 0) {
-        startTransition(() => setLoading(false));
+        setLoading(false);
       }
       forceFocusToScanner('scan');
     }

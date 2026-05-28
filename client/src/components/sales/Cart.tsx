@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, memo, useEffect, useMemo, useState, useDeferredValue } from 'react';
+import React, { useRef, useCallback, memo, useEffect, useMemo, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
@@ -104,7 +104,6 @@ export const Cart = memo(function Cart() {
   const items = useCartStore(s => s.items);
   const removeItem = useCartStore(s => s.removeItem);
   const updateQuantity = useCartStore(s => s.updateQuantity);
-  const deferredItems = useDeferredValue(items);
   const [recentId, setRecentId] = useState<string | null>(null);
   const recentTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevItemsLen = useRef(items.length);
@@ -121,21 +120,21 @@ export const Cart = memo(function Cart() {
   });
 
   useEffect(() => {
-    if (deferredItems.length === 0) { setRecentId(null); prevItemsLen.current = 0; return; }
-    if (deferredItems.length > prevItemsLen.current) {
-      const last = deferredItems[deferredItems.length - 1];
+    if (items.length === 0) { setRecentId(null); prevItemsLen.current = 0; return; }
+    if (items.length > prevItemsLen.current) {
+      const last = items[items.length - 1];
       setRecentId(last?.id || null);
       if (recentTimer.current) clearTimeout(recentTimer.current);
       recentTimer.current = setTimeout(() => setRecentId(null), 800);
     }
-    prevItemsLen.current = deferredItems.length;
+    prevItemsLen.current = items.length;
     return () => { if (recentTimer.current) clearTimeout(recentTimer.current); };
-  }, [deferredItems]);
+  }, [items]);
 
   const handleUpdateQuantity = useCallback((id: string, qty: number) => updateQuantity(id, qty), [updateQuantity]);
   const handleRemove = useCallback((id: string) => removeItem(id), [removeItem]);
 
-  if (deferredItems.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8" role="status">
         <div className="size-10 rounded-lg bg-muted/50 flex items-center justify-center mb-2">
@@ -154,11 +153,10 @@ export const Cart = memo(function Cart() {
         className="h-full overflow-y-auto"
         role="list"
         aria-label="Productos en el carrito"
-        style={{ opacity: items !== deferredItems ? 0.7 : 1 }}
       >
         <div style={{ height: virtualizer.getTotalSize(), position: 'relative', width: '100%' }}>
           {virtualizer.getVirtualItems().map(virtualRow => {
-            const item = deferredItems[virtualRow.index];
+            const item = items[virtualRow.index];
             return (
               <div
                 key={item.id}
@@ -187,8 +185,8 @@ export const Cart = memo(function Cart() {
   }
 
   return (
-    <div className="flex flex-col gap-px" role="list" aria-label="Productos en el carrito" style={{ opacity: items !== deferredItems ? 0.7 : 1 }}>
-      {deferredItems.map((item, i) => (
+    <div className="flex flex-col gap-px" role="list" aria-label="Productos en el carrito">
+      {items.map((item, i) => (
         <div
           key={item.id}
           className="cart-item-enter"
