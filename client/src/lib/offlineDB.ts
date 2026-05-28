@@ -218,9 +218,12 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
   if (path.startsWith('/products')) {
     // GET /products/scan/:sku
     if (path.startsWith('/products/scan/')) {
-      const sku = decodeURIComponent(path.split('/').pop() || '');
+      const code = decodeURIComponent(path.split('/').pop() || '');
       const products = await db.getAll('products');
-      const prod = products.find(p => p.sku === sku);
+      const prod = products.find(p => 
+        p.sku === code || 
+        (p.barcodes && Array.isArray(p.barcodes) && p.barcodes.includes(code))
+      );
       if (!prod) throw new Error('Producto no encontrado por código de barras.');
       return prod;
     }
@@ -236,7 +239,8 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
         const query = q.toLowerCase();
         filtered = products.filter(p => 
           (p.name && p.name.toLowerCase().includes(query)) || 
-          (p.sku && p.sku.toLowerCase().includes(query))
+          (p.sku && p.sku.toLowerCase().includes(query)) ||
+          (p.barcodes && Array.isArray(p.barcodes) && p.barcodes.some((b: string) => b.includes(query)))
         );
       }
       
