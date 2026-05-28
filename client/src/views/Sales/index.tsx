@@ -81,6 +81,11 @@ const SalesView = React.memo(function SalesView() {
     if (input instanceof HTMLElement) input.focus();
   }, []);
 
+  const handleQuickProductSelect = useCallback((p: any) => {
+    addItem(p);
+    focusSearch();
+  }, [addItem, focusSearch]);
+
   const handleShortcutAction = useCallback((action: string) => {
     switch (action) {
       case 'checkout':
@@ -377,7 +382,7 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         <div className="flex-1 rounded-lg border border-border/20 bg-card p-2 overflow-y-auto">
-          <QuickProducts onSelect={(p) => { addItem(p); focusSearch(); }} />
+          <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
