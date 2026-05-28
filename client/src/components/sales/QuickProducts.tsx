@@ -120,22 +120,21 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
     );
   }, [products, deferredQuery]);
 
-  const { recentProducts, topProducts, restProducts } = useMemo(() => {
+  const { recentProducts, topProducts } = useMemo(() => {
     const recent = recentIds
       .map(id => products.find(p => p.id === id))
       .filter(Boolean) as QuickProduct[];
     const sorted = [...products].sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0));
     const top = sorted.slice(0, 6);
-    const rest = products.filter(p => !recentIds.includes(p.id));
-    return { recentProducts: recent, topProducts: top, restProducts: rest };
+    return { recentProducts: recent, topProducts: top };
   }, [products, recentIds]);
 
   const displayProducts = useMemo(() => {
     if (deferredQuery) return filteredProducts;
     if (sortMode === 'recent' && recentProducts.length > 0) return recentProducts;
     if (sortMode === 'top') return topProducts;
-    return restProducts;
-  }, [deferredQuery, filteredProducts, sortMode, recentProducts, topProducts, restProducts]);
+    return products;
+  }, [deferredQuery, filteredProducts, sortMode, recentProducts, topProducts, products]);
 
   const paginatedProducts = displayProducts.slice(0, page * ITEMS_PER_PAGE);
   const hasMore = paginatedProducts.length < displayProducts.length;
