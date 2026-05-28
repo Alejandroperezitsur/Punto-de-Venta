@@ -15,7 +15,7 @@ function EmptyState({ icon: Icon, title, description, action, className, childre
   return (
     <div className={cn(
       'flex flex-col items-center justify-center py-16 px-8 text-center',
-      'rounded-2xl border-2 border-dashed border-border bg-card/50',
+      'rounded-lg border-2 border-dashed border-border bg-card/50',
       className,
     )}>
       {Icon && (

@@ -39,15 +39,15 @@ export const Topbar = () => {
     <header
       role="banner"
       className={cn(
-        'h-12 border-b border-border/30 flex items-center justify-between px-3 sticky top-0 z-40 transition-colors',
+        'h-12 border-b border-border/30 flex items-center justify-between px-3 sticky top-0 z-[var(--z-sticky)] transition-colors',
         scrolled
-          ? 'bg-background/80 shadow-sm'
+          ? 'bg-background/90 backdrop-blur-sm shadow-sm'
           : 'bg-transparent',
       )}
     >
       <div className="flex items-center gap-3">
         <button
-          className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+          className="lg:hidden p-2 -ml-1.5 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors touch-target"
           onClick={toggleSidebar}
           aria-label="Menú"
         >
@@ -74,14 +74,14 @@ export const Topbar = () => {
 
         <button
           onClick={toggleDark}
-          className="p-1.5 rounded-lg text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-colors"
+          className="p-2 rounded-md text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-colors touch-target"
           aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
         >
           {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
         </button>
 
         <button
-          className="p-1.5 rounded-lg text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-colors relative"
+          className="p-2 rounded-md text-muted-foreground/70 hover:bg-muted/50 hover:text-foreground transition-colors relative touch-target"
           aria-label="Notificaciones"
         >
           <Bell className="w-3.5 h-3.5" />

@@ -37,7 +37,7 @@ const NumpadKey = memo(function NumpadKey({ label, onClick, disabled, variant }:
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'rounded-lg border text-base font-bold transition-colors flex items-center justify-center h-10',
+        'rounded-md border text-base font-bold transition-colors flex items-center justify-center min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)]',
         variant === 'danger'
           ? 'bg-danger/10 text-danger border-danger/20 text-xs'
           : 'bg-card border-border text-foreground hover:bg-muted active:bg-muted/70',
@@ -62,7 +62,7 @@ const PaymentMethodButton = memo(function PaymentMethodButton({ method, isSelect
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'h-10 rounded-lg border-2 text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5',
+        'min-h-[var(--touch-target-opt)] rounded-md border-2 text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5',
         isSelected
           ? 'bg-primary text-primary-foreground border-primary'
           : 'bg-card border-border text-muted-foreground hover:border-muted-foreground/30',
@@ -88,7 +88,7 @@ const QuickAmountButton = memo(function QuickAmountButton({ amount, isSelected, 
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'h-8 rounded-md text-xs font-bold transition-colors',
+        'min-h-[var(--touch-target-min)] rounded-md text-xs font-bold transition-colors',
         isSelected
           ? 'bg-primary/20 text-primary border border-primary/30'
           : 'bg-muted/40 text-muted-foreground border border-border/40 hover:bg-muted/70',
@@ -120,13 +120,14 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
 
   const handleKeypress = useCallback((val: string) => {
     if (submitLocked.current) return;
-    if (val === 'DEL') { setReceived(prev => prev.length > 1 ? prev.slice(0, -1) : '0'); }
+    if (val === 'DEL') { setReceived(prev => prev.length > 1 ? prev.slice(0, -1) : ''); }
     else if (val === '.') { setReceived(prev => prev.includes('.') ? prev : prev + '.'); }
-    else { setReceived(prev => (prev === '0' || parseFloat(prev) === total || prev === '') ? val : prev + val); }
-  }, [total]);
+    else { setReceived(prev => (prev === '' || prev === '0') ? val : prev + val); }
+  }, []);
 
   const handleConfirm = useCallback(async () => {
     if (submitLocked.current || !isReady) return;
+    if (method !== 'cash' && method !== 'mixed' && total <= 0) return;
     submitLocked.current = true; setSubmitState('locking');
     setConfirmError('');
     try {
@@ -135,7 +136,9 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         method,
         amount: receivedNum,
         change: method === 'cash' ? change : 0,
-        payments: [{ method, amount: total }],
+        payments: method === 'mixed'
+          ? [{ method: 'cash', amount: receivedNum }, { method: 'card', amount: Math.max(0, total - receivedNum) }]
+          : [{ method, amount: total }],
       });
       setSubmitState('done');
       onClose();
@@ -150,7 +153,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
 
   const handleMethodChange = useCallback((m: string) => {
     setMethod(m);
-    if (m !== 'cash' && m !== 'mixed') setReceived('0');
+    if (m !== 'cash' && m !== 'mixed') setReceived('');
   }, []);
 
   useEffect(() => {
@@ -180,7 +183,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
 
   return (
     <Modal open={true} onClose={onClose} size="sm" hideClose={submitLocked.current}>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <div className="text-center py-1">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total a pagar</p>
           <p className="text-3xl font-black tracking-tight tabular-nums text-foreground">{formatMoney(total)}</p>
@@ -231,7 +234,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               onClick={exactAmount}
               disabled={submitLocked.current}
               className={cn(
-                'w-full h-10 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2',
+                'w-full min-h-[var(--touch-target-opt)] rounded-md font-bold text-sm transition-all flex items-center justify-center gap-2',
                 isExactCash
                   ? 'bg-success text-success-foreground shadow-sm'
                   : 'bg-success/10 text-success border border-success/20 hover:bg-success/20',
@@ -241,7 +244,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               <Check className="size-4" /> Exacto: {formatMoney(total)}
             </button>
 
-            <div className="grid grid-cols-5 gap-1">
+            <div className="grid grid-cols-5 landscape:grid-cols-6 gap-1">
               {quickAmounts.filter(a => Math.abs(a - total) > 0.01).map(amt => (
                 <QuickAmountButton
                   key={amt}
@@ -253,7 +256,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-3 landscape:grid-cols-4 landscape:md:grid-cols-3 gap-1">
               {numpadKeys.map(k => (
                 <NumpadKey
                   key={k}
@@ -268,7 +271,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         )}
 
         {!isCashOrMixed && (
-          <div className="flex flex-col items-center justify-center text-center py-3 rounded-lg bg-primary/[0.03] border border-dashed border-primary/20">
+          <div className="flex flex-col items-center justify-center text-center py-4 rounded-lg bg-primary/[0.03] border border-dashed border-primary/20">
             <div className="size-10 rounded-full bg-card flex items-center justify-center mb-2 border border-border/40">
               <Check className="size-5 text-primary" />
             </div>
@@ -281,7 +284,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         )}
 
         {confirmError && (
-          <div className="p-2 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs font-semibold text-center">
+          <div className="p-2 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs font-semibold text-center" role="alert">
             {confirmError}
           </div>
         )}
@@ -290,9 +293,9 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
           onClick={handleConfirm}
           disabled={!isReady || submitLocked.current}
           className={cn(
-            'w-full h-12 text-base font-bold rounded-lg transition-all flex items-center justify-center gap-2',
+            'w-full min-h-[var(--touch-target-xl)] text-base font-bold rounded-md transition-all flex items-center justify-center gap-2',
             isReady && !submitLocked.current
-              ? 'bg-primary text-primary-foreground hover:brightness-110 active:brightness-90 shadow-sm'
+              ? 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-sm'
               : 'bg-muted text-muted-foreground/50 cursor-not-allowed',
           )}
           aria-label="Confirmar cobro"

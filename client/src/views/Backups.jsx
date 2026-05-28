@@ -12,6 +12,7 @@ import {
     HardDrive, Download, Trash2, RotateCcw, Plus,
     AlertTriangle
 } from 'lucide-react';
+import { ConfirmModal } from '../components/sales/ConfirmModal';
 
 const formatBytes = (bytes) => {
     if (bytes === 0) return '0 B';
@@ -26,6 +27,11 @@ const BackupsView = () => {
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
     const [restoring, setRestoring] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [isDeleteOpen, setDeleteOpen] = useState(false);
+    const [restoreTarget, setRestoreTarget] = useState(null);
+    const [isRestoreOpen, setRestoreOpen] = useState(false);
+    const [isRestoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
     const toast = useToast();
 
     const loadBackups = async () => {
@@ -56,21 +62,38 @@ const BackupsView = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('¿Eliminar este backup? Esta acción no se puede deshacer.')) return;
+    const handleDeleteRequest = (id) => {
+        setDeleteTarget(id);
+        setDeleteOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await api(`/system/backups/${id}`, { method: 'DELETE' });
+            await api(`/system/backups/${deleteTarget}`, { method: 'DELETE' });
+            setDeleteOpen(false);
+            setDeleteTarget(null);
             await loadBackups();
         } catch (e) {
             toast('Error: ' + e.message, 'error');
         }
     };
 
-    const handleRestore = async (id) => {
-        if (!window.confirm('⚠️ ADVERTENCIA: Esto reemplazará TODOS los datos actuales con el backup seleccionado. ¿Continuar?')) return;
-        if (!window.confirm('¿Está SEGURO? Se creará un backup de seguridad automático.')) return;
+    const handleRestoreRequest = (id) => {
+        setRestoreTarget(id);
+        setRestoreOpen(true);
+    };
 
+    const handleRestoreConfirm = () => {
+        setRestoreOpen(false);
+        setRestoreConfirmOpen(true);
+    };
+
+    const handleRestore = async () => {
+        const id = restoreTarget;
+        if (!id) return;
         setRestoring(id);
+        setRestoreConfirmOpen(false);
         try {
             await api(`/system/backups/${id}/restore`, { method: 'POST' });
             toast('Backup restaurado correctamente', 'success');
@@ -122,7 +145,7 @@ const BackupsView = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-green-600"
-                        onClick={() => handleRestore(b.id)}
+                        onClick={() => handleRestoreRequest(b.id)}
                         isLoading={restoring === b.id}
                         title="Restaurar"
                     >
@@ -132,7 +155,7 @@ const BackupsView = () => {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-red-500"
-                        onClick={() => handleDelete(b.id)}
+                        onClick={() => handleDeleteRequest(b.id)}
                         title="Eliminar"
                     >
                         <Trash2 className="h-4 w-4" />
@@ -143,6 +166,7 @@ const BackupsView = () => {
     ];
 
     return (
+        <>
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -193,6 +217,38 @@ const BackupsView = () => {
                 emptyIcon={HardDrive}
             />
         </motion.div>
+
+        <ConfirmModal
+            open={isDeleteOpen}
+            title="Eliminar Backup"
+            message="¿Eliminar este backup? Esta acción no se puede deshacer."
+            confirmLabel="Eliminar"
+            variant="danger"
+            onConfirm={handleDelete}
+            onCancel={() => { setDeleteOpen(false); setDeleteTarget(null); }}
+        />
+
+        <ConfirmModal
+            open={isRestoreOpen}
+            title="Restaurar Backup"
+            message="⚠️ Esto reemplazará TODOS los datos actuales con el backup seleccionado. ¿Continuar?"
+            confirmLabel="Sí, continuar"
+            variant="warning"
+            onConfirm={handleRestoreConfirm}
+            onCancel={() => { setRestoreOpen(false); setRestoreTarget(null); }}
+        />
+
+        <ConfirmModal
+            open={isRestoreConfirmOpen}
+            title="¿Está SEGURO?"
+            message="Se creará un backup de seguridad automático antes de restaurar. Esta acción modificará todos los datos del sistema."
+            confirmLabel="Restaurar ahora"
+            variant="danger"
+            onConfirm={handleRestore}
+            isLoading={restoring !== null}
+            onCancel={() => { setRestoreConfirmOpen(false); setRestoreTarget(null); }}
+        />
+        </>
     );
 };
 

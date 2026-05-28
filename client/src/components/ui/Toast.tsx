@@ -64,7 +64,7 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ toast }}>
       {children}
       <div className={cn(
-        'fixed z-[200] flex flex-col gap-1 pointer-events-none',
+        'fixed z-[var(--z-toast)] flex flex-col gap-1 pointer-events-none',
         'top-3 right-3 max-w-xs w-full',
         'max-sm:bottom-3 max-sm:top-auto max-sm:left-3 max-sm:right-3 max-sm:max-w-none',
       )}>
@@ -77,20 +77,22 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
                 'pointer-events-auto flex items-start gap-2 rounded-md border-l-4 border-border bg-card py-2 pl-2.5 pr-2 shadow-sm',
                 colors[t.variant],
               )}
+              role="alert"
+              aria-live="assertive"
             >
               <Icon className="size-3.5 shrink-0 mt-0.5" />
               <p className="flex-1 text-xs font-semibold leading-tight">{t.message}</p>
               {t.action && (
                 <button
                   onClick={t.action.onClick}
-                  className="text-[11px] font-bold underline underline-offset-2 hover:opacity-70 shrink-0"
+                  className="text-[11px] font-bold underline underline-offset-2 hover:opacity-70 shrink-0 p-1"
                 >
                   {t.action.label}
                 </button>
               )}
               <button
                 onClick={() => removeToast(t.id)}
-                className="shrink-0 p-px rounded hover:bg-black/5 transition-colors"
+                className="shrink-0 p-1 rounded hover:bg-black/5 transition-colors"
                 aria-label="Cerrar"
               >
                 <X className="size-3" />

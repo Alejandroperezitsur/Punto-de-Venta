@@ -22,9 +22,9 @@ interface SelectProps {
 }
 
 const controlHeights = {
-  sm: 'h-8',
-  md: 'h-9',
-  lg: 'h-11',
+  sm: 'h-[var(--control-sm)]',
+  md: 'h-[var(--control-md)]',
+  lg: 'h-[var(--control-lg)]',
 };
 
 function Select({
@@ -104,7 +104,7 @@ function Select({
   return (
     <div ref={ref} className={cn('relative', className)}>
       {label && (
-        <label className="block text-sm font-semibold text-muted-foreground mb-1.5 ml-1">
+        <label className="block text-xs font-semibold text-muted-foreground mb-1 ml-1">
           {label}
         </label>
       )}
@@ -119,6 +119,7 @@ function Select({
           error && 'border-danger',
           'hover:border-foreground/20',
           controlHeights[size],
+          'touch-target',
         )}
         aria-expanded={open}
         aria-haspopup="listbox"
@@ -138,7 +139,7 @@ function Select({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -1 }}
             transition={{ duration: 0.08 }}
-            className="absolute z-50 mt-1 w-full min-w-[200px] rounded-lg border border-border bg-card shadow-md overflow-hidden"
+            className="absolute z-[var(--z-dropdown)] mt-1 w-full min-w-[200px] rounded-lg border border-border bg-card shadow-md overflow-hidden"
             role="listbox"
           >
             {searchable && (
@@ -151,7 +152,7 @@ function Select({
                     placeholder="Buscar..."
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    className="w-full h-9 pl-9 pr-3 rounded-xl bg-muted text-sm font-medium text-foreground placeholder:text-muted-foreground/50 border-none focus:outline-none focus:ring-2 focus:ring-ring/20"
+                    className="w-full h-[var(--control-sm)] pl-9 pr-3 rounded-md bg-muted text-sm font-medium text-foreground placeholder:text-muted-foreground/50 border-none focus:outline-none focus:ring-2 focus:ring-ring/20"
                   />
                 </div>
               </div>
@@ -170,7 +171,8 @@ function Select({
                       onClick={() => handleSelect(opt)}
                       onMouseEnter={() => setHighlightedIndex(i)}
                       className={cn(
-                        'flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors',
+                        'flex items-center gap-2.5 w-full px-3 py-2.5 rounded-md text-sm font-medium text-left transition-colors',
+                        'touch-target',
                         isHighlighted
                           ? 'bg-primary/10 text-primary'
                           : 'text-foreground hover:bg-muted',

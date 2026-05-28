@@ -36,7 +36,7 @@ const MainLayout = memo(function MainLayout({ children }) {
 
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/40 z-20 lg:hidden"
+            className="fixed inset-0 bg-black/40 z-[var(--z-overlay)] lg:hidden"
             onClick={toggleSidebar}
             onKeyDown={(e) => { if (e.key === 'Escape') toggleSidebar(); }}
             aria-hidden="true"
@@ -44,7 +44,7 @@ const MainLayout = memo(function MainLayout({ children }) {
         )}
 
         <div className={cn(
-          'h-full shrink-0 transition-transform duration-100 z-30',
+          'h-full shrink-0 transition-transform duration-100 ease-linear z-[var(--z-sticky)]',
           'max-lg:fixed max-lg:left-0 max-lg:top-0',
           isSidebarOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full',
         )}>
@@ -55,7 +55,7 @@ const MainLayout = memo(function MainLayout({ children }) {
           <main id="main-content" ref={mainRef} className="flex-1 overflow-y-auto p-2 md:p-3 lg:p-4" role="main">
             {children}
           </main>
-          <footer className="shrink-0 py-2 px-3 md:px-4 border-t border-border/30 text-[10px] font-medium text-muted-foreground/60 flex justify-between items-center" role="contentinfo">
+          <footer className="shrink-0 py-3 px-3 md:px-4 border-t border-border/30 text-[10px] font-medium text-muted-foreground/60 flex justify-between items-center" role="contentinfo">
             <span>{info.copyright}</span>
             <span>v{info.version}</span>
           </footer>

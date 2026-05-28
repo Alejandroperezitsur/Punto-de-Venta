@@ -7,7 +7,6 @@ import { formatMoney } from '../../utils/format';
 
 const ITEMS_PER_PAGE = 36;
 const RECENT_MAX = 8;
-const VIRTUAL_OVERSCAN = 4;
 
 interface QuickProduct {
   id: string;
@@ -39,7 +38,7 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect,
       onClick={() => !isOutOfStock && onSelect(product)}
       disabled={isOutOfStock}
       className={cn(
-        'h-9 rounded-md border border-border/30 bg-card flex items-center gap-1.5 px-2 transition-colors',
+        'min-h-[var(--touch-target-min)] rounded-md border border-border/30 bg-card flex items-center gap-1.5 px-2 transition-colors',
         'hover:border-primary/40 hover:bg-muted/20',
         'active:bg-primary/10 active:border-primary/30',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
@@ -48,10 +47,10 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect,
       title={`${product.name} — ${formatMoney(product.price)}`}
       aria-label={`Agregar ${product.name} - ${formatMoney(product.price)}`}
     >
-      <span className="text-[11px] font-semibold truncate flex-1">{product.name}</span>
-      <span className="text-[11px] font-bold text-primary shrink-0 tabular-nums">{formatMoney(product.price)}</span>
+      <span className="text-xs font-semibold truncate flex-1">{product.name}</span>
+      <span className="text-xs font-bold text-primary shrink-0 tabular-nums">{formatMoney(product.price)}</span>
       {isLowStock && (
-        <span className="text-[8px] font-semibold text-warning bg-warning/10 px-1 py-px rounded shrink-0">{product.stock}</span>
+        <span className="text-[9px] font-semibold text-warning bg-warning/10 px-1 py-px rounded shrink-0">{product.stock}</span>
       )}
     </button>
   );
@@ -68,7 +67,7 @@ interface CategorizedSectionProps {
 const CategorizedSection = memo(function CategorizedSection({ label, products, onSelect, focusedIndex, startIndex }: CategorizedSectionProps) {
   return (
     <div className="mb-1.5">
-      <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1 py-1 border-b border-border/10">
+      <div className="sticky top-0 z-[var(--z-sticky)] bg-card/95 backdrop-blur-sm text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-1 py-1 border-b border-border/10">
         {label}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1 mt-1">
@@ -118,10 +117,6 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
     setRecentIds(prev => [p.id, ...prev.filter(id => id !== p.id)].slice(0, RECENT_MAX));
   }, [onSelect]);
 
-  const addRecentProduct = useCallback((p: QuickProduct) => {
-    setRecentIds(prev => [p.id, ...prev.filter(id => id !== p.id)].slice(0, RECENT_MAX));
-  }, []);
-
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return products;
     const q = searchQuery.toLowerCase().trim();
@@ -146,7 +141,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
     if (sortMode === 'recent' && recentProducts.length > 0) return recentProducts;
     if (sortMode === 'top') return topProducts;
     return restProducts;
-  }, [searchQuery, filteredProducts, sortMode, recentProducts, topProducts, restProducts, sortMode]);
+  }, [searchQuery, filteredProducts, sortMode, recentProducts, topProducts, restProducts]);
 
   const paginatedProducts = displayProducts.slice(0, page * ITEMS_PER_PAGE);
   const hasMore = paginatedProducts.length < displayProducts.length;
@@ -222,7 +217,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1.5">
         {Array.from({ length: 12 }).map((_, i) => (
-          <Skeleton key={i} className="h-9 rounded-md" />
+          <Skeleton key={i} className="h-[var(--touch-target-min)] rounded-md" />
         ))}
       </div>
     );
@@ -250,28 +245,28 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
             onChange={e => { setSearchQuery(e.target.value); setFocusedIndex(0); }}
             onKeyDown={handleKeyDown}
             placeholder="Buscar productos..."
-            className="flex-1 h-7 px-2 text-[11px] rounded-md border border-border/30 bg-card font-medium text-foreground placeholder:text-muted-foreground/40 focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/20"
+            className="flex-1 h-[var(--control-sm)] px-2 text-xs rounded-md border border-border/30 bg-card font-medium text-foreground placeholder:text-muted-foreground/40 focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/20"
             aria-label="Buscar productos rápidos"
             autoComplete="off"
           />
           <div className="flex gap-0.5">
             <button
               onClick={() => setSortMode('default')}
-              className={cn('px-1.5 h-7 text-[10px] font-semibold rounded-md border transition-colors',
+              className={cn('px-1.5 h-[var(--control-sm)] text-[10px] font-semibold rounded-md border transition-colors touch-target',
                 sortMode === 'default' ? 'bg-primary/10 text-primary border-primary/30' : 'border-border/30 text-muted-foreground hover:bg-muted/30')}
             >
               Todos
             </button>
             <button
               onClick={() => setSortMode('recent')}
-              className={cn('px-1.5 h-7 text-[10px] font-semibold rounded-md border transition-colors',
+              className={cn('px-1.5 h-[var(--control-sm)] text-[10px] font-semibold rounded-md border transition-colors touch-target',
                 sortMode === 'recent' ? 'bg-primary/10 text-primary border-primary/30' : 'border-border/30 text-muted-foreground hover:bg-muted/30')}
             >
               Recientes
             </button>
             <button
               onClick={() => setSortMode('top')}
-              className={cn('px-1.5 h-7 text-[10px] font-semibold rounded-md border transition-colors',
+              className={cn('px-1.5 h-[var(--control-sm)] text-[10px] font-semibold rounded-md border transition-colors touch-target',
                 sortMode === 'top' ? 'bg-primary/10 text-primary border-primary/30' : 'border-border/30 text-muted-foreground hover:bg-muted/30')}
             >
               Top
@@ -282,7 +277,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
 
       {filteredProducts.length === 0 && searchQuery && (
         <div className="h-10 flex items-center justify-center text-muted-foreground">
-          <p className="text-[11px] font-medium">Sin resultados para "{searchQuery}"</p>
+          <p className="text-xs font-medium">Sin resultados para "{searchQuery}"</p>
         </div>
       )}
 
@@ -332,7 +327,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
       {hasMore && !searchQuery && (
         <button
           onClick={() => setPage(p => p + 1)}
-          className="text-[10px] font-semibold text-primary hover:text-primary/80 transition-colors py-1"
+          className="text-[10px] font-semibold text-primary hover:text-primary/80 transition-colors py-2 touch-target"
         >
           Ver más ({displayProducts.length - paginatedProducts.length} restantes)
         </button>

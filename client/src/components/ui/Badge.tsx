@@ -40,7 +40,7 @@ function Badge({ variant = 'default', size = 'md', dot, pulse, className, childr
         <span
           className={cn(
             'size-1.5 rounded-full shrink-0',
-            pulse && 'animate-[pulse-dot_2s_ease-in-out_infinite]',
+            pulse && 'animate-pulse',
             variant === 'default' && 'bg-primary',
             variant === 'success' && 'bg-success',
             variant === 'warning' && 'bg-warning',

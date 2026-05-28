@@ -4,6 +4,8 @@ import { Table } from '../components/ui/Table';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
+import { ConfirmModal } from '../components/sales/ConfirmModal';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { useToast } from '../components/ui/Toast';
 import { Badge } from '../components/ui/Badge';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -19,6 +21,7 @@ const CustomersView = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', rfc: '' });
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const deleteDialog = useConfirmDialog();
   const toast = useToast();
 
   const loadCustomers = async () => {
@@ -49,13 +52,18 @@ const CustomersView = () => {
     } finally { setSaving(false); }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Eliminar cliente?')) return;
+  const handleDeleteRequest = (id) => {
+    deleteDialog.open(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.target) return;
     try {
-      await api(`/customers/${id}`, { method: 'DELETE' });
+      await api(`/customers/${deleteDialog.target}`, { method: 'DELETE' });
       toast('Cliente eliminado', 'success');
       await loadCustomers();
     } catch { toast('Error al eliminar', 'error'); }
+    finally { deleteDialog.close(); }
   };
 
   const columns = [
@@ -68,8 +76,8 @@ const CustomersView = () => {
     },
     { title: 'RFC', key: 'rfc', hideOnMobile: true },
     { title: '', key: 'actions', width: '48px', render: (row) => (
-      <button onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }}
-        className="size-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
+      <button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(row.id); }}
+        className="size-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors touch-target"
         aria-label="Eliminar cliente">
         <Trash2 className="size-3.5" />
       </button>
@@ -137,6 +145,16 @@ const CustomersView = () => {
           emptyAction={{ label: 'Crear Cliente', onClick: () => setShowForm(true) }}
         />
       )}
+
+      <ConfirmModal
+        open={deleteDialog.isOpen}
+        title="Eliminar Cliente"
+        message="¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer."
+        confirmLabel="Eliminar"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={deleteDialog.close}
+      />
     </ViewContainer>
   );
 };
