@@ -22,14 +22,17 @@ interface DomainErrorBoundaryState {
   hasError: boolean
   error: Error | null
   degraded: boolean
+  retryCount: number
 }
+
+const MAX_AUTO_RETRIES = 3
 
 class DomainErrorBoundary extends React.Component<DomainErrorBoundaryProps, DomainErrorBoundaryState> {
   private resetTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(props: DomainErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false, error: null, degraded: false }
+    this.state = { hasError: false, error: null, degraded: false, retryCount: 0 }
   }
 
   static getDerivedStateFromError(error: Error) {
@@ -40,8 +43,9 @@ class DomainErrorBoundary extends React.Component<DomainErrorBoundaryProps, Doma
     logger.error(`[${this.props.domain}] ${error.message}`, error)
     this.props.onError?.(error, info)
 
-    if (this.props.autoResetMs) {
+    if (this.props.autoResetMs && this.state.retryCount < MAX_AUTO_RETRIES) {
       this.resetTimer = setTimeout(() => {
+        this.setState(prev => ({ retryCount: prev.retryCount + 1 }))
         this.resetError()
       }, this.props.autoResetMs)
     }
