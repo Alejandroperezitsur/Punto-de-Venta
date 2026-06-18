@@ -16,11 +16,13 @@ model Store {
   rfc          String?
   fiscal_name  String?
   tax_regime   String?
+  active       Int      @default(1)
 
   reseller_id  Int?      @default(1)
   country      String?   @default("MX")
   currency     String?   @default("MXN")
   timezone     String?   @default("America/Mexico_City")
+  created_at   DateTime  @default(now())
 
   reseller     Reseller? @relation(fields: [reseller_id], references: [id])
 
@@ -542,23 +544,22 @@ model AiConfig {
 }
 
 model Session {
-  id            Int      @id @default(autoincrement())
-  user_id       Int
-  store_id      Int
-  token_jti     String   @unique
-  refresh_token String   @unique
-  fingerprint   String?
-  ip_address    String?
-  user_agent    String?
-  last_used_at  DateTime @default(now())
-  revoked_at    DateTime?
-  expires_at    DateTime
-  created_at    DateTime @default(now())
+  id                Int       @id @default(autoincrement())
+  user_id           Int
+  store_id          Int
+  jti               String    @unique
+  refresh_token     String?   @unique
+  device_fingerprint String?
+  ip_address        String?
+  user_agent        String?
+  last_activity     DateTime  @default(now())
+  revoked           Boolean   @default(false)
+  created_at        DateTime  @default(now())
 
-  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  store         Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  store             Store     @relation(fields: [store_id], references: [id], onDelete: Cascade)
 
-  @@index([token_jti])
+  @@index([jti])
   @@index([user_id])
   @@map("sessions")
 }

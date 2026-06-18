@@ -29,21 +29,24 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     }, 'Client Error');
   }
 
-  // Response structure
+  // Response structure — aligned with responseHandler.ts envelope
   const response: any = {
-    error: isServerErr ? 'Error interno del servidor' : err.message,
-    code: err.code || (isServerErr ? 'INTERNAL_ERROR' : 'BAD_REQUEST'),
+    data: null,
+    error: {
+      message: isServerErr ? 'Error interno del servidor' : err.message,
+      code: err.code || (isServerErr ? 'INTERNAL_ERROR' : 'BAD_REQUEST'),
+    },
   };
 
   // Include validation errors if present
   if (err.errors) {
-    response.details = err.errors;
+    response.error.details = err.errors;
   }
 
   // Debug info in dev
   if (process.env.NODE_ENV !== 'production' && isServerErr) {
-    response.debug_message = err.message;
-    response.stack = err.stack;
+    response.error.debug_message = err.message;
+    response.error.stack = err.stack;
   }
 
   res.status(statusCode).json(response);
@@ -51,9 +54,12 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
 export const notFoundHandler = (req: Request, res: Response) => {
   res.status(404).json({
-    error: 'Recurso no encontrado',
-    code: 'NOT_FOUND',
-    path: req.path
+    data: null,
+    error: {
+      message: 'Recurso no encontrado',
+      code: 'NOT_FOUND',
+      path: req.path,
+    },
   });
 };
 

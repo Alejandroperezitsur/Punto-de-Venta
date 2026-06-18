@@ -152,13 +152,13 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
             Principal
           </p>
         )}
-        <NavItem to="/ventas" icon={ShoppingCart} shortcut="F2" show={hasPermission(PERMISSIONS.SALES_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
+        <NavItem to="/ventas" icon={ShoppingCart} show={hasPermission(PERMISSIONS.SALES_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Ventas
         </NavItem>
-        <NavItem to="/productos" icon={Package} shortcut="F3" show={hasPermission(PERMISSIONS.PRODUCTS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
+        <NavItem to="/productos" icon={Package} show={hasPermission(PERMISSIONS.PRODUCTS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Inventario
         </NavItem>
-        <NavItem to="/clientes" icon={Users} shortcut="F4" show={hasPermission(PERMISSIONS.CUSTOMERS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
+        <NavItem to="/clientes" icon={Users} show={hasPermission(PERMISSIONS.CUSTOMERS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Clientes
         </NavItem>
 

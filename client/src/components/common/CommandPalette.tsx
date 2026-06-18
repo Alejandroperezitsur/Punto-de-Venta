@@ -5,6 +5,7 @@ import {
   LogOut, HelpCircle, Zap, X, ArrowRight, Command,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { SHORTCUTS, PAYMENT_SHORTCUTS } from '../../config/shortcuts';
 
 interface Command {
   id: string; label: string; description: string; icon: React.ReactNode;
@@ -137,7 +138,9 @@ export function useKeyboardShortcuts(onAction: (action: string) => void): void {
       if (e.key === 'F3' && !isInput) { e.preventDefault(); onActionRef.current('focus-search'); }
       if (e.key === 'F4' && !isInput) { e.preventDefault(); onActionRef.current('manual-product'); }
       if (e.key === 'F5' && !isInput) { e.preventDefault(); onActionRef.current('discount'); }
+      if (e.key === 'F6' && !isInput) { e.preventDefault(); onActionRef.current('customer'); }
       if (e.key === 'F7') { e.preventDefault(); onActionRef.current('clear-cart'); }
+      if (e.key === 'F8' && !isInput) { e.preventDefault(); onActionRef.current('hold-ticket'); }
       if (e.key === 'F1' && !isInput) { e.preventDefault(); onActionRef.current('show-shortcuts'); }
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); onActionRef.current('command-palette'); }
       if (e.key === 'Escape') { onActionRef.current('escape'); }
@@ -150,18 +153,9 @@ export function useKeyboardShortcuts(onAction: (action: string) => void): void {
 export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   if (!open) return null;
 
-  const shortcuts = [
-    { key: 'F1', label: 'Ayuda / Atajos' },
-    { key: 'F2', label: 'Cobrar' },
-    { key: 'F3', label: 'Buscar producto' },
-    { key: 'F4', label: 'Producto manual' },
-    { key: 'F5', label: 'Descuento' },
-    { key: 'F7', label: 'Vaciar carrito' },
-    { key: '\u2318K', label: 'Paleta de comandos' },
-    { key: 'C', label: 'Efectivo (en cobro)' },
-    { key: 'T', label: 'Tarjeta (en cobro)' },
-    { key: 'R', label: 'Transferencia (en cobro)' },
-    { key: 'Esc', label: 'Cerrar modal' },
+  const allShortcuts = [
+    ...SHORTCUTS.map(s => ({ key: s.key, label: s.label })),
+    ...PAYMENT_SHORTCUTS.map(s => ({ key: s.key, label: s.label + ' (en cobro)' })),
   ];
 
   return (
@@ -169,7 +163,7 @@ export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> 
       <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Atajos de teclado">
         <h2 className="text-lg font-bold mb-4 text-foreground">Atajos de Teclado</h2>
         <div className="space-y-1">
-          {shortcuts.map((s) => (
+          {allShortcuts.map((s) => (
             <div key={s.key} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted">
               <span className="text-sm text-foreground">{s.label}</span>
               <kbd className="px-3 py-1.5 text-xs font-bold bg-muted text-muted-foreground rounded-lg">{s.key}</kbd>

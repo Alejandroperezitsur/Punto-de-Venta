@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
+const { auth } = require('./auth');
 
 // Get Roadmap
 router.get('/', async (req, res) => {
@@ -27,8 +28,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Vote
-router.post('/vote', async (req, res) => {
+// Vote (auth required to prevent manipulation)
+router.post('/vote', auth, async (req, res) => {
     const { feature_name } = req.body;
     try {
         const feature = await prisma.featureVote.upsert({

@@ -140,7 +140,7 @@ export const Cart = memo(function Cart() {
         <div className="size-10 rounded-lg bg-muted/50 flex items-center justify-center mb-2">
           <ShoppingBag className="size-5 opacity-40" />
         </div>
-        <p className="text-sm font-semibold">Carrito vacio</p>
+        <p className="text-sm font-semibold">Carrito vacío</p>
         <p className="text-xs font-medium text-muted-foreground/60">Escanee o busque productos</p>
       </div>
     );

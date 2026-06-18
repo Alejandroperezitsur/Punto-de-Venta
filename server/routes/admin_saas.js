@@ -72,6 +72,9 @@ router.get('/stores', async (req, res) => {
 router.post('/stores', async (req, res) => {
     const { name, admin_username, admin_password } = req.body;
     if (!name || !admin_username || !admin_password) return res.jsonError('Faltan datos requeridos', 400);
+    if (typeof name !== 'string' || name.trim().length < 2) return res.jsonError('Nombre de tienda inválido (mín. 2 caracteres)', 400);
+    if (typeof admin_username !== 'string' || admin_username.trim().length < 3) return res.jsonError('Username inválido (mín. 3 caracteres)', 400);
+    if (typeof admin_password !== 'string' || admin_password.length < 6) return res.jsonError('Contraseña inválida (mín. 6 caracteres)', 400);
 
     try {
         await prisma.$transaction(async (tx) => {

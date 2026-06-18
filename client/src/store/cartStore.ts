@@ -18,6 +18,15 @@ export interface CartTotals {
   total: number;
 }
 
+export interface HeldTicket {
+  id: string;
+  items: CartItem[];
+  customer: CartCustomer | null;
+  discount: number;
+  heldAt: number;
+  label: string;
+}
+
 export interface CartCustomer {
   id: string;
   name: string;
@@ -29,6 +38,7 @@ interface CartStoreState {
   discount: number;
   checkoutId: string | null;
   hydrated: boolean;
+  heldTickets: HeldTicket[];
 }
 
 interface CartStoreActions {
@@ -42,6 +52,9 @@ interface CartStoreActions {
   getTotals: () => CartTotals;
   validateStock: () => { valid: boolean; message?: string };
   hydrate: () => Promise<void>;
+  holdCurrentTicket: (label?: string) => void;
+  recallTicket: (id: string) => void;
+  removeHeldTicket: (id: string) => void;
 }
 
 let persistTimer: ReturnType<typeof setTimeout> | null = null;
@@ -65,8 +78,26 @@ export const useCartStore = create<CartStoreState & CartStoreActions>((set, get)
   discount: 0,
   checkoutId: null,
   hydrated: false,
+  heldTickets: [],
 
   hydrate: async () => {
+    // Load held tickets from localStorage
+    try {
+      const heldJson = localStorage.getItem('held_tickets');
+      if (heldJson) {
+        const parsed = JSON.parse(heldJson);
+        if (Array.isArray(parsed)) {
+          // Expire held tickets older than 48 hours
+          const now = Date.now();
+          const valid = parsed.filter((t: any) => now - t.heldAt < 48 * 60 * 60 * 1000);
+          set({ heldTickets: valid });
+          if (valid.length !== parsed.length) {
+            localStorage.setItem('held_tickets', JSON.stringify(valid));
+          }
+        }
+      }
+    } catch {}
+
     try {
       const saved = await getPersistedCart();
       if (saved) {
@@ -199,5 +230,43 @@ export const useCartStore = create<CartStoreState & CartStoreActions>((set, get)
       }
     }
     return { valid: true };
+  },
+
+  holdCurrentTicket: (label?: string) => {
+    const { items, customer, discount } = get();
+    if (items.length === 0) return;
+    const held: HeldTicket = {
+      id: crypto.randomUUID ? crypto.randomUUID() : 'hold-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      items: [...items],
+      customer,
+      discount,
+      heldAt: Date.now(),
+      label: label || `Ticket ${new Date().toLocaleTimeString()}`,
+    };
+    const nextHeld = [...get().heldTickets, held];
+    localStorage.setItem('held_tickets', JSON.stringify(nextHeld));
+    set({ heldTickets: nextHeld, items: [], customer: null, discount: 0, checkoutId: null });
+    removePersistedCart();
+  },
+
+  recallTicket: (id: string) => {
+    const held = get().heldTickets.find(t => t.id === id);
+    if (!held) return;
+    set({
+      items: held.items,
+      customer: held.customer,
+      discount: held.discount,
+      checkoutId: null,
+      heldTickets: get().heldTickets.filter(t => t.id !== id),
+    });
+    const nextHeld = get().heldTickets.filter(t => t.id !== id);
+    localStorage.setItem('held_tickets', JSON.stringify(nextHeld));
+    debouncedPersist(get());
+  },
+
+  removeHeldTicket: (id: string) => {
+    const nextHeld = get().heldTickets.filter(t => t.id !== id);
+    localStorage.setItem('held_tickets', JSON.stringify(nextHeld));
+    set({ heldTickets: nextHeld });
   },
 }));

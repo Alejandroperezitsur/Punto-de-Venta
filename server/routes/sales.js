@@ -5,6 +5,9 @@ const { auth } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 const { createSale, deleteSaleWithReversal } = require('../services/salesService');
 const { idempotency } = require('../middleware/idempotency');
+const { fraudInterceptor } = require('../middleware/fraudInterceptor');
+const { saleRules } = require('../validators/salesValidator');
+const { validationResult } = require('express-validator');
 
 // Pagination defaults
 const PAGE_SIZE = 50;
@@ -96,7 +99,12 @@ router.get('/:id', auth, requirePermission(PERMISSIONS.SALES_VIEW), async (req, 
   }
 });
 
-router.post('/', auth, requirePermission(PERMISSIONS.SALES_CREATE), idempotency, async (req, res, next) => {
+router.post('/', auth, requirePermission(PERMISSIONS.SALES_CREATE), fraudInterceptor, saleRules, idempotency, async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ data: null, error: { message: 'Validación fallida', code: 'VALIDATION_ERROR', details: errors.array() } });
+  }
+
   const { customer_id = null, items = [], discount = 0, payment_method = 'cash', payments = null } = req.body;
 
   if (!Array.isArray(items) || items.length === 0) {

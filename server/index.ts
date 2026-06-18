@@ -37,10 +37,9 @@ import fraudRouter from './routes/fraud';
 import dashboardsRouter from './routes/dashboards';
 
 // Middleware
-import { apiLimiter, cashLimiter } from './middleware/rateLimiter';
+import { apiLimiter, cashLimiter, loginLimiter } from './middleware/rateLimiter';
 import { responseHandler } from './middleware/responseHandler';
 import { errorHandler } from './middleware/errorHandler';
-import { fraudInterceptor } from './middleware/fraudInterceptor';
 
 dotenv.config();
 
@@ -88,14 +87,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// API Routes
+// Token rotation — BEFORE routes so it wraps res.json() on all authenticated endpoints
+const { attachTokenRotation } = authModule;
+app.use(attachTokenRotation);
+
+// API Rate Limiters
+app.use('/api/auth', loginLimiter);
 app.use('/api/auth', apiLimiter);
 app.use('/api/cash', cashLimiter);
 app.use('/api/', apiLimiter);
 
-// Fraud interception for sales
-app.post('/api/sales', fraudInterceptor);
-
+// API Routes (fraudInterceptor moved inside sales router after auth)
 app.use('/api/products', productsRouter);
 app.use('/api/categories', categoriesRouter);
 app.use('/api/customers', customersRouter);
@@ -128,12 +130,9 @@ app.get('/api/metrics', async (req: Request, res: Response) => {
     res.set('Content-Type', client.register.contentType);
     res.send(await client.register.metrics());
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ data: null, error: { message: e.message, code: 'METRICS_ERROR' } });
   }
 });
-
-const { attachTokenRotation } = authModule;
-app.use(attachTokenRotation);
 
 // Error Handling
 app.use(errorHandler);

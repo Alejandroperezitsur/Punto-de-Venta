@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
-const db = require('../db');
+const prisma = require('../db');
 const { auth } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 
@@ -27,12 +27,29 @@ function getMachineId() {
     return crypto.createHash('sha256').update(info).digest('hex').slice(0, 32);
 }
 
+// Get feature matrix
+function getFeatures(type) {
+    const features = {
+        free: { maxProducts: 50, reports: false, multiUser: false, backup: false, support: false },
+        trial: { maxProducts: 1000, reports: true, multiUser: true, backup: true, support: false },
+        pro: { maxProducts: -1, reports: true, multiUser: true, backup: true, support: true }
+    };
+    return features[type] || features.trial;
+}
+
 // Get license status
-router.get('/status', auth, (req, res) => {
+router.get('/status', auth, async (req, res) => {
     try {
+        const settingsRows = await prisma.globalSetting.findMany({
+            where: {
+                OR: [
+                    { key: { startsWith: 'license' } },
+                    { key: { startsWith: 'app' } }
+                ]
+            }
+        });
         const settings = {};
-        const rows = db.all("SELECT key, value FROM settings WHERE key LIKE 'license%' OR key LIKE 'app%'");
-        rows.forEach(r => settings[r.key] = r.value);
+        settingsRows.forEach(r => settings[r.key] = r.value);
 
         const machineId = getMachineId();
         const licenseType = settings.license_type || 'trial';
@@ -47,10 +64,13 @@ router.get('/status', auth, (req, res) => {
             daysRemaining = Math.ceil((expires - now) / (1000 * 60 * 60 * 24));
             isValid = daysRemaining > 0;
         } else if (licenseType === 'trial' && !expiresAt) {
-            // Set trial for 30 days
             const expiryDate = new Date();
             expiryDate.setDate(expiryDate.getDate() + 30);
-            db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('license_expires', ?)", [expiryDate.toISOString()]);
+            await prisma.globalSetting.upsert({
+                where: { key: 'license_expires' },
+                update: { value: expiryDate.toISOString() },
+                create: { key: 'license_expires', value: expiryDate.toISOString() }
+            });
             daysRemaining = 30;
         }
 
@@ -70,38 +90,62 @@ router.get('/status', auth, (req, res) => {
 });
 
 // Activate license
-router.post('/activate', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), (req, res) => {
+router.post('/activate', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), async (req, res) => {
     try {
         const { licenseKey } = req.body || {};
         if (!licenseKey) return res.jsonError('Clave de licencia requerida', 400);
 
         const machineId = getMachineId();
 
-        // Simple license key validation (in production, validate against server)
-        // Format: XXXX-XXXX-XXXX-XXXX
         if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(licenseKey)) {
             return res.jsonError('Formato de licencia inválido', 400);
         }
 
-        // Determine license type from key prefix
         let licenseType = 'pro';
         if (licenseKey.startsWith('FREE')) licenseType = 'free';
         else if (licenseKey.startsWith('TRIA')) licenseType = 'trial';
 
-        // Save license
-        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('license_key', ?)", [licenseKey]);
-        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('license_type', ?)", [licenseType]);
-        db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('machine_id', ?)", [machineId]);
-
+        // Save license settings
+        const settingsToSave = [
+            { key: 'license_key', value: licenseKey },
+            { key: 'license_type', value: licenseType },
+            { key: 'machine_id', value: machineId }
+        ];
         if (licenseType === 'pro') {
-            db.run("INSERT OR REPLACE INTO settings (key, value) VALUES ('license_expires', '')", []);
+            settingsToSave.push({ key: 'license_expires', value: '' });
         }
 
-        // Log activation
-        db.run("INSERT INTO licenses (license_key, license_type, machine_id, activated_at, created_at) VALUES (?, ?, ?, ?, ?)",
-            [licenseKey, licenseType, machineId, new Date().toISOString(), new Date().toISOString()]);
+        for (const s of settingsToSave) {
+            await prisma.globalSetting.upsert({
+                where: { key: s.key },
+                update: { value: s.value },
+                create: s
+            });
+        }
 
-        db.audit('license_activate', req.user.uid, 'license', null, { licenseType });
+        // Record in licenses table
+        await prisma.license.create({
+            data: {
+                license_key: licenseKey,
+                license_type: licenseType,
+                machine_id: machineId,
+                activated_at: new Date(),
+                store_id: req.user.storeId
+            }
+        });
+
+        // Audit
+        try {
+            await prisma.audit.create({
+                data: {
+                    store_id: req.user.storeId,
+                    event: 'license_activate',
+                    user_id: req.user.uid,
+                    ref_type: 'license',
+                    data: JSON.stringify({ licenseType })
+                }
+            });
+        } catch { }
 
         res.jsonResponse({ success: true, type: licenseType });
     } catch (e) {
@@ -109,74 +153,67 @@ router.post('/activate', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), (re
     }
 });
 
-// Get feature matrix
-function getFeatures(type) {
-    const features = {
-        free: {
-            maxProducts: 50,
-            reports: false,
-            multiUser: false,
-            backup: false,
-            support: false
-        },
-        trial: {
-            maxProducts: 1000,
-            reports: true,
-            multiUser: true,
-            backup: true,
-            support: false
-        },
-        pro: {
-            maxProducts: -1, // unlimited
-            reports: true,
-            multiUser: true,
-            backup: true,
-            support: true
-        }
-    };
-    return features[type] || features.trial;
-}
-
 // ===== BACKUPS =====
 
-// List backups
-router.get('/backups', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), (req, res) => {
+router.get('/backups', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), async (req, res) => {
     try {
-        const backups = db.all('SELECT * FROM backups ORDER BY created_at DESC');
+        const backups = await prisma.backup.findMany({ orderBy: { created_at: 'desc' } });
         res.jsonResponse(backups);
     } catch (e) {
         res.jsonError(e.message);
     }
 });
 
-// Create manual backup
-router.post('/backups', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), (req, res) => {
+router.post('/backups', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), async (req, res) => {
     try {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `backup-manual-${timestamp}.db`;
         const destPath = path.join(BACKUP_DIR, filename);
-        const srcPath = path.join(__dirname, '../data.db');
+
+        // Find the SQLite database path
+        const dbUrl = process.env.DATABASE_URL || '';
+        const srcPath = dbUrl.startsWith('file:')
+            ? path.resolve(__dirname, '..', dbUrl.replace('file:', '').replace(/^\.\//, ''))
+            : path.join(__dirname, '../prisma/data.db');
+
+        if (!fs.existsSync(srcPath)) {
+            return res.jsonError('Base de datos no encontrada', 500);
+        }
 
         fs.copyFileSync(srcPath, destPath);
         const stats = fs.statSync(destPath);
 
-        const result = db.run(
-            'INSERT INTO backups (filename, size, type, created_at) VALUES (?, ?, ?, ?)',
-            [filename, stats.size, 'manual', new Date().toISOString()]
-        );
+        const backup = await prisma.backup.create({
+            data: {
+                filename,
+                size: stats.size,
+                type: 'manual',
+                created_at: new Date()
+            }
+        });
 
-        db.audit('backup_create', req.user.uid, 'backup', result.id, { filename, type: 'manual' });
+        try {
+            await prisma.audit.create({
+                data: {
+                    store_id: req.user.storeId,
+                    event: 'backup_create',
+                    user_id: req.user.uid,
+                    ref_type: 'backup',
+                    ref_id: String(backup.id),
+                    data: JSON.stringify({ filename, type: 'manual' })
+                }
+            });
+        } catch { }
 
-        res.jsonResponse({ id: result.id, filename, size: stats.size }, { status: 201 });
+        res.jsonResponse({ id: backup.id, filename, size: stats.size }, { status: 201 });
     } catch (e) {
         res.jsonError(e.message);
     }
 });
 
-// Download backup
-router.get('/backups/:id/download', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), (req, res) => {
+router.get('/backups/:id/download', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), async (req, res) => {
     try {
-        const backup = db.get('SELECT * FROM backups WHERE id = ?', [req.params.id]);
+        const backup = await prisma.backup.findUnique({ where: { id: parseInt(req.params.id) } });
         if (!backup) return res.jsonError('Backup no encontrado', 404);
 
         const filePath = path.join(BACKUP_DIR, backup.filename);
@@ -188,35 +225,34 @@ router.get('/backups/:id/download', auth, requirePermission(PERMISSIONS.SETTINGS
     }
 });
 
-// Restore backup
-router.post('/backups/:id/restore', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), (req, res) => {
+router.post('/backups/:id/restore', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), async (req, res) => {
     try {
-        const backup = db.get('SELECT * FROM backups WHERE id = ?', [req.params.id]);
+        const backup = await prisma.backup.findUnique({ where: { id: parseInt(req.params.id) } });
         if (!backup) return res.jsonError('Backup no encontrado', 404);
 
-        const srcPath = path.join(BACKUP_DIR, backup.filename);
-        const destPath = path.join(__dirname, '../data.db');
+        const dbUrl = process.env.DATABASE_URL || '';
+        const destPath = dbUrl.startsWith('file:')
+            ? path.resolve(__dirname, '..', dbUrl.replace('file:', '').replace(/^\.\//, ''))
+            : path.join(__dirname, '../prisma/data.db');
 
+        const srcPath = path.join(BACKUP_DIR, backup.filename);
         if (!fs.existsSync(srcPath)) return res.jsonError('Archivo no encontrado', 404);
 
-        // Create safety backup before restore
+        // Safety backup
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const safetyBackup = `backup-pre-restore-${timestamp}.db`;
         fs.copyFileSync(destPath, path.join(BACKUP_DIR, safetyBackup));
 
-        // Restore
         fs.copyFileSync(srcPath, destPath);
-
         res.jsonResponse({ success: true, safetyBackup });
     } catch (e) {
         res.jsonError(e.message);
     }
 });
 
-// Delete backup
-router.delete('/backups/:id', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), (req, res) => {
+router.delete('/backups/:id', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), async (req, res) => {
     try {
-        const backup = db.get('SELECT * FROM backups WHERE id = ?', [req.params.id]);
+        const backup = await prisma.backup.findUnique({ where: { id: parseInt(req.params.id) } });
         if (!backup) return res.jsonError('Backup no encontrado', 404);
 
         const filePath = path.join(BACKUP_DIR, backup.filename);
@@ -224,8 +260,20 @@ router.delete('/backups/:id', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT)
             fs.unlinkSync(filePath);
         }
 
-        db.run('DELETE FROM backups WHERE id = ?', [req.params.id]);
-        db.audit('backup_delete', req.user.uid, 'backup', req.params.id, { filename: backup.filename });
+        await prisma.backup.delete({ where: { id: parseInt(req.params.id) } });
+
+        try {
+            await prisma.audit.create({
+                data: {
+                    store_id: req.user.storeId,
+                    event: 'backup_delete',
+                    user_id: req.user.uid,
+                    ref_type: 'backup',
+                    ref_id: req.params.id,
+                    data: JSON.stringify({ filename: backup.filename })
+                }
+            });
+        } catch { }
 
         res.jsonResponse({ ok: true });
     } catch (e) {
@@ -235,17 +283,20 @@ router.delete('/backups/:id', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT)
 
 // ===== DIAGNOSTICS =====
 
-router.get('/diagnostics', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), (req, res) => {
+router.get('/diagnostics', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), async (req, res) => {
     try {
-        const dbPath = path.join(__dirname, '../data.db');
+        const dbUrl = process.env.DATABASE_URL || '';
+        const dbPath = dbUrl.startsWith('file:')
+            ? path.resolve(__dirname, '..', dbUrl.replace('file:', '').replace(/^\.\//, ''))
+            : path.join(__dirname, '../prisma/data.db');
         const dbStats = fs.existsSync(dbPath) ? fs.statSync(dbPath) : null;
 
-        const counts = {
-            products: db.get('SELECT COUNT(*) as count FROM products')?.count || 0,
-            sales: db.get('SELECT COUNT(*) as count FROM sales')?.count || 0,
-            customers: db.get('SELECT COUNT(*) as count FROM customers')?.count || 0,
-            users: db.get('SELECT COUNT(*) as count FROM users')?.count || 0,
-        };
+        const [products, sales, customers, users] = await Promise.all([
+            prisma.product.count(),
+            prisma.sale.count(),
+            prisma.customer.count(),
+            prisma.user.count()
+        ]);
 
         res.jsonResponse({
             system: {
@@ -264,7 +315,7 @@ router.get('/diagnostics', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), (
                 path: dbPath,
                 size: dbStats?.size || 0,
                 lastModified: dbStats?.mtime || null,
-                counts
+                counts: { products, sales, customers, users }
             },
             machineId: getMachineId()
         });
@@ -274,11 +325,11 @@ router.get('/diagnostics', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), (
 });
 
 // Export settings
-router.get('/export-config', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), (req, res) => {
+router.get('/export-config', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW), async (req, res) => {
     try {
-        const settings = db.all('SELECT key, value FROM settings');
+        const settingsRows = await prisma.globalSetting.findMany();
         const config = {};
-        settings.forEach(s => config[s.key] = s.value);
+        settingsRows.forEach(s => config[s.key] = s.value);
 
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Content-Disposition', 'attachment; filename=pos-config.json');
@@ -289,25 +340,37 @@ router.get('/export-config', auth, requirePermission(PERMISSIONS.SETTINGS_VIEW),
 });
 
 // Import settings
-router.post('/import-config', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), (req, res) => {
+router.post('/import-config', auth, requirePermission(PERMISSIONS.SETTINGS_EDIT), async (req, res) => {
     try {
         const config = req.body;
         if (!config || typeof config !== 'object') {
             return res.jsonError('Configuración inválida', 400);
         }
 
-        // Protected keys that shouldn't be imported
         const protectedKeys = ['license_key', 'machine_id', 'license_type'];
+        const entries = Object.entries(config).filter(([key]) => !protectedKeys.includes(key));
 
-        Object.entries(config).forEach(([key, value]) => {
-            if (!protectedKeys.includes(key)) {
-                db.run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, String(value)]);
-            }
-        });
+        for (const [key, value] of entries) {
+            await prisma.globalSetting.upsert({
+                where: { key },
+                update: { value: String(value) },
+                create: { key, value: String(value) }
+            });
+        }
 
-        db.audit('config_import', req.user.uid, 'settings', null, { keys: Object.keys(config).length });
+        try {
+            await prisma.audit.create({
+                data: {
+                    store_id: req.user.storeId,
+                    event: 'config_import',
+                    user_id: req.user.uid,
+                    ref_type: 'settings',
+                    data: JSON.stringify({ keys: entries.length })
+                }
+            });
+        } catch { }
 
-        res.jsonResponse({ success: true, imported: Object.keys(config).length });
+        res.jsonResponse({ success: true, imported: entries.length });
     } catch (e) {
         res.jsonError(e.message);
     }

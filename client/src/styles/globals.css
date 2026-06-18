@@ -39,6 +39,9 @@
   --color-ring: hsl(var(--ring));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-pos-checkout: hsl(var(--pos-checkout));
+  --color-pos-hold: hsl(var(--pos-hold));
+  --color-pos-offline: hsl(var(--pos-offline));
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);

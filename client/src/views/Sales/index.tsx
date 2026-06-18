@@ -13,7 +13,7 @@ import { CommandPalette, ShortcutsOverlay, useKeyboardShortcuts } from '../../co
 import { useScannerFocusEngine } from '../../hooks/useScannerFocusEngine';
 import { api } from '../../lib/api';
 import { enqueueSale, initSyncManager } from '../../lib/syncManager';
-import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check } from 'lucide-react';
+import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check, Lock, Wallet, UserPlus, X, Pause, Play, Clock } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
 
@@ -33,7 +33,7 @@ const CheckoutButton = React.memo(function CheckoutButton({
       className={cn(
         'w-full min-h-[var(--pos-btn-checkout-height)] text-base font-bold rounded-lg transition-all flex items-center justify-center gap-3',
         hasItems && !isProcessing
-          ? 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-sm'
+          ? 'bg-pos-checkout text-success-foreground hover:brightness-110 active:brightness-95 shadow-sm'
           : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
       )}
       disabled={!hasItems || isProcessing}
@@ -50,6 +50,93 @@ const CheckoutButton = React.memo(function CheckoutButton({
   );
 });
 
+const CustomerSearchModal = React.memo(function CustomerSearchModal({
+  open,
+  onClose,
+  onSelect,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSelect: (c: { id: number; name: string }) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setQuery('');
+      setResults([]);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || query.trim().length < 2) { setResults([]); return; }
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await api(`/customers?search=${encodeURIComponent(query.trim())}&take=10`);
+        const data = Array.isArray(res) ? res : res.data || [];
+        setResults(data);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query, open]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]" role="dialog" aria-modal="true" aria-label="Buscar cliente">
+      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-card rounded-xl shadow-2xl border border-border overflow-hidden">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+          <UserPlus className="h-5 w-5 text-muted-foreground" />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Buscar cliente por nombre o teléfono..."
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
+            className="flex-1 text-base outline-none bg-transparent placeholder:text-muted-foreground/50 text-foreground"
+            autoFocus
+          />
+        </div>
+        <div className="max-h-64 overflow-y-auto p-2">
+          {loading && <p className="text-center text-muted-foreground text-sm py-4">Buscando...</p>}
+          {!loading && query.length >= 2 && results.length === 0 && (
+            <p className="text-center text-muted-foreground text-sm py-4">No se encontraron clientes</p>
+          )}
+          {results.map(c => (
+            <button
+              key={c.id}
+              onClick={() => onSelect({ id: c.id, name: c.name })}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-muted transition-colors"
+            >
+              <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                {c.name?.charAt(0)?.toUpperCase() || '?'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate text-foreground">{c.name}</p>
+                {c.phone && <p className="text-xs text-muted-foreground truncate">{c.phone}</p>}
+              </div>
+            </button>
+          ))}
+          {!loading && query.length < 2 && (
+            <p className="text-center text-muted-foreground/60 text-xs py-6">Escribe al menos 2 caracteres para buscar</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+});
+
 const SalesView = React.memo(function SalesView() {
   const items = useCartStore(s => s.items);
   const addItem = useCartStore(s => s.addItem);
@@ -60,6 +147,10 @@ const SalesView = React.memo(function SalesView() {
   const hydrate = useCartStore(s => s.hydrate);
   const setDiscount = useCartStore(s => s.setDiscount);
   const discount = useCartStore(s => s.discount);
+  const heldTickets = useCartStore(s => s.heldTickets);
+  const holdCurrentTicket = useCartStore(s => s.holdCurrentTicket);
+  const recallTicket = useCartStore(s => s.recallTicket);
+  const removeHeldTicket = useCartStore(s => s.removeHeldTicket);
   const [isPayModalOpen, setPayModalOpen] = useState(false);
   const [isProcessing, setProcessing] = useState(false);
   const [isManualModalOpen, setManualModalOpen] = useState(false);
@@ -70,6 +161,10 @@ const SalesView = React.memo(function SalesView() {
   const [manualForm, setManualForm] = useState({ name: '', price: '' });
   const [payError, setPayError] = useState('');
   const [saleComplete, setSaleComplete] = useState<{ total: number; change: number; method: string } | null>(null);
+  const [cashOpen, setCashOpen] = useState<boolean | null>(null); // null = loading
+  const [selectedCustomer, setSelectedCustomer] = useState<{ id: number; name: string } | null>(null);
+  const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
+  const [showHeldTickets, setShowHeldTickets] = useState(false);
   const toast = useToast();
   const saleCompleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { forceFocusToScanner, restoreAfterModal, restoreAfterSaleComplete } = useScannerFocusEngine();
@@ -101,10 +196,11 @@ const SalesView = React.memo(function SalesView() {
         }
         break;
       case 'discount': setDiscountOpen(true); break;
-      case 'customer': focusSearch(); break;
+      case 'customer': setCustomerModalOpen(true); break;
+      case 'hold-ticket': holdCurrentTicket(); toast('Ticket en espera', 'info'); break;
       case 'command-palette': setCmdPaletteOpen(true); break;
       case 'show-shortcuts': setShortcutsOpen(true); break;
-      case 'escape': setCmdPaletteOpen(false); setShortcutsOpen(false); setDiscountOpen(false); break;
+      case 'escape': setCmdPaletteOpen(false); setShortcutsOpen(false); setDiscountOpen(false); setCustomerModalOpen(false); break;
     }
   }, [clearCart, focusSearch, toast]);
 
@@ -139,6 +235,22 @@ const SalesView = React.memo(function SalesView() {
     initSyncManager();
     focusSearch();
   }, [focusSearch, hydrate]);
+
+  // Cash gate: check if cash register is open
+  useEffect(() => {
+    const checkCash = async () => {
+      try {
+        const res = await api('/cash/status');
+        setCashOpen(!!res.session);
+      } catch {
+        setCashOpen(false);
+      }
+    };
+    checkCash();
+    const onCashUpdate = () => checkCash();
+    window.addEventListener('cash-status', onCashUpdate);
+    return () => window.removeEventListener('cash-status', onCashUpdate);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -182,6 +294,17 @@ const SalesView = React.memo(function SalesView() {
     iframe.style.border = 'none';
     document.body.appendChild(iframe);
 
+    // Read branding from localStorage
+    let branding = { businessName: 'POS Pro', businessSubtitle: 'Punto de Venta', logo: null as string | null };
+    try {
+      const stored = localStorage.getItem('app_branding');
+      if (stored) branding = { ...branding, ...JSON.parse(stored) };
+    } catch {}
+
+    const logoHtml = branding.logo
+      ? `<img src="${branding.logo}" style="max-height:40px;max-width:180px;margin:0 auto 4px;display:block" />`
+      : '';
+
     const html = `
       <html>
       <head><title>Ticket #${data.id}</title>
@@ -191,34 +314,41 @@ const SalesView = React.memo(function SalesView() {
         .right { text-align: right; }
         .bold { font-weight: bold; }
         .line { border-top: 1px dashed #000; margin: 5px 0; }
+        .amount { font-family: 'Courier New', monospace; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; }
         td { vertical-align: top; }
+        .footer-msg { margin-top: 16px; text-align: center; font-size: 11px; }
       </style></head>
       <body>
         <div class="center">
-          <h2 style="margin:0">POS SYSTEM</h2>
-          <p>Ticket: #${data.id}<br>Fecha: ${data.date.toLocaleString()}</p>
+          ${logoHtml}
+          <h2 style="margin:0;font-size:15px">${branding.businessName}</h2>
+          <p style="margin:2px 0;font-size:10px;color:#555">${branding.businessSubtitle}</p>
+          <p style="margin:4px 0">Ticket: #${data.id}<br>${data.date.toLocaleString()}</p>
           <p class="line"></p>
         </div>
         <table>
           ${data.items.map((item: any) => `
-            <tr><td colspan="2">${item.name}</td></tr>
-            <tr><td>${item.quantity} x $${item.price.toFixed(2)}</td><td class="right">$${(item.quantity * item.price).toFixed(2)}</td></tr>
+            <tr><td colspan="2" class="bold">${item.name}</td></tr>
+            <tr><td>${item.quantity} x $${item.price.toFixed(2)}</td><td class="right amount">$${(item.quantity * item.price).toFixed(2)}</td></tr>
           `).join('')}
         </table>
         <p class="line"></p>
         <table>
-          <tr><td>Subtotal:</td><td class="right">$${data.totals.subtotal.toFixed(2)}</td></tr>
-          <tr><td>IVA:</td><td class="right">$${data.totals.tax.toFixed(2)}</td></tr>
-          ${data.totals.discount > 0 ? `<tr><td>Descuento:</td><td class="right">-$${data.totals.discount.toFixed(2)}</td></tr>` : ''}
-          <tr class="bold" style="font-size:14px"><td>TOTAL:</td><td class="right">$${data.totals.total.toFixed(2)}</td></tr>
+          <tr><td>Subtotal:</td><td class="right amount">$${data.totals.subtotal.toFixed(2)}</td></tr>
+          <tr><td>IVA (16%):</td><td class="right amount">$${data.totals.tax.toFixed(2)}</td></tr>
+          ${data.totals.discount > 0 ? `<tr><td>Descuento:</td><td class="right amount">-$${data.totals.discount.toFixed(2)}</td></tr>` : ''}
+          <tr class="bold" style="font-size:15px"><td>TOTAL:</td><td class="right amount">$${data.totals.total.toFixed(2)}</td></tr>
         </table>
         <p class="line"></p>
         <table>
-          ${data.payments.map((p: any) => `<tr><td>Pago (${p.method}):</td><td class="right">$${p.amount.toFixed(2)}</td></tr>`).join('')}
-          <tr class="bold"><td>Cambio:</td><td class="right">$${data.change.toFixed(2)}</td></tr>
+          ${data.payments.map((p: any) => `<tr><td>Pago (${p.method}):</td><td class="right amount">$${p.amount.toFixed(2)}</td></tr>`).join('')}
+          <tr class="bold"><td>Cambio:</td><td class="right amount">$${data.change.toFixed(2)}</td></tr>
         </table>
-        <div class="center" style="margin-top:20px"><p>Gracias por su compra!</p></div>
+        <div class="footer-msg">
+          <p class="bold">\u00A1Gracias por su compra!</p>
+          <p style="color:#888;margin-top:4px">Conserve este ticket para cualquier aclaraci\u00F3n</p>
+        </div>
         <script>window.onload = function() { window.print(); setTimeout(() => window.close(), 500); }; <\/script>
       </body></html>
     `;
@@ -236,9 +366,9 @@ const SalesView = React.memo(function SalesView() {
     const currentItems = itemsRef.current;
     const validation = validateStock();
     if (!validation.valid) {
-      setPayError(validation.message);
+      setPayError(validation.message || 'Stock insuficiente');
       setProcessing(false);
-      throw new Error(validation.message);
+      throw new Error(validation.message || 'Stock invalid');
     }
 
     try {
@@ -263,6 +393,7 @@ const SalesView = React.memo(function SalesView() {
         discount: computedTotals.discount,
         payment_method: paymentData.method,
         payments,
+        customer_id: selectedCustomer?.id || null,
       };
 
       const idempotencyKey = generateCheckoutId();
@@ -303,6 +434,7 @@ const SalesView = React.memo(function SalesView() {
 
       printTicket({ items: currentItems, totals: computedTotals, payments, change: paymentData.change || 0, date: new Date(), id: ticketId });
       clearCart();
+      setSelectedCustomer(null);
       showSaleComplete(computedTotals.total, paymentData.change || 0, paymentData.method);
       if (offlineMode) toast('Venta guardada localmente hasta que haya internet', 'info');
       restoreAfterSaleComplete();
@@ -314,7 +446,7 @@ const SalesView = React.memo(function SalesView() {
     } finally {
       setProcessing(false);
     }
-  }, [validateStock, generateCheckoutId, printTicket, clearCart, toast, showSaleComplete, restoreAfterSaleComplete]);
+  }, [validateStock, generateCheckoutId, printTicket, clearCart, toast, showSaleComplete, restoreAfterSaleComplete, selectedCustomer]);
 
   const handleAddManual = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -322,11 +454,12 @@ const SalesView = React.memo(function SalesView() {
 
     addItem({
       id: crypto.randomUUID?.() || 'manual-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
-      name: manualForm.name,
-      price: parseFloat(manualForm.price),
+      name: manualForm.name || 'Producto',
+      price: parseFloat(manualForm.price || '0'),
+      quantity: 1,
       stock: 999999,
       isManual: true,
-    });
+    } as any);
 
     setManualForm({ name: '', price: '' });
     setManualModalOpen(false);
@@ -337,8 +470,8 @@ const SalesView = React.memo(function SalesView() {
   const openPayModal = useCallback(() => {
     const validation = validateStock();
     if (!validation.valid) {
-      setPayError(validation.message);
-      toast(validation.message, 'warning');
+      setPayError(validation.message ?? 'Stock insuficiente');
+      toast(validation.message ?? 'Stock insuficiente', 'warning');
       return;
     }
     setPayError('');
@@ -365,7 +498,8 @@ const SalesView = React.memo(function SalesView() {
 
   return (
     <div className="h-full min-h-0 flex gap-2.5 overflow-hidden">
-      <div className="flex-1 flex flex-col gap-2.5 min-w-0">
+      {/* Catalog panel — 60% on kiosk landscape */}
+      <div className="flex-1 min-w-0 flex flex-col gap-2.5" style={{ flexBasis: 'var(--pos-catalog-width, 60%)' }}>
         <div className="flex gap-2">
           <div className="flex-1">
             <ProductSearch />
@@ -386,7 +520,8 @@ const SalesView = React.memo(function SalesView() {
         </div>
       </div>
 
-      <div className="w-full max-w-[360px] lg:max-w-[400px] xl:max-w-[420px] flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden min-w-[280px] pos-cart-panel">
+      {/* Cart panel — 40% on kiosk landscape, fixed right */}
+      <div className="flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden pos-cart-panel" style={{ flexBasis: 'var(--pos-cart-width, 40%)', minWidth: '280px', maxWidth: '480px' }}>
         <div className="px-3 py-2 border-b border-border/20 flex items-center justify-between shrink-0">
           <h2 className="font-bold text-xs flex items-center gap-1.5" id="cart-heading">
             <ShoppingBag className="size-3.5" />
@@ -396,6 +531,24 @@ const SalesView = React.memo(function SalesView() {
             </span>
           </h2>
           <div className="flex items-center gap-1">
+            {heldTickets.length > 0 && (
+              <button
+                onClick={() => setShowHeldTickets(!showHeldTickets)}
+                className="text-[10px] font-semibold text-pos-hold hover:bg-pos-hold/10 px-2 py-1.5 rounded-md transition-colors flex items-center gap-0.5 touch-target relative"
+                title={`Tickets en espera (${heldTickets.length})`}
+              >
+                <Clock className="size-3" />
+                <span>{heldTickets.length}</span>
+              </button>
+            )}
+            <button
+              onClick={() => { if (items.length > 0) { holdCurrentTicket(); toast('Ticket en espera', 'info'); } }}
+              disabled={!hasItems}
+              className="text-[10px] font-semibold text-info hover:bg-info/10 px-2 py-1.5 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5 touch-target"
+              title="Pausar ticket (Ctrl+H)"
+            >
+              <Pause className="size-3" />Pausar
+            </button>
             <button
               onClick={() => setDiscountOpen(true)}
               disabled={!hasItems}
@@ -416,6 +569,32 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-1" role="region" aria-labelledby="cart-heading" aria-live="polite">
+          {showHeldTickets && heldTickets.length > 0 && (
+            <div className="mb-2 border border-pos-hold/30 rounded-lg bg-pos-hold/5 overflow-hidden">
+              <div className="px-3 py-2 border-b border-pos-hold/20 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-pos-hold uppercase tracking-wider">Tickets en espera</span>
+                <button onClick={() => setShowHeldTickets(false)} className="text-pos-hold/60 hover:text-foreground"><X className="size-3" /></button>
+              </div>
+              {heldTickets.map(t => (
+                <div key={t.id} className="px-3 py-2 flex items-center justify-between border-b border-pos-hold/10 last:border-0">
+                  <button
+                    onClick={() => { recallTicket(t.id); setShowHeldTickets(false); toast(`Ticket restaurado: ${t.label}`, 'success'); }}
+                    className="flex-1 text-left min-w-0"
+                  >
+                    <p className="text-xs font-semibold text-foreground truncate">{t.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{t.items.length} items · {new Date(t.heldAt).toLocaleTimeString()}</p>
+                  </button>
+                  <button
+                    onClick={() => { removeHeldTicket(t.id); toast('Ticket descartado', 'info'); }}
+                    className="text-danger/60 hover:text-danger ml-2 shrink-0 touch-target"
+                    aria-label="Descartar ticket"
+                  >
+                    <XCircle className="size-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <Cart />
         </div>
 
@@ -433,9 +612,34 @@ const SalesView = React.memo(function SalesView() {
         )}
 
         <div className="px-3 py-2 border-t border-border/20 space-y-2 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
+          {/* Customer selector */}
+          <div className="flex items-center gap-2">
+            {selectedCustomer ? (
+              <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-info/10 border border-info/20 text-xs">
+                <UserPlus className="size-3.5 text-info shrink-0" />
+                <span className="font-semibold text-info truncate flex-1">{selectedCustomer.name}</span>
+                <button
+                  onClick={() => setSelectedCustomer(null)}
+                  className="text-info/60 hover:text-danger transition-colors shrink-0"
+                  aria-label="Quitar cliente"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setCustomerModalOpen(true)}
+                className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-dashed border-border/40 text-xs text-muted-foreground hover:border-info/40 hover:text-info transition-colors"
+              >
+                <UserPlus className="size-3.5" />
+                <span>Agregar cliente (F6)</span>
+              </button>
+            )}
+          </div>
+
           <div className="flex items-baseline justify-between">
             <span className="text-xs text-muted-foreground font-medium">Total:</span>
-            <span className="text-3xl font-black text-foreground tracking-tight tabular-nums">
+            <span className="text-3xl font-black text-foreground tracking-tight font-mono tabular-nums">
               {formatMoney(totals.total)}
             </span>
           </div>
@@ -462,7 +666,7 @@ const SalesView = React.memo(function SalesView() {
               <Check className="size-6 text-success" />
             </div>
             <p className="text-base font-black text-foreground mb-0.5">VENTA COMPLETADA</p>
-            <p className="text-2xl font-black text-success tabular-nums mb-1">{formatMoney(saleComplete.total)}</p>
+            <p className="text-2xl font-black text-pos-checkout font-mono tabular-nums mb-1">{formatMoney(saleComplete.total)}</p>
             {saleComplete.change > 0 && (
               <p className="text-sm font-semibold text-muted-foreground">
                 Cambio: <span className="text-foreground tabular-nums">{formatMoney(saleComplete.change)}</span>
@@ -559,6 +763,35 @@ const SalesView = React.memo(function SalesView() {
 
       <CommandPalette open={isCmdPaletteOpen} onClose={() => { setCmdPaletteOpen(false); restoreAfterModal(); }} />
       <ShortcutsOverlay open={isShortcutsOpen} onClose={() => { setShortcutsOpen(false); restoreAfterModal(); }} />
+
+      {/* Customer Search Modal */}
+      <CustomerSearchModal
+        open={isCustomerModalOpen}
+        onClose={() => { setCustomerModalOpen(false); restoreAfterModal(); }}
+        onSelect={(c) => { setSelectedCustomer(c); setCustomerModalOpen(false); toast(`Cliente: ${c.name}`, 'info'); restoreAfterModal(); }}
+      />
+
+      {/* Cash Gate: block sales when cash register is closed */}
+      {cashOpen === false && (
+        <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-card rounded-xl border border-border p-8 text-center max-w-sm shadow-2xl">
+            <div className="size-14 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
+              <Lock className="size-7 text-danger" />
+            </div>
+            <h3 className="text-lg font-black text-foreground mb-2">Caja Cerrada</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Debes abrir caja antes de realizar ventas. Ve a la secci&oacute;n de Caja para aperturar.
+            </p>
+            <a
+              href="#/caja"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
+            >
+              <Wallet className="size-4" />
+              Abrir Caja
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

@@ -186,7 +186,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
       <div className="flex flex-col gap-3">
         <div className="text-center py-1">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total a pagar</p>
-          <p className="text-3xl font-black tracking-tight tabular-nums text-foreground">{formatMoney(total)}</p>
+          <p className="text-3xl font-black tracking-tight tabular-nums font-mono text-foreground">{formatMoney(total)}</p>
         </div>
 
         <div className="grid grid-cols-4 gap-1">
@@ -295,7 +295,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
           className={cn(
             'w-full min-h-[var(--touch-target-xl)] text-base font-bold rounded-md transition-all flex items-center justify-center gap-2',
             isReady && !submitLocked.current
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-sm'
+              ? 'bg-pos-checkout text-success-foreground hover:brightness-110 active:brightness-95 shadow-sm'
               : 'bg-muted text-muted-foreground/50 cursor-not-allowed',
           )}
           aria-label="Confirmar cobro"

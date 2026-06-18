@@ -2,8 +2,8 @@
   "name": "punto-de-venta-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Backend POS con Express y SQLite",
-  "main": "index.js",
+  "description": "Backend POS con Express y Prisma",
+  "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts",
     "dev": "nodemon index.ts",

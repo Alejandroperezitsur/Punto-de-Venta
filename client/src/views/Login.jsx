@@ -23,6 +23,7 @@ const Login = () => {
     businessSubtitle: 'Sistema Profesional de Gestión',
     primaryColor: '#3b82f6',
   });
+  const isProd = import.meta.env.PROD;
   const login = useUserStore(state => state.login);
   const navigate = useNavigate();
   const { isDark, toggleDark } = useTheme();
@@ -192,6 +193,7 @@ const Login = () => {
                       placeholder="admin"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="username"
                       autoFocus
                       className="flex-1 bg-transparent border-none text-foreground font-medium text-base placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0"
                     />
@@ -215,6 +217,7 @@ const Login = () => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="current-password"
                       className="flex-1 bg-transparent border-none text-foreground font-medium text-base placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0"
                     />
                     <button
@@ -271,6 +274,7 @@ const Login = () => {
                   )}
                 </button>
 
+                {!isProd && (
                 <div className="pt-6 mt-6 border-t border-border/40 text-center">
                   <p className="text-xs font-medium text-muted-foreground/70 mb-2 uppercase tracking-wider">
                     Acceso de demostración
@@ -281,6 +285,7 @@ const Login = () => {
                     <span>admin123</span>
                   </div>
                 </div>
+                )}
               </motion.form>
             ) : (
               <motion.div

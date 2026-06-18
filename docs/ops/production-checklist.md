@@ -245,8 +245,47 @@ update_config:
 | Security | | | |
 | DevOps | | | |
 
+## 16. Audit v2.1 Corrections (Applied)
+
+### Phase 0 — Backend Stabilization
+- [x] Entrypoint unified: `package.json` scripts, Dockerfile CMD, `reset-db`
+- [x] Prisma schema aligned with code: Session fields (jti, device_fingerprint, last_activity, revoked)
+- [x] Missing tables migrated: sessions, reconciliation_logs, inventory_versions, fraud_alerts, idempotency_keys
+- [x] `system.js` migrated from legacy SQLite API to Prisma
+- [x] Middleware order fixed: `attachTokenRotation` before routes, `loginLimiter` on auth
+- [x] Fraud interceptor moved inside sales router (after auth, before handler)
+- [x] Multi-tenant leaks closed: roadmap POST auth, receivables store filter
+
+### Phase 1 — Cashier UX
+- [x] Keyboard shortcuts unified in `shortcuts.ts` (F1-F10, Ctrl+K)
+- [x] Cash gate: blocking overlay when cash register is closed
+- [x] Customer-in-checkout: search modal, customer_id in sale payload
+- [x] PWA landscape orientation for tablets
+- [x] Sidebar F-key labels corrected (removed wrong assignments)
+
+### Phase 2 — Enterprise 2026 Visual Redesign
+- [x] Palette: Deep navy primary (HSL 220/78/34), functional green checkout, amber hold
+- [x] POS kiosk layout: catalog 60% / cart 40% percentage-based
+- [x] Monospace font for monetary amounts (font-mono + tabular-nums)
+- [x] Branded tickets: business name, logo, subtitle from localStorage
+- [x] Login production: demo credentials hidden in production, autocomplete attributes
+- [x] Corporate theme: complete light + dark variants with POS semantic tokens
+
+### Phase 3 — Security
+- [x] Payment validation: server-side sum check (payments >= total), method validation
+- [x] saleRules connected: express-validator rules applied to POST /api/sales
+- [x] Error format unified: `{ data: null, error: { message, code } }` across all handlers
+- [x] CORS production: configurable via `ALLOWED_ORIGINS` env var
+- [x] Admin SaaS: input validation for store creation (name, username, password lengths)
+
+### Phase 4 — Enterprise Features
+- [x] Hold/recall tickets: pause cart, view held tickets, recall or discard
+- [x] F6 (customer) and F8 (hold-ticket) shortcuts registered
+- [x] Theme dark mode: corporate + dark toggle works via data-mode attribute
+- [x] Held tickets persisted in localStorage with 48h expiration
+
 ---
 
-**Version**: v2.0.0  
-**Date**: $(date +%Y-%m-%d)  
+**Version**: v2.1.0  
+**Date**: 2026-06-17  
 **Status**: Release Candidate

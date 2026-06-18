@@ -9,11 +9,7 @@ router.get('/', auth, async (req, res) => {
   try {
     const rows = await prisma.receivable.findMany({
       where: {
-        sale: { store_id: req.user.storeId } // Link via sale to store? Or check if Receivable has store_id directly?
-        // Checking Schema again from memory: Receivable likely doesn't have store_id directly if it was simple, 
-        // but it SHOULD. If not, we filter via customer or sale.
-        // Let's assume we filter via Sale or Customer which definitely have store_id.
-        // Safest is to rely on Sale's store_id if Receivable doesn't have it.
+        sale: { store_id: req.user.storeId }
       },
       orderBy: { id: 'desc' },
       include: {

@@ -116,6 +116,26 @@ async function createSale({ customer_id = null, items = [], discount = 0, paymen
 
     const payList = Array.isArray(payments) && payments.length ? payments : [{ method: payment_method, amount: total }];
 
+    // Validate payment amounts sum covers the total
+    const paymentSum = payList.reduce((sum, p) => sum + toDecimal(p.amount), 0);
+    if (paymentSum < total - 0.01) {
+      throw Object.assign(
+        new Error(`Suma de pagos (${toDecimal(paymentSum)}) insuficiente para el total (${total})`),
+        { status: 400 }
+      );
+    }
+
+    // Validate payment methods
+    const validMethods = ['cash', 'card', 'transfer', 'credit'];
+    for (const p of payList) {
+      if (!validMethods.includes(p.method)) {
+        throw Object.assign(new Error(`Método de pago inválido: ${p.method}`), { status: 400 });
+      }
+      if (toDecimal(p.amount) < 0) {
+        throw Object.assign(new Error('Los montos de pago no pueden ser negativos'), { status: 400 });
+      }
+    }
+
     let cashAmount = 0;
     for (const p of payList) {
       const amount = toDecimal(p.amount);
