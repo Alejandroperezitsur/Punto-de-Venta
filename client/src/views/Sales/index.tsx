@@ -428,7 +428,7 @@ const SalesView = React.memo(function SalesView() {
           payment_method: paymentData.method,
           created_at: new Date(),
           idempotency_key: idempotencyKey,
-        }, idempotencyKey);
+        });
         offlineMode = true;
       }
 

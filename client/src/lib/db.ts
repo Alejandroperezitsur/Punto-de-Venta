@@ -162,12 +162,12 @@ interface POSDB extends DBSchema {
   offlineSales: {
     key: string;
     value: OfflineSale;
-    indexes: { 'by-synced': boolean; 'by-date': Date };
+    indexes: { 'by-synced': number; 'by-date': Date };
   };
   offlineMovements: {
     key: string;
     value: OfflineInventoryMovement;
-    indexes: { 'by-synced': boolean };
+    indexes: { 'by-synced': number };
   };
   cartPersist: {
     key: string;
@@ -282,10 +282,14 @@ interface POSDB extends DBSchema {
     value: any;
     indexes: { 'by-product': string; 'by-synced': string };
   };
+  settings: {
+    key: string;
+    value: { key: string; value: unknown };
+  };
 }
 
 const DB_NAME = 'pos-offline';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 let dbPromise: Promise<IDBPDatabase<POSDB>> | null = null;
 
@@ -406,6 +410,9 @@ export function getDB(): Promise<IDBPDatabase<POSDB>> {
           s.createIndex('by-product', 'product_id');
           s.createIndex('by-synced', 'synced');
         }
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'key' });
+        }
       },
       blocked() { console.warn('[DB] Blocked by other tab'); },
       blocking() { console.warn('[DB] Close other tabs to upgrade'); },
@@ -439,28 +446,28 @@ export async function saveOfflineSale(sale: OfflineSale): Promise<void> {
 
 export async function getUnsyncedSales(): Promise<OfflineSale[]> {
   const db = await getDB();
-  return db.transaction('offlineSales').store.index('by-synced').getAll(false);
+  return db.transaction('offlineSales').store.index('by-synced').getAll(0);
 }
 
 export async function markSaleSynced(id: string): Promise<void> {
   const db = await getDB();
   const sale = await db.get('offlineSales', id);
   if (sale) {
-    sale.synced = true;
+    sale.synced = true as any;
     await db.put('offlineSales', sale);
   }
 }
 
 export async function getUnsyncedMovements(): Promise<OfflineInventoryMovement[]> {
   const db = await getDB();
-  return db.transaction('offlineMovements').store.index('by-synced').getAll(false);
+  return db.transaction('offlineMovements').store.index('by-synced').getAll(0);
 }
 
 export async function markMovementSynced(id: string): Promise<void> {
   const db = await getDB();
   const mov = await db.get('offlineMovements', id);
   if (mov) {
-    mov.synced = true;
+    mov.synced = true as any;
     await db.put('offlineMovements', mov);
   }
 }
