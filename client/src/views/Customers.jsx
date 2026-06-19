@@ -89,6 +89,7 @@ const CustomersView = () => {
       <ViewHeader
         title="Clientes"
         description={customers.length > 0 ? `${customers.length} registrados` : 'Gestiona tus clientes'}
+        icon={<Users className="size-5 text-primary" />}
       >
         <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-lg border border-border/30">
           <RefreshCw className="size-4" />
@@ -99,8 +100,13 @@ const CustomersView = () => {
       </ViewHeader>
 
       {showForm && (
-        <Card className="p-4 border border-primary/15 rounded-xl">
-          <h3 className="text-sm font-bold mb-3">Registrar Cliente</h3>
+        <Card className="p-5 border border-primary/12 rounded-2xl bg-card/80">
+          <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+            <div className="size-7 rounded-lg bg-primary/8 flex items-center justify-center">
+              <Plus className="size-3.5 text-primary" />
+            </div>
+            Registrar Cliente
+          </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
             <div className="md:col-span-2">
               <Input placeholder="Nombre completo" value={form.name}

@@ -14,10 +14,12 @@ import {
 } from 'lucide-react';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
-  <Card variant="outline" className="p-6 space-y-4">
-    <div className="flex items-center gap-3 border-b border-border pb-3 mb-2">
-      <Icon className="h-5 w-5 text-primary" />
-      <h3 className="font-semibold text-lg">{title}</h3>
+  <Card variant="outline" className="p-6 space-y-4 rounded-2xl hover:border-border-accent/30 transition-colors">
+    <div className="flex items-center gap-3 border-b border-border/10 pb-3 mb-2">
+      <div className="size-8 rounded-lg bg-primary/8 flex items-center justify-center">
+        <Icon className="size-4 text-primary" />
+      </div>
+      <h3 className="font-semibold text-base">{title}</h3>
     </div>
     {children}
   </Card>
@@ -109,10 +111,15 @@ const BusinessSettings = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-20">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <Settings className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Configuración del Sistema</h1>
+      <div className="flex justify-between items-center pb-4 border-b border-border/10">
+        <div className="flex items-center gap-3.5">
+          <div className="size-11 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
+            <Settings className="size-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-[1.5rem] font-bold tracking-tight text-foreground leading-tight">Configuración del Sistema</h1>
+            <p className="text-muted-foreground font-medium text-xs mt-0.5">Personaliza tu punto de venta</p>
+          </div>
         </div>
         <Button onClick={handleSave} isLoading={saving} disabled={saved}>
           {saved ? (

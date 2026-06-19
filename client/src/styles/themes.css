@@ -1,7 +1,7 @@
 ﻿:root,
 [data-theme="light"] {
-  /* Enterprise 2026: Vibrant deep navy — authoritative, modern corporate */
-  --primary-h: 220; --primary-s: 72%; --primary-l: 32%;
+  /* Enterprise 2026: Deep authoritative navy — Walmart-grade corporate */
+  --primary-h: 220; --primary-s: 78%; --primary-l: 24%;
   --primary-foreground-h: 210; --primary-foreground-s: 40%; --primary-foreground-l: 98%;
 
   /* Accent: warm amber-orange — premium secondary actions */
@@ -58,6 +58,10 @@
   --pos-checkout-h: 152; --pos-checkout-s: 68%; --pos-checkout-l: 36%;
   --pos-hold-h: 38; --pos-hold-s: 88%; --pos-hold-l: 50%;
   --pos-offline-h: 25; --pos-offline-s: 90%; --pos-offline-l: 48%;
+
+  /* Enterprise panel + accent border — light */
+  --surface-panel-h: 220; --surface-panel-s: 14%; --surface-panel-l: 98%;
+  --border-accent-h: 220; --border-accent-s: 40%; --border-accent-l: 82%;
 }
 
 [data-theme="dark"] {
@@ -113,11 +117,15 @@
   --pos-checkout-h: 152; --pos-checkout-s: 52%; --pos-checkout-l: 48%;
   --pos-hold-h: 38; --pos-hold-s: 72%; --pos-hold-l: 55%;
   --pos-offline-h: 25; --pos-offline-s: 78%; --pos-offline-l: 52%;
+
+  /* Enterprise panel + accent border — dark */
+  --surface-panel-h: 222; --surface-panel-s: 14%; --surface-panel-l: 9%;
+  --border-accent-h: 220; --border-accent-s: 35%; --border-accent-l: 28%;
 }
 
 [data-theme="corporate"] {
-  --primary-h: 220; --primary-s: 72%; --primary-l: 32%;
-  --ring-h: 220; --ring-s: 72%; --ring-l: 32%;
+  --primary-h: 220; --primary-s: 78%; --primary-l: 24%;
+  --ring-h: 220; --ring-s: 78%; --ring-l: 24%;
   --accent-h: 32; --accent-s: 88%; --accent-l: 48%;
   --success-h: 152; --success-s: 68%; --success-l: 36%;
   --warning-h: 38; --warning-s: 92%; --warning-l: 48%;
@@ -188,4 +196,8 @@
   --pos-checkout: var(--pos-checkout-h) var(--pos-checkout-s) var(--pos-checkout-l);
   --pos-hold: var(--pos-hold-h) var(--pos-hold-s) var(--pos-hold-l);
   --pos-offline: var(--pos-offline-h) var(--pos-offline-s) var(--pos-offline-l);
+
+  /* Enterprise composites */
+  --surface-panel: var(--surface-panel-h) var(--surface-panel-s) var(--surface-panel-l);
+  --border-accent: var(--border-accent-h) var(--border-accent-s) var(--border-accent-l);
 }

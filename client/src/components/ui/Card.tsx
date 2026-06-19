@@ -2,7 +2,7 @@
 import { cn } from '../../utils/cn';
 
 interface CardProps {
-  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent';
+  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent' | 'dashboard';
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -21,6 +21,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
     inset: 'bg-surface-inset text-foreground border border-border-subtle shadow-inner-sm',
     premium: 'bg-card text-card-foreground shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px gradient-border',
     accent: 'bg-surface-accent text-foreground border border-border/30 shadow-xs',
+    dashboard: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:border-border-accent/40 hover:-translate-y-px transition-all duration-200',
   };
   return (
     <Component

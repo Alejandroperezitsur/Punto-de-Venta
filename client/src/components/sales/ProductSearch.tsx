@@ -21,6 +21,7 @@ const ProductSearch = React.memo(function ProductSearch() {
   const [query, setQuery] = useState('');
   const [scannerStatus, setScannerStatus] = useState<'ready' | 'scanning' | 'error' | 'idle'>('ready');
   const [feedback, setFeedback] = useState<ScanFeedback | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingScans = useRef(0);
@@ -149,24 +150,31 @@ const ProductSearch = React.memo(function ProductSearch() {
     return 'bg-success/50';
   };
 
+  const borderColor = () => {
+    if (scannerStatus === 'scanning') return 'border-primary/50 shadow-lg shadow-primary/10';
+    if (scannerStatus === 'error') return 'border-danger/50 shadow-lg shadow-danger/8';
+    if (isFocused) return 'border-primary/45 shadow-lg shadow-primary/8';
+    return 'border-border/25';
+  };
+
   return (
     <div className="relative">
       <form onSubmit={handleSearch} role="search" aria-label="Buscar producto">
         <div className="relative">
           {/* Premium hero scan bar */}
           <div className={cn(
-            'flex items-center gap-3 rounded-2xl border-2 bg-card transition-all duration-200',
-            'px-4 h-[3.5rem]',
-            scannerStatus === 'scanning'
-              ? 'border-primary/50 shadow-lg shadow-primary/10'
-              : scannerStatus === 'error'
-                ? 'border-danger/50 shadow-lg shadow-danger/10'
-                : 'border-border/30 focus-within:border-primary/50 focus-within:shadow-lg focus-within:shadow-primary/10',
+            'flex items-center gap-3.5 rounded-2xl border-2 bg-card transition-all duration-200',
+            'px-4 h-[4rem]',
+            borderColor(),
           )}>
             {/* Animated scanner icon */}
             <div className={cn(
-              'shrink-0 transition-all duration-200',
-              scannerStatus === 'scanning' ? 'text-primary scale-110' : 'text-muted-foreground/40',
+              'shrink-0 size-10 rounded-xl flex items-center justify-center transition-all duration-200',
+              scannerStatus === 'scanning'
+                ? 'bg-primary/12 text-primary scale-105'
+                : isFocused
+                  ? 'bg-primary/8 text-primary/70'
+                  : 'bg-muted/30 text-muted-foreground/35',
             )}>
               {loading ? (
                 <Loader2 className="size-5 animate-spin" />
@@ -182,17 +190,19 @@ const ProductSearch = React.memo(function ProductSearch() {
               placeholder="Escanear o buscar producto..."
               value={query}
               onChange={(e) => { setQuery(e.target.value); if (error) setError(''); if (scannerStatus === 'error') setScannerStatus('ready'); }}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               disabled={loading}
               data-scan-input="true"
               aria-label="Buscar o escanear producto"
               autoComplete="off"
-              className="flex-1 bg-transparent border-none text-base font-semibold text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:ring-0 disabled:opacity-50"
+              className="flex-1 bg-transparent border-none text-base font-semibold text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-0 disabled:opacity-50"
             />
 
             {/* Scanner status indicator */}
             {scannerStatus === 'idle' ? (
               <div className="shrink-0" title="Scanner no detectado">
-                <WifiOff className="size-4 text-muted-foreground/25" />
+                <WifiOff className="size-4 text-muted-foreground/20" />
               </div>
             ) : (
               <div className={cn(
@@ -203,7 +213,7 @@ const ProductSearch = React.memo(function ProductSearch() {
             )}
 
             {/* Keyboard shortcut hint */}
-            <span className="shrink-0 text-[10px] font-bold text-muted-foreground/20 bg-muted/30 px-2 py-1 rounded-lg hidden xl:inline tracking-wider">
+            <span className="shrink-0 text-[9px] font-bold text-muted-foreground/18 bg-muted/25 px-2 py-1 rounded-lg hidden xl:inline tracking-wider uppercase">
               F1
             </span>
           </div>

@@ -117,7 +117,7 @@
   --touch-target-lg:  3.5rem;
   --touch-target-xl:  4rem;
 
-  --header-height: 3.5rem;
+  --header-height: 3.75rem;
   --sidebar-width: 15rem;
   --sidebar-collapsed: 4.25rem;
 
@@ -151,9 +151,22 @@
   --gradient-checkout: linear-gradient(135deg, hsl(var(--pos-checkout)) 0%, hsl(var(--pos-checkout) / 0.82) 100%);
   --gradient-accent: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.85) 100%);
   --gradient-hero-scan: linear-gradient(90deg, hsl(var(--primary) / 0.04) 0%, transparent 40%, transparent 60%, hsl(var(--accent) / 0.04) 100%);
+  --gradient-hero: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--accent) / 0.05) 40%, hsl(var(--primary) / 0.03) 100%);
+  --gradient-mesh: radial-gradient(ellipse 80% 60% at 20% 30%, hsl(var(--primary) / 0.07) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 70%, hsl(var(--accent) / 0.05) 0%, transparent 60%);
+  --gradient-panel: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%);
 
   /* Premium surface accent */
   --surface-accent-h: 215;
   --surface-accent-s: 20%;
   --surface-accent-l: 97%;
+
+  /* Enterprise panel surface — slightly warmer than card */
+  --surface-panel-h: 220;
+  --surface-panel-s: 14%;
+  --surface-panel-l: 98%;
+
+  /* Accent border — subtle primary tint */
+  --border-accent-h: 220;
+  --border-accent-s: 40%;
+  --border-accent-l: 82%;
 }

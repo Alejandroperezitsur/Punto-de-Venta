@@ -46,6 +46,8 @@
   --color-pos-checkout: hsl(var(--pos-checkout));
   --color-pos-hold: hsl(var(--pos-hold));
   --color-pos-offline: hsl(var(--pos-offline));
+  --color-surface-panel: hsl(var(--surface-panel));
+  --color-border-accent: hsl(var(--border-accent));
 
   --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
@@ -105,18 +107,18 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.18);
+  background: hsl(var(--muted-foreground) / 0.14);
   border-radius: var(--radius-full);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.3);
+  background: hsl(var(--muted-foreground) / 0.28);
 }
 
 :focus-visible {
@@ -378,6 +380,66 @@ img {
 /* GPU-safe transition utilities */
 .duration-60 { transition-duration: 60ms; }
 .duration-80 { transition-duration: 80ms; }
+
+/* Enterprise panel — premium surface with subtle gradient border */
+.enterprise-panel {
+  background: hsl(var(--surface-panel));
+  border: 1px solid hsl(var(--border-accent) / 0.35);
+  box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.03);
+  border-radius: var(--radius-xl);
+}
+
+/* Stat card for KPI metrics */
+.stat-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  transition: all 0.15s var(--ease-out);
+}
+.stat-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  border-color: hsl(var(--border-accent) / 0.4);
+}
+
+/* Slide in from left */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-left {
+  animation: slideInLeft 0.28s var(--ease-out) forwards;
+}
+
+/* Pulse scale — subtle attention getter */
+@keyframes pulseScale {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.03); }
+}
+.animate-pulse-scale {
+  animation: pulseScale 2s var(--ease-smooth) infinite;
+}
+
+/* Gradient shift — animated background gradient */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Dot grid background pattern */
+.dot-pattern {
+  background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
 
 /* Ensure all animations use transform/opacity for GPU compositing */
 .cart-item-enter,

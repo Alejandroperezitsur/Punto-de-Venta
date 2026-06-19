@@ -11,7 +11,7 @@ import { Select } from '../components/ui/Select';
 import { ViewContainer } from '../components/layout/ViewContainer';
 import { ViewHeader } from '../components/layout/ViewHeader';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, X, Check } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Check, UserCog } from 'lucide-react';
 import { ConfirmModal } from '../components/sales/ConfirmModal';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
@@ -95,7 +95,7 @@ const UsersView = () => {
     return (
         <>
             <ViewContainer maxWidth="md">
-            <ViewHeader title="Gestión de Usuarios">
+            <ViewHeader title="Gestión de Usuarios" icon={<UserCog className="size-5 text-primary" />}>
                 <Button onClick={() => { setShowForm(!showForm); setEditingId(null); setForm({ username: '', password: '', role: 'cajero' }); }}>
                     {showForm ? <X className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
                     {showForm ? 'Cancelar' : 'Nuevo Usuario'}
@@ -104,8 +104,13 @@ const UsersView = () => {
 
             {showForm && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                    <Card className="p-6 border-l-4 border-l-primary rounded-xl">
-                        <h3 className="font-semibold mb-4">{editingId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h3>
+                    <Card className="p-6 border-l-4 border-l-primary rounded-2xl bg-card/80">
+                        <h3 className="font-semibold mb-4 flex items-center gap-2">
+                            <div className="size-7 rounded-lg bg-primary/8 flex items-center justify-center">
+                                {editingId ? <Edit2 className="size-3.5 text-primary" /> : <Plus className="size-3.5 text-primary" />}
+                            </div>
+                            {editingId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
+                        </h3>
                         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                             <div>
                                 <label className="text-xs font-bold text-muted-foreground/70 mb-1 block">Usuario</label>

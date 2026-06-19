@@ -148,7 +148,7 @@ const CashControlView = () => {
 
     return (
         <ViewContainer maxWidth="md">
-            <ViewHeader title="Control de Caja">
+            <ViewHeader title="Control de Caja" icon={<Wallet className="size-5 text-primary" />}>
                 <Button variant="ghost" onClick={loadHistory} isLoading={historyLoading} size="sm">
                     <History className="h-4 w-4 mr-2" /> Historial
                 </Button>
@@ -191,14 +191,14 @@ const CashControlView = () => {
                 </motion.div>
             ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                    <Card className="p-6 border-l-4 border-l-success bg-success/5 rounded-xl">
+                    <Card className="p-6 border-l-4 border-l-success bg-success/3 rounded-xl">
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-success/10 text-success rounded-full">
+                                <div className="p-3.5 bg-success/10 text-success rounded-xl">
                                     <Wallet className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-lg text-green-700 dark:text-green-400">Caja Abierta</h3>
+                                    <h3 className="font-bold text-lg text-success">Caja Abierta</h3>
                                     <p className="text-sm text-muted-foreground">
                                         Abierta: {new Date(session.opened_at).toLocaleString()} &bull; Inicial: {formatMoney(session.opening_balance)}
                                     </p>
@@ -212,33 +212,33 @@ const CashControlView = () => {
 
                     {summary && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <Card className="p-4 text-center rounded-xl hover:-translate-y-px hover:shadow-md transition-all duration-150">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Ventas (Efectivo)</p>
-                                <p className="text-xl font-bold text-success mt-1">{formatMoney(summary.sales)}</p>
-                                <div className="h-0.5 bg-success/20 rounded-full mt-3"><div className="h-full bg-success/40 rounded-full" style={{ width: '60%' }} /></div>
+                            <Card className="p-5 text-center rounded-2xl hover:-translate-y-0.5 hover:shadow-md hover:border-border-accent/30 transition-all duration-200" variant="dashboard">
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Ventas (Efectivo)</p>
+                                <p className="text-2xl font-extrabold text-success mt-2">{formatMoney(summary.sales)}</p>
+                                <div className="h-1 bg-success/15 rounded-full mt-3"><div className="h-full bg-success/50 rounded-full" style={{ width: '60%' }} /></div>
                             </Card>
-                            <Card className="p-4 text-center rounded-xl hover:-translate-y-px hover:shadow-md transition-all duration-150">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Depósitos</p>
-                                <p className="text-xl font-bold text-info mt-1">{formatMoney(summary.deposits)}</p>
-                                <div className="h-0.5 bg-info/20 rounded-full mt-3"><div className="h-full bg-info/40 rounded-full" style={{ width: '40%' }} /></div>
+                            <Card className="p-5 text-center rounded-2xl hover:-translate-y-0.5 hover:shadow-md hover:border-border-accent/30 transition-all duration-200" variant="dashboard">
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Depósitos</p>
+                                <p className="text-2xl font-extrabold text-info mt-2">{formatMoney(summary.deposits)}</p>
+                                <div className="h-1 bg-info/15 rounded-full mt-3"><div className="h-full bg-info/50 rounded-full" style={{ width: '40%' }} /></div>
                             </Card>
-                            <Card className="p-4 text-center rounded-xl hover:-translate-y-px hover:shadow-md transition-all duration-150">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Retiros</p>
-                                <p className="text-xl font-bold text-danger mt-1">{formatMoney(summary.withdrawals)}</p>
-                                <div className="h-0.5 bg-danger/20 rounded-full mt-3"><div className="h-full bg-danger/40 rounded-full" style={{ width: '30%' }} /></div>
+                            <Card className="p-5 text-center rounded-2xl hover:-translate-y-0.5 hover:shadow-md hover:border-border-accent/30 transition-all duration-200" variant="dashboard">
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Retiros</p>
+                                <p className="text-2xl font-extrabold text-danger mt-2">{formatMoney(summary.withdrawals)}</p>
+                                <div className="h-1 bg-danger/15 rounded-full mt-3"><div className="h-full bg-danger/50 rounded-full" style={{ width: '30%' }} /></div>
                             </Card>
-                            <Card className="p-4 text-center rounded-xl shadow-sm" variant="accent">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Saldo Estimado</p>
-                                <p className="text-xl font-black text-primary mt-1">{formatMoney(summary.expected)}</p>
-                                <div className="h-0.5 bg-primary/20 rounded-full mt-3"><div className="h-full bg-primary/40 rounded-full" style={{ width: '80%' }} /></div>
+                            <Card className="p-5 text-center rounded-2xl shadow-sm" variant="accent">
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Saldo Estimado</p>
+                                <p className="text-2xl font-black text-primary mt-2">{formatMoney(summary.expected)}</p>
+                                <div className="h-1 bg-primary/15 rounded-full mt-3"><div className="h-full bg-primary/50 rounded-full" style={{ width: '80%' }} /></div>
                             </Card>
                         </div>
                     )}
 
-                    <Card className="p-6 rounded-xl border-border/20">
-                        <h4 className="font-semibold mb-4 flex items-center gap-2">
-                            <div className="size-6 rounded-lg bg-primary/8 flex items-center justify-center">
-                                <ArrowDownCircle className="size-3 text-primary" />
+                    <Card className="p-6 rounded-2xl border-border/15">
+                        <h4 className="font-semibold mb-4 flex items-center gap-2.5">
+                            <div className="size-7 rounded-lg bg-primary/8 flex items-center justify-center">
+                                <ArrowDownCircle className="size-3.5 text-primary" />
                             </div>
                             Registrar Movimiento
                         </h4>
@@ -276,10 +276,10 @@ const CashControlView = () => {
                         </div>
                     </Card>
 
-                    <Card className="p-6 rounded-xl border-border/20">
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="size-6 rounded-lg bg-muted/50 flex items-center justify-center">
-                                <History className="size-3 text-muted-foreground" />
+                    <Card className="p-6 rounded-2xl border-border/15">
+                        <div className="flex items-center gap-2.5 mb-4">
+                            <div className="size-7 rounded-lg bg-muted/40 flex items-center justify-center">
+                                <History className="size-3.5 text-muted-foreground" />
                             </div>
                             <h4 className="font-semibold">Movimientos de esta Sesión</h4>
                         </div>

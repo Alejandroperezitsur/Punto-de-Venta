@@ -25,6 +25,8 @@ const variants = {
     'glass-panel text-foreground shadow-glow hover:shadow-lg active:shadow-md',
   'gradient-success':
     'text-success-foreground shadow-md shadow-success/20 hover:shadow-lg hover:shadow-success/25 active:shadow-sm',
+  hero:
+    'text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md',
 };
 
 const sizes = {
@@ -50,6 +52,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const gradientStyle =
       variant === 'gradient' ? { background: 'var(--gradient-primary)' } :
       variant === 'gradient-success' ? { background: 'var(--gradient-success)' } :
+      variant === 'hero' ? { background: 'var(--gradient-primary)' } :
       undefined;
     return (
       <button

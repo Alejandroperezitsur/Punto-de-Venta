@@ -13,7 +13,7 @@ import { CommandPalette, ShortcutsOverlay, useKeyboardShortcuts } from '../../co
 import { useScannerFocusEngine } from '../../hooks/useScannerFocusEngine';
 import { api } from '../../lib/api';
 import { enqueueSale, initSyncManager } from '../../lib/syncManager';
-import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check, Lock, Wallet, UserPlus, X, Pause, Clock, MoreHorizontal } from 'lucide-react';
+import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check, Lock, Wallet, UserPlus, X, Pause, Clock, MoreHorizontal, Trash2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
 
@@ -31,10 +31,10 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'w-full min-h-[4.5rem] text-base font-extrabold rounded-2xl transition-all duration-150 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
+        'w-full min-h-[5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
         hasItems && !isProcessing
-          ? 'text-success-foreground shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/25 hover:-translate-y-px success-pulse'
-          : 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed',
+          ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-0.5 success-pulse'
+          : 'bg-muted/30 text-muted-foreground/25 cursor-not-allowed',
       )}
       style={hasItems && !isProcessing ? { background: 'var(--gradient-checkout)' } : undefined}
       disabled={!hasItems || isProcessing}
@@ -47,8 +47,8 @@ const CheckoutButton = React.memo(function CheckoutButton({
       ) : (
         <>
           <Wallet className="size-5" />
-          <span className="text-lg">COBRAR</span>
-          <span className="text-[10px] font-bold opacity-30 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">F2</span>
+          <span className="text-lg tracking-wider">COBRAR</span>
+          <span className="text-[9px] font-bold opacity-25 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">F2</span>
         </>
       )}
     </button>
@@ -502,16 +502,16 @@ const SalesView = React.memo(function SalesView() {
 
   return (
     <div className="h-full min-h-0 flex gap-3 overflow-hidden">
-      {/* ===== CATALOG PANEL (Left ~55%) ===== */}
-      <div className="flex-1 min-w-0 flex flex-col gap-3" style={{ flexBasis: 'var(--pos-catalog-width, 55%)' }}>
+      {/* ===== CATALOG PANEL (Left ~60%) ===== */}
+      <div className="flex-1 min-w-0 flex flex-col gap-2.5" style={{ flexBasis: '60%' }}>
         {/* Scan bar — top zone */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <div className="flex-1">
             <ProductSearch />
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 min-h-[var(--control-xl)] px-3.5 text-xs font-bold rounded-xl bg-warning/8 text-warning border border-warning/15 hover:bg-warning/15 hover:-translate-y-px transition-all flex items-center gap-1.5 touch-target active:scale-[0.97]"
+            className="shrink-0 min-h-[4rem] px-3.5 text-xs font-bold rounded-2xl bg-warning/8 text-warning border border-warning/12 hover:bg-warning/12 hover:-translate-y-px transition-all flex items-center gap-1.5 touch-target active:scale-[0.97]"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -521,91 +521,81 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         {/* Product catalog grid */}
-        <div className="flex-1 rounded-2xl border border-border/15 bg-card p-2.5 overflow-y-auto">
+        <div className="flex-1 rounded-2xl border border-border/12 bg-card p-3 overflow-y-auto">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
-      {/* ===== CART PANEL (Right ~45%) ===== */}
-      <div className="flex flex-col rounded-2xl border border-border/15 bg-surface-accent h-full overflow-hidden pos-cart-panel" style={{ flexBasis: 'var(--pos-cart-width, 45%)', minWidth: '280px', maxWidth: '520px' }}>
-
-        {/* Cart header */}
-        <div className="px-4 py-3 border-b border-border/10 flex items-center justify-between shrink-0 bg-card/60 backdrop-blur-sm">
+      {/* ===== CART PANEL (Right ~40%) ===== */}
+      <div
+        className="flex flex-col rounded-2xl border border-border/12 bg-surface-panel h-full overflow-hidden pos-cart-panel"
+        style={{ flexBasis: '40%', minWidth: '300px', maxWidth: '540px' }}
+      >
+        {/* Cart header — premium */}
+        <div className="px-4 py-3 border-b border-border/8 flex items-center justify-between shrink-0">
           <h2 className="font-bold text-sm flex items-center gap-2.5" id="cart-heading">
-            <div className="size-7 rounded-lg bg-primary/8 flex items-center justify-center">
-              <ShoppingBag className="size-3.5 text-primary" />
+            <div className="size-8 rounded-lg bg-primary/8 flex items-center justify-center">
+              <ShoppingBag className="size-4 text-primary" />
             </div>
-            <span>Carrito</span>
-            <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold min-w-[20px] text-center" aria-live="polite">
+            <span className="text-foreground">Carrito</span>
+            <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold min-w-[22px] text-center tabular-nums" aria-live="polite">
               {items.length}
             </span>
           </h2>
-          <div className="flex items-center gap-1">
+
+          {/* Quick action icons */}
+          <div className="flex items-center gap-0.5">
             {heldTickets.length > 0 && (
               <button
                 onClick={() => setShowHeldTickets(!showHeldTickets)}
-                className="text-[11px] font-semibold text-pos-hold hover:bg-pos-hold/8 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 touch-target"
+                className="p-1.5 rounded-lg text-pos-hold hover:bg-pos-hold/8 transition-colors touch-target"
                 title={`Tickets en espera (${heldTickets.length})`}
               >
-                <Clock className="size-3" />
-                <span>{heldTickets.length}</span>
+                <Clock className="size-3.5" />
               </button>
             )}
-            {/* Cart actions menu */}
-            <div className="relative">
-              <button
-                onClick={() => setShowCartMenu(!showCartMenu)}
-                className="p-1.5 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-colors touch-target"
-                aria-label="Acciones del carrito"
-              >
-                <MoreHorizontal className="size-4" />
-              </button>
-              {showCartMenu && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowCartMenu(false)} />
-                  <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-card rounded-xl border border-border/30 shadow-lg py-1 animate-scale-in">
-                    <button
-                      onClick={() => { if (hasItems) { holdCurrentTicket(); toast('Ticket en espera', 'info'); } setShowCartMenu(false); }}
-                      disabled={!hasItems}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted/30 transition-colors disabled:opacity-30"
-                    >
-                      <Pause className="size-3.5" /> Pausar ticket
-                    </button>
-                    <button
-                      onClick={() => { setDiscountOpen(true); setShowCartMenu(false); }}
-                      disabled={!hasItems}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted/30 transition-colors disabled:opacity-30"
-                    >
-                      <Percent className="size-3.5" /> Descuento
-                    </button>
-                    <button
-                      onClick={() => { setCustomerModalOpen(true); setShowCartMenu(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted/30 transition-colors"
-                    >
-                      <UserPlus className="size-3.5" /> Agregar cliente
-                    </button>
-                    <div className="border-t border-border/10 my-1" />
-                    <button
-                      onClick={() => { if (hasItems) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } setShowCartMenu(false); }}
-                      disabled={!hasItems}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-danger hover:bg-danger/5 transition-colors disabled:opacity-30"
-                    >
-                      <XCircle className="size-3.5" /> Vaciar carrito
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            <button
+              onClick={() => { if (hasItems) { holdCurrentTicket(); toast('Ticket en pausa', 'info'); } }}
+              disabled={!hasItems}
+              className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-25 touch-target"
+              title="Pausar ticket"
+            >
+              <Pause className="size-3.5" />
+            </button>
+            <button
+              onClick={() => setDiscountOpen(true)}
+              disabled={!hasItems}
+              className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-25 touch-target"
+              title="Descuento"
+            >
+              <Percent className="size-3.5" />
+            </button>
+            <button
+              onClick={() => setCustomerModalOpen(true)}
+              className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors touch-target"
+              title="Agregar cliente"
+            >
+              <UserPlus className="size-3.5" />
+            </button>
+            <div className="w-px h-3.5 bg-border/20 mx-1" />
+            <button
+              onClick={() => { if (hasItems) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } }}
+              disabled={!hasItems}
+              className="p-1.5 rounded-lg text-muted-foreground/30 hover:text-danger hover:bg-danger/5 transition-colors disabled:opacity-25 touch-target"
+              title="Vaciar carrito"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
           </div>
         </div>
 
         {/* Cart items list */}
-        <div className="flex-1 overflow-y-auto px-2.5 py-1" role="region" aria-labelledby="cart-heading" aria-live="polite">
+        <div className="flex-1 overflow-y-auto px-2.5 py-1.5" role="region" aria-labelledby="cart-heading" aria-live="polite">
           {showHeldTickets && heldTickets.length > 0 && (
-            <div className="mb-2 border border-pos-hold/20 rounded-xl bg-pos-hold/5 overflow-hidden">
-              <div className="px-3 py-2 border-b border-pos-hold/15 flex items-center justify-between">
-                <span className="text-[10px] font-bold text-pos-hold uppercase tracking-[0.08em]">Tickets en espera</span>
-                <button onClick={() => setShowHeldTickets(false)} className="text-pos-hold/50 hover:text-foreground touch-target"><X className="size-3" /></button>
+            <div className="mb-2 border border-pos-hold/15 rounded-xl bg-pos-hold/5 overflow-hidden">
+              <div className="px-3 py-2 border-b border-pos-hold/10 flex items-center justify-between">
+                <span className="text-[9px] font-bold text-pos-hold uppercase tracking-[0.1em]">Tickets en espera</span>
+                <button onClick={() => setShowHeldTickets(false)} className="text-pos-hold/40 hover:text-foreground touch-target"><X className="size-3" /></button>
               </div>
               {heldTickets.map(t => (
                 <div key={t.id} className="px-3 py-2.5 flex items-center justify-between border-b border-pos-hold/8 last:border-0">
@@ -614,11 +604,11 @@ const SalesView = React.memo(function SalesView() {
                     className="flex-1 text-left min-w-0"
                   >
                     <p className="text-xs font-semibold text-foreground truncate">{t.label}</p>
-                    <p className="text-[10px] text-muted-foreground/50">{t.items.length} items · {new Date(t.heldAt).toLocaleTimeString()}</p>
+                    <p className="text-[10px] text-muted-foreground/40">{t.items.length} items · {new Date(t.heldAt).toLocaleTimeString()}</p>
                   </button>
                   <button
                     onClick={() => { removeHeldTicket(t.id); toast('Ticket descartado', 'info'); }}
-                    className="text-danger/50 hover:text-danger ml-2 shrink-0 touch-target"
+                    className="text-danger/40 hover:text-danger ml-2 shrink-0 touch-target"
                     aria-label="Descartar ticket"
                   >
                     <XCircle className="size-3.5" />
@@ -632,7 +622,7 @@ const SalesView = React.memo(function SalesView() {
 
         {/* Discount indicator */}
         {discount > 0 && (
-          <div className="px-4 py-1.5 bg-info/6 border-t border-info/10 flex items-center justify-between text-[11px]">
+          <div className="px-4 py-1.5 bg-info/5 border-t border-info/8 flex items-center justify-between text-[11px]">
             <span className="font-semibold text-info flex items-center gap-1.5"><Percent className="size-3" />Descuento</span>
             <span className="font-bold text-info tabular-nums">-{formatMoney(discount)}</span>
           </div>
@@ -640,24 +630,24 @@ const SalesView = React.memo(function SalesView() {
 
         {/* Error */}
         {payError && (
-          <div className="px-3 py-2 bg-danger/8 border-t-2 border-danger/15 flex items-center gap-1.5" role="alert">
+          <div className="px-3 py-2 bg-danger/6 border-t-2 border-danger/12 flex items-center gap-1.5" role="alert">
             <span className="text-[11px] font-semibold text-danger">{payError}</span>
           </div>
         )}
 
         {/* Bottom: customer + totals + checkout */}
-        <div className="px-4 py-4 border-t border-border/10 space-y-3 shrink-0 bg-card/60 backdrop-blur-sm pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-4 py-4 border-t border-border/8 space-y-3 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
           {/* Customer selector */}
           <div className="flex items-center gap-2">
             {selectedCustomer ? (
-              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-info/6 border border-info/15 text-xs">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-info/5 border border-info/12 text-xs">
                 <div className="size-6 rounded-full bg-info/10 flex items-center justify-center shrink-0">
                   <span className="text-[10px] font-bold text-info">{selectedCustomer.name.charAt(0).toUpperCase()}</span>
                 </div>
                 <span className="font-semibold text-info truncate flex-1">{selectedCustomer.name}</span>
                 <button
                   onClick={() => setSelectedCustomer(null)}
-                  className="text-info/50 hover:text-danger transition-colors shrink-0"
+                  className="text-info/40 hover:text-danger transition-colors shrink-0"
                   aria-label="Quitar cliente"
                 >
                   <X className="size-3" />
@@ -666,7 +656,7 @@ const SalesView = React.memo(function SalesView() {
             ) : (
               <button
                 onClick={() => setCustomerModalOpen(true)}
-                className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-border/25 text-[11px] text-muted-foreground/50 hover:border-info/30 hover:text-info/70 hover:bg-info/[0.02] transition-all"
+                className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-border/20 text-[11px] text-muted-foreground/40 hover:border-info/25 hover:text-info/60 hover:bg-info/[0.02] transition-all"
               >
                 <UserPlus className="size-3" />
                 <span>Agregar cliente (F6)</span>
@@ -674,10 +664,28 @@ const SalesView = React.memo(function SalesView() {
             )}
           </div>
 
-          {/* Totals — premium gradient panel */}
-          <div className="rounded-xl p-3.5" style={{ background: 'var(--gradient-surface)' }}>
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="text-xs text-muted-foreground/60 font-semibold">Total</span>
+          {/* Totals — premium gradient panel with breakdown */}
+          <div className="rounded-xl p-4" style={{ background: 'var(--gradient-panel)' }}>
+            {/* Breakdown rows */}
+            <div className="space-y-1 mb-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground/50 font-medium">Subtotal</span>
+                <span className="font-semibold text-foreground/70 tabular-nums">{formatMoney(totals.subtotal)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground/50 font-medium">IVA (16%)</span>
+                <span className="font-semibold text-foreground/70 tabular-nums">{formatMoney(totals.tax)}</span>
+              </div>
+              {totals.discount > 0 && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-info font-medium">Descuento</span>
+                  <span className="font-semibold text-info tabular-nums">-{formatMoney(totals.discount)}</span>
+                </div>
+              )}
+            </div>
+            {/* Total */}
+            <div className="pt-3 border-t border-border/10 flex items-baseline justify-between gap-3">
+              <span className="text-xs text-muted-foreground/50 font-bold uppercase tracking-wider">Total</span>
               <span className="text-4xl font-black text-foreground tracking-tight font-mono tabular-nums leading-none">
                 {formatMoney(totals.total)}
               </span>
@@ -685,7 +693,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
 
           {!hasItems && (
-            <p className="text-[11px] text-muted-foreground/35 text-center font-medium">
+            <p className="text-[10px] text-muted-foreground/30 text-center font-medium">
               Escanee o busque productos para comenzar
             </p>
           )}

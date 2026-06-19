@@ -19,26 +19,26 @@ import { cn } from '../utils/cn';
 
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
   return (
-    <div className="relative rounded-xl border border-border/25 bg-card p-3 hover:border-primary/25 hover:-translate-y-px hover:shadow-md transition-all duration-150 flex flex-col cursor-pointer"
+    <div className="relative rounded-2xl border border-border/20 bg-card p-3.5 hover:border-primary/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 flex flex-col cursor-pointer group"
       onClick={() => onEdit(p)}
     >
-      <button className="absolute top-2 right-2 p-1.5 rounded-lg hover:bg-muted text-muted-foreground opacity-60 hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); onEdit(p); }}
+      <button className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-muted/50 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all" onClick={(e) => { e.stopPropagation(); onEdit(p); }}
         aria-label="Editar producto">
         <Edit3 className="size-3.5" />
       </button>
 
-      <div className="size-16 rounded-xl bg-muted/50 flex items-center justify-center mb-3 border border-border/15 mx-auto overflow-hidden">
+      <div className="size-[4.5rem] rounded-xl bg-muted/40 flex items-center justify-center mb-3.5 border border-border/10 mx-auto overflow-hidden group-hover:border-primary/15 transition-colors">
         {p.image_url ? (
           <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-xl" loading="lazy" />
         ) : (
-          <Package className="size-7 text-muted-foreground/50" aria-hidden="true" />
+          <Package className="size-8 text-muted-foreground/40" aria-hidden="true" />
         )}
       </div>
 
-      <h3 className="font-semibold text-sm mb-1 line-clamp-2 min-h-[2.2rem] leading-tight text-center">{p.name}</h3>
+      <h3 className="font-semibold text-sm mb-1.5 line-clamp-2 min-h-[2.2rem] leading-tight text-center text-foreground/90">{p.name}</h3>
 
       <div className="mt-auto pt-2 space-y-1.5 w-full text-center">
-        <p className="text-lg font-bold text-primary tracking-tight">
+        <p className="text-xl font-extrabold text-primary tracking-tight">
           {formatMoney(p.price)}
         </p>
         {(p.barcodes?.length > 0 || p.sku) && (
@@ -172,6 +172,7 @@ const ProductsView = () => {
       <ViewHeader
         title="Inventario"
         description={pagination.total > 0 ? `${pagination.total} productos` : 'Gestiona tus productos'}
+        icon={<Package className="size-5 text-primary" />}
       >
         <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-lg border border-border/30">
           <RefreshCw className={cn('size-4', loading && 'animate-spin')} />

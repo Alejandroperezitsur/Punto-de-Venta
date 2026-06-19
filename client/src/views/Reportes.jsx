@@ -132,24 +132,24 @@ const MyBusinessView = () => {
     return (
             <div className="max-w-4xl mx-auto flex flex-col justify-between gap-8">
             <div className="text-center py-10">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.15em] mb-4">Lo que ganaste hoy para ti</p>
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-5">Lo que ganaste hoy para ti</p>
                 <div className="flex items-center justify-center gap-4">
-                    <span className="text-7xl font-bold tracking-tight text-foreground">
+                    <span className="text-8xl font-black tracking-tight text-foreground">
                         ${data.gain.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </span>
                 </div>
-                <p className="mt-4 text-base font-medium text-muted-foreground">¡Buen trabajo! Es un día sólido.</p>
+                <p className="mt-5 text-base font-medium text-muted-foreground/70">¡Buen trabajo! Es un día sólido.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-10 border-y-2 border-border">
-                <div className="text-center md:text-right md:pr-12 md:border-r-2 md:border-border">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Efectivo en caja</p>
-                    <p className="text-4xl font-bold text-foreground">${data.cash.toLocaleString()}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 border-y border-border/15">
+                <div className="text-center md:text-right md:pr-12 md:border-r md:border-border/15">
+                    <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em] mb-3">Efectivo en caja</p>
+                    <p className="text-5xl font-extrabold text-foreground tracking-tight">${data.cash.toLocaleString()}</p>
                 </div>
                 <div className="text-center md:text-left md:pl-12 flex flex-col items-center md:items-start">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
-                    <div className="flex items-center gap-2">
-                        <p className="text-4xl font-bold text-foreground uppercase">{data.status}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em] mb-3">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
+                    <div className="flex items-center gap-3">
+                        <p className="text-5xl font-extrabold text-foreground uppercase tracking-tight">{data.status}</p>
                         {data.status === 'mejor' ? (
                             <ArrowUpRight className="h-8 w-8 text-success stroke-[3]" />
                         ) : (
@@ -160,8 +160,8 @@ const MyBusinessView = () => {
             </div>
 
             <div className="space-y-4 py-10">
-                <Card className="flex items-center gap-3 p-4 border border-primary/10 rounded-xl">
-                    <div className="size-10 bg-card rounded-lg flex items-center justify-center shadow-sm shrink-0 border border-border">
+                <Card className="flex items-center gap-4 p-5 border border-primary/8 rounded-2xl hover:border-primary/20 hover:shadow-sm transition-all" variant="dashboard">
+                    <div className="size-12 bg-primary/6 rounded-xl flex items-center justify-center shrink-0">
                         <Sun className="size-5 text-primary" />
                     </div>
                     <p className="text-sm font-semibold leading-tight text-foreground">
@@ -169,8 +169,8 @@ const MyBusinessView = () => {
                     </p>
                 </Card>
 
-                <Card className="flex items-center gap-3 p-4 border border-warning/10 rounded-xl">
-                    <div className="size-10 bg-card rounded-lg flex items-center justify-center shadow-sm shrink-0 border border-border">
+                <Card className="flex items-center gap-4 p-5 border border-warning/8 rounded-2xl hover:border-warning/20 hover:shadow-sm transition-all" variant="dashboard">
+                    <div className="size-12 bg-warning/6 rounded-xl flex items-center justify-center shrink-0">
                         <Coffee className="size-5 text-warning" />
                     </div>
                     <p className="text-sm font-semibold leading-tight text-foreground">
