@@ -153,24 +153,25 @@ const ProductSearch = React.memo(function ProductSearch() {
     <div className="relative">
       <form onSubmit={handleSearch} role="search" aria-label="Buscar producto">
         <div className="relative">
+          {/* Premium hero scan bar */}
           <div className={cn(
-            'flex items-center gap-2 rounded-xl border-2 bg-card transition-all duration-150',
-            'px-3 h-[var(--control-xl)]',
+            'flex items-center gap-3 rounded-2xl border-2 bg-card transition-all duration-200',
+            'px-4 h-[3.5rem]',
             scannerStatus === 'scanning'
-              ? 'border-primary/40 shadow-sm shadow-primary/5'
+              ? 'border-primary/50 shadow-lg shadow-primary/10'
               : scannerStatus === 'error'
-                ? 'border-danger/40 shadow-sm shadow-danger/5'
-                : 'border-border/40 focus-within:border-primary/40 focus-within:shadow-sm focus-within:shadow-primary/5',
+                ? 'border-danger/50 shadow-lg shadow-danger/10'
+                : 'border-border/30 focus-within:border-primary/50 focus-within:shadow-lg focus-within:shadow-primary/10',
           )}>
-            {/* Scanner icon */}
+            {/* Animated scanner icon */}
             <div className={cn(
-              'shrink-0 transition-colors duration-100',
-              scannerStatus === 'scanning' ? 'text-primary' : 'text-muted-foreground/50',
+              'shrink-0 transition-all duration-200',
+              scannerStatus === 'scanning' ? 'text-primary scale-110' : 'text-muted-foreground/40',
             )}>
               {loading ? (
                 <Loader2 className="size-5 animate-spin" />
               ) : (
-                <ScanLine className="size-5" />
+                <ScanLine className={cn('size-5', scannerStatus === 'ready' && 'scan-pulse')} />
               )}
             </div>
 
@@ -185,13 +186,13 @@ const ProductSearch = React.memo(function ProductSearch() {
               data-scan-input="true"
               aria-label="Buscar o escanear producto"
               autoComplete="off"
-              className="flex-1 bg-transparent border-none text-base font-semibold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0 disabled:opacity-50"
+              className="flex-1 bg-transparent border-none text-base font-semibold text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:ring-0 disabled:opacity-50"
             />
 
             {/* Scanner status indicator */}
             {scannerStatus === 'idle' ? (
               <div className="shrink-0" title="Scanner no detectado">
-                <WifiOff className="size-4 text-muted-foreground/30" />
+                <WifiOff className="size-4 text-muted-foreground/25" />
               </div>
             ) : (
               <div className={cn(
@@ -202,7 +203,7 @@ const ProductSearch = React.memo(function ProductSearch() {
             )}
 
             {/* Keyboard shortcut hint */}
-            <span className="shrink-0 text-[10px] font-bold text-muted-foreground/25 bg-muted/30 px-1.5 py-0.5 rounded-md hidden xl:inline">
+            <span className="shrink-0 text-[10px] font-bold text-muted-foreground/20 bg-muted/30 px-2 py-1 rounded-lg hidden xl:inline tracking-wider">
               F1
             </span>
           </div>
@@ -213,8 +214,8 @@ const ProductSearch = React.memo(function ProductSearch() {
       {feedback && (
         <div
           className={cn(
-            'absolute top-full left-0 right-0 mt-1.5 z-[var(--z-dropdown)] animate-fade-up',
-            'px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 shadow-sm',
+            'absolute top-full left-0 right-0 mt-2 z-[var(--z-dropdown)] animate-fade-up',
+            'px-4 py-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2.5 shadow-md',
             feedback.type === 'success' && 'bg-success/8 border-success/15 text-success',
             feedback.type === 'warning' && 'bg-warning/8 border-warning/15 text-warning',
             feedback.type === 'error' && 'bg-danger/8 border-danger/15 text-danger',
@@ -222,9 +223,9 @@ const ProductSearch = React.memo(function ProductSearch() {
           role="status"
           aria-live="polite"
         >
-          {feedback.type === 'success' && <CheckCircle2 className="size-3.5 shrink-0" />}
-          {feedback.type === 'warning' && <AlertCircle className="size-3.5 shrink-0" />}
-          {feedback.type === 'error' && <AlertCircle className="size-3.5 shrink-0" />}
+          {feedback.type === 'success' && <CheckCircle2 className="size-4 shrink-0" />}
+          {feedback.type === 'warning' && <AlertCircle className="size-4 shrink-0" />}
+          {feedback.type === 'error' && <AlertCircle className="size-4 shrink-0" />}
           <span className="truncate">{feedback.message}</span>
           {feedback.code && (
             <span className="text-[11px] opacity-50 shrink-0 ml-auto font-mono">{feedback.code}</span>
@@ -241,14 +242,14 @@ const ProductSearch = React.memo(function ProductSearch() {
 
       {/* Product not found — quick create */}
       {error && !feedback && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 z-[var(--z-dropdown)] animate-fade-up">
-          <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-warning/8 border border-warning/15 shadow-sm">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="size-9 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
-                <Plus className="size-4 text-warning" />
+        <div className="absolute top-full left-0 right-0 mt-2 z-[var(--z-dropdown)] animate-fade-up">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-warning/8 border border-warning/15 shadow-md">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="size-10 rounded-xl bg-warning/15 flex items-center justify-center shrink-0">
+                <Plus className="size-5 text-warning" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-warning truncate">Producto no encontrado</p>
+                <p className="text-xs font-bold text-warning truncate">Producto no encontrado</p>
                 <p className="text-[11px] font-medium text-warning/60 font-mono">{error}</p>
               </div>
             </div>

@@ -47,11 +47,13 @@ const MainLayout = memo(function MainLayout({ children }) {
             ref={mainRef}
             className={cn(
               'flex-1 overflow-y-auto',
-              isPOS ? 'p-2' : 'p-3 md:p-4 lg:p-5',
+              isPOS ? 'p-2.5' : 'p-4 md:p-5 lg:p-6',
             )}
             role="main"
           >
-            {children}
+            <div className="animate-fade-in">
+              {children}
+            </div>
           </main>
         </div>
       </div>

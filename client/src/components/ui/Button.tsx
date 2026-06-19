@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 
 const variants = {
   primary:
-    'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-sm shadow-primary/10',
+    'bg-primary text-primary-foreground hover:bg-primary/88 active:bg-primary/80 shadow-sm shadow-primary/12',
   secondary:
     'bg-secondary text-secondary-foreground hover:bg-secondary/70 border border-border/60 active:bg-secondary/60',
   ghost:
@@ -19,6 +19,12 @@ const variants = {
     'bg-warning text-warning-foreground hover:bg-warning/90 active:bg-warning/80 shadow-sm shadow-warning/10',
   'primary-glow':
     'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-glow',
+  gradient:
+    'text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 active:shadow-sm',
+  premium:
+    'glass-panel text-foreground shadow-glow hover:shadow-lg active:shadow-md',
+  'gradient-success':
+    'text-success-foreground shadow-md shadow-success/20 hover:shadow-lg hover:shadow-success/25 active:shadow-sm',
 };
 
 const sizes = {
@@ -40,7 +46,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, type = 'button', ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', isLoading, children, disabled, type = 'button', style, ...props }, ref) => {
+    const gradientStyle =
+      variant === 'gradient' ? { background: 'var(--gradient-primary)' } :
+      variant === 'gradient-success' ? { background: 'var(--gradient-success)' } :
+      undefined;
     return (
       <button
         ref={ref}
@@ -49,12 +59,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           'inline-flex items-center justify-center font-semibold transition-all duration-75',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2',
           'disabled:pointer-events-none disabled:opacity-40 select-none',
+          'active:scale-[0.97]',
           'touch-target',
           variants[variant],
           sizes[size],
           className,
         )}
         disabled={disabled || isLoading}
+        style={{ ...gradientStyle, ...style }}
         {...props}
       >
         {isLoading && <Loader2 className="size-3.5 animate-spin shrink-0" />}

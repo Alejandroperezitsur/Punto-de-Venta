@@ -7,7 +7,7 @@ import { cn } from '../../utils/cn';
 
 const LOW_STOCK_THRESHOLD = 5;
 const VIRTUALIZE_THRESHOLD = 50;
-const ROW_HEIGHT = 48;
+const ROW_HEIGHT = 56;
 
 interface CartItemRowProps {
   item: any;
@@ -52,10 +52,10 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     <div
       ref={rowRef}
       className={cn(
-        'flex items-center gap-2.5 py-2 px-1 rounded-xl transition-colors cart-item-enter',
-        isRecent && 'bg-success/[0.04]',
+        'flex items-center gap-3 py-2.5 px-2 rounded-xl transition-all duration-150 cart-item-enter',
+        isRecent && 'bg-success/[0.05] shadow-sm shadow-success/5',
         isOutOfStock && 'opacity-40',
-        'hover:bg-muted/20',
+        'hover:bg-muted/25',
       )}
       role="listitem"
       tabIndex={0}
@@ -65,31 +65,31 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       {/* Product info */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate leading-tight" title={item.name}>{item.name}</p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-2 mt-1">
           <span className="text-[11px] text-muted-foreground/50 tabular-nums">@ {formatMoney(item.price)}</span>
           {isLowStock && (
-            <span className="text-[9px] font-bold text-warning bg-warning/8 px-1 py-px rounded">stock bajo</span>
+            <span className="text-[9px] font-bold text-warning bg-warning/8 px-1.5 py-px rounded-md">stock bajo</span>
           )}
         </div>
       </div>
 
-      {/* Quantity stepper — compact pill */}
-      <div className="flex items-center gap-px bg-muted/15 rounded-lg border border-border/15">
+      {/* Quantity stepper — tactile pill design */}
+      <div className="flex items-center gap-0.5 bg-card rounded-xl border border-border/20 shadow-sm">
         <button
           className={cn(
-            'size-8 flex items-center justify-center rounded-l-lg transition-colors',
-            'text-muted-foreground hover:bg-muted/40 active:bg-muted/60',
+            'size-9 flex items-center justify-center rounded-l-xl transition-all duration-100',
+            'text-muted-foreground hover:bg-muted/50 active:scale-90 active:bg-muted/70',
           )}
           onClick={() => item.quantity <= 1 ? onRemove(item.id) : onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity <= 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
         >
           {item.quantity <= 1 ? <Trash2 className="size-3.5 text-danger/60" /> : <Minus className="size-3.5" />}
         </button>
-        <span className="w-7 text-center text-xs font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
+        <span className="w-8 text-center text-sm font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
         <button
           className={cn(
-            'size-8 flex items-center justify-center rounded-r-lg transition-colors',
-            'text-muted-foreground hover:bg-muted/40 active:bg-muted/60',
+            'size-9 flex items-center justify-center rounded-r-xl transition-all duration-100',
+            'text-muted-foreground hover:bg-muted/50 active:scale-90 active:bg-muted/70',
           )}
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
@@ -99,7 +99,7 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       </div>
 
       {/* Line total */}
-      <div className="text-right w-[72px] shrink-0">
+      <div className="text-right w-[76px] shrink-0">
         <span className="text-sm font-bold tabular-nums text-foreground">{formatMoney(lineTotal)}</span>
       </div>
     </div>
@@ -143,11 +143,11 @@ export const Cart = memo(function Cart() {
   if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-10" role="status">
-        <div className="size-14 rounded-2xl bg-muted/20 flex items-center justify-center mb-3">
-          <ShoppingBag className="size-6 opacity-20" />
+        <div className="size-16 rounded-2xl bg-muted/20 flex items-center justify-center mb-4">
+          <ShoppingBag className="size-7 opacity-20" />
         </div>
         <p className="text-sm font-bold text-foreground/60">Carrito vacío</p>
-        <p className="text-xs font-medium text-muted-foreground/40 mt-0.5">Escanee o busque productos</p>
+        <p className="text-xs font-medium text-muted-foreground/40 mt-1">Escanee o busque productos</p>
       </div>
     );
   }
@@ -191,7 +191,7 @@ export const Cart = memo(function Cart() {
   }
 
   return (
-    <div className="flex flex-col gap-px" role="list" aria-label="Productos en el carrito">
+    <div className="flex flex-col gap-0.5" role="list" aria-label="Productos en el carrito">
       {items.map((item, i) => (
         <CartItemRow
           key={item.id}

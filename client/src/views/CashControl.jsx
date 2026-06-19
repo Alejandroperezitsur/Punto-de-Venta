@@ -212,27 +212,36 @@ const CashControlView = () => {
 
                     {summary && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <Card className="p-4 text-center rounded-xl">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold">Ventas (Efectivo)</p>
-                                <p className="text-xl font-bold text-success">{formatMoney(summary.sales)}</p>
+                            <Card className="p-4 text-center rounded-xl hover:-translate-y-px hover:shadow-md transition-all duration-150">
+                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Ventas (Efectivo)</p>
+                                <p className="text-xl font-bold text-success mt-1">{formatMoney(summary.sales)}</p>
+                                <div className="h-0.5 bg-success/20 rounded-full mt-3"><div className="h-full bg-success/40 rounded-full" style={{ width: '60%' }} /></div>
                             </Card>
-                            <Card className="p-4 text-center rounded-xl">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold">Depósitos</p>
-                                <p className="text-xl font-bold text-info">{formatMoney(summary.deposits)}</p>
+                            <Card className="p-4 text-center rounded-xl hover:-translate-y-px hover:shadow-md transition-all duration-150">
+                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Depósitos</p>
+                                <p className="text-xl font-bold text-info mt-1">{formatMoney(summary.deposits)}</p>
+                                <div className="h-0.5 bg-info/20 rounded-full mt-3"><div className="h-full bg-info/40 rounded-full" style={{ width: '40%' }} /></div>
                             </Card>
-                            <Card className="p-4 text-center rounded-xl">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold">Retiros</p>
-                                <p className="text-xl font-bold text-danger">{formatMoney(summary.withdrawals)}</p>
+                            <Card className="p-4 text-center rounded-xl hover:-translate-y-px hover:shadow-md transition-all duration-150">
+                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Retiros</p>
+                                <p className="text-xl font-bold text-danger mt-1">{formatMoney(summary.withdrawals)}</p>
+                                <div className="h-0.5 bg-danger/20 rounded-full mt-3"><div className="h-full bg-danger/40 rounded-full" style={{ width: '30%' }} /></div>
                             </Card>
-                            <Card className="p-4 text-center border-2 border-primary/30 rounded-xl">
-                                <p className="text-xs text-muted-foreground uppercase font-semibold">Saldo Estimado</p>
-                                <p className="text-xl font-black text-primary">{formatMoney(summary.expected)}</p>
+                            <Card className="p-4 text-center rounded-xl shadow-sm" variant="accent">
+                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Saldo Estimado</p>
+                                <p className="text-xl font-black text-primary mt-1">{formatMoney(summary.expected)}</p>
+                                <div className="h-0.5 bg-primary/20 rounded-full mt-3"><div className="h-full bg-primary/40 rounded-full" style={{ width: '80%' }} /></div>
                             </Card>
                         </div>
                     )}
 
-                    <Card className="p-6 rounded-xl">
-                        <h4 className="font-semibold mb-4">Registrar Movimiento</h4>
+                    <Card className="p-6 rounded-xl border-border/20">
+                        <h4 className="font-semibold mb-4 flex items-center gap-2">
+                            <div className="size-6 rounded-lg bg-primary/8 flex items-center justify-center">
+                                <ArrowDownCircle className="size-3 text-primary" />
+                            </div>
+                            Registrar Movimiento
+                        </h4>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                             <div>
                                 <Select
@@ -267,9 +276,11 @@ const CashControlView = () => {
                         </div>
                     </Card>
 
-                    <Card className="p-6 rounded-xl">
+                    <Card className="p-6 rounded-xl border-border/20">
                         <div className="flex items-center gap-2 mb-4">
-                            <History className="h-5 w-5 text-muted-foreground" />
+                            <div className="size-6 rounded-lg bg-muted/50 flex items-center justify-center">
+                                <History className="size-3 text-muted-foreground" />
+                            </div>
                             <h4 className="font-semibold">Movimientos de esta Sesión</h4>
                         </div>
                         <Table

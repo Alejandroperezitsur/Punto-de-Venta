@@ -34,13 +34,13 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect,
       onClick={() => !isOutOfStock && onSelect(product)}
       disabled={isOutOfStock}
       className={cn(
-        'rounded-xl border bg-card flex flex-col justify-center gap-0.5 transition-all duration-100',
-        'hover:border-primary/30 hover:bg-primary/[0.02] hover:shadow-xs',
-        'active:bg-primary/5 active:border-primary/20 active:scale-[0.98]',
+        'rounded-xl border bg-card flex flex-col justify-center gap-1 transition-all duration-150',
+        'hover:border-primary/35 hover:bg-primary/[0.03] hover:shadow-sm hover:-translate-y-px',
+        'active:bg-primary/5 active:border-primary/25 active:scale-[0.98] active:translate-y-0',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-1',
         compact
-          ? 'min-h-[var(--touch-target-min)] px-2.5 py-2 border-border/20'
-          : 'min-h-[4.5rem] px-3 py-2.5 border-border/25',
+          ? 'min-h-[var(--touch-target-min)] px-3 py-2 border-border/20'
+          : 'min-h-[5rem] px-3.5 py-3 border-border/25',
         isOutOfStock && 'opacity-25 pointer-events-none',
       )}
       title={`${product.name} — ${formatMoney(product.price)}`}
@@ -63,7 +63,7 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect,
           compact ? 'text-xs' : 'text-sm',
         )}>{formatMoney(product.price)}</span>
         {isLowStock && (
-          <span className="text-[9px] font-bold text-warning bg-warning/8 px-1 py-px rounded shrink-0">{product.stock}</span>
+          <span className="text-[9px] font-bold text-warning bg-warning/10 px-1.5 py-0.5 rounded-md shrink-0">{product.stock}</span>
         )}
       </div>
     </button>
@@ -185,13 +185,13 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
     <div className="flex gap-2.5 h-full">
       {/* Category sidebar — vertical tabs */}
       {categories.length > 1 && (
-        <div className="shrink-0 w-[5.5rem] flex flex-col gap-0.5 overflow-y-auto pr-1 pb-2">
+        <div className="shrink-0 w-24 flex flex-col gap-0.5 overflow-y-auto pr-1.5 pb-2">
           <button
             onClick={() => { setActiveCategory(null); setPage(1); }}
             className={cn(
-              'w-full text-left px-2.5 py-2 rounded-lg text-[11px] font-semibold transition-colors',
+              'w-full text-left px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all duration-150',
               !activeCategory
-                ? 'bg-primary/8 text-primary'
+                ? 'bg-primary/10 text-primary shadow-xs shadow-primary/5'
                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/30',
             )}
           >
@@ -202,9 +202,9 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
               key={cat}
               onClick={() => { setActiveCategory(cat === activeCategory ? null : cat); setPage(1); }}
               className={cn(
-                'w-full text-left px-2.5 py-2 rounded-lg text-[11px] font-semibold transition-colors truncate',
+                'w-full text-left px-3 py-2.5 rounded-xl text-[11px] font-semibold transition-all duration-150 truncate',
                 activeCategory === cat
-                  ? 'bg-primary/8 text-primary'
+                  ? 'bg-primary/10 text-primary shadow-xs shadow-primary/5'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/30',
               )}
               title={`${cat} (${count})`}
@@ -283,7 +283,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
         {displayProducts.length > 0 && (
           <div className={cn(
             viewMode === 'grid'
-              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1.5'
+              ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2'
               : 'flex flex-col gap-1',
           )}>
             {paginatedProducts.map((p) => (

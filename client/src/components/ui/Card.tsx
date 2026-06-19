@@ -2,7 +2,7 @@
 import { cn } from '../../utils/cn';
 
 interface CardProps {
-  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset';
+  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent';
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -15,10 +15,12 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
     glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm',
     elevated: 'bg-card text-card-foreground border border-border/40 shadow-md',
     interactive:
-      'bg-card text-card-foreground border border-border/50 shadow-xs hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer active:scale-[0.995]',
+      'bg-card text-card-foreground border border-border/50 shadow-xs hover:shadow-md hover:border-primary/25 transition-all duration-150 cursor-pointer active:scale-[0.995] hover:-translate-y-px',
     outline: 'bg-transparent text-foreground border border-border/50',
     frosted: 'backdrop-blur-xl bg-surface-glass/80 text-foreground border border-white/10 shadow-lg',
     inset: 'bg-surface-inset text-foreground border border-border-subtle shadow-inner-sm',
+    premium: 'bg-card text-card-foreground shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px gradient-border',
+    accent: 'bg-surface-accent text-foreground border border-border/30 shadow-xs',
   };
   return (
     <Component

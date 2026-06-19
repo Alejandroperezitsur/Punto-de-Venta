@@ -8,6 +8,7 @@ const variants = {
   danger: 'bg-danger/8 text-danger border-danger/15',
   info: 'bg-info/8 text-info border-info/15',
   neutral: 'bg-muted/60 text-muted-foreground border-border/50',
+  premium: 'bg-primary/10 text-primary border-primary/20 shadow-sm shadow-primary/5',
 };
 
 const sizes = {

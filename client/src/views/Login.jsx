@@ -100,8 +100,9 @@ const Login = () => {
 
       {/* Left branding panel */}
       <div className="hidden lg:flex flex-1 items-center justify-center p-12 relative z-10">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        {/* Animated gradient background */}
+        <div className="absolute inset-0" style={{ background: 'var(--gradient-hero-scan, linear-gradient(135deg, hsl(var(--primary) / 0.06) 0%, transparent 50%, hsl(var(--accent) / 0.06) 100%))' }} />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/30" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -112,7 +113,7 @@ const Login = () => {
             initial={{ opacity: 0, scale: 0.85 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.1, ease: [0.34, 1.56, 0.64, 1] }}
-            className="size-24 rounded-2xl bg-primary/8 border border-primary/10 flex items-center justify-center mx-auto mb-8 shadow-lg shadow-primary/5"
+            className="size-24 rounded-2xl bg-primary/10 border border-primary/12 flex items-center justify-center mx-auto mb-8 shadow-lg shadow-primary/8 ring-1 ring-primary/8"
           >
             {branding.logo ? (
               <img src={branding.logo} alt="Logo" className="w-full h-full object-contain p-3" />
@@ -130,10 +131,10 @@ const Login = () => {
             Gestiona ventas, inventario y clientes con una plataforma moderna, rápida y confiable.
           </p>
 
-          {/* Feature pills */}
-          <div className="flex flex-wrap gap-2 mt-8 justify-center">
+          {/* Feature pills — glass effect */}
+          <div className="flex flex-wrap gap-2.5 mt-10 justify-center">
             {['Offline', 'Multi-caja', 'Inventario', 'Reportes'].map(f => (
-              <span key={f} className="px-3 py-1.5 rounded-full bg-card/80 border border-border/20 text-[11px] font-semibold text-muted-foreground/60 backdrop-blur-sm">
+              <span key={f} className="px-3.5 py-2 rounded-xl glass-panel text-[11px] font-semibold text-muted-foreground/70 hover:-translate-y-px transition-all cursor-default">
                 {f}
               </span>
             ))}
@@ -170,7 +171,7 @@ const Login = () => {
           </div>
 
           {/* Login card */}
-          <div className="bg-card border border-border/30 rounded-2xl p-6 md:p-8 shadow-lg shadow-black/[0.03]">
+          <div className="bg-card border border-border/25 rounded-2xl p-6 md:p-8 shadow-xl shadow-black/[0.04] gradient-border">
             <div className="mb-7 hidden lg:block">
               <h3 className="text-xl font-bold text-foreground">Bienvenido de vuelta</h3>
               <p className="text-sm text-muted-foreground/60 mt-1.5 font-medium">Ingresa tus credenciales para continuar</p>
@@ -274,12 +275,12 @@ const Login = () => {
                     type="submit"
                     disabled={loading}
                     className={cn(
-                      'w-full h-[var(--control-lg)] mt-2 rounded-xl font-bold text-sm transition-all duration-100 flex items-center justify-center gap-2',
-                      'bg-primary text-primary-foreground hover:bg-primary/90',
+                      'w-full h-[var(--control-lg)] mt-2 rounded-xl font-bold text-sm transition-all duration-150 flex items-center justify-center gap-2 active:scale-[0.98]',
+                      'text-primary-foreground shadow-md shadow-primary/15 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-px',
                       'disabled:opacity-50 disabled:cursor-not-allowed',
-                      'active:scale-[0.98]',
-                      'touch-target shadow-sm shadow-primary/10',
+                      'touch-target',
                     )}
+                    style={{ background: 'var(--gradient-primary)' }}
                   >
                     {loading ? (
                       <>
@@ -325,8 +326,8 @@ const Login = () => {
                           onClick={() => handleSelectStore(store.id)}
                           disabled={loading}
                           className={cn(
-                            'w-full flex items-center gap-3.5 p-3.5 rounded-xl border border-border/30 bg-background/50 text-left transition-all duration-100 group',
-                            'hover:border-primary/30 hover:bg-primary/[0.03]',
+                            'w-full flex items-center gap-3.5 p-3.5 rounded-xl border border-border/25 bg-background/50 text-left transition-all duration-150 group',
+                            'hover:border-primary/30 hover:bg-primary/[0.03] hover:-translate-y-px hover:shadow-sm',
                             'active:scale-[0.98]',
                             loading && 'opacity-40 cursor-not-allowed',
                             'touch-target',
@@ -361,6 +362,9 @@ const Login = () => {
           {/* Bottom branding */}
           <p className="text-center text-[10px] font-medium text-muted-foreground/30 mt-6">
             &copy; 2026 POS Pro &middot; APV Labs
+          </p>
+          <p className="text-center text-[9px] font-semibold text-muted-foreground/20 mt-1 uppercase tracking-[0.15em]">
+            Powered by POS Pro
           </p>
         </motion.div>
       </div>

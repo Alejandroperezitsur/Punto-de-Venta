@@ -10,11 +10,12 @@ const inputSizes = {
   xl: 'h-[var(--control-xl)] px-4 text-base rounded-xl',
 };
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   size?: keyof typeof inputSizes;
   icon?: React.ElementType;
   iconRight?: React.ElementType;
   error?: string;
+  success?: boolean;
   label?: string;
   floatingLabel?: boolean;
   scanner?: boolean;
@@ -22,7 +23,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size = 'md', icon: Icon, iconRight: IconRight, error, label, floatingLabel, scanner, onIconClick, type, ...props }, ref) => {
+  ({ className, size = 'md', icon: Icon, iconRight: IconRight, error, success, label, floatingLabel, scanner, onIconClick, type, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
     const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
@@ -50,7 +51,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className={cn(
               'flex w-full border border-input bg-card font-medium text-foreground',
               'placeholder:text-muted-foreground/45 transition-all duration-100',
-              'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/15',
+              'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/15 focus-visible:shadow-sm focus-visible:shadow-primary/5',
               'disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-muted/20',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               inputSizes[size],
@@ -58,9 +59,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               scanner && 'pl-9 h-[var(--control-xl)] text-base font-semibold',
               IconRight && 'pr-9',
               type === 'password' && 'pr-9',
-              error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/15',
+              error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/15 animate-[shake_0.3s_ease-in-out]',
+              success && !error && 'border-success/50 focus-visible:border-success focus-visible:ring-success/15',
               scanner && 'border-primary/25 focus-visible:border-primary focus-visible:ring-primary/15',
-              !scanner && !error && 'hover:border-foreground/15',
+              !scanner && !error && !success && 'hover:border-foreground/15',
               className,
             )}
             {...props}

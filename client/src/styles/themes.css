@@ -1,11 +1,11 @@
 ﻿:root,
 [data-theme="light"] {
-  /* Enterprise 2026: Deep navy — authoritative, premium corporate */
-  --primary-h: 215; --primary-s: 65%; --primary-l: 28%;
+  /* Enterprise 2026: Vibrant deep navy — authoritative, modern corporate */
+  --primary-h: 220; --primary-s: 72%; --primary-l: 32%;
   --primary-foreground-h: 210; --primary-foreground-s: 40%; --primary-foreground-l: 98%;
 
-  /* Accent: warm amber-gold — premium secondary actions */
-  --accent-h: 36; --accent-s: 82%; --accent-l: 46%;
+  /* Accent: warm amber-orange — premium secondary actions */
+  --accent-h: 32; --accent-s: 88%; --accent-l: 48%;
   --accent-foreground-h: 30; --accent-foreground-s: 80%; --accent-foreground-l: 12%;
 
   /* Functional green: cobrar / success */
@@ -37,6 +37,7 @@
   /* New surfaces */
   --surface-glass-h: 0; --surface-glass-s: 0%; --surface-glass-l: 100%;
   --surface-inset-h: 220; --surface-inset-s: 12%; --surface-inset-l: 94%;
+  --surface-accent-h: 220; --surface-accent-s: 24%; --surface-accent-l: 97%;
 
   --card-h: 0; --card-s: 0%; --card-l: 100%;
   --card-foreground-h: 215; --card-foreground-s: 35%; --card-foreground-l: 12%;
@@ -60,10 +61,10 @@
 }
 
 [data-theme="dark"] {
-  --primary-h: 215; --primary-s: 62%; --primary-l: 58%;
+  --primary-h: 220; --primary-s: 68%; --primary-l: 60%;
   --primary-foreground-h: 0; --primary-foreground-s: 0%; --primary-foreground-l: 100%;
 
-  --accent-h: 36; --accent-s: 70%; --accent-l: 55%;
+  --accent-h: 32; --accent-s: 76%; --accent-l: 58%;
   --accent-foreground-h: 30; --accent-foreground-s: 80%; --accent-foreground-l: 10%;
 
   --success-h: 152; --success-s: 52%; --success-l: 50%;
@@ -92,6 +93,7 @@
 
   --surface-glass-h: 222; --surface-glass-s: 14%; --surface-glass-l: 12%;
   --surface-inset-h: 222; --surface-inset-s: 16%; --surface-inset-l: 5%;
+  --surface-accent-h: 222; --surface-accent-s: 18%; --surface-accent-l: 8%;
 
   --card-h: 222; --card-s: 14%; --card-l: 11%;
   --card-foreground-h: 210; --card-foreground-s: 20%; --card-foreground-l: 90%;
@@ -114,9 +116,9 @@
 }
 
 [data-theme="corporate"] {
-  --primary-h: 215; --primary-s: 65%; --primary-l: 28%;
-  --ring-h: 215; --ring-s: 65%; --ring-l: 28%;
-  --accent-h: 36; --accent-s: 82%; --accent-l: 46%;
+  --primary-h: 220; --primary-s: 72%; --primary-l: 32%;
+  --ring-h: 220; --ring-s: 72%; --ring-l: 32%;
+  --accent-h: 32; --accent-s: 88%; --accent-l: 48%;
   --success-h: 152; --success-s: 68%; --success-l: 36%;
   --warning-h: 38; --warning-s: 92%; --warning-l: 48%;
   --warning-foreground-h: 30; --warning-foreground-s: 80%; --warning-foreground-l: 12%;
@@ -130,9 +132,9 @@
 }
 
 [data-theme="corporate"][data-mode="dark"] {
-  --primary-h: 215; --primary-s: 60%; --primary-l: 55%;
-  --ring-h: 215; --ring-s: 60%; --ring-l: 55%;
-  --accent-h: 36; --accent-s: 68%; --accent-l: 52%;
+  --primary-h: 220; --primary-s: 66%; --primary-l: 58%;
+  --ring-h: 220; --ring-s: 66%; --ring-l: 58%;
+  --accent-h: 32; --accent-s: 74%; --accent-l: 55%;
   --success-h: 152; --success-s: 52%; --success-l: 48%;
   --warning-h: 38; --warning-s: 78%; --warning-l: 54%;
   --warning-foreground-h: 30; --warning-foreground-s: 80%; --warning-foreground-l: 10%;
@@ -170,6 +172,7 @@
   --surface-elevated: var(--surface-elevated-h) var(--surface-elevated-s) var(--surface-elevated-l);
   --surface-glass: var(--surface-glass-h) var(--surface-glass-s) var(--surface-glass-l);
   --surface-inset: var(--surface-inset-h) var(--surface-inset-s) var(--surface-inset-l);
+  --surface-accent: var(--surface-accent-h) var(--surface-accent-s) var(--surface-accent-l);
   --card: var(--card-h) var(--card-s) var(--card-l);
   --card-foreground: var(--card-foreground-h) var(--card-foreground-s) var(--card-foreground-l);
   --popover: var(--popover-h) var(--popover-s) var(--popover-l);

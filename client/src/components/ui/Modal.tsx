@@ -128,7 +128,7 @@ function Modal({
           'absolute inset-0 transition-opacity',
           isReduced ? '' : 'duration-80',
           isOpen ? 'opacity-100' : 'opacity-0',
-          isDrawer ? 'bg-black/40 backdrop-blur-[2px]' : 'bg-black/50 backdrop-blur-[2px]',
+          isDrawer ? 'bg-black/45 backdrop-blur-[3px]' : 'bg-black/55 backdrop-blur-[4px]',
         )}
         onClick={handleOverlayClick}
       />
@@ -158,7 +158,12 @@ function Modal({
         {(title || description) && (
           <div className="flex items-start justify-between px-5 pt-5 pb-0">
             <div className="flex-1 min-w-0">
-              {title && <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>}
+              {title && (
+                <div className="flex items-center gap-3">
+                  <span className="w-1 h-5 rounded-full bg-primary shrink-0" />
+                  <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>
+                </div>
+              )}
               {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
             </div>
             {!hideClose && (

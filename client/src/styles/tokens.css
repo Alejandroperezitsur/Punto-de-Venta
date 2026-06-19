@@ -134,4 +134,26 @@
   --z-toast:     400;
   --z-overlay:   500;
   --z-max:       9999;
+
+  /* Glass blur utilities */
+  --blur-sm:  4px;
+  --blur-md:  8px;
+  --blur-lg:  16px;
+  --blur-xl:  24px;
+
+  /* Gradient tokens (HSL-based, theme-aware) */
+  --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.85) 100%);
+  --gradient-primary-hover: linear-gradient(135deg, hsl(var(--primary) / 0.92) 0%, hsl(var(--primary) / 0.78) 100%);
+  --gradient-success: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.88) 100%);
+  --gradient-success-hover: linear-gradient(135deg, hsl(var(--success) / 0.92) 0%, hsl(var(--success) / 0.8) 100%);
+  --gradient-surface: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 100%);
+  --gradient-sidebar: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-hover) / 0.5) 100%);
+  --gradient-checkout: linear-gradient(135deg, hsl(var(--pos-checkout)) 0%, hsl(var(--pos-checkout) / 0.82) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.85) 100%);
+  --gradient-hero-scan: linear-gradient(90deg, hsl(var(--primary) / 0.04) 0%, transparent 40%, transparent 60%, hsl(var(--accent) / 0.04) 100%);
+
+  /* Premium surface accent */
+  --surface-accent-h: 215;
+  --surface-accent-s: 20%;
+  --surface-accent-l: 97%;
 }

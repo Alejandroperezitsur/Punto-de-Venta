@@ -19,7 +19,7 @@ import { cn } from '../utils/cn';
 
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
   return (
-    <div className="relative rounded-xl border border-border/30 bg-card p-3 hover:border-primary/30 transition-colors flex flex-col cursor-pointer"
+    <div className="relative rounded-xl border border-border/25 bg-card p-3 hover:border-primary/25 hover:-translate-y-px hover:shadow-md transition-all duration-150 flex flex-col cursor-pointer"
       onClick={() => onEdit(p)}
     >
       <button className="absolute top-2 right-2 p-1.5 rounded-lg hover:bg-muted text-muted-foreground opacity-60 hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); onEdit(p); }}
@@ -27,7 +27,7 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
         <Edit3 className="size-3.5" />
       </button>
 
-      <div className="size-16 rounded-xl bg-muted/50 flex items-center justify-center mb-3 border border-border/20 mx-auto">
+      <div className="size-16 rounded-xl bg-muted/50 flex items-center justify-center mb-3 border border-border/15 mx-auto overflow-hidden">
         {p.image_url ? (
           <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-xl" loading="lazy" />
         ) : (
@@ -188,7 +188,7 @@ const ProductsView = () => {
           ref={searchRef}
           type="text"
           placeholder="Buscar por nombre o código de barras..."
-          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-xl border border-border/30 bg-card text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/8 transition-all placeholder:text-muted-foreground/40"
+          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-xl border border-border/25 bg-card text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/8 focus:shadow-sm focus:shadow-primary/5 transition-all placeholder:text-muted-foreground/40"
           value={search}
           onChange={handleSearch}
           aria-label="Buscar productos"
@@ -212,7 +212,7 @@ const ProductsView = () => {
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5">
             {products.map((p) => (
               <ProductCard key={p.id} p={p} onEdit={handleEdit} onDelete={handleDeleteRequest} />
             ))}

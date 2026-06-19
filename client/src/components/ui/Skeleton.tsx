@@ -10,11 +10,11 @@ function Skeleton({ className, variant = 'text' }: SkeletonProps) {
   return (
     <div
       className={cn(
-        'animate-pulse bg-gradient-to-r from-muted/40 via-muted/60 to-muted/40 bg-[length:200%_100%]',
-        variant === 'text' && 'h-4 w-full rounded-md',
+        'shimmer rounded-md',
+        variant === 'text' && 'h-4 w-full',
         variant === 'card' && 'h-48 w-full rounded-lg',
         variant === 'avatar' && 'size-12 rounded-full',
-        variant === 'table-row' && 'h-12 w-full rounded-md',
+        variant === 'table-row' && 'h-12 w-full',
         variant === 'chart' && 'h-32 w-full rounded-lg',
         className,
       )}

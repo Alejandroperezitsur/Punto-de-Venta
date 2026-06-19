@@ -136,7 +136,7 @@ function Table<T extends Record<string, any>>({
       )}
 
       <div className={cn(
-        'rounded-lg border border-border/20 overflow-hidden bg-card',
+        'rounded-xl border border-border/20 overflow-hidden bg-card',
         stickyHeader && 'relative',
       )}>
         <div className="overflow-x-auto">
@@ -196,9 +196,10 @@ function Table<T extends Record<string, any>>({
                   <tr
                     key={rowKey(row)}
                     className={cn(
-                      'transition-colors',
-                      striped && i % 2 === 1 && 'bg-foreground/[0.02]',
-                      onRowClick && 'cursor-pointer hover:bg-muted/30',
+                      'transition-colors duration-100',
+                      striped && i % 2 === 1 && 'bg-foreground/[0.015]',
+                      onRowClick && 'cursor-pointer hover:bg-primary/[0.03]',
+                      !onRowClick && 'hover:bg-muted/20',
                     )}
                     onClick={() => onRowClick?.(row)}
                   >

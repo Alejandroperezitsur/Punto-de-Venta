@@ -31,11 +31,12 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'w-full min-h-[3.5rem] text-sm font-extrabold rounded-2xl transition-all duration-100 flex items-center justify-center gap-2.5 uppercase tracking-wide',
+        'w-full min-h-[4.5rem] text-base font-extrabold rounded-2xl transition-all duration-150 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
         hasItems && !isProcessing
-          ? 'bg-pos-checkout text-success-foreground hover:brightness-110 active:brightness-90 shadow-md shadow-success/15 success-pulse'
+          ? 'text-success-foreground shadow-lg shadow-success/20 hover:shadow-xl hover:shadow-success/25 hover:-translate-y-px success-pulse'
           : 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed',
       )}
+      style={hasItems && !isProcessing ? { background: 'var(--gradient-checkout)' } : undefined}
       disabled={!hasItems || isProcessing}
       onClick={onCheckout}
       aria-label={hasItems ? 'Cobrar' : 'Agregue productos primero'}
@@ -45,8 +46,8 @@ const CheckoutButton = React.memo(function CheckoutButton({
         <><span className="size-2.5 rounded-full bg-current animate-pulse" /><span>Procesando...</span></>
       ) : (
         <>
-          <Wallet className="size-4.5" />
-          <span>COBRAR</span>
+          <Wallet className="size-5" />
+          <span className="text-lg">COBRAR</span>
           <span className="text-[10px] font-bold opacity-30 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">F2</span>
         </>
       )}
@@ -500,9 +501,9 @@ const SalesView = React.memo(function SalesView() {
   const hasItems = items.length > 0;
 
   return (
-    <div className="h-full min-h-0 flex gap-2 overflow-hidden">
-      {/* ===== CATALOG PANEL (Left ~58%) ===== */}
-      <div className="flex-1 min-w-0 flex flex-col gap-2" style={{ flexBasis: 'var(--pos-catalog-width, 58%)' }}>
+    <div className="h-full min-h-0 flex gap-3 overflow-hidden">
+      {/* ===== CATALOG PANEL (Left ~55%) ===== */}
+      <div className="flex-1 min-w-0 flex flex-col gap-3" style={{ flexBasis: 'var(--pos-catalog-width, 55%)' }}>
         {/* Scan bar — top zone */}
         <div className="flex gap-2">
           <div className="flex-1">
@@ -510,7 +511,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 min-h-[var(--control-xl)] px-3 text-xs font-bold rounded-xl bg-warning/8 text-warning border border-warning/15 hover:bg-warning/15 transition-colors flex items-center gap-1.5 touch-target"
+            className="shrink-0 min-h-[var(--control-xl)] px-3.5 text-xs font-bold rounded-xl bg-warning/8 text-warning border border-warning/15 hover:bg-warning/15 hover:-translate-y-px transition-all flex items-center gap-1.5 touch-target active:scale-[0.97]"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -520,20 +521,22 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         {/* Product catalog grid */}
-        <div className="flex-1 rounded-xl border border-border/15 bg-card p-2.5 overflow-y-auto">
+        <div className="flex-1 rounded-2xl border border-border/15 bg-card p-2.5 overflow-y-auto">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
-      {/* ===== CART PANEL (Right ~42%) ===== */}
-      <div className="flex flex-col rounded-xl border border-border/15 bg-card h-full overflow-hidden pos-cart-panel" style={{ flexBasis: 'var(--pos-cart-width, 42%)', minWidth: '280px', maxWidth: '500px' }}>
+      {/* ===== CART PANEL (Right ~45%) ===== */}
+      <div className="flex flex-col rounded-2xl border border-border/15 bg-surface-accent h-full overflow-hidden pos-cart-panel" style={{ flexBasis: 'var(--pos-cart-width, 45%)', minWidth: '280px', maxWidth: '520px' }}>
 
         {/* Cart header */}
-        <div className="px-4 py-2.5 border-b border-border/10 flex items-center justify-between shrink-0">
-          <h2 className="font-bold text-sm flex items-center gap-2" id="cart-heading">
-            <ShoppingBag className="size-4 text-muted-foreground/50" />
+        <div className="px-4 py-3 border-b border-border/10 flex items-center justify-between shrink-0 bg-card/60 backdrop-blur-sm">
+          <h2 className="font-bold text-sm flex items-center gap-2.5" id="cart-heading">
+            <div className="size-7 rounded-lg bg-primary/8 flex items-center justify-center">
+              <ShoppingBag className="size-3.5 text-primary" />
+            </div>
             <span>Carrito</span>
-            <span className="bg-primary/8 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold min-w-[20px] text-center" aria-live="polite">
+            <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold min-w-[20px] text-center" aria-live="polite">
               {items.length}
             </span>
           </h2>
@@ -643,12 +646,14 @@ const SalesView = React.memo(function SalesView() {
         )}
 
         {/* Bottom: customer + totals + checkout */}
-        <div className="px-4 py-3 border-t border-border/10 space-y-2.5 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-4 py-4 border-t border-border/10 space-y-3 shrink-0 bg-card/60 backdrop-blur-sm pb-[env(safe-area-inset-bottom,0.75rem)]">
           {/* Customer selector */}
           <div className="flex items-center gap-2">
             {selectedCustomer ? (
-              <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-info/6 border border-info/15 text-xs">
-                <UserPlus className="size-3 text-info shrink-0" />
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-info/6 border border-info/15 text-xs">
+                <div className="size-6 rounded-full bg-info/10 flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-bold text-info">{selectedCustomer.name.charAt(0).toUpperCase()}</span>
+                </div>
                 <span className="font-semibold text-info truncate flex-1">{selectedCustomer.name}</span>
                 <button
                   onClick={() => setSelectedCustomer(null)}
@@ -661,7 +666,7 @@ const SalesView = React.memo(function SalesView() {
             ) : (
               <button
                 onClick={() => setCustomerModalOpen(true)}
-                className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-dashed border-border/25 text-[11px] text-muted-foreground/50 hover:border-info/30 hover:text-info/70 transition-colors"
+                className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-border/25 text-[11px] text-muted-foreground/50 hover:border-info/30 hover:text-info/70 hover:bg-info/[0.02] transition-all"
               >
                 <UserPlus className="size-3" />
                 <span>Agregar cliente (F6)</span>
@@ -669,12 +674,14 @@ const SalesView = React.memo(function SalesView() {
             )}
           </div>
 
-          {/* Totals */}
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-xs text-muted-foreground/60 font-semibold">Total</span>
-            <span className="text-4xl font-black text-foreground tracking-tight font-mono tabular-nums leading-none">
-              {formatMoney(totals.total)}
-            </span>
+          {/* Totals — premium gradient panel */}
+          <div className="rounded-xl p-3.5" style={{ background: 'var(--gradient-surface)' }}>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-xs text-muted-foreground/60 font-semibold">Total</span>
+              <span className="text-4xl font-black text-foreground tracking-tight font-mono tabular-nums leading-none">
+                {formatMoney(totals.total)}
+              </span>
+            </div>
           </div>
 
           {!hasItems && (
