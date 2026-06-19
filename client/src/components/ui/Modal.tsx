@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+﻿import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
@@ -19,6 +19,7 @@ interface ModalProps {
   size?: keyof typeof sizes;
   fullscreen?: boolean;
   sheet?: boolean;
+  drawer?: boolean;
   children?: React.ReactNode;
   className?: string;
   onRestoreFocus?: () => void;
@@ -63,7 +64,7 @@ function useFocusTrap(open: boolean, onClose: () => void) {
 }
 
 function Modal({
-  open, onClose, title, description, size = 'md', fullscreen, sheet,
+  open, onClose, title, description, size = 'md', fullscreen, sheet, drawer,
   children, className, onRestoreFocus, hideClose = false, zIndex = 300,
 }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -93,7 +94,7 @@ function Modal({
       const timer = setTimeout(() => {
         setAnimState('exited');
         setShouldRender(false);
-      }, isReduced ? 0 : 80);
+      }, isReduced ? 0 : 120);
       return () => clearTimeout(timer);
     }
   }, [open, isReduced]);
@@ -114,49 +115,60 @@ function Modal({
   if (!shouldRender) return null;
 
   const isOpen = animState === 'entered';
+  const isDrawer = drawer || sheet;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex }}>
+    <div
+      className={cn('fixed inset-0 flex', isDrawer ? 'justify-end' : 'items-center justify-center')}
+      style={{ zIndex }}
+    >
       <div
         ref={overlayRef}
         className={cn(
-          'absolute inset-0 bg-black/50 transition-opacity',
-          isReduced ? '' : 'duration-60',
-          isOpen ? 'opacity-100' : 'opacity-0'
+          'absolute inset-0 transition-opacity',
+          isReduced ? '' : 'duration-80',
+          isOpen ? 'opacity-100' : 'opacity-0',
+          isDrawer ? 'bg-black/40 backdrop-blur-[2px]' : 'bg-black/50 backdrop-blur-[2px]',
         )}
         onClick={handleOverlayClick}
       />
       <div
         ref={panelRef}
         className={cn(
-          'relative w-full bg-card border border-border shadow-lg overflow-y-auto',
+          'relative w-full bg-card border shadow-xl overflow-y-auto',
           'transition-all',
-          isReduced ? '' : 'duration-80',
+          isReduced ? '' : 'duration-100',
           isOpen
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-[2px]',
-          sheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
-            : fullscreen ? 'max-w-[95vw] h-[95vh] rounded-lg'
-              : `${sizes[size]} mx-4 rounded-lg`,
+            ? 'opacity-100 translate-x-0 translate-y-0'
+            : drawer
+              ? 'opacity-100 translate-x-full'
+              : 'opacity-0 translate-y-[4px]',
+          drawer
+            ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none border-l border-border/40'
+            : sheet
+              ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none'
+              : fullscreen
+                ? `max-w-[95vw] h-[95vh] rounded-2xl border-border/40`
+                : `${sizes[size]} mx-4 rounded-2xl border-border/40`,
           'pb-[env(safe-area-inset-bottom,0px)] max-h-[95vh]',
           className,
         )}
         role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}
       >
         {(title || description) && (
-          <div className="flex items-start justify-between p-4 pb-0">
+          <div className="flex items-start justify-between px-5 pt-5 pb-0">
             <div className="flex-1 min-w-0">
               {title && <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>}
-              {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
+              {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
             </div>
             {!hideClose && (
-              <button onClick={onClose} className="ml-3 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
+              <button onClick={onClose} className="ml-3 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors shrink-0" aria-label="Cerrar">
                 <X className="size-4" />
               </button>
             )}
           </div>
         )}
-        <div className="p-4">{children}</div>
+        <div className="p-5">{children}</div>
       </div>
     </div>
   );

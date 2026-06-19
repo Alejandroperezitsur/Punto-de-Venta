@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ProductSearch } from '../../components/sales/ProductSearch';
 import { Cart } from '../../components/sales/Cart';
 import { PaymentModal } from '../../components/sales/PaymentModal';
@@ -13,7 +13,7 @@ import { CommandPalette, ShortcutsOverlay, useKeyboardShortcuts } from '../../co
 import { useScannerFocusEngine } from '../../hooks/useScannerFocusEngine';
 import { api } from '../../lib/api';
 import { enqueueSale, initSyncManager } from '../../lib/syncManager';
-import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check, Lock, Wallet, UserPlus, X, Pause, Play, Clock } from 'lucide-react';
+import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check, Lock, Wallet, UserPlus, X, Pause, Clock, MoreHorizontal } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
 
@@ -31,10 +31,10 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'w-full min-h-[var(--pos-btn-checkout-height)] text-base font-bold rounded-lg transition-all flex items-center justify-center gap-3',
+        'w-full min-h-[3.5rem] text-sm font-extrabold rounded-2xl transition-all duration-100 flex items-center justify-center gap-2.5 uppercase tracking-wide',
         hasItems && !isProcessing
-          ? 'bg-pos-checkout text-success-foreground hover:brightness-110 active:brightness-95 shadow-sm'
-          : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
+          ? 'bg-pos-checkout text-success-foreground hover:brightness-110 active:brightness-90 shadow-md shadow-success/15 success-pulse'
+          : 'bg-muted/40 text-muted-foreground/30 cursor-not-allowed',
       )}
       disabled={!hasItems || isProcessing}
       onClick={onCheckout}
@@ -42,9 +42,13 @@ const CheckoutButton = React.memo(function CheckoutButton({
       title={!hasItems ? 'Agregue productos al carrito primero' : undefined}
     >
       {isProcessing ? (
-        <><span className="size-2 rounded-full bg-current animate-pulse" />Procesando...</>
+        <><span className="size-2.5 rounded-full bg-current animate-pulse" /><span>Procesando...</span></>
       ) : (
-        <><span>COBRAR</span><span className="text-xs font-bold opacity-60 bg-black/15 px-1.5 py-0.5 rounded ml-1">F2</span></>
+        <>
+          <Wallet className="size-4.5" />
+          <span>COBRAR</span>
+          <span className="text-[10px] font-bold opacity-30 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">F2</span>
+        </>
       )}
     </button>
   );
@@ -93,10 +97,10 @@ const CustomerSearchModal = React.memo(function CustomerSearchModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]" role="dialog" aria-modal="true" aria-label="Buscar cliente">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-card rounded-xl shadow-2xl border border-border overflow-hidden">
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
-          <UserPlus className="h-5 w-5 text-muted-foreground" />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-card rounded-2xl shadow-2xl border border-border/30 overflow-hidden">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-border/15">
+          <UserPlus className="h-4 w-4 text-muted-foreground/50" />
           <input
             ref={inputRef}
             type="text"
@@ -104,32 +108,32 @@ const CustomerSearchModal = React.memo(function CustomerSearchModal({
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
-            className="flex-1 text-base outline-none bg-transparent placeholder:text-muted-foreground/50 text-foreground"
+            className="flex-1 text-sm outline-none bg-transparent placeholder:text-muted-foreground/40 text-foreground font-medium"
             autoFocus
           />
         </div>
         <div className="max-h-64 overflow-y-auto p-2">
-          {loading && <p className="text-center text-muted-foreground text-sm py-4">Buscando...</p>}
+          {loading && <p className="text-center text-muted-foreground/50 text-xs py-4">Buscando...</p>}
           {!loading && query.length >= 2 && results.length === 0 && (
-            <p className="text-center text-muted-foreground text-sm py-4">No se encontraron clientes</p>
+            <p className="text-center text-muted-foreground/50 text-xs py-4">No se encontraron clientes</p>
           )}
           {results.map(c => (
             <button
               key={c.id}
               onClick={() => onSelect({ id: c.id, name: c.name })}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-muted transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left hover:bg-muted/30 transition-colors"
             >
-              <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+              <div className="size-9 rounded-full bg-primary/8 flex items-center justify-center text-primary text-xs font-bold shrink-0">
                 {c.name?.charAt(0)?.toUpperCase() || '?'}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate text-foreground">{c.name}</p>
-                {c.phone && <p className="text-xs text-muted-foreground truncate">{c.phone}</p>}
+                {c.phone && <p className="text-[11px] text-muted-foreground/50 truncate">{c.phone}</p>}
               </div>
             </button>
           ))}
           {!loading && query.length < 2 && (
-            <p className="text-center text-muted-foreground/60 text-xs py-6">Escribe al menos 2 caracteres para buscar</p>
+            <p className="text-center text-muted-foreground/40 text-[11px] py-6">Escribe al menos 2 caracteres para buscar</p>
           )}
         </div>
       </div>
@@ -161,10 +165,11 @@ const SalesView = React.memo(function SalesView() {
   const [manualForm, setManualForm] = useState({ name: '', price: '' });
   const [payError, setPayError] = useState('');
   const [saleComplete, setSaleComplete] = useState<{ total: number; change: number; method: string } | null>(null);
-  const [cashOpen, setCashOpen] = useState<boolean | null>(null); // null = loading
+  const [cashOpen, setCashOpen] = useState<boolean | null>(null);
   const [selectedCustomer, setSelectedCustomer] = useState<{ id: number; name: string } | null>(null);
   const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
   const [showHeldTickets, setShowHeldTickets] = useState(false);
+  const [showCartMenu, setShowCartMenu] = useState(false);
   const toast = useToast();
   const saleCompleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { forceFocusToScanner, restoreAfterModal, restoreAfterSaleComplete } = useScannerFocusEngine();
@@ -236,7 +241,6 @@ const SalesView = React.memo(function SalesView() {
     focusSearch();
   }, [focusSearch, hydrate]);
 
-  // Cash gate: check if cash register is open
   useEffect(() => {
     const checkCash = async () => {
       try {
@@ -294,7 +298,6 @@ const SalesView = React.memo(function SalesView() {
     iframe.style.border = 'none';
     document.body.appendChild(iframe);
 
-    // Read branding from localStorage
     let branding = { businessName: 'POS Pro', businessSubtitle: 'Punto de Venta', logo: null as string | null };
     try {
       const stored = localStorage.getItem('app_branding');
@@ -497,16 +500,17 @@ const SalesView = React.memo(function SalesView() {
   const hasItems = items.length > 0;
 
   return (
-    <div className="h-full min-h-0 flex gap-2.5 overflow-hidden">
-      {/* Catalog panel — 60% on kiosk landscape */}
-      <div className="flex-1 min-w-0 flex flex-col gap-2.5" style={{ flexBasis: 'var(--pos-catalog-width, 60%)' }}>
+    <div className="h-full min-h-0 flex gap-2 overflow-hidden">
+      {/* ===== CATALOG PANEL (Left ~58%) ===== */}
+      <div className="flex-1 min-w-0 flex flex-col gap-2" style={{ flexBasis: 'var(--pos-catalog-width, 58%)' }}>
+        {/* Scan bar — top zone */}
         <div className="flex gap-2">
           <div className="flex-1">
             <ProductSearch />
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 min-h-[var(--control-xl)] px-3 text-xs font-bold rounded-lg bg-warning/10 text-warning border border-warning/20 hover:bg-warning/20 transition-colors flex items-center gap-1 touch-target"
+            className="shrink-0 min-h-[var(--control-xl)] px-3 text-xs font-bold rounded-xl bg-warning/8 text-warning border border-warning/15 hover:bg-warning/15 transition-colors flex items-center gap-1.5 touch-target"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -515,18 +519,21 @@ const SalesView = React.memo(function SalesView() {
           </button>
         </div>
 
-        <div className="flex-1 rounded-lg border border-border/20 bg-card p-2 overflow-y-auto">
+        {/* Product catalog grid */}
+        <div className="flex-1 rounded-xl border border-border/15 bg-card p-2.5 overflow-y-auto">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
-      {/* Cart panel — 40% on kiosk landscape, fixed right */}
-      <div className="flex flex-col rounded-lg border border-border/20 bg-card h-full overflow-hidden pos-cart-panel" style={{ flexBasis: 'var(--pos-cart-width, 40%)', minWidth: '280px', maxWidth: '480px' }}>
-        <div className="px-3 py-2 border-b border-border/20 flex items-center justify-between shrink-0">
-          <h2 className="font-bold text-xs flex items-center gap-1.5" id="cart-heading">
-            <ShoppingBag className="size-3.5" />
-            Carrito
-            <span className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[20px] text-center" aria-live="polite">
+      {/* ===== CART PANEL (Right ~42%) ===== */}
+      <div className="flex flex-col rounded-xl border border-border/15 bg-card h-full overflow-hidden pos-cart-panel" style={{ flexBasis: 'var(--pos-cart-width, 42%)', minWidth: '280px', maxWidth: '500px' }}>
+
+        {/* Cart header */}
+        <div className="px-4 py-2.5 border-b border-border/10 flex items-center justify-between shrink-0">
+          <h2 className="font-bold text-sm flex items-center gap-2" id="cart-heading">
+            <ShoppingBag className="size-4 text-muted-foreground/50" />
+            <span>Carrito</span>
+            <span className="bg-primary/8 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold min-w-[20px] text-center" aria-live="polite">
               {items.length}
             </span>
           </h2>
@@ -534,62 +541,84 @@ const SalesView = React.memo(function SalesView() {
             {heldTickets.length > 0 && (
               <button
                 onClick={() => setShowHeldTickets(!showHeldTickets)}
-                className="text-[10px] font-semibold text-pos-hold hover:bg-pos-hold/10 px-2 py-1.5 rounded-md transition-colors flex items-center gap-0.5 touch-target relative"
+                className="text-[11px] font-semibold text-pos-hold hover:bg-pos-hold/8 px-2 py-1.5 rounded-lg transition-colors flex items-center gap-1 touch-target"
                 title={`Tickets en espera (${heldTickets.length})`}
               >
                 <Clock className="size-3" />
                 <span>{heldTickets.length}</span>
               </button>
             )}
-            <button
-              onClick={() => { if (items.length > 0) { holdCurrentTicket(); toast('Ticket en espera', 'info'); } }}
-              disabled={!hasItems}
-              className="text-[10px] font-semibold text-info hover:bg-info/10 px-2 py-1.5 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5 touch-target"
-              title="Pausar ticket (Ctrl+H)"
-            >
-              <Pause className="size-3" />Pausar
-            </button>
-            <button
-              onClick={() => setDiscountOpen(true)}
-              disabled={!hasItems}
-              className="text-[10px] font-semibold text-info hover:bg-info/10 px-2 py-1.5 rounded-md transition-colors disabled:opacity-30 flex items-center gap-0.5 touch-target"
-              title="Descuento (F5)"
-            >
-              <Percent className="size-3" />Dto
-            </button>
-            <button
-              onClick={() => { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); }}
-              disabled={!hasItems}
-              className="text-[10px] font-semibold text-danger hover:bg-danger/10 px-2 py-1.5 rounded-md transition-colors disabled:opacity-30 touch-target"
-              aria-label="Vaciar carrito"
-            >
-              Vaciar
-            </button>
+            {/* Cart actions menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowCartMenu(!showCartMenu)}
+                className="p-1.5 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-colors touch-target"
+                aria-label="Acciones del carrito"
+              >
+                <MoreHorizontal className="size-4" />
+              </button>
+              {showCartMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowCartMenu(false)} />
+                  <div className="absolute right-0 top-full mt-1 z-20 w-44 bg-card rounded-xl border border-border/30 shadow-lg py-1 animate-scale-in">
+                    <button
+                      onClick={() => { if (hasItems) { holdCurrentTicket(); toast('Ticket en espera', 'info'); } setShowCartMenu(false); }}
+                      disabled={!hasItems}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted/30 transition-colors disabled:opacity-30"
+                    >
+                      <Pause className="size-3.5" /> Pausar ticket
+                    </button>
+                    <button
+                      onClick={() => { setDiscountOpen(true); setShowCartMenu(false); }}
+                      disabled={!hasItems}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted/30 transition-colors disabled:opacity-30"
+                    >
+                      <Percent className="size-3.5" /> Descuento
+                    </button>
+                    <button
+                      onClick={() => { setCustomerModalOpen(true); setShowCartMenu(false); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-foreground hover:bg-muted/30 transition-colors"
+                    >
+                      <UserPlus className="size-3.5" /> Agregar cliente
+                    </button>
+                    <div className="border-t border-border/10 my-1" />
+                    <button
+                      onClick={() => { if (hasItems) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } setShowCartMenu(false); }}
+                      disabled={!hasItems}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-danger hover:bg-danger/5 transition-colors disabled:opacity-30"
+                    >
+                      <XCircle className="size-3.5" /> Vaciar carrito
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-1" role="region" aria-labelledby="cart-heading" aria-live="polite">
+        {/* Cart items list */}
+        <div className="flex-1 overflow-y-auto px-2.5 py-1" role="region" aria-labelledby="cart-heading" aria-live="polite">
           {showHeldTickets && heldTickets.length > 0 && (
-            <div className="mb-2 border border-pos-hold/30 rounded-lg bg-pos-hold/5 overflow-hidden">
-              <div className="px-3 py-2 border-b border-pos-hold/20 flex items-center justify-between">
-                <span className="text-[10px] font-bold text-pos-hold uppercase tracking-wider">Tickets en espera</span>
-                <button onClick={() => setShowHeldTickets(false)} className="text-pos-hold/60 hover:text-foreground"><X className="size-3" /></button>
+            <div className="mb-2 border border-pos-hold/20 rounded-xl bg-pos-hold/5 overflow-hidden">
+              <div className="px-3 py-2 border-b border-pos-hold/15 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-pos-hold uppercase tracking-[0.08em]">Tickets en espera</span>
+                <button onClick={() => setShowHeldTickets(false)} className="text-pos-hold/50 hover:text-foreground touch-target"><X className="size-3" /></button>
               </div>
               {heldTickets.map(t => (
-                <div key={t.id} className="px-3 py-2 flex items-center justify-between border-b border-pos-hold/10 last:border-0">
+                <div key={t.id} className="px-3 py-2.5 flex items-center justify-between border-b border-pos-hold/8 last:border-0">
                   <button
                     onClick={() => { recallTicket(t.id); setShowHeldTickets(false); toast(`Ticket restaurado: ${t.label}`, 'success'); }}
                     className="flex-1 text-left min-w-0"
                   >
                     <p className="text-xs font-semibold text-foreground truncate">{t.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{t.items.length} items · {new Date(t.heldAt).toLocaleTimeString()}</p>
+                    <p className="text-[10px] text-muted-foreground/50">{t.items.length} items · {new Date(t.heldAt).toLocaleTimeString()}</p>
                   </button>
                   <button
                     onClick={() => { removeHeldTicket(t.id); toast('Ticket descartado', 'info'); }}
-                    className="text-danger/60 hover:text-danger ml-2 shrink-0 touch-target"
+                    className="text-danger/50 hover:text-danger ml-2 shrink-0 touch-target"
                     aria-label="Descartar ticket"
                   >
-                    <XCircle className="size-4" />
+                    <XCircle className="size-3.5" />
                   </button>
                 </div>
               ))}
@@ -598,54 +627,58 @@ const SalesView = React.memo(function SalesView() {
           <Cart />
         </div>
 
+        {/* Discount indicator */}
         {discount > 0 && (
-          <div className="px-3 py-1.5 bg-info/10 border-t border-info/20 flex items-center justify-between text-xs">
-            <span className="font-semibold text-info">Descuento</span>
+          <div className="px-4 py-1.5 bg-info/6 border-t border-info/10 flex items-center justify-between text-[11px]">
+            <span className="font-semibold text-info flex items-center gap-1.5"><Percent className="size-3" />Descuento</span>
             <span className="font-bold text-info tabular-nums">-{formatMoney(discount)}</span>
           </div>
         )}
 
+        {/* Error */}
         {payError && (
-          <div className="px-3 py-2 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-1.5" role="alert">
-            <span className="text-xs font-semibold text-danger">{payError}</span>
+          <div className="px-3 py-2 bg-danger/8 border-t-2 border-danger/15 flex items-center gap-1.5" role="alert">
+            <span className="text-[11px] font-semibold text-danger">{payError}</span>
           </div>
         )}
 
-        <div className="px-3 py-2 border-t border-border/20 space-y-2 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        {/* Bottom: customer + totals + checkout */}
+        <div className="px-4 py-3 border-t border-border/10 space-y-2.5 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
           {/* Customer selector */}
           <div className="flex items-center gap-2">
             {selectedCustomer ? (
-              <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-info/10 border border-info/20 text-xs">
-                <UserPlus className="size-3.5 text-info shrink-0" />
+              <div className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-info/6 border border-info/15 text-xs">
+                <UserPlus className="size-3 text-info shrink-0" />
                 <span className="font-semibold text-info truncate flex-1">{selectedCustomer.name}</span>
                 <button
                   onClick={() => setSelectedCustomer(null)}
-                  className="text-info/60 hover:text-danger transition-colors shrink-0"
+                  className="text-info/50 hover:text-danger transition-colors shrink-0"
                   aria-label="Quitar cliente"
                 >
-                  <X className="size-3.5" />
+                  <X className="size-3" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setCustomerModalOpen(true)}
-                className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-md border border-dashed border-border/40 text-xs text-muted-foreground hover:border-info/40 hover:text-info transition-colors"
+                className="flex-1 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-dashed border-border/25 text-[11px] text-muted-foreground/50 hover:border-info/30 hover:text-info/70 transition-colors"
               >
-                <UserPlus className="size-3.5" />
+                <UserPlus className="size-3" />
                 <span>Agregar cliente (F6)</span>
               </button>
             )}
           </div>
 
-          <div className="flex items-baseline justify-between">
-            <span className="text-xs text-muted-foreground font-medium">Total:</span>
-            <span className="text-3xl font-black text-foreground tracking-tight font-mono tabular-nums">
+          {/* Totals */}
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-xs text-muted-foreground/60 font-semibold">Total</span>
+            <span className="text-4xl font-black text-foreground tracking-tight font-mono tabular-nums leading-none">
               {formatMoney(totals.total)}
             </span>
           </div>
 
           {!hasItems && (
-            <p className="text-xs text-muted-foreground/60 text-center font-medium">
+            <p className="text-[11px] text-muted-foreground/35 text-center font-medium">
               Escanee o busque productos para comenzar
             </p>
           )}
@@ -654,34 +687,43 @@ const SalesView = React.memo(function SalesView() {
         </div>
       </div>
 
+      {/* ===== SALE COMPLETE OVERLAY ===== */}
       {saleComplete && (
         <div
-          className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/40"
+          className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/50 backdrop-blur-sm"
           onClick={dismissSaleComplete}
           role="alert"
           aria-live="assertive"
         >
-          <div className="bg-card rounded-lg border border-success/30 shadow-2xl px-6 py-5 text-center max-w-xs">
-            <div className="size-12 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-2">
-              <Check className="size-6 text-success" />
+          <div className="bg-card rounded-3xl border border-success/20 shadow-2xl px-10 py-10 text-center max-w-sm animate-scale-in">
+            {/* Success icon */}
+            <div className="size-20 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-5 ring-4 ring-success/8 success-pulse">
+              <Check className="size-10 text-success" strokeWidth={2.5} />
             </div>
-            <p className="text-base font-black text-foreground mb-0.5">VENTA COMPLETADA</p>
-            <p className="text-2xl font-black text-pos-checkout font-mono tabular-nums mb-1">{formatMoney(saleComplete.total)}</p>
+            <p className="text-lg font-extrabold text-foreground mb-2 uppercase tracking-wide">Venta Completada</p>
+            <p className="text-5xl font-black text-pos-checkout font-mono tabular-nums mb-3 leading-none">{formatMoney(saleComplete.total)}</p>
             {saleComplete.change > 0 && (
-              <p className="text-sm font-semibold text-muted-foreground">
-                Cambio: <span className="text-foreground tabular-nums">{formatMoney(saleComplete.change)}</span>
+              <p className="text-sm font-semibold text-muted-foreground mb-2">
+                Cambio: <span className="text-foreground font-bold tabular-nums">{formatMoney(saleComplete.change)}</span>
               </p>
             )}
-            <p className="text-xs text-muted-foreground/60 mt-1 font-medium">
-              {saleComplete.method === 'cash' ? 'Efectivo' : saleComplete.method === 'card' ? 'Tarjeta' : saleComplete.method === 'transfer' ? 'Transferencia' : 'Mixto'}
-            </p>
-            <p className="text-[10px] text-muted-foreground/40 mt-3 font-medium">
-              Toque en cualquier parte para continuar
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/30 mt-2">
+              <span className="text-xs font-semibold text-muted-foreground/60">
+                {saleComplete.method === 'cash' ? 'Efectivo' : saleComplete.method === 'card' ? 'Tarjeta' : saleComplete.method === 'transfer' ? 'Transferencia' : 'Mixto'}
+              </span>
+            </div>
+            {/* Auto-dismiss progress bar */}
+            <div className="mt-6 h-0.5 bg-muted/20 rounded-full overflow-hidden">
+              <div className="h-full bg-success/30 rounded-full progress-dismiss" style={{ '--dismiss-duration': '4s' } as any} />
+            </div>
+            <p className="text-[11px] text-muted-foreground/30 mt-3 font-medium">
+              Toque para continuar
             </p>
           </div>
         </div>
       )}
 
+      {/* ===== MODALS ===== */}
       <Modal
         open={isManualModalOpen}
         onClose={() => { setManualModalOpen(false); restoreAfterModal(); }}
@@ -689,15 +731,15 @@ const SalesView = React.memo(function SalesView() {
         size="sm"
         onRestoreFocus={restoreAfterModal}
       >
-        <form onSubmit={handleAddManual} className="space-y-3">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Nombre del producto</label>
+        <form onSubmit={handleAddManual} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Nombre del producto</label>
             <Input placeholder="Nombre del producto..." value={manualForm.name} onChange={e => setManualForm({ ...manualForm, name: e.target.value })} autoFocus required />
           </div>
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Precio</label>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Precio</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10 text-sm">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground/50 z-10 text-sm">$</span>
               <Input className="pl-7" type="number" step="0.01" min="0" placeholder="0.00" value={manualForm.price} onChange={e => setManualForm({ ...manualForm, price: e.target.value })} required />
             </div>
           </div>
@@ -714,11 +756,11 @@ const SalesView = React.memo(function SalesView() {
         size="sm"
         onRestoreFocus={restoreAfterModal}
       >
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Monto a descontar</label>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Monto a descontar</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10 text-sm">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground/50 z-10 text-sm">$</span>
               <Input
                 className="pl-7"
                 type="number"
@@ -743,7 +785,7 @@ const SalesView = React.memo(function SalesView() {
           {discount > 0 && (
             <button
               onClick={() => { setDiscount(0); setDiscountOpen(false); toast('Descuento eliminado', 'info'); restoreAfterModal(); }}
-              className="w-full text-xs font-semibold text-danger hover:bg-danger/10 py-2 rounded-md transition-colors touch-target"
+              className="w-full text-xs font-semibold text-danger hover:bg-danger/5 py-2.5 rounded-xl transition-colors touch-target"
             >
               Quitar descuento ({formatMoney(discount)})
             </button>
@@ -764,27 +806,26 @@ const SalesView = React.memo(function SalesView() {
       <CommandPalette open={isCmdPaletteOpen} onClose={() => { setCmdPaletteOpen(false); restoreAfterModal(); }} />
       <ShortcutsOverlay open={isShortcutsOpen} onClose={() => { setShortcutsOpen(false); restoreAfterModal(); }} />
 
-      {/* Customer Search Modal */}
       <CustomerSearchModal
         open={isCustomerModalOpen}
         onClose={() => { setCustomerModalOpen(false); restoreAfterModal(); }}
         onSelect={(c) => { setSelectedCustomer(c); setCustomerModalOpen(false); toast(`Cliente: ${c.name}`, 'info'); restoreAfterModal(); }}
       />
 
-      {/* Cash Gate: block sales when cash register is closed */}
+      {/* Cash Gate */}
       {cashOpen === false && (
-        <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-card rounded-xl border border-border p-8 text-center max-w-sm shadow-2xl">
-            <div className="size-14 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
-              <Lock className="size-7 text-danger" />
+        <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card rounded-2xl border border-border/30 p-8 text-center max-w-sm shadow-2xl animate-scale-in">
+            <div className="size-16 rounded-2xl bg-danger/8 flex items-center justify-center mx-auto mb-5">
+              <Lock className="size-8 text-danger" />
             </div>
             <h3 className="text-lg font-black text-foreground mb-2">Caja Cerrada</h3>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-sm text-muted-foreground/60 mb-6">
               Debes abrir caja antes de realizar ventas. Ve a la secci&oacute;n de Caja para aperturar.
             </p>
             <a
               href="#/caja"
-              className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
             >
               <Wallet className="size-4" />
               Abrir Caja

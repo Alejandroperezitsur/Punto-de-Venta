@@ -160,7 +160,7 @@ const MyBusinessView = () => {
             </div>
 
             <div className="space-y-4 py-10">
-                <Card className="flex items-center gap-3 p-4 border border-primary/10">
+                <Card className="flex items-center gap-3 p-4 border border-primary/10 rounded-xl">
                     <div className="size-10 bg-card rounded-lg flex items-center justify-center shadow-sm shrink-0 border border-border">
                         <Sun className="size-5 text-primary" />
                     </div>
@@ -169,7 +169,7 @@ const MyBusinessView = () => {
                     </p>
                 </Card>
 
-                <Card className="flex items-center gap-3 p-4 border border-warning/10">
+                <Card className="flex items-center gap-3 p-4 border border-warning/10 rounded-xl">
                     <div className="size-10 bg-card rounded-lg flex items-center justify-center shadow-sm shrink-0 border border-border">
                         <Coffee className="size-5 text-warning" />
                     </div>
@@ -192,7 +192,7 @@ const MyBusinessView = () => {
 
             {isClosing && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4" style={{ zIndex: 'var(--z-modal)' }}>
-                    <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full shadow-lg relative">
+                    <div className="bg-card border border-border/30 rounded-2xl p-6 max-w-md w-full shadow-lg relative">
                         <button
                             onClick={() => { setIsClosing(false); setClosingStep(1); }}
                             className="absolute top-6 right-6 text-muted-foreground hover:text-foreground font-bold text-xs"
@@ -206,7 +206,7 @@ const MyBusinessView = () => {
                                 <p className="text-sm text-muted-foreground font-medium italic">Cuenta tu efectivo físicamente ahora mismo.</p>
 
                                 {closeError && (
-                                    <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg text-danger text-sm font-semibold">
+                                    <div className="p-3 bg-danger/10 border border-danger/15 rounded-xl text-danger text-sm font-semibold">
                                         {closeError}
                                     </div>
                                 )}

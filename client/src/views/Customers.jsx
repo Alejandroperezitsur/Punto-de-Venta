@@ -77,7 +77,7 @@ const CustomersView = () => {
     { title: 'RFC', key: 'rfc', hideOnMobile: true },
     { title: '', key: 'actions', width: '48px', render: (row) => (
       <button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(row.id); }}
-        className="size-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors touch-target"
+        className="size-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors touch-target"
         aria-label="Eliminar cliente">
         <Trash2 className="size-3.5" />
       </button>
@@ -90,7 +90,7 @@ const CustomersView = () => {
         title="Clientes"
         description={customers.length > 0 ? `${customers.length} registrados` : 'Gestiona tus clientes'}
       >
-        <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-md border border-border">
+        <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-lg border border-border/30">
           <RefreshCw className="size-4" />
         </Button>
         <Button onClick={() => setShowForm(!showForm)} size="md" className="font-bold">
@@ -99,7 +99,7 @@ const CustomersView = () => {
       </ViewHeader>
 
       {showForm && (
-        <Card className="p-4 border border-primary/20">
+        <Card className="p-4 border border-primary/15 rounded-xl">
           <h3 className="text-sm font-bold mb-3">Registrar Cliente</h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
             <div className="md:col-span-2">

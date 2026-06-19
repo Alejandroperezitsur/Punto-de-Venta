@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Package, Users, BarChart3, Settings, LogOut, Wallet,
-  Shield, ClipboardList, ChevronLeft, Store, Palette,
+  Shield, ClipboardList, ChevronLeft, Store, Palette, ChevronRight,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
@@ -17,10 +17,10 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
-          'flex items-center justify-between rounded-md text-sm font-medium transition-colors group relative',
-          isCollapsed ? 'px-0 py-3 justify-center' : 'px-4 py-3',
+          'flex items-center rounded-xl text-sm font-medium transition-all duration-100 group relative',
+          isCollapsed ? 'px-0 py-2.5 justify-center mx-1' : 'px-3 py-2.5 mx-1',
           isActive
-            ? 'bg-primary/10 text-primary font-semibold'
+            ? 'bg-primary/8 text-primary font-semibold'
             : 'text-muted-foreground hover:text-foreground hover:bg-surface-hover',
         )
       }
@@ -29,17 +29,23 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
     >
       {({ isActive }) => (
         <>
-          <div className={cn('flex items-center gap-3.5', isCollapsed && 'justify-center')}>
-            <Icon className={cn('size-5 shrink-0')} />
+          <div className={cn('flex items-center gap-3', isCollapsed && 'justify-center')}>
+            <div className={cn(
+              'shrink-0 flex items-center justify-center rounded-lg transition-colors',
+              isCollapsed ? 'size-10' : 'size-8',
+              isActive ? 'bg-primary/10 text-primary' : 'text-current',
+            )}>
+              <Icon className={cn('shrink-0', isCollapsed ? 'size-5' : 'size-4')} />
+            </div>
             {!isCollapsed && <span className="truncate">{children}</span>}
           </div>
           {shortcut && !isCollapsed && (
-            <span className="text-[10px] font-mono tracking-wider opacity-0 group-hover:opacity-40 border border-current/30 px-1.5 py-0.5 rounded-md transition-opacity">
+            <span className="text-[10px] font-mono tracking-wider opacity-0 group-hover:opacity-30 border border-current/20 px-1.5 py-0.5 rounded-md transition-opacity ml-auto">
               {shortcut}
             </span>
           )}
           {isActive && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full" />
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full" />
           )}
         </>
       )}
@@ -54,7 +60,7 @@ const RoleBadge = ({ role }) => {
     cajero: { variant: 'success', label: 'Cajero' },
   };
   const v = variants[role] || { variant: 'neutral', label: role };
-  return <Badge variant={v.variant} size="sm" className="opacity-80">{v.label}</Badge>;
+  return <Badge variant={v.variant} size="xs" className="opacity-80">{v.label}</Badge>;
 };
 
 export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
@@ -109,46 +115,48 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
   const userInitial = userName.charAt(0).toUpperCase();
 
   return (
-      <aside
-        className={cn(
-          'border-r border-border/30 bg-card flex flex-col h-full shrink-0 transition-[width] duration-100 ease-linear z-[var(--z-sticky)]',
-          isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
-        )}
-        aria-label="Navegación principal"
-      >
+    <aside
+      className={cn(
+        'border-r border-border/20 bg-card flex flex-col h-full shrink-0 transition-[width] duration-100 ease-linear z-[var(--z-sticky)]',
+        isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
+      )}
+      aria-label="Navegación principal"
+    >
+      {/* Logo header */}
       <div className={cn(
-        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/30',
-        isCollapsed ? 'justify-center px-0' : 'px-5 justify-between',
+        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/15',
+        isCollapsed ? 'justify-center px-0' : 'px-4 justify-between',
       )}>
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="size-9 rounded-md bg-primary/10 flex items-center justify-center text-primary shrink-0 overflow-hidden">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="size-8 rounded-lg bg-primary/8 flex items-center justify-center text-primary shrink-0 overflow-hidden">
             {branding.logo ? (
               <img src={branding.logo} alt="Logo" className="size-full object-contain p-1" />
             ) : (
-              <Store className="size-5" />
+              <Store className="size-4" />
             )}
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
-              <span className="font-extrabold text-sm tracking-tight truncate block">{branding.businessName}</span>
-              <p className="text-[10px] text-muted-foreground font-semibold tracking-wider truncate block uppercase">{branding.businessSubtitle}</p>
+              <span className="font-bold text-sm tracking-tight truncate block leading-tight">{branding.businessName}</span>
+              <p className="text-[10px] text-muted-foreground/60 font-medium tracking-wider truncate block uppercase">{branding.businessSubtitle}</p>
             </div>
           )}
         </div>
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
-            className="size-8 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-muted transition-all flex items-center justify-center"
+            className="size-7 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted transition-all flex items-center justify-center"
             aria-label="Colapsar sidebar"
           >
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-3.5" />
           </button>
         )}
       </div>
 
-      <nav className="flex-1 px-2.5 py-4 space-y-1 overflow-y-auto custom-scrollbar" aria-label="Navegación principal">
+      {/* Navigation */}
+      <nav className="flex-1 px-1.5 py-3 space-y-0.5 overflow-y-auto custom-scrollbar" aria-label="Navegación principal">
         {!isCollapsed && (
-          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest px-4 pt-2 pb-3">
+          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.08em] px-4 pt-2 pb-2">
             Principal
           </p>
         )}
@@ -162,9 +170,11 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
           Clientes
         </NavItem>
 
+        <div className="my-2 mx-3 border-t border-border/10" />
+
         {!isCollapsed && (
-          <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest px-4 pt-6 pb-3">
-            Administración
+          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.08em] px-4 pt-1 pb-2">
+            Gestión
           </p>
         )}
         <NavItem to="/caja" icon={Wallet} show={hasPermission(PERMISSIONS.CASH_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
@@ -179,6 +189,9 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
         <NavItem to="/audits" icon={ClipboardList} show={hasPermission(PERMISSIONS.AUDITS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Auditoría
         </NavItem>
+
+        <div className="my-2 mx-3 border-t border-border/10" />
+
         <NavItem to="/config" icon={Settings} shortcut="F10" show={hasPermission(PERMISSIONS.SETTINGS_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Configuración
         </NavItem>
@@ -187,49 +200,57 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
         </NavItem>
       </nav>
 
+      {/* Collapse expand button */}
       {isCollapsed && (
-        <div className="p-3">
+        <div className="p-2">
           <button
             onClick={() => setIsCollapsed(false)}
-            className="w-full py-3 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
+            className="w-full py-2.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
             aria-label="Expandir sidebar"
           >
-            <ChevronLeft className="size-4 rotate-180" />
+            <ChevronRight className="size-4" />
           </button>
         </div>
       )}
 
-      <div className="p-4 border-t border-border/30">
+      {/* User section */}
+      <div className="p-3 border-t border-border/15">
         {!isCollapsed ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 transition-colors">
-              <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-sm shrink-0">
-                {userInitial}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-muted/40 transition-colors">
+              <div className="relative shrink-0">
+                <div className="size-9 rounded-full bg-primary/8 flex items-center justify-center font-bold text-primary text-xs">
+                  {userInitial}
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate text-foreground/90">{userName}</p>
+                <p className="text-xs font-bold truncate text-foreground/90">{userName}</p>
                 <RoleBadge role={role} />
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 px-3 py-2.5 rounded-md text-sm font-semibold text-danger/80 hover:text-danger hover:bg-danger/10 transition-colors touch-target"
+              className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-danger/70 hover:text-danger hover:bg-danger/5 transition-colors touch-target"
             >
-              <LogOut className="size-4" />
+              <LogOut className="size-3.5" />
               <span>Cerrar Sesión</span>
             </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-3 items-center">
-            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-sm shrink-0">
-              {userInitial}
+          <div className="flex flex-col gap-2 items-center">
+            <div className="relative">
+              <div className="size-9 rounded-full bg-primary/8 flex items-center justify-center font-bold text-primary text-xs">
+                {userInitial}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card" />
             </div>
             <button
               onClick={handleLogout}
-              className="p-2.5 rounded-md text-danger/80 hover:text-danger hover:bg-danger/10 transition-colors"
+              className="p-2 rounded-lg text-danger/70 hover:text-danger hover:bg-danger/5 transition-colors"
               title="Cerrar Sesión"
             >
-              <LogOut className="size-5" />
+              <LogOut className="size-4" />
             </button>
           </div>
         )}

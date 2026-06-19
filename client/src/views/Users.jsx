@@ -8,6 +8,8 @@ import { useToast } from '../components/ui/Toast';
 import { Skeleton } from '../components/ui/Skeleton';
 import { Table } from '../components/ui/Table';
 import { Select } from '../components/ui/Select';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
 import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit2, X, Check } from 'lucide-react';
 import { ConfirmModal } from '../components/sales/ConfirmModal';
@@ -92,22 +94,21 @@ const UsersView = () => {
 
     return (
         <>
-            <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
+            <ViewContainer maxWidth="md">
+            <ViewHeader title="Gestión de Usuarios">
                 <Button onClick={() => { setShowForm(!showForm); setEditingId(null); setForm({ username: '', password: '', role: 'cajero' }); }}>
                     {showForm ? <X className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
                     {showForm ? 'Cancelar' : 'Nuevo Usuario'}
                 </Button>
-            </div>
+            </ViewHeader>
 
             {showForm && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                    <Card className="p-6 border-l-4 border-l-primary">
+                    <Card className="p-6 border-l-4 border-l-primary rounded-xl">
                         <h3 className="font-semibold mb-4">{editingId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h3>
                         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                             <div>
-                                <label className="text-xs font-medium mb-1 block">Usuario</label>
+                                <label className="text-xs font-bold text-muted-foreground/70 mb-1 block">Usuario</label>
                                 <Input
                                     placeholder="nombre_usuario"
                                     value={form.username}
@@ -117,7 +118,7 @@ const UsersView = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium mb-1 block">Contraseña {editingId && '(dejar vacío para no cambiar)'}</label>
+                                <label className="text-xs font-bold text-muted-foreground/70 mb-1 block">Contraseña {editingId && '(dejar vacío para no cambiar)'}</label>
                                 <Input
                                     type="password"
                                     placeholder={editingId ? '••••••••' : 'Contraseña'}
@@ -142,7 +143,7 @@ const UsersView = () => {
                 </motion.div>
             )}
 
-            <Card className="p-0 overflow-hidden">
+            <Card className="p-0 overflow-hidden rounded-xl">
                 {loading ? (
                     <div className="p-8 space-y-4">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -191,7 +192,7 @@ const UsersView = () => {
                     />
                 )}
             </Card>
-            </div>
+            </ViewContainer>
 
             <ConfirmModal
                 open={deleteDialog.isOpen}

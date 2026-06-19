@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback, useRef, memo } from 'react';
+﻿import React, { useMemo, useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Modal } from '../ui/Modal';
 import { X, Check, CreditCard, Banknote, Smartphone, ShoppingBag } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -16,7 +16,7 @@ const getQuickAmounts = (total: number): number[] => {
   if (roundUp > total) amounts.add(roundUp);
   const roundUp500 = Math.ceil(total / 500) * 500;
   if (roundUp500 > total) amounts.add(roundUp500);
-  return Array.from(amounts).sort((a, b) => a - b).slice(0, 5);
+  return Array.from(amounts).sort((a, b) => a - b).slice(0, 6);
 };
 
 const PAYMENT_METHODS = [
@@ -37,11 +37,12 @@ const NumpadKey = memo(function NumpadKey({ label, onClick, disabled, variant }:
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'rounded-md border text-base font-bold transition-colors flex items-center justify-center min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)]',
+        'rounded-xl border text-base font-bold transition-all duration-75 flex items-center justify-center',
+        'min-h-[var(--touch-target-opt)] min-w-[var(--touch-target-opt)]',
         variant === 'danger'
-          ? 'bg-danger/10 text-danger border-danger/20 text-xs'
-          : 'bg-card border-border text-foreground hover:bg-muted active:bg-muted/70',
-        disabled && 'opacity-60 cursor-not-allowed',
+          ? 'bg-danger/8 text-danger border-danger/15 text-sm active:bg-danger/15'
+          : 'bg-card border-border/30 text-foreground hover:bg-muted/40 active:bg-muted/60',
+        disabled && 'opacity-50 cursor-not-allowed',
       )}
       aria-label={typeof label === 'string' && label === 'DEL' ? 'Borrar' : String(label)}
     >
@@ -62,17 +63,17 @@ const PaymentMethodButton = memo(function PaymentMethodButton({ method, isSelect
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'min-h-[var(--touch-target-opt)] rounded-md border-2 text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5',
+        'min-h-[var(--touch-target-opt)] rounded-xl border-2 text-xs font-bold transition-all duration-100 flex flex-col items-center justify-center gap-1.5',
         isSelected
-          ? 'bg-primary text-primary-foreground border-primary'
-          : 'bg-card border-border text-muted-foreground hover:border-muted-foreground/30',
-        disabled && 'opacity-60 cursor-not-allowed',
+          ? 'bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/15'
+          : 'bg-card border-border/30 text-muted-foreground hover:border-border/60',
+        disabled && 'opacity-50 cursor-not-allowed',
       )}
       aria-label={`Pago con ${method.label}`}
       aria-pressed={isSelected}
     >
-      <Icon className="size-4" />
-      <span className="text-[9px] tracking-wide font-bold">{method.label}</span>
+      <Icon className="size-5" />
+      <span className="text-[10px] tracking-wide font-bold">{method.label}</span>
     </button>
   );
 });
@@ -88,11 +89,11 @@ const QuickAmountButton = memo(function QuickAmountButton({ amount, isSelected, 
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'min-h-[var(--touch-target-min)] rounded-md text-xs font-bold transition-colors',
+        'min-h-[var(--touch-target-min)] rounded-xl text-xs font-bold transition-all duration-75',
         isSelected
-          ? 'bg-primary/20 text-primary border border-primary/30'
-          : 'bg-muted/40 text-muted-foreground border border-border/40 hover:bg-muted/70',
-        disabled && 'opacity-60 cursor-not-allowed',
+          ? 'bg-primary/15 text-primary border-2 border-primary/30'
+          : 'bg-muted/20 text-muted-foreground border border-border/20 hover:bg-muted/40',
+        disabled && 'opacity-50 cursor-not-allowed',
       )}
     >
       {formatMoney(amount)}
@@ -182,14 +183,17 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
   const numpadKeys = useMemo(() => [1,2,3,4,5,6,7,8,9,'.',0,'DEL'], []);
 
   return (
-    <Modal open={true} onClose={onClose} size="sm" hideClose={submitLocked.current}>
-      <div className="flex flex-col gap-3">
-        <div className="text-center py-1">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Total a pagar</p>
-          <p className="text-3xl font-black tracking-tight tabular-nums font-mono text-foreground">{formatMoney(total)}</p>
+    <Modal open={true} onClose={onClose} size="xl" hideClose={submitLocked.current}>
+      <div className="flex flex-col gap-4">
+        {/* Total header */}
+        <div className="text-center py-3">
+          <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.1em] mb-1.5">Total a pagar</p>
+          <p className="text-5xl font-black tracking-tight tabular-nums font-mono text-foreground leading-none">{formatMoney(total)}</p>
+          <p className="text-xs text-muted-foreground/40 mt-2">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
         </div>
 
-        <div className="grid grid-cols-4 gap-1">
+        {/* Payment method selection */}
+        <div className="grid grid-cols-4 gap-2">
           {PAYMENT_METHODS.map(m => (
             <PaymentMethodButton
               key={m.id}
@@ -203,25 +207,26 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
 
         {isCashOrMixed && (
           <>
-            <div className="rounded-lg border border-border bg-muted/20 p-2.5">
-              <div className="flex justify-between items-baseline mb-0.5">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Recibido</span>
+            {/* Received amount display */}
+            <div className="rounded-2xl border border-border/30 bg-surface-inset/50 p-4">
+              <div className="flex justify-between items-baseline mb-1.5">
+                <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.08em]">Recibido</span>
                 {receivedNum > 0 && (
-                  <span className="text-[10px] font-medium text-muted-foreground/60">
+                  <span className="text-[11px] font-medium text-muted-foreground/50">
                     {isShort ? `Falta ${formatMoney(total - receivedNum)}` : ''}
                   </span>
                 )}
               </div>
               <p className={cn(
-                'text-xl font-bold tracking-tight tabular-nums font-mono',
-                receivedNum <= 0 ? 'text-muted-foreground/30' : 'text-foreground',
+                'text-3xl font-bold tracking-tight tabular-nums font-mono',
+                receivedNum <= 0 ? 'text-muted-foreground/25' : 'text-foreground',
               )}>
-                <span className="text-muted-foreground/40 mr-0.5">$</span>{received || '0'}
+                <span className="text-muted-foreground/30 mr-1 text-xl">$</span>{received || '0'}
               </p>
               {receivedNum > 0 && (
                 <div className={cn(
-                  'mt-1 pt-1 border-t text-right',
-                  change >= 0 && !isShort ? 'border-success/20 text-success' : 'border-danger/20 text-danger',
+                  'mt-3 pt-3 border-t text-right',
+                  change >= 0 && !isShort ? 'border-success/15 text-success' : 'border-danger/15 text-danger',
                 )}>
                   <span className="text-sm font-bold tabular-nums">
                     {isShort ? `Faltan ${formatMoney(total - receivedNum)}` : `Cambio: ${formatMoney(change)}`}
@@ -230,21 +235,23 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               )}
             </div>
 
+            {/* Exact amount button */}
             <button
               onClick={exactAmount}
               disabled={submitLocked.current}
               className={cn(
-                'w-full min-h-[var(--touch-target-opt)] rounded-md font-bold text-sm transition-all flex items-center justify-center gap-2',
+                'w-full min-h-[var(--touch-target-opt)] rounded-xl font-bold text-sm transition-all duration-100 flex items-center justify-center gap-2',
                 isExactCash
-                  ? 'bg-success text-success-foreground shadow-sm'
-                  : 'bg-success/10 text-success border border-success/20 hover:bg-success/20',
-                submitLocked.current && 'opacity-60 cursor-not-allowed',
+                  ? 'bg-success text-success-foreground shadow-sm shadow-success/15'
+                  : 'bg-success/8 text-success border border-success/15 hover:bg-success/15',
+                submitLocked.current && 'opacity-50 cursor-not-allowed',
               )}
             >
               <Check className="size-4" /> Exacto: {formatMoney(total)}
             </button>
 
-            <div className="grid grid-cols-5 landscape:grid-cols-6 gap-1">
+            {/* Quick amounts */}
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5">
               {quickAmounts.filter(a => Math.abs(a - total) > 0.01).map(amt => (
                 <QuickAmountButton
                   key={amt}
@@ -256,7 +263,8 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               ))}
             </div>
 
-            <div className="grid grid-cols-3 landscape:grid-cols-4 landscape:md:grid-cols-3 gap-1">
+            {/* Numpad */}
+            <div className="grid grid-cols-3 gap-1.5">
               {numpadKeys.map(k => (
                 <NumpadKey
                   key={k}
@@ -271,39 +279,43 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         )}
 
         {!isCashOrMixed && (
-          <div className="flex flex-col items-center justify-center text-center py-4 rounded-lg bg-primary/[0.03] border border-dashed border-primary/20">
-            <div className="size-10 rounded-full bg-card flex items-center justify-center mb-2 border border-border/40">
-              <Check className="size-5 text-primary" />
+          <div className="flex flex-col items-center justify-center text-center py-8 rounded-2xl bg-primary/[0.02] border border-dashed border-primary/15">
+            <div className="size-14 rounded-2xl bg-card flex items-center justify-center mb-3 border border-border/30">
+              <Check className="size-7 text-primary" />
             </div>
             <h3 className="text-sm font-bold">Pago con {method === 'card' ? 'tarjeta' : 'transferencia'}</h3>
-            <p className="text-xs text-muted-foreground font-medium mt-0.5">
+            <p className="text-xs text-muted-foreground/60 font-medium mt-1.5">
               {method === 'card' ? 'Cobra primero en la terminal.' : 'Solicita la transferencia.'}
             </p>
-            <p className="font-bold text-xl mt-2 text-primary tabular-nums">{formatMoney(total)}</p>
+            <p className="font-black text-3xl mt-4 text-primary tabular-nums">{formatMoney(total)}</p>
           </div>
         )}
 
         {confirmError && (
-          <div className="p-2 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs font-semibold text-center" role="alert">
+          <div className="p-3 rounded-xl bg-danger/8 border border-danger/15 text-danger text-xs font-semibold text-center" role="alert">
             {confirmError}
           </div>
         )}
 
+        {/* Confirm button */}
         <button
           onClick={handleConfirm}
           disabled={!isReady || submitLocked.current}
           className={cn(
-            'w-full min-h-[var(--touch-target-xl)] text-base font-bold rounded-md transition-all flex items-center justify-center gap-2',
+            'w-full min-h-[4.5rem] text-base font-extrabold rounded-2xl transition-all duration-100 flex items-center justify-center gap-2 uppercase tracking-wide',
             isReady && !submitLocked.current
-              ? 'bg-pos-checkout text-success-foreground hover:brightness-110 active:brightness-95 shadow-sm'
-              : 'bg-muted text-muted-foreground/50 cursor-not-allowed',
+              ? 'bg-pos-checkout text-success-foreground hover:brightness-110 active:brightness-90 shadow-md shadow-success/15'
+              : 'bg-muted/50 text-muted-foreground/40 cursor-not-allowed',
           )}
           aria-label="Confirmar cobro"
         >
           {submitLocked.current ? (
-            <><span className="size-2 rounded-full bg-current animate-pulse" />{getButtonLabel()}</>
+            <><span className="size-2.5 rounded-full bg-current animate-pulse" />{getButtonLabel()}</>
           ) : (
-            <><span>{getButtonLabel()}</span><span className="text-[10px] opacity-50 bg-black/10 px-1.5 py-0.5 rounded">Enter</span></>
+            <>
+              <span>{getButtonLabel()}</span>
+              <span className="text-[10px] opacity-40 bg-black/8 px-2 py-0.5 rounded-lg tracking-wider font-bold">Enter</span>
+            </>
           )}
         </button>
       </div>

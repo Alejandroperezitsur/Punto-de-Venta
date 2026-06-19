@@ -4,24 +4,14 @@ import { Topbar } from './Topbar';
 import { useLocation } from 'react-router-dom';
 import { ToastProvider } from '../ui/Toast';
 import { useUserStore } from '../../store/userStore';
-import { api } from '../../lib/api';
 import { cn } from '../../utils/cn';
 
 const MainLayout = memo(function MainLayout({ children }) {
   const location = useLocation();
-  const [info, setInfo] = useState({ copyright: '', version: '' });
   const isSidebarOpen = useUserStore(state => state.isSidebarOpen);
   const toggleSidebar = useUserStore(state => state.toggleSidebar);
   const mainRef = useRef(null);
-
-  useEffect(() => {
-    api('/settings')
-      .then(data => setInfo({
-        copyright: data.app_copyright || '\u00a9 2026 POS Pro',
-        version: data.app_version || '1.0.0',
-      }))
-      .catch(() => {});
-  }, []);
+  const isPOS = location.pathname === '/ventas';
 
   useEffect(() => {
     if (mainRef.current) mainRef.current.scrollTop = 0;
@@ -36,7 +26,7 @@ const MainLayout = memo(function MainLayout({ children }) {
 
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/40 z-[var(--z-overlay)] lg:hidden"
+            className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-[var(--z-overlay)] lg:hidden"
             onClick={toggleSidebar}
             onKeyDown={(e) => { if (e.key === 'Escape') toggleSidebar(); }}
             aria-hidden="true"
@@ -50,18 +40,19 @@ const MainLayout = memo(function MainLayout({ children }) {
         )}>
           <Sidebar onNavigate={toggleSidebar} />
         </div>
-        <div className="flex-1 flex flex-col min-w-0 bg-background/50">
+        <div className="flex-1 flex flex-col min-w-0 bg-background">
           <Topbar />
-          <main id="main-content" ref={mainRef} className="flex-1 overflow-y-auto p-2 md:p-3 lg:p-4" role="main">
+          <main
+            id="main-content"
+            ref={mainRef}
+            className={cn(
+              'flex-1 overflow-y-auto',
+              isPOS ? 'p-2' : 'p-3 md:p-4 lg:p-5',
+            )}
+            role="main"
+          >
             {children}
           </main>
-          <footer className="shrink-0 py-3 px-3 md:px-4 border-t border-border/30 text-[10px] font-medium text-muted-foreground/60 flex justify-between items-center" role="contentinfo">
-            <span>{info.copyright}</span>
-            <span className="flex items-center gap-2">
-              <span className="text-[9px] opacity-40 select-none">APV Labs</span>
-              <span>v{info.version}</span>
-            </span>
-          </footer>
         </div>
       </div>
     </ToastProvider>

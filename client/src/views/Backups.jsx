@@ -7,6 +7,8 @@ import { Badge } from '../components/ui/Badge';
 import { useToast } from '../components/ui/Toast';
 import { Skeleton } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
 import { motion } from 'framer-motion';
 import {
     HardDrive, Download, Trash2, RotateCcw, Plus,
@@ -167,23 +169,15 @@ const BackupsView = () => {
 
     return (
         <>
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6 max-w-4xl mx-auto"
-        >
-            <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <HardDrive className="h-6 w-6 text-primary" />
-                    <h1 className="text-2xl font-bold">Respaldos del Sistema</h1>
-                </div>
+        <ViewContainer>
+            <ViewHeader title="Respaldos del Sistema">
                 <Button onClick={handleCreate} isLoading={creating}>
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Backup
                 </Button>
-            </div>
+            </ViewHeader>
 
-            <Card className="p-4 bg-amber-50 border-amber-200 flex items-start gap-3">
+            <Card className="p-4 bg-warning/6 border-warning/15 flex items-start gap-3 rounded-xl">
                 <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
                 <div className="text-sm text-amber-800">
                     <p className="font-semibold">Importante</p>
@@ -191,7 +185,7 @@ const BackupsView = () => {
                 </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-6 rounded-xl">
                 <h3 className="font-semibold mb-4">Exportar / Importar Configuración</h3>
                 <div className="flex gap-4">
                     <Button variant="outline" onClick={() => window.open('/api/system/export-config', '_blank')}>
@@ -199,7 +193,7 @@ const BackupsView = () => {
                         Exportar Configuración
                     </Button>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="text-xs text-muted-foreground/60 mt-2">
                     Exporta solo la configuración del sistema (sin datos de ventas ni productos).
                 </p>
             </Card>
@@ -216,7 +210,7 @@ const BackupsView = () => {
                 emptyDescription="Crea tu primer backup para proteger tus datos"
                 emptyIcon={HardDrive}
             />
-        </motion.div>
+        </ViewContainer>
 
         <ConfirmModal
             open={isDeleteOpen}

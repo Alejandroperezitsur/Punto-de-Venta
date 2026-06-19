@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
 import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
@@ -147,17 +148,14 @@ const CashControlView = () => {
 
     return (
         <ViewContainer maxWidth="md">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Control de Caja</h1>
-                <div className="flex gap-2">
-                    <Button variant="ghost" onClick={loadHistory} isLoading={historyLoading} size="sm">
-                        <History className="h-4 w-4 mr-2" /> Historial
-                    </Button>
-                    <Button variant="ghost" onClick={loadStatus} isLoading={loading} size="sm">
-                        <RefreshCw className="h-4 w-4 mr-2" /> Actualizar
-                    </Button>
-                </div>
-            </div>
+            <ViewHeader title="Control de Caja">
+                <Button variant="ghost" onClick={loadHistory} isLoading={historyLoading} size="sm">
+                    <History className="h-4 w-4 mr-2" /> Historial
+                </Button>
+                <Button variant="ghost" size="icon" onClick={loadStatus} isLoading={loading} className="rounded-lg border border-border/30">
+                    <RefreshCw className="h-4 w-4" />
+                </Button>
+            </ViewHeader>
 
             {loading ? (
                 <Card className="p-12 text-center text-muted-foreground">
@@ -165,7 +163,7 @@ const CashControlView = () => {
                 </Card>
             ) : !session ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <Card className="p-8 space-y-6 border-l-4 border-l-warning">
+                    <Card className="p-8 space-y-6 border-l-4 border-l-warning rounded-xl">
                         <div className="flex items-center gap-4 text-amber-600">
                             <AlertCircle className="h-8 w-8" />
                             <div>
@@ -193,7 +191,7 @@ const CashControlView = () => {
                 </motion.div>
             ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                    <Card className="p-6 border-l-4 border-l-success bg-success/5">
+                    <Card className="p-6 border-l-4 border-l-success bg-success/5 rounded-xl">
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-success/10 text-success rounded-full">
@@ -214,26 +212,26 @@ const CashControlView = () => {
 
                     {summary && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <Card className="p-4 text-center">
+                            <Card className="p-4 text-center rounded-xl">
                                 <p className="text-xs text-muted-foreground uppercase font-semibold">Ventas (Efectivo)</p>
                                 <p className="text-xl font-bold text-success">{formatMoney(summary.sales)}</p>
                             </Card>
-                            <Card className="p-4 text-center">
+                            <Card className="p-4 text-center rounded-xl">
                                 <p className="text-xs text-muted-foreground uppercase font-semibold">Depósitos</p>
                                 <p className="text-xl font-bold text-info">{formatMoney(summary.deposits)}</p>
                             </Card>
-                            <Card className="p-4 text-center">
+                            <Card className="p-4 text-center rounded-xl">
                                 <p className="text-xs text-muted-foreground uppercase font-semibold">Retiros</p>
                                 <p className="text-xl font-bold text-danger">{formatMoney(summary.withdrawals)}</p>
                             </Card>
-                            <Card className="p-4 text-center border-2 border-primary">
+                            <Card className="p-4 text-center border-2 border-primary/30 rounded-xl">
                                 <p className="text-xs text-muted-foreground uppercase font-semibold">Saldo Estimado</p>
                                 <p className="text-xl font-black text-primary">{formatMoney(summary.expected)}</p>
                             </Card>
                         </div>
                     )}
 
-                    <Card className="p-6">
+                    <Card className="p-6 rounded-xl">
                         <h4 className="font-semibold mb-4">Registrar Movimiento</h4>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                             <div>
@@ -269,7 +267,7 @@ const CashControlView = () => {
                         </div>
                     </Card>
 
-                    <Card className="p-6">
+                    <Card className="p-6 rounded-xl">
                         <div className="flex items-center gap-2 mb-4">
                             <History className="h-5 w-5 text-muted-foreground" />
                             <h4 className="font-semibold">Movimientos de esta Sesión</h4>
@@ -310,7 +308,7 @@ const CashControlView = () => {
                     className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[var(--z-modal)]"
                     onKeyDown={(e) => { if (e.key === 'Escape') { setIsClosing(false); setCloseStep('input'); } }}
                 >
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-lg p-6 max-w-md w-full shadow-lg relative">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border/30 rounded-2xl p-6 max-w-md w-full shadow-lg relative">
                         <button
                             onClick={() => { setIsClosing(false); setCloseStep('input'); }}
                             className="absolute top-4 right-4 text-xs text-muted-foreground hover:text-foreground font-semibold"
@@ -324,7 +322,7 @@ const CashControlView = () => {
                                 <p className="text-sm text-muted-foreground">Cuenta tu efectivo físicamente antes de continuar.</p>
 
                                 {closeError && (
-                                    <div className="bg-danger/10 border border-danger/20 rounded-md text-danger font-semibold p-3 text-sm">
+                                    <div className="bg-danger/10 border border-danger/15 rounded-xl text-danger font-semibold p-3 text-sm">
                                         {closeError}
                                     </div>
                                 )}
@@ -335,7 +333,7 @@ const CashControlView = () => {
                                         type="number"
                                         step="0.01"
                                         autoFocus
-                                        className="w-full h-14 bg-muted border-2 border-border rounded-md text-2xl font-bold text-center focus:outline-none focus:border-primary transition-all"
+                                        className="w-full h-14 bg-muted/50 border-2 border-border/30 rounded-xl text-2xl font-bold text-center focus:outline-none focus:border-primary/40 transition-all"
                                         value={countedCash}
                                         onChange={(e) => setCountedCash(e.target.value)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleCloseSubmit(); }}
@@ -402,7 +400,7 @@ const CashControlView = () => {
                     className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
                     onKeyDown={(e) => { if (e.key === 'Escape') setShowHistory(false); }}
                 >
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-lg">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border/30 rounded-2xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-lg">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold">Historial de Cierres</h2>
                             <Button variant="ghost" onClick={() => setShowHistory(false)}>

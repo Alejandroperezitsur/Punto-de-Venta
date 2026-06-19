@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, memo, useEffect, useMemo, useState } from 'react';
+﻿import React, { useRef, useCallback, memo, useEffect, useMemo, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
@@ -7,7 +7,7 @@ import { cn } from '../../utils/cn';
 
 const LOW_STOCK_THRESHOLD = 5;
 const VIRTUALIZE_THRESHOLD = 50;
-const ROW_HEIGHT = 44;
+const ROW_HEIGHT = 48;
 
 interface CartItemRowProps {
   item: any;
@@ -52,40 +52,44 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     <div
       ref={rowRef}
       className={cn(
-        'flex items-center gap-2 py-1.5 border-b border-border/10 last:border-0 min-h-[var(--touch-target-min)] cart-item-enter',
+        'flex items-center gap-2.5 py-2 px-1 rounded-xl transition-colors cart-item-enter',
         isRecent && 'bg-success/[0.04]',
-        isOutOfStock && 'opacity-50',
+        isOutOfStock && 'opacity-40',
+        'hover:bg-muted/20',
       )}
       role="listitem"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       aria-label={`${item.name}, ${item.quantity} unidades, ${formatMoney(lineTotal)}`}
     >
+      {/* Product info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-1">
-          <span className="text-xs font-semibold truncate" title={item.name}>{item.name}</span>
-          <span className="text-[10px] text-muted-foreground/40 shrink-0 tabular-nums">@ {formatMoney(item.price)}</span>
+        <p className="text-sm font-semibold truncate leading-tight" title={item.name}>{item.name}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-[11px] text-muted-foreground/50 tabular-nums">@ {formatMoney(item.price)}</span>
+          {isLowStock && (
+            <span className="text-[9px] font-bold text-warning bg-warning/8 px-1 py-px rounded">stock bajo</span>
+          )}
         </div>
-        {isLowStock && (
-          <span className="text-[9px] font-semibold text-warning leading-none">stock bajo</span>
-        )}
       </div>
-      <div className="flex items-center gap-px bg-muted/20 rounded-md border border-border/20">
+
+      {/* Quantity stepper — compact pill */}
+      <div className="flex items-center gap-px bg-muted/15 rounded-lg border border-border/15">
         <button
           className={cn(
-            'min-w-[var(--touch-target-min)] min-h-[var(--touch-target-min)] flex items-center justify-center rounded-l-md',
-            'text-muted-foreground hover:bg-muted/50 active:bg-muted/70 transition-colors',
+            'size-8 flex items-center justify-center rounded-l-lg transition-colors',
+            'text-muted-foreground hover:bg-muted/40 active:bg-muted/60',
           )}
           onClick={() => item.quantity <= 1 ? onRemove(item.id) : onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity <= 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
         >
-          {item.quantity <= 1 ? <Trash2 className="size-3.5 text-danger" /> : <Minus className="size-3.5" />}
+          {item.quantity <= 1 ? <Trash2 className="size-3.5 text-danger/60" /> : <Minus className="size-3.5" />}
         </button>
-        <span className="w-8 text-center text-xs font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
+        <span className="w-7 text-center text-xs font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
         <button
           className={cn(
-            'min-w-[var(--touch-target-min)] min-h-[var(--touch-target-min)] flex items-center justify-center rounded-r-md',
-            'text-muted-foreground hover:bg-muted/50 active:bg-muted/70 transition-colors',
+            'size-8 flex items-center justify-center rounded-r-lg transition-colors',
+            'text-muted-foreground hover:bg-muted/40 active:bg-muted/60',
           )}
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
@@ -93,8 +97,10 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
           <Plus className="size-3.5" />
         </button>
       </div>
-      <div className="text-right w-[72px]">
-        <span className="text-xs font-bold tabular-nums">{formatMoney(lineTotal)}</span>
+
+      {/* Line total */}
+      <div className="text-right w-[72px] shrink-0">
+        <span className="text-sm font-bold tabular-nums text-foreground">{formatMoney(lineTotal)}</span>
       </div>
     </div>
   );
@@ -136,12 +142,12 @@ export const Cart = memo(function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8" role="status">
-        <div className="size-10 rounded-lg bg-muted/50 flex items-center justify-center mb-2">
-          <ShoppingBag className="size-5 opacity-40" />
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-10" role="status">
+        <div className="size-14 rounded-2xl bg-muted/20 flex items-center justify-center mb-3">
+          <ShoppingBag className="size-6 opacity-20" />
         </div>
-        <p className="text-sm font-semibold">Carrito vacío</p>
-        <p className="text-xs font-medium text-muted-foreground/60">Escanee o busque productos</p>
+        <p className="text-sm font-bold text-foreground/60">Carrito vacío</p>
+        <p className="text-xs font-medium text-muted-foreground/40 mt-0.5">Escanee o busque productos</p>
       </div>
     );
   }
@@ -187,18 +193,14 @@ export const Cart = memo(function Cart() {
   return (
     <div className="flex flex-col gap-px" role="list" aria-label="Productos en el carrito">
       {items.map((item, i) => (
-        <div
+        <CartItemRow
           key={item.id}
-          className="cart-item-enter"
-        >
-          <CartItemRow
-            item={item}
-            index={i}
-            isRecent={recentId === item.id}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemove={handleRemove}
-          />
-        </div>
+          item={item}
+          index={i}
+          isRecent={recentId === item.id}
+          onUpdateQuantity={handleUpdateQuantity}
+          onRemove={handleRemove}
+        />
       ))}
     </div>
   );

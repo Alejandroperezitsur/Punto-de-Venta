@@ -19,17 +19,17 @@ import { cn } from '../utils/cn';
 
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
   return (
-    <div className="relative rounded-lg border border-border bg-card p-3 hover:border-primary/30 transition-colors flex flex-col cursor-pointer"
+    <div className="relative rounded-xl border border-border/30 bg-card p-3 hover:border-primary/30 transition-colors flex flex-col cursor-pointer"
       onClick={() => onEdit(p)}
     >
-      <button className="absolute top-2 right-2 p-1.5 rounded-md hover:bg-muted text-muted-foreground opacity-60 hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); onEdit(p); }}
+      <button className="absolute top-2 right-2 p-1.5 rounded-lg hover:bg-muted text-muted-foreground opacity-60 hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); onEdit(p); }}
         aria-label="Editar producto">
         <Edit3 className="size-3.5" />
       </button>
 
-      <div className="size-16 rounded-lg bg-muted flex items-center justify-center mb-3 border border-border mx-auto">
+      <div className="size-16 rounded-xl bg-muted/50 flex items-center justify-center mb-3 border border-border/20 mx-auto">
         {p.image_url ? (
-          <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-lg" loading="lazy" />
+          <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-xl" loading="lazy" />
         ) : (
           <Package className="size-7 text-muted-foreground/50" aria-hidden="true" />
         )}
@@ -173,7 +173,7 @@ const ProductsView = () => {
         title="Inventario"
         description={pagination.total > 0 ? `${pagination.total} productos` : 'Gestiona tus productos'}
       >
-        <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-md border border-border">
+        <Button variant="ghost" size="icon" onClick={() => loadData(null)} className="rounded-lg border border-border/30">
           <RefreshCw className={cn('size-4', loading && 'animate-spin')} />
         </Button>
         <Button onClick={() => { setEditingProduct(null); setForm({ name: '', price: '', stock: '999', sku: '' }); setModalOpen(true); }}
@@ -188,7 +188,7 @@ const ProductsView = () => {
           ref={searchRef}
           type="text"
           placeholder="Buscar por nombre o código de barras..."
-          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-md border border-border bg-card text-sm font-medium focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-colors placeholder:text-muted-foreground/40"
+          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-xl border border-border/30 bg-card text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/8 transition-all placeholder:text-muted-foreground/40"
           value={search}
           onChange={handleSearch}
           aria-label="Buscar productos"
@@ -200,7 +200,7 @@ const ProductsView = () => {
       ) : loading && products.length === 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="aspect-[3/4] rounded-lg" />
+            <Skeleton key={i} className="aspect-[3/4] rounded-xl" />
           ))}
         </div>
       ) : products.length === 0 ? (
@@ -220,7 +220,7 @@ const ProductsView = () => {
 
           {pagination.hasMore && (
             <div className="flex justify-center pt-3">
-              <Button variant="secondary" onClick={() => loadData(pagination.nextCursor)} isLoading={loadingMore} size="md" className="font-bold border">
+              <Button variant="secondary" onClick={() => loadData(pagination.nextCursor)} isLoading={loadingMore} size="md" className="font-bold border border-border/30">
                 {loadingMore ? 'Cargando...' : 'Cargar más productos'}
               </Button>
             </div>
@@ -237,14 +237,14 @@ const ProductsView = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Nombre del producto</label>
+            <label className="text-xs font-bold text-muted-foreground/70">Nombre del producto</label>
             <Input placeholder="Ej: Coca Cola 600ml..." value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
               required autoFocus={!editingProduct} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground">Precio de venta</label>
+              <label className="text-xs font-bold text-muted-foreground/70">Precio de venta</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10">$</span>
                 <Input className="pl-7" placeholder="0.00" type="number" step="0.01" min="0"
@@ -252,14 +252,14 @@ const ProductsView = () => {
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground">Stock inicial</label>
+              <label className="text-xs font-bold text-muted-foreground/70">Stock inicial</label>
               <Input placeholder="999" type="number" min="0"
                 value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground/70 flex items-center gap-1.5">
               <ScanLine className="size-3" /> Codigo de barras
             </label>
             <Input
@@ -273,11 +273,11 @@ const ProductsView = () => {
 
           {editingProduct && (
             <div className="flex justify-between items-center pt-1">
-              <button type="button" className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1.5 rounded-md transition-colors touch-target"
+              <button type="button" className="text-xs font-semibold text-danger hover:bg-danger/10 px-2 py-1.5 rounded-lg transition-colors touch-target"
                 onClick={() => handleDeleteRequest(editingProduct.id)}>
                 <Trash2 className="size-3.5 inline mr-1" /> Archivar
               </button>
-              <button type="button" className="text-xs font-semibold text-info hover:bg-info/10 px-2 py-1.5 rounded-md transition-colors touch-target"
+              <button type="button" className="text-xs font-semibold text-info hover:bg-info/10 px-2 py-1.5 rounded-lg transition-colors touch-target"
                 onClick={() => { setKardexProduct(editingProduct); setModalOpen(false); }}>
                 <History className="size-3.5 inline mr-1" /> Historial
               </button>

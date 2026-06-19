@@ -9,6 +9,9 @@ export interface CartItem {
   stock?: number;
   discount?: number;
   isManual?: boolean;
+  sku?: string;
+  isNew?: boolean;
+  barcode?: string;
 }
 
 export interface CartTotals {

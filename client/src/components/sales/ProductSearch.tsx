@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Search, Loader2, Plus, ScanLine, WifiOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, Plus, ScanLine, WifiOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
 import { useScan } from '../../hooks/useScan';
@@ -43,7 +43,7 @@ const ProductSearch = React.memo(function ProductSearch() {
   const showFeedback = useCallback((fb: ScanFeedback) => {
     clearFeedback();
     setFeedback(fb);
-    feedbackTimer.current = setTimeout(() => setFeedback(null), 2000);
+    feedbackTimer.current = setTimeout(() => setFeedback(null), 2500);
   }, [clearFeedback]);
 
   useEffect(() => {
@@ -143,68 +143,95 @@ const ProductSearch = React.memo(function ProductSearch() {
     }
   }, [error, addItem, playSuccess, showFeedback, focusInput]);
 
-  const scannerIndicator = () => {
+  const scannerDotColor = () => {
     if (scannerStatus === 'scanning') return 'bg-primary animate-pulse';
     if (scannerStatus === 'error') return 'bg-danger';
-    return 'bg-muted-foreground/30';
+    return 'bg-success/50';
   };
 
   return (
     <div className="relative">
       <form onSubmit={handleSearch} role="search" aria-label="Buscar producto">
         <div className="relative">
-          <Input
-            ref={inputRef}
-            icon={loading ? Loader2 : ScanLine}
-            scanner
-            placeholder="Escanear o buscar producto..."
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); if (error) setError(''); if (scannerStatus === 'error') setScannerStatus('ready'); }}
-            disabled={loading}
-            className={cn(
-              loading && 'animate-pulse',
-              scannerStatus === 'scanning' && 'border-primary',
-              scannerStatus === 'error' && 'border-danger',
-            )}
-            data-scan-input="true"
-            aria-label="Buscar o escanear producto"
-            autoComplete="off"
-          />
-          {scannerStatus === 'idle' ? (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2" title="Scanner no detectado">
-              <WifiOff className="size-4 text-muted-foreground/50" />
-            </div>
-          ) : (
+          <div className={cn(
+            'flex items-center gap-2 rounded-xl border-2 bg-card transition-all duration-150',
+            'px-3 h-[var(--control-xl)]',
+            scannerStatus === 'scanning'
+              ? 'border-primary/40 shadow-sm shadow-primary/5'
+              : scannerStatus === 'error'
+                ? 'border-danger/40 shadow-sm shadow-danger/5'
+                : 'border-border/40 focus-within:border-primary/40 focus-within:shadow-sm focus-within:shadow-primary/5',
+          )}>
+            {/* Scanner icon */}
             <div className={cn(
-              'absolute right-3 top-1/2 -translate-y-1/2 size-2.5 rounded-full transition-colors',
-              scannerIndicator(),
-            )} />
-          )}
+              'shrink-0 transition-colors duration-100',
+              scannerStatus === 'scanning' ? 'text-primary' : 'text-muted-foreground/50',
+            )}>
+              {loading ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : (
+                <ScanLine className="size-5" />
+              )}
+            </div>
+
+            {/* Input */}
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Escanear o buscar producto..."
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); if (error) setError(''); if (scannerStatus === 'error') setScannerStatus('ready'); }}
+              disabled={loading}
+              data-scan-input="true"
+              aria-label="Buscar o escanear producto"
+              autoComplete="off"
+              className="flex-1 bg-transparent border-none text-base font-semibold text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-0 disabled:opacity-50"
+            />
+
+            {/* Scanner status indicator */}
+            {scannerStatus === 'idle' ? (
+              <div className="shrink-0" title="Scanner no detectado">
+                <WifiOff className="size-4 text-muted-foreground/30" />
+              </div>
+            ) : (
+              <div className={cn(
+                'shrink-0 size-2.5 rounded-full transition-colors',
+                scannerDotColor(),
+                scannerStatus === 'ready' && 'success-pulse',
+              )} />
+            )}
+
+            {/* Keyboard shortcut hint */}
+            <span className="shrink-0 text-[10px] font-bold text-muted-foreground/25 bg-muted/30 px-1.5 py-0.5 rounded-md hidden xl:inline">
+              F1
+            </span>
+          </div>
         </div>
       </form>
 
+      {/* Scan feedback toast */}
       {feedback && (
         <div
           className={cn(
-            'absolute top-full left-0 right-0 mt-1 z-[var(--z-dropdown)] animate-in',
-            'px-2 py-1.5 rounded-md border text-xs font-semibold flex items-center gap-1.5',
-            feedback.type === 'success' && 'bg-success/10 border-success/20 text-success',
-            feedback.type === 'warning' && 'bg-warning/10 border-warning/20 text-warning',
-            feedback.type === 'error' && 'bg-danger/10 border-danger/20 text-danger',
+            'absolute top-full left-0 right-0 mt-1.5 z-[var(--z-dropdown)] animate-fade-up',
+            'px-3 py-2 rounded-xl border text-xs font-semibold flex items-center gap-2 shadow-sm',
+            feedback.type === 'success' && 'bg-success/8 border-success/15 text-success',
+            feedback.type === 'warning' && 'bg-warning/8 border-warning/15 text-warning',
+            feedback.type === 'error' && 'bg-danger/8 border-danger/15 text-danger',
           )}
           role="status"
           aria-live="polite"
         >
-          {feedback.type === 'success' && <CheckCircle2 className="size-3 shrink-0" />}
-          {feedback.type === 'warning' && <AlertCircle className="size-3 shrink-0" />}
-          {feedback.type === 'error' && <AlertCircle className="size-3 shrink-0" />}
+          {feedback.type === 'success' && <CheckCircle2 className="size-3.5 shrink-0" />}
+          {feedback.type === 'warning' && <AlertCircle className="size-3.5 shrink-0" />}
+          {feedback.type === 'error' && <AlertCircle className="size-3.5 shrink-0" />}
           <span className="truncate">{feedback.message}</span>
           {feedback.code && (
-            <span className="text-[10px] opacity-60 shrink-0 ml-auto font-mono">{feedback.code}</span>
+            <span className="text-[11px] opacity-50 shrink-0 ml-auto font-mono">{feedback.code}</span>
           )}
           <button
             onClick={clearFeedback}
-            className="shrink-0 ml-1 p-1 rounded hover:bg-black/10 touch-target"
+            className="shrink-0 ml-1 p-1 rounded-lg hover:bg-black/5 touch-target"
             aria-label="Descartar"
           >
             <span className="size-3 block text-center leading-none">&times;</span>
@@ -212,16 +239,17 @@ const ProductSearch = React.memo(function ProductSearch() {
         </div>
       )}
 
+      {/* Product not found — quick create */}
       {error && !feedback && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-[var(--z-dropdown)]">
-          <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md bg-warning/10 border border-warning/20">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="size-8 rounded-md bg-warning/20 flex items-center justify-center shrink-0">
+        <div className="absolute top-full left-0 right-0 mt-1.5 z-[var(--z-dropdown)] animate-fade-up">
+          <div className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl bg-warning/8 border border-warning/15 shadow-sm">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="size-9 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
                 <Plus className="size-4 text-warning" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-warning truncate">Producto no encontrado</p>
-                <p className="text-[10px] font-medium text-warning/70">Código: {error}</p>
+                <p className="text-[11px] font-medium text-warning/60 font-mono">{error}</p>
               </div>
             </div>
             <Button

@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { cn } from '../../utils/cn';
 
 interface CardProps {
-  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline';
+  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset';
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -11,16 +11,18 @@ interface CardProps {
 function Card({ variant = 'default', className, children, onClick }: CardProps) {
   const Component = onClick ? 'button' : 'div';
   const variants = {
-    default: 'bg-card text-card-foreground border border-border shadow-sm',
-    glass: 'backdrop-blur-md bg-surface/80 text-foreground border border-border/30',
-    elevated: 'bg-card text-card-foreground border border-border shadow-md',
+    default: 'bg-card text-card-foreground border border-border/60 shadow-xs',
+    glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm',
+    elevated: 'bg-card text-card-foreground border border-border/40 shadow-md',
     interactive:
-      'bg-card text-card-foreground border border-border/60 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-200 cursor-pointer active:scale-[0.99]',
-    outline: 'bg-transparent text-foreground border border-border/60',
+      'bg-card text-card-foreground border border-border/50 shadow-xs hover:shadow-md hover:border-primary/20 transition-all duration-150 cursor-pointer active:scale-[0.995]',
+    outline: 'bg-transparent text-foreground border border-border/50',
+    frosted: 'backdrop-blur-xl bg-surface-glass/80 text-foreground border border-white/10 shadow-lg',
+    inset: 'bg-surface-inset text-foreground border border-border-subtle shadow-inner-sm',
   };
   return (
     <Component
-      className={cn('rounded-md p-4 transition-colors text-left relative', variants[variant], className)}
+      className={cn('rounded-xl p-4 transition-colors text-left relative', variants[variant], className)}
       onClick={onClick}
       {...(onClick ? { type: 'button' as const } : {})}
     >
@@ -55,7 +57,7 @@ function CardBody({ className, children, ...props }: React.HTMLAttributes<HTMLDi
 
 function CardFooter({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('flex items-center pt-4 mt-4 border-t border-border', className)} {...props}>
+    <div className={cn('flex items-center pt-4 mt-4 border-t border-border/40', className)} {...props}>
       {children}
     </div>
   );

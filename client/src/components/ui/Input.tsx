@@ -1,13 +1,13 @@
-import React from 'react';
+﻿import React from 'react';
 import { cn } from '../../utils/cn';
 import { Search, Barcode, Eye, EyeOff } from 'lucide-react';
 
 const inputSizes = {
-  xs: 'h-[var(--control-sm)] px-2 text-xs rounded-md',
+  xs: 'h-[var(--control-xs)] px-2 text-xs rounded-md',
   sm: 'h-[var(--control-sm)] px-2.5 text-xs rounded-md',
-  md: 'h-[var(--control-md)] px-3 text-sm rounded-md',
-  lg: 'h-[var(--control-lg)] px-3.5 text-sm rounded-md',
-  xl: 'h-[var(--control-xl)] px-4 text-base rounded-lg',
+  md: 'h-[var(--control-md)] px-3 text-sm rounded-lg',
+  lg: 'h-[var(--control-lg)] px-3.5 text-sm rounded-lg',
+  xl: 'h-[var(--control-xl)] px-4 text-base rounded-xl',
 };
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -24,23 +24,23 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, size = 'md', icon: Icon, iconRight: IconRight, error, label, floatingLabel, scanner, onIconClick, type, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
-    const inputType = type === 'password' && showPassword ? 'text' : type;
+    const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
     return (
       <div className="relative w-full">
         {label && !floatingLabel && (
-          <label className="block text-xs font-semibold text-muted-foreground mb-1 ml-1">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 ml-0.5">
             {label}
           </label>
         )}
         <div className="relative group">
           {Icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-foreground transition-colors pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors duration-100 pointer-events-none">
               <Icon className={cn('size-4', scanner && 'size-5')} />
             </div>
           )}
           {scanner && !Icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-foreground transition-colors pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors duration-100 pointer-events-none">
               <Barcode className="size-5" />
             </div>
           )}
@@ -49,18 +49,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={inputType}
             className={cn(
               'flex w-full border border-input bg-card font-medium text-foreground',
-              'placeholder:text-muted-foreground/50 transition-colors duration-75',
-              'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/20',
-              'disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-muted/30',
+              'placeholder:text-muted-foreground/45 transition-all duration-100',
+              'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/15',
+              'disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-muted/20',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               inputSizes[size],
               Icon && 'pl-9',
               scanner && 'pl-9 h-[var(--control-xl)] text-base font-semibold',
               IconRight && 'pr-9',
               type === 'password' && 'pr-9',
-              error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/20',
-              scanner && 'border-primary/30 focus-visible:border-primary',
-              !scanner && !error && 'hover:border-foreground/20',
+              error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/15',
+              scanner && 'border-primary/25 focus-visible:border-primary focus-visible:ring-primary/15',
+              !scanner && !error && 'hover:border-foreground/15',
               className,
             )}
             {...props}
@@ -93,7 +93,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         {error && (
-          <p className="mt-1 text-[11px] font-medium text-danger ml-1 flex items-center gap-1">
+          <p className="mt-1.5 text-[11px] font-medium text-danger ml-0.5 flex items-center gap-1">
             <span className="size-1 rounded-full bg-danger shrink-0" />
             {error}
           </p>

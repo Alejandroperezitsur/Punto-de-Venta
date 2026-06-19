@@ -91,11 +91,11 @@ const AboutView = () => {
         <div className="space-y-6 max-w-3xl mx-auto">
             <div className="flex items-center gap-3">
                 <Info className="h-6 w-6 text-primary" />
-                <h1 className="text-2xl font-bold">Acerca de {license?.appName || 'POS Pro'}</h1>
+                <h1 className="text-2xl font-bold tracking-tight">Acerca de {license?.appName || 'POS Pro'}</h1>
             </div>
 
             {/* Hero Card */}
-            <Card className="p-8 bg-gradient-to-br from-[hsl(var(--primary))] to-blue-700 text-white">
+            <Card className="p-8 bg-gradient-to-br from-[hsl(var(--primary))] to-blue-700 text-white rounded-2xl">
                 <div className="flex items-center gap-6">
                     <div className="h-20 w-20 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-4xl font-black">
                         P
@@ -112,31 +112,31 @@ const AboutView = () => {
             </Card>
 
             {/* License Status */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-xl">
                 <div className="flex items-center gap-3 mb-4">
                     <Shield className="h-5 w-5 text-primary" />
                     <h3 className="font-semibold">Estado de Licencia</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-4 rounded-lg bg-muted">
+                    <div className="p-4 rounded-xl bg-muted/50">
                         <p className="text-xs text-muted-foreground uppercase">Tipo</p>
                         <p className="font-bold capitalize">{license?.type || 'Trial'}</p>
                     </div>
-                    <div className="p-4 rounded-lg bg-muted">
+                    <div className="p-4 rounded-xl bg-muted/50">
                         <p className="text-xs text-muted-foreground uppercase">Estado</p>
                         <p className={`font-bold ${license?.isValid ? 'text-green-600' : 'text-red-500'}`}>
                             {license?.isValid ? 'Activa' : 'Expirada'}
                         </p>
                     </div>
                     {license?.daysRemaining !== null && (
-                        <div className="p-4 rounded-lg bg-muted">
+                        <div className="p-4 rounded-xl bg-muted/50">
                             <p className="text-xs text-muted-foreground uppercase">Días Restantes</p>
                             <p className={`font-bold ${license.daysRemaining <= 7 ? 'text-amber-500' : ''}`}>
                                 {license.daysRemaining}
                             </p>
                         </div>
                     )}
-                    <div className="p-4 rounded-lg bg-muted">
+                    <div className="p-4 rounded-xl bg-muted/50">
                         <p className="text-xs text-muted-foreground uppercase">Productos</p>
                         <p className="font-bold">
                             {license?.features?.maxProducts === -1 ? 'Ilimitados' : license?.features?.maxProducts || '50'}
@@ -144,7 +144,7 @@ const AboutView = () => {
                     </div>
                 </div>
                 {license?.type !== 'pro' && (
-                    <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg flex items-center justify-between">
+                    <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/30 rounded-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <AlertTriangle className="h-5 w-5 text-purple-600" />
                             <span className="text-sm text-purple-700">Actualiza a PRO para desbloquear todas las funciones</span>
@@ -162,8 +162,8 @@ const AboutView = () => {
 
             {/* Activation Modal */}
             {showActivation && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <Card className="w-full max-w-md p-6 bg-white animate-in zoom-in-95">
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <Card className="w-full max-w-md p-6 bg-card border border-border/30 rounded-2xl animate-in zoom-in-95">
                         <h3 className="text-lg font-bold mb-4">Activar Licencia</h3>
                         <p className="text-sm text-gray-500 mb-4">
                             Ingresa tu clave de producto. Si no tienes una, contacta al proveedor.
@@ -174,7 +174,7 @@ const AboutView = () => {
                                 <input
                                     type="text"
                                     placeholder="XXXX-XXXX-XXXX-XXXX"
-                                    className="w-full p-2 border rounded-md font-mono text-center uppercase tracking-widest"
+                                    className="w-full p-2.5 border border-border/30 rounded-xl font-mono text-center uppercase tracking-widest bg-background/50 text-sm focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/8 transition-all"
                                     value={activationKey}
                                     onChange={e => setActivationKey(e.target.value.toUpperCase())}
                                     maxLength={19}
@@ -199,25 +199,25 @@ const AboutView = () => {
             )}
 
             {/* System Info */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-xl">
                 <div className="flex items-center gap-3 mb-4">
                     <Cpu className="h-5 w-5 text-primary" />
                     <h3 className="font-semibold">Información del Sistema</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                    <div className="flex justify-between p-3 bg-muted/50 rounded-xl">
                         <span className="text-muted-foreground">Plataforma</span>
                         <span className="font-medium">{diagnostics?.system?.platform}</span>
                     </div>
-                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                    <div className="flex justify-between p-3 bg-muted/50 rounded-xl">
                         <span className="text-muted-foreground">Arquitectura</span>
                         <span className="font-medium">{diagnostics?.system?.arch}</span>
                     </div>
-                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                    <div className="flex justify-between p-3 bg-muted/50 rounded-xl">
                         <span className="text-muted-foreground">Memoria Total</span>
                         <span className="font-medium">{formatBytes(diagnostics?.system?.memory?.total || 0)}</span>
                     </div>
-                    <div className="flex justify-between p-3 bg-muted rounded-lg">
+                    <div className="flex justify-between p-3 bg-muted/50 rounded-xl">
                         <span className="text-muted-foreground">Base de Datos</span>
                         <span className="font-medium">{formatBytes(diagnostics?.database?.size || 0)}</span>
                     </div>
@@ -225,14 +225,14 @@ const AboutView = () => {
             </Card>
 
             {/* Database Stats */}
-            <Card className="p-6">
+            <Card className="p-6 rounded-xl">
                 <div className="flex items-center gap-3 mb-4">
                     <Database className="h-5 w-5 text-primary" />
                     <h3 className="font-semibold">Estadísticas de Datos</h3>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {Object.entries(diagnostics?.database?.counts || {}).map(([key, value]) => (
-                        <div key={key} className="text-center p-4 bg-muted rounded-lg">
+                        <div key={key} className="text-center p-4 bg-muted/50 rounded-xl">
                             <p className="text-2xl font-bold text-primary">{value}</p>
                             <p className="text-xs text-muted-foreground capitalize">{key}</p>
                         </div>
