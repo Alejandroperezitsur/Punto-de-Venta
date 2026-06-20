@@ -4,12 +4,13 @@ import { Table } from '../components/ui/Table';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
+import { KpiCard } from '../components/ui/KpiCard';
 import { ConfirmModal } from '../components/sales/ConfirmModal';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
 import { useToast } from '../components/ui/Toast';
 import { Badge } from '../components/ui/Badge';
 import { ErrorState } from '../components/ui/ErrorState';
-import { Plus, Trash2, RefreshCw, Users, Phone, Mail, FileText } from 'lucide-react';
+import { Plus, Trash2, RefreshCw, Users, Phone, Mail, UserPlus, TrendingUp } from 'lucide-react';
 import { ViewContainer } from '../components/layout/ViewContainer';
 import { ViewHeader } from '../components/layout/ViewHeader';
 import { cn } from '../utils/cn';
@@ -66,18 +67,35 @@ const CustomersView = () => {
     finally { deleteDialog.close(); }
   };
 
+  const getAvatarColor = (name) => {
+    const colors = [
+      'from-blue-500 to-blue-600', 'from-emerald-500 to-emerald-600',
+      'from-violet-500 to-violet-600', 'from-amber-500 to-amber-600',
+      'from-rose-500 to-rose-600', 'from-cyan-500 to-cyan-600',
+    ];
+    const idx = (name || '').charCodeAt(0) % colors.length;
+    return colors[idx];
+  };
+
   const columns = [
-    { title: 'Nombre', key: 'name', sortable: true, className: 'font-semibold min-w-[160px]' },
+    { title: 'Nombre', key: 'name', sortable: true, className: 'font-semibold min-w-[160px]', render: (row) => (
+      <div className="flex items-center gap-3">
+        <div className={cn('size-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-xs shrink-0', getAvatarColor(row.name))}>
+          {(row.name || '?').charAt(0).toUpperCase()}
+        </div>
+        <span>{row.name}</span>
+      </div>
+    )},
     { title: 'Email', key: 'email', sortable: true, hideOnMobile: true, render: (row) =>
-      row.email ? <span className="flex items-center gap-1"><Mail className="size-3 text-muted-foreground" />{row.email}</span> : '—'
+      row.email ? <span className="flex items-center gap-1.5 text-muted-foreground"><Mail className="size-3 text-muted-foreground/60" />{row.email}</span> : <span className="text-muted-foreground/40">—</span>
     },
     { title: 'Teléfono', key: 'phone', render: (row) =>
-      row.phone ? <span className="flex items-center gap-1"><Phone className="size-3 text-muted-foreground" />{row.phone}</span> : '—'
+      row.phone ? <span className="flex items-center gap-1.5 text-muted-foreground"><Phone className="size-3 text-muted-foreground/60" />{row.phone}</span> : <span className="text-muted-foreground/40">—</span>
     },
-    { title: 'RFC', key: 'rfc', hideOnMobile: true },
+    { title: 'RFC', key: 'rfc', hideOnMobile: true, render: (row) => row.rfc || <span className="text-muted-foreground/40">—</span> },
     { title: '', key: 'actions', width: '48px', render: (row) => (
       <button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(row.id); }}
-        className="size-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors touch-target"
+        className="size-8 flex items-center justify-center rounded-lg text-muted-foreground/50 hover:text-danger hover:bg-danger/10 transition-all duration-200 touch-target opacity-0 group-hover:opacity-100"
         aria-label="Eliminar cliente">
         <Trash2 className="size-3.5" />
       </button>
@@ -99,11 +117,21 @@ const CustomersView = () => {
         </Button>
       </ViewHeader>
 
+      {/* Stats Row */}
+      {customers.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <KpiCard label="Total Clientes" value={customers.length} icon={Users} iconColor="primary" />
+          <KpiCard label="Con Email" value={customers.filter(c => c.email).length} icon={Mail} iconColor="info" />
+          <KpiCard label="Con Teléfono" value={customers.filter(c => c.phone).length} icon={Phone} iconColor="success" className="hidden md:flex" />
+        </div>
+      )}
+
       {showForm && (
-        <Card className="p-5 border border-border/12 rounded-2xl bg-card/80">
+        <Card className="p-6 border border-white/[0.06] rounded-2xl backdrop-blur-md bg-surface-glass/40 shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
           <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-            <div className="size-7 rounded-lg bg-primary/6 flex items-center justify-center">
-              <Plus className="size-3.5 text-primary" />
+            <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <UserPlus className="size-3.5 text-primary" />
             </div>
             Registrar Cliente
           </h3>

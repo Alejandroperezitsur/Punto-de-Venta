@@ -41,7 +41,7 @@ const NumpadKey = memo(function NumpadKey({ label, onClick, disabled, variant }:
         'min-h-[var(--touch-target-opt)] min-w-[var(--touch-target-opt)]',
         variant === 'danger'
           ? 'bg-danger/8 text-danger border-danger/15 text-sm active:bg-danger/15 shadow-sm shadow-danger/5'
-          : 'bg-card border-border/20 text-foreground hover:bg-muted/30 active:bg-muted/50 shadow-sm',
+          : 'backdrop-blur-md bg-surface-glass/50 border-white/[0.06] text-foreground hover:bg-surface-glass/70 active:bg-surface-glass/40 shadow-sm',
         disabled && 'opacity-50 cursor-not-allowed',
       )}
       aria-label={typeof label === 'string' && label === 'DEL' ? 'Borrar' : String(label)}
@@ -209,7 +209,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         {isCashOrMixed && (
           <>
             {/* Received amount display */}
-            <div className="rounded-2xl border border-border/15 bg-surface-inset/50 p-5 shadow-sm">
+            <div className="rounded-2xl border border-border/15 backdrop-blur-md bg-surface-glass/30 p-5 shadow-sm">
               <div className="flex justify-between items-baseline mb-3">
                 <span className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.1em]">Recibido</span>
                 {receivedNum > 0 && (

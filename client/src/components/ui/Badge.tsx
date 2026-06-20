@@ -11,6 +11,7 @@ const variants = {
   premium: 'bg-primary/10 text-primary border-primary/20 shadow-sm shadow-primary/5',
   'outline-glow': 'bg-transparent text-primary border-primary/40 shadow-glow',
   'dot-only': 'border-0 bg-transparent p-0',
+  glass: 'backdrop-blur-md bg-surface-glass/40 text-foreground border-white/10 shadow-sm',
 };
 
 const sizes = {

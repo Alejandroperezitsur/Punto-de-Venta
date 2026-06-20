@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
+import { KpiCard } from '../components/ui/KpiCard';
 import { ViewContainer } from '../components/layout/ViewContainer';
 import { ViewHeader } from '../components/layout/ViewHeader';
 import { Button } from '../components/ui/Button';
@@ -13,7 +14,7 @@ import { Select } from '../components/ui/Select';
 import { motion } from 'framer-motion';
 import {
     DoorOpen, DoorClosed, ArrowDownCircle, ArrowUpCircle, RefreshCw,
-    AlertCircle, Wallet, History, CheckCircle2
+    AlertCircle, Wallet, History, CheckCircle2, DollarSign, TrendingUp
 } from 'lucide-react';
 
 const CashControlView = () => {
@@ -163,9 +164,12 @@ const CashControlView = () => {
                 </Card>
             ) : !session ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <Card className="p-8 space-y-6 border-l-4 border-l-warning rounded-xl">
-                        <div className="flex items-center gap-4 text-amber-600">
-                            <AlertCircle className="h-8 w-8" />
+                    <Card className="p-8 space-y-6 border-l-4 border-l-warning rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-warning to-warning/40" />
+                        <div className="flex items-center gap-4">
+                            <div className="p-3.5 bg-warning/10 text-warning rounded-xl">
+                                <AlertCircle className="h-7 w-7" />
+                            </div>
                             <div>
                                 <h3 className="font-bold text-lg">Caja Cerrada</h3>
                                 <p className="text-sm text-muted-foreground">No hay sesión de caja activa. Abre una para comenzar.</p>
@@ -191,7 +195,9 @@ const CashControlView = () => {
                 </motion.div>
             ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                    <Card className="p-6 border-l-4 border-l-success bg-success/3 rounded-xl">
+                    {/* Status Banner */}
+                    <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-success to-success/40" />
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="p-3.5 bg-success/10 text-success rounded-xl">
@@ -204,7 +210,7 @@ const CashControlView = () => {
                                     </p>
                                 </div>
                             </div>
-                            <Button variant="outline" onClick={handleCloseStart} className="border-red-200 text-red-600 hover:bg-red-50">
+                            <Button variant="outline" onClick={handleCloseStart} className="border-danger/20 text-danger hover:bg-danger/5">
                                 <DoorClosed className="h-4 w-4 mr-2" /> Cerrar Caja
                             </Button>
                         </div>
@@ -212,32 +218,18 @@ const CashControlView = () => {
 
                     {summary && (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <Card className="metric-card p-5 text-center rounded-2xl transition-all duration-200">
-                                <p className="text-[10px] text-muted-foreground/50 uppercase font-bold tracking-[0.1em]">Ventas (Efectivo)</p>
-                                <p className="text-2xl font-black text-success mt-2 tabular-nums tracking-tight">{formatMoney(summary.sales)}</p>
-                                <div className="h-1 bg-success/10 rounded-full mt-3"><div className="h-full bg-success/40 rounded-full" style={{ width: '60%' }} /></div>
-                            </Card>
-                            <Card className="metric-card p-5 text-center rounded-2xl transition-all duration-200">
-                                <p className="text-[10px] text-muted-foreground/50 uppercase font-bold tracking-[0.1em]">Depósitos</p>
-                                <p className="text-2xl font-black text-info mt-2 tabular-nums tracking-tight">{formatMoney(summary.deposits)}</p>
-                                <div className="h-1 bg-info/10 rounded-full mt-3"><div className="h-full bg-info/40 rounded-full" style={{ width: '40%' }} /></div>
-                            </Card>
-                            <Card className="metric-card p-5 text-center rounded-2xl transition-all duration-200">
-                                <p className="text-[10px] text-muted-foreground/50 uppercase font-bold tracking-[0.1em]">Retiros</p>
-                                <p className="text-2xl font-black text-danger mt-2 tabular-nums tracking-tight">{formatMoney(summary.withdrawals)}</p>
-                                <div className="h-1 bg-danger/10 rounded-full mt-3"><div className="h-full bg-danger/40 rounded-full" style={{ width: '30%' }} /></div>
-                            </Card>
-                            <Card className="metric-card p-5 text-center rounded-2xl transition-all duration-200">
-                                <p className="text-[10px] text-muted-foreground/50 uppercase font-bold tracking-[0.1em]">Saldo Estimado</p>
-                                <p className="text-2xl font-black text-primary mt-2 tabular-nums tracking-tight">{formatMoney(summary.expected)}</p>
-                                <div className="h-1 bg-primary/10 rounded-full mt-3"><div className="h-full bg-primary/40 rounded-full" style={{ width: '80%' }} /></div>
-                            </Card>
+                            <KpiCard label="Ventas (Efectivo)" value={formatMoney(summary.sales)} icon={DollarSign} iconColor="success" />
+                            <KpiCard label="Depósitos" value={formatMoney(summary.deposits)} icon={ArrowDownCircle} iconColor="info" />
+                            <KpiCard label="Retiros" value={formatMoney(summary.withdrawals)} icon={ArrowUpCircle} iconColor="danger" />
+                            <KpiCard label="Saldo Estimado" value={formatMoney(summary.expected)} icon={Wallet} iconColor="primary" />
                         </div>
                     )}
 
-                    <Card className="p-6 rounded-2xl border-border/12">
+                    {/* Movement Form - Glass Panel */}
+                    <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                         <h4 className="font-semibold mb-4 flex items-center gap-2.5">
-                            <div className="size-7 rounded-lg bg-primary/6 flex items-center justify-center">
+                            <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
                                 <ArrowDownCircle className="size-3.5 text-primary" />
                             </div>
                             Registrar Movimiento
@@ -276,12 +268,14 @@ const CashControlView = () => {
                         </div>
                     </Card>
 
-                    <Card className="p-6 rounded-2xl border-border/12">
+                    {/* Movements History */}
+                    <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
                         <div className="flex items-center gap-2.5 mb-4">
                             <div className="size-7 rounded-lg bg-muted/30 flex items-center justify-center">
                                 <History className="size-3.5 text-muted-foreground" />
                             </div>
                             <h4 className="font-semibold">Movimientos de esta Sesión</h4>
+                            <Badge variant="glass" size="sm">{movements.length}</Badge>
                         </div>
                         <Table
                             data={movements}
@@ -319,7 +313,8 @@ const CashControlView = () => {
                     className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[var(--z-modal)]"
                     onKeyDown={(e) => { if (e.key === 'Escape') { setIsClosing(false); setCloseStep('input'); } }}
                 >
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border/30 rounded-2xl p-6 max-w-md w-full shadow-lg relative">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-white/[0.06] rounded-2xl p-6 max-w-md w-full shadow-2xl relative backdrop-blur-md bg-surface-glass/40 overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-danger to-danger/40" />
                         <button
                             onClick={() => { setIsClosing(false); setCloseStep('input'); }}
                             className="absolute top-4 right-4 text-xs text-muted-foreground hover:text-foreground font-semibold"
@@ -411,7 +406,7 @@ const CashControlView = () => {
                     className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
                     onKeyDown={(e) => { if (e.key === 'Escape') setShowHistory(false); }}
                 >
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border/30 rounded-2xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-lg">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-white/[0.06] rounded-2xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-2xl backdrop-blur-md bg-surface-glass/40">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold">Historial de Cierres</h2>
                             <Button variant="ghost" onClick={() => setShowHistory(false)}>

@@ -104,9 +104,10 @@ const UsersView = () => {
 
             {showForm && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                    <Card className="p-6 border-l-4 border-l-primary rounded-2xl bg-card/80">
+                    <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                         <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <div className="size-7 rounded-lg bg-primary/8 flex items-center justify-center">
+                            <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
                                 {editingId ? <Edit2 className="size-3.5 text-primary" /> : <Plus className="size-3.5 text-primary" />}
                             </div>
                             {editingId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
@@ -148,7 +149,7 @@ const UsersView = () => {
                 </motion.div>
             )}
 
-            <Card className="p-0 overflow-hidden rounded-xl">
+            <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
                 {loading ? (
                     <div className="p-8 space-y-4">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -169,7 +170,7 @@ const UsersView = () => {
                         columns={[
                             { key: 'username', title: 'Usuario', render: (row) => (
                                 <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-sm">
+                                    <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                                         {row.username.charAt(0).toUpperCase()}
                                     </div>
                                     <span className="font-medium">{row.username}</span>

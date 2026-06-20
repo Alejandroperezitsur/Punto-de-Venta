@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { KpiCard } from '../components/ui/KpiCard';
 import { DataCard } from '../components/ui/DataCard';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
@@ -9,8 +10,9 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useToast } from '../components/ui/Toast';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, AlertCircle, ArrowUpRight, ArrowDownRight, Sun, Coffee, DoorClosed } from 'lucide-react';
+import { CheckCircle2, AlertCircle, ArrowUpRight, ArrowDownRight, Sun, Coffee, DoorClosed, DollarSign, ShoppingCart, TrendingUp, BarChart3 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { motion } from 'framer-motion';
 
 const MyBusinessView = () => {
     const navigate = useNavigate();
@@ -22,7 +24,9 @@ const MyBusinessView = () => {
         status: 'mejor',
         diff: 0,
         topProduct: '',
-        todayTotal: 0
+        todayTotal: 0,
+        transactionCount: 0,
+        avgTicket: 0
     });
     const [isClosing, setIsClosing] = useState(false);
     const [closingStep, setClosingStep] = useState(1);
@@ -63,6 +67,8 @@ const MyBusinessView = () => {
                 }
             });
             const topProduct = Object.entries(productCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Ninguno aún';
+            const transactionCount = todaySales.length;
+            const avgTicket = transactionCount > 0 ? (todaySum.total || 0) / transactionCount : 0;
 
             setData({
                 gain,
@@ -70,7 +76,9 @@ const MyBusinessView = () => {
                 status: diff >= 0 ? 'mejor' : 'lento',
                 diff: Math.abs(diff),
                 topProduct,
-                todayTotal: todaySum.total || 0
+                todayTotal: todaySum.total || 0,
+                transactionCount,
+                avgTicket
             });
         } catch (e) {
             console.error(e);
@@ -131,60 +139,75 @@ const MyBusinessView = () => {
     }
 
     return (
-            <div className="max-w-4xl mx-auto flex flex-col justify-between gap-10 animate-fade-slide-in">
-            <div className="text-center py-12">
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.25em] mb-6">Lo que ganaste hoy para ti</p>
+            <div className="max-w-5xl mx-auto flex flex-col gap-8 animate-fade-slide-in">
+            {/* Hero Section */}
+            <div className="text-center py-8">
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.25em] mb-4">Lo que ganaste hoy para ti</p>
                 <div className="flex items-center justify-center gap-4">
                     <span className="text-display font-black tracking-tighter text-foreground tabular-nums">
                         ${data.gain.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </span>
                 </div>
-                <p className="mt-6 text-sm font-medium text-muted-foreground/60">Buen trabajo. Es un dı́a sólido.</p>
+                <p className="mt-4 text-sm font-medium text-muted-foreground/60">Buen trabajo. Es un día sólido.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 border-y border-border/10">
-                <div className="text-center md:text-right md:pr-12 md:border-r md:border-border/10">
-                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-3">Efectivo en caja</p>
-                    <p className="text-5xl font-black text-foreground tracking-tighter tabular-nums">${data.cash.toLocaleString()}</p>
-                </div>
-                <div className="text-center md:text-left md:pl-12 flex flex-col items-center md:items-start">
-                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-3">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
-                    <div className="flex items-center gap-3">
-                        <p className="text-5xl font-black text-foreground uppercase tracking-tight">{data.status}</p>
-                        {data.status === 'mejor' ? (
-                            <ArrowUpRight className="h-8 w-8 text-success stroke-[3]" />
-                        ) : (
-                            <ArrowDownRight className="h-8 w-8 text-warning stroke-[3]" />
-                        )}
+            {/* KPI Cards Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <KpiCard label="Ventas Hoy" value={`$${data.todayTotal.toLocaleString()}`} icon={DollarSign} iconColor="success" />
+                <KpiCard label="Transacciones" value={data.transactionCount} icon={ShoppingCart} iconColor="info" />
+                <KpiCard label="Ticket Promedio" value={`$${data.avgTicket.toFixed(0)}`} icon={TrendingUp} iconColor="primary" />
+                <KpiCard label="Efectivo en Caja" value={`$${data.cash.toLocaleString()}`} icon={BarChart3} iconColor="warning" />
+            </div>
+
+            {/* Trend Comparison */}
+            <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="text-center md:text-right md:pr-8 md:border-r md:border-border/10">
+                        <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-2">Efectivo en caja</p>
+                        <p className="text-4xl font-black text-foreground tracking-tighter tabular-nums">${data.cash.toLocaleString()}</p>
+                    </div>
+                    <div className="text-center md:text-left md:pl-8 flex flex-col items-center md:items-start">
+                        <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-2">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
+                        <div className="flex items-center gap-3">
+                            <p className="text-4xl font-black text-foreground uppercase tracking-tight">{data.status}</p>
+                            {data.status === 'mejor' ? (
+                                <ArrowUpRight className="h-7 w-7 text-success stroke-[3]" />
+                            ) : (
+                                <ArrowDownRight className="h-7 w-7 text-warning stroke-[3]" />
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
+            </Card>
 
-            <div className="space-y-4 py-10">
-                <Card className="flex items-center gap-4 p-5 border border-border/10 rounded-2xl hover:border-primary/15 hover:shadow-sm transition-all metric-card">
-                    <div className="size-12 bg-primary/5 rounded-xl flex items-center justify-center shrink-0">
-                        <Sun className="size-5 text-primary/70" />
+            {/* Insight Cards */}
+            <div className="space-y-4">
+                <Card className="flex items-center gap-4 p-5 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] hover:border-primary/15 hover:shadow-md transition-all duration-200">
+                    <div className="size-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+                        <Sun className="size-5 text-primary" />
                     </div>
                     <p className="text-sm font-semibold leading-tight text-foreground">
-                        Tu mejor hora fue a las 2:00 PM. Mañana podrı́as vender más si refuerzas esa hora.
+                        Tu mejor hora fue a las 2:00 PM. Mañana podrías vender más si refuerzas esa hora.
                     </p>
                 </Card>
 
-                <Card className="flex items-center gap-4 p-5 border border-border/10 rounded-2xl hover:border-warning/15 hover:shadow-sm transition-all metric-card">
-                    <div className="size-12 bg-warning/5 rounded-xl flex items-center justify-center shrink-0">
-                        <Coffee className="size-5 text-warning/70" />
+                <Card className="flex items-center gap-4 p-5 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] hover:border-warning/15 hover:shadow-md transition-all duration-200">
+                    <div className="size-12 bg-warning/10 rounded-xl flex items-center justify-center shrink-0">
+                        <Coffee className="size-5 text-warning" />
                     </div>
                     <p className="text-sm font-semibold leading-tight text-foreground">
-                        Tu producto estrella hoy fue <span className="underline decoration-2">{data.topProduct}</span>.
+                        Tu producto estrella hoy fue <span className="underline decoration-2 decoration-primary/40">{data.topProduct}</span>.
                     </p>
                 </Card>
             </div>
 
-            <div className="pt-6">
+            {/* Close Day CTA */}
+            <div className="pt-2">
                 <Button
                     onClick={() => { setIsClosing(true); setClosingStep(1); setCountedCash(''); setCloseResult(null); setCloseError(''); }}
                     size="2xl"
-                    className="w-full font-bold bg-foreground text-background hover:bg-foreground/90 shadow-lg active:scale-95"
+                    className="w-full font-bold bg-foreground text-background hover:bg-foreground/90 shadow-lg active:scale-[0.98]"
                 >
                     <DoorClosed className="h-6 w-6 mr-3" />
                     CERRAR CAJA Y TERMINAR DÍA
@@ -193,7 +216,8 @@ const MyBusinessView = () => {
 
             {isClosing && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4" style={{ zIndex: 'var(--z-modal)' }}>
-                    <div className="bg-card border border-border/30 rounded-2xl p-6 max-w-md w-full shadow-lg relative">
+                    <div className="bg-card border border-white/[0.06] rounded-2xl p-6 max-w-md w-full shadow-2xl relative backdrop-blur-md bg-surface-glass/40 overflow-hidden">
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                         <button
                             onClick={() => { setIsClosing(false); setClosingStep(1); }}
                             className="absolute top-6 right-6 text-muted-foreground hover:text-foreground font-bold text-xs"

@@ -107,14 +107,14 @@ export const Topbar = React.memo(function Topbar() {
       className={cn(
         'h-[var(--header-height)] flex items-center justify-between px-4 lg:px-5 sticky top-0 z-[var(--z-sticky)] transition-all duration-300',
         scrolled
-          ? 'bg-background/90 backdrop-blur-xl shadow-[0_1px_3px_0_rgb(0_0_0/0.03)]'
+          ? 'bg-background/85 backdrop-blur-xl shadow-[0_1px_4px_0_rgb(0_0_0/0.04)]'
           : 'bg-background/70 backdrop-blur-md',
       )}
     >
       {/* Hairline bottom border with gradient */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-px opacity-60"
-        style={{ background: 'linear-gradient(90deg, transparent 2%, hsl(var(--border) / 0.4) 20%, hsl(var(--border) / 0.6) 50%, hsl(var(--border) / 0.4) 80%, transparent 98%)' }}
+        className="absolute bottom-0 left-0 right-0 h-px opacity-50"
+        style={{ background: 'linear-gradient(90deg, transparent 2%, hsl(var(--primary) / 0.15) 20%, hsl(var(--border) / 0.5) 50%, hsl(var(--primary) / 0.15) 80%, transparent 98%)' }}
       />
 
       {/* Left: Menu + Breadcrumb + Cash status */}
@@ -128,8 +128,8 @@ export const Topbar = React.memo(function Topbar() {
         </button>
 
         {/* Breadcrumb-style page path */}
-        <nav className="hidden sm:flex items-center gap-1 min-w-0" aria-label="Breadcrumb">
-          <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider">{breadcrumb[0]}</span>
+        <nav className="hidden sm:flex items-center gap-1 min-w-0 group" aria-label="Breadcrumb">
+          <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider group-hover:text-muted-foreground/70 transition-colors cursor-default">{breadcrumb[0]}</span>
           <ChevronRight className="size-3 text-muted-foreground/30 shrink-0" />
           <span className="text-sm font-bold text-foreground truncate">{breadcrumb[1]}</span>
         </nav>
@@ -149,7 +149,7 @@ export const Topbar = React.memo(function Topbar() {
 
       {/* Center: Refined clock with date pill */}
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted/25 border border-border/10">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] shadow-sm">
           <span className="tabular-nums font-bold text-foreground text-[13px] tracking-tight">{timeStr}</span>
           <span className="w-px h-3 bg-border/30" />
           <span className="text-muted-foreground/60 text-[11px] font-medium">{dateStrShort}</span>
@@ -190,7 +190,7 @@ export const Topbar = React.memo(function Topbar() {
           aria-label="Notificaciones"
         >
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-danger shadow-sm shadow-danger/20 ring-1 ring-card" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-danger shadow-sm shadow-danger/20 ring-1 ring-card animate-pulse" />
         </button>
       </div>
     </header>

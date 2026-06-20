@@ -25,3 +25,7 @@ export type { DropdownItem, DropdownProps } from './Dropdown';
 export { DataCard } from './DataCard';
 export { StatusIndicator } from './StatusIndicator';
 export { SegmentedControl } from './SegmentedControl';
+export { KpiCard } from './KpiCard';
+export type { KpiCardProps } from './KpiCard';
+export { PageHeader } from './PageHeader';
+export type { PageHeaderProps, BreadcrumbItem } from './PageHeader';

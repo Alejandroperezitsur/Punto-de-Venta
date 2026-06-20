@@ -212,10 +212,10 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Login card — premium surface */}
-          <div className="relative bg-card/80 backdrop-blur-sm border border-border/15 rounded-[1.5rem] p-7 md:p-9 shadow-2xl shadow-black/[0.04]">
+          {/* Login card — premium glassmorphism surface */}
+          <div className="relative bg-card/70 backdrop-blur-xl border border-white/[0.06] rounded-[1.5rem] p-7 md:p-9 shadow-2xl shadow-black/[0.06]">
             {/* Gradient top accent */}
-            <div className="absolute top-0 left-8 right-8 h-px rounded-full" style={{ background: 'var(--gradient-primary)', opacity: 0.25 }} />
+            <div className="absolute top-0 left-6 right-6 h-px rounded-full" style={{ background: 'var(--gradient-primary)', opacity: 0.35 }} />
 
             <div className="mb-8 hidden lg:block">
               <h3 className="text-[1.35rem] font-bold text-foreground tracking-tight">Bienvenido de vuelta</h3>
@@ -254,9 +254,9 @@ const Login = () => {
                       Usuario
                     </label>
                     <div className={cn(
-                      'flex items-center gap-3 px-4 h-[3.5rem] rounded-xl border border-border/25 bg-background/30 transition-all duration-200',
-                      'hover:border-border/40 hover:bg-background/50',
-                      'focus-within:border-primary/35 focus-within:bg-background/70 focus-within:ring-2 focus-within:ring-primary/8 focus-within:shadow-sm focus-within:shadow-primary/5',
+                      'flex items-center gap-3 px-4 h-[3.5rem] rounded-xl border border-border/20 bg-background/20 backdrop-blur-sm transition-all duration-200',
+                      'hover:border-border/35 hover:bg-background/40',
+                      'focus-within:border-primary/40 focus-within:bg-background/60 focus-within:ring-2 focus-within:ring-primary/10 focus-within:shadow-md focus-within:shadow-primary/8',
                     )}>
                       <User className="w-4 h-4 text-muted-foreground/35 shrink-0" />
                       <input
@@ -276,9 +276,9 @@ const Login = () => {
                       Contraseña
                     </label>
                     <div className={cn(
-                      'flex items-center gap-3 px-4 h-[3.5rem] rounded-xl border border-border/25 bg-background/30 transition-all duration-200',
-                      'hover:border-border/40 hover:bg-background/50',
-                      'focus-within:border-primary/35 focus-within:bg-background/70 focus-within:ring-2 focus-within:ring-primary/8 focus-within:shadow-sm focus-within:shadow-primary/5',
+                      'flex items-center gap-3 px-4 h-[3.5rem] rounded-xl border border-border/20 bg-background/20 backdrop-blur-sm transition-all duration-200',
+                      'hover:border-border/35 hover:bg-background/40',
+                      'focus-within:border-primary/40 focus-within:bg-background/60 focus-within:ring-2 focus-within:ring-primary/10 focus-within:shadow-md focus-within:shadow-primary/8',
                     )}>
                       <Lock className="w-4 h-4 text-muted-foreground/40 shrink-0" />
                       <input

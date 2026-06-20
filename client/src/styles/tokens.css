@@ -197,6 +197,33 @@
   --gradient-metric:        linear-gradient(180deg, hsl(var(--surface-metric)) 0%, hsl(var(--card)) 100%);
   --gradient-shimmer:       linear-gradient(90deg, transparent 0%, hsl(var(--primary) / 0.06) 50%, transparent 100%);
 
+ /* Glassmorphism utility tokens */
+  --glass-bg-opacity: 0.72;
+  --glass-border-opacity: 0.18;
+  --glass-blur: 20px;
+  --glass-saturation: 180%;
+
+  /* Premium micro-interaction tokens */
+  --hover-lift-distance: -3px;
+  --press-depth: scale(0.965);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 3px;
+
+  /* Enterprise data visualization tokens */
+  --sparkline-height: 32px;
+  --bar-chart-radius: 3px;
+  --kpi-trend-up: var(--success);
+  --kpi-trend-down: var(--danger);
+  --kpi-trend-neutral: var(--muted-foreground);
+
+  /* Gradient tokens for data viz */
+  --gradient-chart-area: linear-gradient(180deg, hsl(var(--chart-1) / 0.12) 0%, transparent 100%);
+  --gradient-success-area: linear-gradient(180deg, hsl(var(--success) / 0.10) 0%, transparent 100%);
+  --gradient-danger-area: linear-gradient(180deg, hsl(var(--danger) / 0.10) 0%, transparent 100%);
+  --gradient-glass: linear-gradient(135deg, hsl(var(--surface) / 0.6) 0%, hsl(var(--surface) / 0.3) 100%);
+  --gradient-glass-hover: linear-gradient(135deg, hsl(var(--surface) / 0.75) 0%, hsl(var(--surface) / 0.45) 100%);
+  --gradient-premium-border: linear-gradient(135deg, hsl(var(--primary) / 0.2) 0%, hsl(var(--accent) / 0.15) 50%, hsl(var(--primary) / 0.1) 100%);
+
   /* Premium surface accent */
   --surface-accent-h: 215;
   --surface-accent-s: 22%;

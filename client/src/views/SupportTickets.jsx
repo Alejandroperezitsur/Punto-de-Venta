@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 import { Table } from '../components/ui/Table';
 import { useToast } from '../components/ui/Toast';
 import { Badge } from '../components/ui/Badge';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
+import { Headphones, Plus, X } from 'lucide-react';
 
 export default function SupportTickets() {
     const toast = useToast();
@@ -34,35 +40,36 @@ export default function SupportTickets() {
     };
 
     return (
-        <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Soporte Técnico</h1>
-                <button onClick={() => setNewTicket(true)} className="btn btn-primary">
-                    + Nuevo Ticket
-                </button>
-            </div>
+        <ViewContainer>
+            <ViewHeader title="Soporte Técnico" icon={<Headphones className="size-5 text-primary" />}>
+                <Button onClick={() => setNewTicket(!newTicket)} size="sm">
+                    {newTicket ? <X className="size-4 mr-1" /> : <Plus className="size-4 mr-1" />}
+                    {newTicket ? 'Cancelar' : 'Nuevo Ticket'}
+                </Button>
+            </ViewHeader>
 
             {newTicket && (
-                <div className="bg-white p-6 rounded shadow mb-6 border animate-fadeUp">
+                <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden mb-6">
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                     <h3 className="font-bold mb-4">Crear Ticket</h3>
-                    <form onSubmit={handleCreate}>
-                        <div className="mb-4">
+                    <form onSubmit={handleCreate} className="space-y-4">
+                        <div>
                             <label className="block text-sm font-medium mb-1">Asunto</label>
-                            <input className="input w-full border p-2 rounded" value={subject} onChange={e => setSubject(e.target.value)} required />
+                            <Input value={subject} onChange={e => setSubject(e.target.value)} required placeholder="Describe tu problema" />
                         </div>
-                        <div className="mb-4">
+                        <div>
                             <label className="block text-sm font-medium mb-1">Mensaje</label>
-                            <textarea className="input w-full border p-2 rounded" rows="4" value={message} onChange={e => setMessage(e.target.value)} required ></textarea>
+                            <textarea className="w-full p-3 rounded-xl border border-border/30 bg-background/50 text-sm focus:outline-none focus:border-primary/40 transition-colors min-h-[100px]" value={message} onChange={e => setMessage(e.target.value)} required />
                         </div>
                         <div className="flex justify-end gap-2">
-                            <button type="button" onClick={() => setNewTicket(false)} className="btn btn-ghost">Cancelar</button>
-                            <button type="submit" className="btn btn-primary">Enviar</button>
+                            <Button type="button" variant="ghost" onClick={() => setNewTicket(false)}>Cancelar</Button>
+                            <Button type="submit">Enviar</Button>
                         </div>
                     </form>
-                </div>
+                </Card>
             )}
 
-            <div className="bg-white rounded shadow overflow-hidden">
+            <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
                 <Table
                     data={tickets}
                     searchable={false}
@@ -77,12 +84,12 @@ export default function SupportTickets() {
                                 {t.status}
                             </Badge>
                         )},
-                        { key: 'created_at', title: 'Fecha', render: (t) => <span className="text-gray-500 text-sm">{new Date(t.created_at).toLocaleDateString()}</span> },
+                        { key: 'created_at', title: 'Fecha', render: (t) => <span className="text-muted-foreground text-sm">{new Date(t.created_at).toLocaleDateString()}</span> },
                         { key: 'messages', title: 'Mensajes', render: (t) => t.messages.length },
                     ]}
                     rowKey={(t) => t.id}
                 />
-            </div>
-        </div>
+            </Card>
+        </ViewContainer>
     );
 }

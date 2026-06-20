@@ -17,10 +17,10 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
       onClick={onNavigate}
       className={({ isActive }) =>
         cn(
-          'flex items-center rounded-xl text-[13px] font-medium transition-all duration-150 group relative overflow-hidden',
+          'flex items-center rounded-xl text-[13px] font-medium transition-all duration-200 group relative overflow-hidden',
           isCollapsed ? 'px-0 py-2.5 justify-center mx-2' : 'px-2.5 py-2.5 mx-2',
           isActive
-            ? 'bg-surface-sidebar-active text-foreground font-bold sidebar-active-bg'
+            ? 'bg-surface-sidebar-active text-foreground font-bold sidebar-active-bg shadow-sm shadow-primary/5'
             : 'text-muted-foreground/70 hover:text-foreground hover:bg-muted/30',
         )
       }
@@ -29,22 +29,25 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
     >
       {({ isActive }) => (
         <>
+          {isActive && (
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary transition-all duration-300" />
+          )}
           <div className={cn('flex items-center gap-3 w-full', isCollapsed && 'justify-center')}>
             <div className={cn(
-              'shrink-0 flex items-center justify-center rounded-lg transition-all duration-150',
+              'shrink-0 flex items-center justify-center rounded-lg transition-all duration-200',
               isCollapsed ? 'size-10' : 'size-9',
               isActive
                 ? 'bg-primary/12 text-primary'
-                : 'text-current group-hover:bg-muted/50',
+                : 'text-current group-hover:bg-muted/50 group-hover:scale-105',
             )}>
               <Icon className={cn(
-                'shrink-0 transition-transform duration-150',
+                'shrink-0 transition-transform duration-200',
                 isCollapsed ? 'size-[18px]' : 'size-[17px]',
                 isActive && 'scale-105',
               )} />
             </div>
             {!isCollapsed && (
-              <span className="truncate leading-tight">{children}</span>
+              <span className="truncate leading-tight transition-transform duration-200 group-hover:translate-x-0.5">{children}</span>
             )}
           </div>
           {shortcut && !isCollapsed && (
@@ -145,11 +148,12 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
     >
       {/* Logo header */}
       <div className={cn(
-        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/8',
+        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/8 relative',
         isCollapsed ? 'justify-center px-0' : 'px-4 justify-between',
       )}>
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent" />
         <div className="flex items-center gap-3 min-w-0">
-          <div className="size-10 rounded-xl bg-primary/8 flex items-center justify-center text-primary shrink-0 overflow-hidden ring-1 ring-primary/6 shadow-sm shadow-primary/5">
+          <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 overflow-hidden ring-1 ring-primary/10 shadow-sm shadow-primary/8 backdrop-blur-sm">
             {branding.logo ? (
               <img src={branding.logo} alt="Logo" className="size-full object-contain p-1.5" />
             ) : (
@@ -230,10 +234,10 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
       {/* User section */}
       <div className="p-2.5 border-t border-border/8">
         {!isCollapsed ? (
-          <div className="rounded-xl bg-muted/15 border border-border/8 p-2.5 space-y-2">
+          <div className="rounded-xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] p-2.5 space-y-2 shadow-sm">
             <div className="flex items-center gap-2.5 px-1.5 py-1.5">
               <div className="relative shrink-0">
-                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[11px] ring-2 ring-primary/10">
+                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[11px] ring-2 ring-primary/10 backdrop-blur-sm">
                   {userInitial}
                 </div>
                 <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card" />

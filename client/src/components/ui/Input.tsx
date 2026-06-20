@@ -24,7 +24,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size = 'md', icon: Icon, iconRight: IconRight, error, success, label, floatingLabel, scanner, onIconClick, type, ...props }, ref) => {
+  ({ className, size = 'md', icon: Icon, iconRight: IconRight, error, success, label, floatingLabel, scanner, onIconClick, type, charCount, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
     const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
@@ -62,10 +62,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type === 'password' && 'pr-9',
               error && 'border-danger/60 focus-visible:border-danger focus-visible:ring-danger/15',
               success && !error && 'border-success/50 focus-visible:border-success focus-visible:ring-success/15',
-              scanner && 'border-primary/25 focus-visible:border-primary/50 focus-visible:ring-primary/15',
+              scanner && 'border-primary/25 bg-primary/[0.02] focus-visible:border-primary/60 focus-visible:ring-primary/20 focus-visible:shadow-primary/10',
               !scanner && !error && !success && 'hover:border-foreground/15',
+              floatingLabel && 'peer',
               className,
             )}
+            placeholder={floatingLabel ? ' ' : props.placeholder}
             {...props}
           />
           {type === 'password' && (
@@ -91,7 +93,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {floatingLabel && label && (
-          <label className="absolute -top-2 left-2.5 px-1 text-[11px] font-semibold text-muted-foreground bg-card rounded">
+          <label className={cn(
+            'absolute left-3 px-1 rounded pointer-events-none transition-all duration-200 origin-left',
+            'text-muted-foreground peer-focus:text-primary peer-focus:scale-90',
+            'peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm',
+            'top-0 -translate-y-1/2 text-[11px] font-semibold bg-card',
+          )}>
             {label}
           </label>
         )}

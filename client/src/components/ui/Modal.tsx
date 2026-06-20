@@ -139,10 +139,10 @@ function Modal({
           'transition-all',
           isReduced ? '' : 'duration-100',
           isOpen
-            ? 'opacity-100 translate-x-0 translate-y-0'
+            ? 'opacity-100 translate-x-0 translate-y-0 scale-100'
             : drawer
-              ? 'opacity-100 translate-x-full'
-              : 'opacity-0 translate-y-[4px]',
+              ? 'opacity-100 translate-x-full scale-100'
+              : 'opacity-0 translate-y-[4px] scale-[0.98]',
           drawer
             ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-none border-l border-border/40'
             : sheet
@@ -160,7 +160,7 @@ function Modal({
             <div className="flex-1 min-w-0">
               {title && (
                 <div className="flex items-center gap-3">
-                  <span className="w-1 h-5 rounded-full bg-primary shrink-0" />
+                  <span className="w-1 h-5 rounded-full bg-gradient-to-b from-primary to-primary/50 shrink-0" />
                   <h2 id={titleId} className="text-lg font-bold tracking-tight">{title}</h2>
                 </div>
               )}

@@ -35,18 +35,18 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect 
       disabled={isOutOfStock}
       className={cn(
         'rounded-2xl border bg-card flex flex-col justify-between gap-2 transition-all duration-200 group relative overflow-hidden',
-        'hover:border-primary/30 hover:bg-primary/[0.02] hover:shadow-md hover:-translate-y-0.5',
+        'hover:border-primary/30 hover:bg-primary/[0.02] hover:shadow-lg hover:-translate-y-1',
         'active:bg-primary/[0.04] active:border-primary/20 active:scale-[0.98] active:translate-y-0',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-1',
         'min-h-[6.5rem] px-3.5 py-3 border-border/15',
-        isOutOfStock && 'pointer-events-none',
+        isOutOfStock && 'pointer-events-none opacity-60',
       )}
       title={`${product.name} — ${formatMoney(product.price)}`}
       aria-label={`Agregar ${product.name} - ${formatMoney(product.price)}`}
     >
       {/* Out of stock overlay */}
       {isOutOfStock && (
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-2xl">
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-2xl">
           <span className="text-[10px] font-black text-danger/60 uppercase tracking-widest">Agotado</span>
         </div>
       )}
@@ -54,7 +54,7 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect 
       {/* Low stock amber dot */}
       {isLowStock && (
         <span
-          className="absolute top-2.5 right-2.5 size-2 rounded-full bg-warning shadow-sm shadow-warning/20 ring-1 ring-warning/15"
+          className="absolute top-2.5 right-2.5 size-2 rounded-full bg-warning shadow-sm shadow-warning/20 ring-1 ring-warning/15 animate-pulse"
           title={`Solo quedan ${product.stock}`}
         />
       )}
@@ -65,7 +65,7 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect 
       )}
 
       <div className="flex-1 flex flex-col justify-center min-w-0">
-        <span className="font-bold truncate leading-tight text-left text-[13px] text-foreground/90 group-hover:text-foreground transition-colors">
+        <span className="font-bold truncate leading-tight text-left text-[13px] text-foreground/90 group-hover:text-foreground transition-colors group-hover:translate-x-0.5 duration-200">
           {product.name}
         </span>
         <div className="flex items-baseline gap-1 mt-2">
@@ -80,6 +80,19 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect 
           </span>
         )}
       </div>
+
+      {/* Stock indicator bar at bottom */}
+      {product.stock !== undefined && product.stock > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted/20">
+          <div
+            className={cn(
+              'h-full rounded-r-full transition-all duration-300',
+              isLowStock ? 'bg-warning' : 'bg-success/40',
+            )}
+            style={{ width: `${Math.min((product.stock / 50) * 100, 100)}%` }}
+          />
+        </div>
+      )}
     </button>
   );
 });

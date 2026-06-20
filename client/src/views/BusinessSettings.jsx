@@ -14,10 +14,11 @@ import {
 } from 'lucide-react';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
-  <Card variant="outline" className="p-6 space-y-4 rounded-2xl border-border/12 hover:border-border/20 transition-colors">
+  <Card variant="outline" className="p-6 space-y-4 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] hover:border-border/20 transition-all duration-200 relative overflow-hidden">
+    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
     <div className="flex items-center gap-3 border-b border-border/8 pb-3 mb-2">
-      <div className="size-8 rounded-lg bg-primary/6 flex items-center justify-center">
-        <Icon className="size-4 text-primary/70" />
+      <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
+        <Icon className="size-4 text-primary" />
       </div>
       <h3 className="font-semibold text-base text-foreground">{title}</h3>
     </div>
@@ -113,7 +114,7 @@ const BusinessSettings = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-20 animate-fade-slide-in">
       <div className="flex justify-between items-center pb-5 border-b border-border/8">
         <div className="flex items-center gap-3.5">
-          <div className="size-11 rounded-xl bg-primary/6 border border-primary/8 flex items-center justify-center shadow-xs shadow-primary/5">
+          <div className="size-11 rounded-xl bg-primary/10 border border-primary/10 flex items-center justify-center shadow-xs shadow-primary/5">
             <Settings className="size-5 text-primary" />
           </div>
           <div>

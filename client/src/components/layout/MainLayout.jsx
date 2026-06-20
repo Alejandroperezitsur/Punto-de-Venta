@@ -51,7 +51,7 @@ const MainLayout = memo(function MainLayout({ children }) {
             )}
             role="main"
           >
-            <div key={location.pathname} className="animate-fade-slide-in">
+            <div key={location.pathname} className="animate-page-enter">
               {children}
             </div>
           </main>

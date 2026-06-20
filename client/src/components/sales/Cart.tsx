@@ -81,8 +81,8 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
         </div>
       </div>
 
-      {/* Quantity stepper — refined pill design */}
-      <div className="flex items-center gap-0.5 bg-muted/10 rounded-xl border border-border/12 shadow-xs">
+      {/* Quantity stepper — refined pill design with glass background */}
+      <div className="flex items-center gap-0.5 backdrop-blur-md bg-surface-glass/40 rounded-xl border border-white/[0.06] shadow-xs">
         <button
           className={cn(
             'size-9 flex items-center justify-center rounded-l-xl transition-all duration-100',
@@ -152,7 +152,7 @@ export const Cart = memo(function Cart() {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-16" role="status">
         <div className="relative mb-6">
-          <div className="size-24 rounded-3xl bg-muted/10 flex items-center justify-center border border-border/8">
+          <div className="size-24 rounded-3xl bg-muted/10 flex items-center justify-center border border-border/8 shadow-inner-sm">
             <ShoppingBag className="size-10 opacity-12" />
           </div>
           <Package className="size-5 text-muted-foreground/10 absolute -bottom-1 -right-1" />

@@ -2,7 +2,7 @@
 import { cn } from '../../utils/cn';
 
 interface CardProps {
-  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent' | 'dashboard' | 'metric' | 'command';
+  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent' | 'dashboard' | 'metric' | 'command' | 'data-viz';
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -15,7 +15,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
     glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm',
     elevated: 'bg-card text-card-foreground border border-border/40 shadow-md',
     interactive:
-      'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-0.5 transition-all duration-150 cursor-pointer active:scale-[0.995]',
+      'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200 cursor-pointer active:scale-[0.995]',
     outline: 'bg-transparent text-foreground border border-border/45',
     frosted: 'backdrop-blur-xl bg-surface-glass/80 text-foreground border border-white/10 shadow-lg',
     inset: 'bg-surface-inset text-foreground border border-border-subtle shadow-inner-sm',
@@ -24,6 +24,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
     dashboard: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:border-border-accent/40 hover:-translate-y-px transition-all duration-200',
     metric: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden',
     command: 'bg-surface-command text-foreground border border-border/20 shadow-lg backdrop-blur-sm',
+    'data-viz': 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
   };
   return (
     <Component

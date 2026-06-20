@@ -170,7 +170,7 @@ const BackupsView = () => {
     return (
         <>
         <ViewContainer>
-            <ViewHeader title="Respaldos del Sistema">
+            <ViewHeader title="Respaldos del Sistema" icon={<HardDrive className="size-5 text-primary" />}>
                 <Button onClick={handleCreate} isLoading={creating}>
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Backup

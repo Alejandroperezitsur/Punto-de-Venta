@@ -528,11 +528,11 @@ const SalesView = React.memo(function SalesView() {
 
       {/* ===== CART PANEL (Right ~40%) ===== */}
       <div
-        className="flex flex-col rounded-2xl border border-border/10 bg-surface-panel h-full overflow-hidden pos-cart-panel shadow-sm"
+        className="flex flex-col rounded-2xl border border-border/10 bg-surface-panel/80 backdrop-blur-sm h-full overflow-hidden pos-cart-panel shadow-sm"
         style={{ flexBasis: '40%', minWidth: '300px', maxWidth: '540px' }}
       >
         {/* Cart header — frosted glass */}
-        <div className="px-5 py-3.5 border-b border-border/6 flex items-center justify-between shrink-0 bg-muted/5 backdrop-blur-sm">
+        <div className="px-5 py-3.5 border-b border-border/6 flex items-center justify-between shrink-0 backdrop-blur-md bg-surface-glass/30">
           <h2 className="font-bold text-sm flex items-center gap-3" id="cart-heading">
             <div className="size-9 rounded-xl bg-primary/8 flex items-center justify-center shadow-xs shadow-primary/5">
               <ShoppingBag className="size-4 text-primary" />
@@ -665,7 +665,9 @@ const SalesView = React.memo(function SalesView() {
           </div>
 
           {/* Totals — metric card with larger total */}
-          <div className="rounded-2xl p-5 border border-border/8" style={{ background: 'var(--gradient-panel)' }}>
+          <div className="rounded-2xl p-5 border border-border/8 relative overflow-hidden" style={{ background: 'var(--gradient-panel)' }}>
+            {/* Gradient accent line at top */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40 opacity-60" />
             {/* Breakdown rows */}
             <div className="space-y-1.5 mb-4">
               <div className="flex items-center justify-between text-xs">
@@ -710,7 +712,7 @@ const SalesView = React.memo(function SalesView() {
           role="alert"
           aria-live="assertive"
         >
-          <div className="bg-card rounded-3xl border border-success/15 shadow-2xl shadow-success/5 px-12 py-12 text-center max-w-sm animate-scale-in">
+          <div className="bg-card rounded-3xl border border-success/15 shadow-2xl shadow-success/10 px-12 py-12 text-center max-w-sm animate-scale-in backdrop-blur-md bg-surface-glass/80">
             {/* Success icon */}
             <div className="size-24 rounded-full bg-success/8 flex items-center justify-center mx-auto mb-6 ring-4 ring-success/5 success-pulse">
               <Check className="size-12 text-success" strokeWidth={2.5} />

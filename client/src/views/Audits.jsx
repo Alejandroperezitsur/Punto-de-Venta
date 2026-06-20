@@ -8,8 +8,10 @@ import { Table } from '../components/ui/Table';
 import { useToast } from '../components/ui/Toast';
 import { Skeleton } from '../components/ui/Skeleton';
 import { EmptyState } from '../components/ui/EmptyState';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
 import { formatMoney } from '../utils/format';
-import { ClipboardList, Search, Calendar, User, ArrowUpDown } from 'lucide-react';
+import { ClipboardList, Search, Calendar, User, ArrowUpDown, Filter } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const AuditsView = () => {
@@ -66,31 +68,34 @@ const AuditsView = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex items-center gap-3">
-          <ClipboardList className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Auditoría del Sistema</h1>
-        </div>
-        <div className="flex gap-2 items-center">
-          <Input
-            placeholder="Buscar acción, entidad..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            icon={Search}
-            className="w-64"
-          />
-          <button
-            onClick={() => setSortDir(sortDir === 'desc' ? 'asc' : 'desc')}
-            className="p-2 rounded-lg border border-border hover:bg-muted"
-            title="Cambiar orden"
-          >
-            <ArrowUpDown className="h-4 w-4" />
+    <ViewContainer>
+      <ViewHeader title="Auditoría del Sistema" icon={<ClipboardList className="size-5 text-primary" />}>
+        <Input
+          placeholder="Buscar acción, entidad..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          icon={Search}
+          className="w-64"
+        />
+        <button
+          onClick={() => setSortDir(sortDir === 'desc' ? 'asc' : 'desc')}
+          className="p-2 rounded-lg border border-border/30 hover:bg-muted/50 backdrop-blur-sm transition-colors"
+          title="Cambiar orden"
+        >
+          <ArrowUpDown className="h-4 w-4" />
+        </button>
+      </ViewHeader>
+
+      {/* Filter Chips */}
+      <div className="flex flex-wrap gap-2">
+        {['Todos', 'Ventas', 'Usuarios', 'Caja', 'Config'].map(chip => (
+          <button key={chip} className="px-3 py-1.5 text-xs font-medium rounded-full backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] hover:border-primary/20 transition-colors">
+            {chip}
           </button>
-        </div>
+        ))}
       </div>
 
-      <Card className="p-0 overflow-hidden">
+      <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
         <Table
           columns={[
             {
@@ -160,7 +165,7 @@ const AuditsView = () => {
       <p className="text-xs text-muted-foreground text-center">
         Mostrando los últimos 100 registros
       </p>
-    </div>
+    </ViewContainer>
   );
 };
 

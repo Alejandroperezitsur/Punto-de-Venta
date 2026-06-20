@@ -113,8 +113,13 @@ function Table<T extends Record<string, any>>({
   const SortIcon = ({ column }: { column: Column<T> }) => {
     if (!column.sortable && !globallySortable) return null;
     const active = sortKey === column.key;
-    if (!active) return <ChevronsUpDown className="size-3 opacity-20" />;
-    return sortDir === 'asc' ? <ChevronUp className="size-3 text-primary" /> : <ChevronDown className="size-3 text-primary" />;
+    if (!active) return <ChevronsUpDown className="size-3 opacity-30 group-hover:opacity-50 transition-opacity" />;
+    return (
+      <span className="inline-flex flex-col gap-px ml-0.5">
+        <ChevronUp className={cn('size-2.5 transition-colors', sortDir === 'asc' ? 'text-primary' : 'text-muted-foreground/30')} />
+        <ChevronDown className={cn('size-2.5 transition-colors', sortDir === 'desc' ? 'text-primary' : 'text-muted-foreground/30')} />
+      </span>
+    );
   };
 
   return (
@@ -141,16 +146,16 @@ function Table<T extends Record<string, any>>({
       )}>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className={cn('bg-muted/30 border-b border-border/30', stickyHeader && 'sticky top-0 z-[var(--z-sticky)]')}>
+            <thead className={cn('bg-muted/30 border-b border-border/30', stickyHeader && 'sticky top-0 z-[var(--z-sticky)] backdrop-blur-sm bg-muted/50')}>
               <tr>
                 {columns.map(col => (
                   <th
                     key={col.key}
                     className={cn(
-                      'font-semibold text-muted-foreground uppercase tracking-wider select-none text-[10px]',
+                      'font-semibold text-muted-foreground uppercase tracking-wider select-none text-[10px] group',
                       densityStyles[density],
                       col.sortable !== false && globallySortable && 'cursor-pointer hover:text-foreground transition-colors',
-                      col.hideOnMobile && 'hidden md:table-cell',
+                      col.hideOnMobile && 'hidden lg:table-cell',
                       col.className,
                     )}
                     style={col.width ? { width: col.width } : undefined}
@@ -172,7 +177,7 @@ function Table<T extends Record<string, any>>({
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skel-${i}`}>
                     {columns.map(col => (
-                      <td key={col.key} className={cn(densityStyles[density], col.hideOnMobile && 'hidden md:table-cell')}>
+                      <td key={col.key} className={cn(densityStyles[density], col.hideOnMobile && 'hidden lg:table-cell')}>
                         <div className="h-3 rounded bg-muted/60" style={{ width: `${50 + (i * 5) % 30}%` }} />
                       </td>
                     ))}
@@ -197,16 +202,16 @@ function Table<T extends Record<string, any>>({
                     key={rowKey(row)}
                     className={cn(
                       'transition-colors duration-100',
-                      striped && i % 2 === 1 && 'bg-foreground/[0.015]',
-                      onRowClick && 'cursor-pointer hover:bg-primary/[0.03]',
-                      !onRowClick && 'hover:bg-muted/20',
+                      striped && i % 2 === 1 && 'bg-foreground/[0.02]',
+                      onRowClick && 'cursor-pointer hover:bg-primary/[0.04]',
+                      !onRowClick && 'hover:bg-muted/30',
                     )}
                     onClick={() => onRowClick?.(row)}
                   >
                     {columns.map(col => (
                       <td
                         key={col.key}
-                        className={cn(densityStyles[density], col.hideOnMobile && 'hidden md:table-cell', col.className)}
+                        className={cn(densityStyles[density], col.hideOnMobile && 'hidden lg:table-cell', col.className)}
                       >
                         {col.render ? col.render(row) : row[col.key]}
                       </td>

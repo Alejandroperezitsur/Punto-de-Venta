@@ -18,17 +18,20 @@ import { ViewHeader } from '../components/layout/ViewHeader';
 import { cn } from '../utils/cn';
 
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
+  const stockPct = Math.min((Number(p.stock) / 50) * 100, 100);
   return (
-    <div className="relative rounded-2xl border border-border/15 bg-card p-4 hover:border-primary/20 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 flex flex-col cursor-pointer group"
+    <div className="relative rounded-2xl border border-border/15 bg-card p-4 hover:border-primary/25 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/8 transition-all duration-200 flex flex-col cursor-pointer group overflow-hidden"
       onClick={() => onEdit(p)}
     >
-      <button className="absolute top-3 right-3 p-1.5 rounded-lg bg-muted/40 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
+      {/* Edit button */}
+      <button className="absolute top-3 right-3 p-1.5 rounded-lg bg-muted/40 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all z-10"
         onClick={(e) => { e.stopPropagation(); onEdit(p); }}
         aria-label="Editar producto">
         <Edit3 className="size-3.5" />
       </button>
 
-      <div className="size-[4.5rem] rounded-xl bg-muted/30 flex items-center justify-center mb-4 border border-border/8 mx-auto overflow-hidden group-hover:border-primary/12 transition-colors">
+      {/* Product image */}
+      <div className="size-[4.5rem] rounded-xl bg-muted/30 flex items-center justify-center mb-4 border border-border/8 mx-auto overflow-hidden group-hover:border-primary/15 group-hover:scale-105 transition-all duration-200">
         {p.image_url ? (
           <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-xl" loading="lazy" />
         ) : (
@@ -36,12 +39,15 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
         )}
       </div>
 
-      <h3 className="font-bold text-sm mb-2 line-clamp-2 min-h-[2.2rem] leading-tight text-center text-foreground/90">{p.name}</h3>
+      <h3 className="font-bold text-sm mb-2 line-clamp-2 min-h-[2.2rem] leading-tight text-center text-foreground/90 group-hover:text-foreground transition-colors">{p.name}</h3>
 
       <div className="mt-auto pt-2 space-y-2 w-full text-center">
-        <p className="text-xl font-black text-primary tracking-tight">
-          {formatMoney(p.price)}
-        </p>
+        <div className="flex items-baseline justify-center gap-0.5">
+          <span className="text-[10px] font-semibold text-primary/50">$</span>
+          <p className="text-xl font-black text-primary tracking-tight tabular-nums">
+            {formatMoney(p.price)}
+          </p>
+        </div>
         {(p.barcodes?.length > 0 || p.sku) && (
           <p className="text-[10px] text-muted-foreground/50 font-mono truncate">
             {p.barcodes?.[0]?.code || p.sku}
@@ -54,6 +60,17 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
         >
           Stock: {Number(p.stock).toFixed(0)}
         </Badge>
+      </div>
+
+      {/* Stock indicator bar at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted/20">
+        <div
+          className={cn(
+            'h-full rounded-r-full transition-all duration-300',
+            p.stock <= 0 ? 'bg-danger' : p.stock <= 5 ? 'bg-warning' : 'bg-success/40',
+          )}
+          style={{ width: `${stockPct}%` }}
+        />
       </div>
     </div>
   );
@@ -190,7 +207,7 @@ const ProductsView = () => {
           ref={searchRef}
           type="text"
           placeholder="Buscar por nombre o código de barras..."
-          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-xl border border-border/25 bg-card text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/8 focus:shadow-sm focus:shadow-primary/5 transition-all placeholder:text-muted-foreground/40"
+          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-2xl border-2 border-border/20 bg-card/80 backdrop-blur-sm text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 focus:shadow-md focus:shadow-primary/8 transition-all placeholder:text-muted-foreground/40"
           value={search}
           onChange={handleSearch}
           aria-label="Buscar productos"
@@ -214,7 +231,7 @@ const ProductsView = () => {
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3.5 stagger-enter">
             {products.map((p) => (
               <ProductCard key={p.id} p={p} onEdit={handleEdit} onDelete={handleDeleteRequest} />
             ))}

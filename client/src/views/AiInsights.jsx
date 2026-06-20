@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { Card } from '../components/ui/Card';
 import { Table } from '../components/ui/Table';
 import { Badge } from '../components/ui/Badge';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
+import { Brain, AlertTriangle, Bell, Package } from 'lucide-react';
+import { cn } from '../utils/cn';
 
 export default function AiInsights() {
     const [insights, setInsights] = useState([]);
@@ -18,34 +23,40 @@ export default function AiInsights() {
         }).catch(() => { }).finally(() => setLoading(false));
     }, []);
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Analizando datos... 🧠</div>;
+    if (loading) return <div className="p-8 text-center text-muted-foreground">Analizando datos...</div>;
 
     return (
-        <div className="p-6 max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold mb-2">Centro de Inteligencia</h1>
-            <p className="text-gray-500 mb-8">Alertas predictivas y recomendaciones para tu negocio.</p>
+        <ViewContainer>
+            <ViewHeader title="Centro de Inteligencia" icon={<Brain className="size-5 text-primary" />}
+                description="Alertas predictivas y recomendaciones para tu negocio" />
 
             {/* Smart Alerts */}
             {insights.length > 0 && (
                 <div className="mb-8 space-y-4">
-                    <h2 className="font-bold text-lg text-gray-800">🔔 Alertas Activas</h2>
+                    <h2 className="font-bold text-lg flex items-center gap-2">
+                        <Bell className="size-4 text-warning" /> Alertas Activas
+                    </h2>
                     {insights.map((ins, idx) => (
-                        <div key={idx} className={`p-4 rounded-lg border-l-4 shadow-sm flex gap-4 ${ins.priority === 'high' ? 'bg-red-50 border-red-500 text-red-900' : 'bg-yellow-50 border-yellow-500 text-yellow-900'}`}>
-                            <div className="text-2xl">{ins.priority === 'high' ? '⚠️' : '📢'}</div>
-                            <div>
-                                <div className="font-bold">{ins.title}</div>
-                                <div>{ins.description}</div>
+                        <Card key={idx} className={cn('p-4 flex gap-4 rounded-2xl border-l-4 backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]', ins.priority === 'high' ? 'border-l-danger' : 'border-l-warning')}>
+                            <div className="size-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+                                {ins.priority === 'high' ? <AlertTriangle className="size-4 text-danger" /> : <Bell className="size-4 text-warning" />}
                             </div>
-                        </div>
+                            <div>
+                                <div className="font-bold text-sm">{ins.title}</div>
+                                <div className="text-sm text-muted-foreground">{ins.description}</div>
+                            </div>
+                        </Card>
                     ))}
                 </div>
             )}
 
             {/* Inventory Predictions */}
-            <div className="bg-white rounded-lg shadow border overflow-hidden">
-                <div className="p-6 border-b bg-gray-50">
-                    <h2 className="font-bold text-lg text-gray-800">📦 Predicción de Inventario</h2>
-                    <p className="text-sm text-gray-500">Productos que se agotarán pronto basado en tu ritmo de ventas.</p>
+            <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
+                <div className="p-6 border-b border-border/10">
+                    <h2 className="font-bold text-lg flex items-center gap-2">
+                        <Package className="size-4 text-primary" /> Predicción de Inventario
+                    </h2>
+                    <p className="text-sm text-muted-foreground">Productos que se agotarán pronto basado en tu ritmo de ventas.</p>
                 </div>
                 <Table
                     data={predictions}
@@ -59,14 +70,14 @@ export default function AiInsights() {
                         { key: 'stock', title: 'Stock Actual', className: 'text-right' },
                         { key: 'dailyAvg', title: 'Venta Diaria Prom.', className: 'text-right' },
                         { key: 'daysLeft', title: 'Se agota en', className: 'text-center', render: (p) => (
-                            <span className={`px-2 py-1 rounded font-bold text-xs ${p.daysLeft <= 3 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                            <Badge variant={p.daysLeft <= 3 ? 'danger' : 'warning'} size="sm">
                                 {p.daysLeft} días
-                            </span>
+                            </Badge>
                         )},
-                        { key: 'depletionDate', title: 'Fecha Estimada', render: (p) => <span className="text-gray-500">{new Date(p.depletionDate).toLocaleDateString()}</span> },
+                        { key: 'depletionDate', title: 'Fecha Estimada', render: (p) => <span className="text-muted-foreground">{new Date(p.depletionDate).toLocaleDateString()}</span> },
                     ]}
                 />
-            </div>
-        </div>
+            </Card>
+        </ViewContainer>
     );
 }

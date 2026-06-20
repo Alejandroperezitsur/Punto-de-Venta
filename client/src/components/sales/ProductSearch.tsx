@@ -151,16 +151,16 @@ const ProductSearch = React.memo(function ProductSearch() {
   };
 
   const barBgTint = () => {
-    if (scannerStatus === 'scanning') return 'bg-primary/[0.02]';
+    if (scannerStatus === 'scanning') return 'bg-primary/[0.03] backdrop-blur-sm';
     if (scannerStatus === 'error') return 'bg-danger/[0.02]';
-    return 'bg-card';
+    return 'bg-card/80 backdrop-blur-sm';
   };
 
   return (
     <div className="relative">
       <form onSubmit={handleSearch} role="search" aria-label="Buscar producto">
         <div className="relative">
-          {/* Enterprise scan bar — taller, more commanding */}
+          {/* Enterprise scan bar — taller, more commanding with glass surface */}
           <div className={cn(
             'flex items-center gap-4 rounded-2xl border-2 transition-all duration-200 relative overflow-hidden',
             'px-5 h-[4.5rem]',

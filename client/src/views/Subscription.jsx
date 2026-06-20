@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 import { useToast } from '../components/ui/Toast';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
+import { CreditCard, Check } from 'lucide-react';
+import { cn } from '../utils/cn';
 
 export default function Subscription() {
     const toast = useToast();
@@ -30,50 +37,58 @@ export default function Subscription() {
         }
     };
 
-    if (!sub) return <div className="p-8">Cargando...</div>;
+    if (!sub) return <div className="p-8 text-center text-muted-foreground">Cargando...</div>;
 
-    const PlanCard = ({ id, name, price, current }) => (
-        <div className={`border rounded-lg p-6 ${current ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200' : 'bg-white'}`}>
-            <h3 className="font-bold text-lg">{name}</h3>
-            <div className="text-2xl font-bold my-2">${price} <span className="text-sm font-normal text-gray-500">/mes</span></div>
-            {current ? (
-                <div className="bg-green-100 text-green-800 px-3 py-1 rounded inline-block text-sm font-medium mt-4">Plan Actual</div>
-            ) : (
-                <button
-                    onClick={() => handleUpgrade(id)}
-                    disabled={loading}
-                    className="w-full mt-4 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
-                >
-                    {loading ? 'Procesando...' : 'Seleccionar'}
-                </button>
-            )}
-        </div>
-    );
+    const plans = [
+        { id: 'free', name: 'Emprendedor', price: '0', features: ['1 Sucursal', '50 Productos', 'Reportes básicos'] },
+        { id: 'pro', name: 'Negocio Pro', price: '499', features: ['3 Sucursales', 'Productos ilimitados', 'Reportes avanzados', 'Soporte prioritario'] },
+        { id: 'enterprise', name: 'Enterprise', price: '1,499', features: ['Sucursales ilimitadas', 'API access', 'Multi-empresa', 'Soporte 24/7'] },
+    ];
 
     return (
-        <div className="p-6 max-w-5xl mx-auto">
-            <h1 className="text-2xl font-bold mb-2">Suscripción y Facturación</h1>
-            <p className="text-gray-500 mb-8">Administra el plan de tu negocio.</p>
+        <ViewContainer>
+            <ViewHeader title="Suscripción y Facturación" icon={<CreditCard className="size-5 text-primary" />} />
 
             <div className="grid md:grid-cols-3 gap-6">
-                <PlanCard id="free" name="Emprendedor" price="0" current={sub.plan_id === 'free'} />
-                <PlanCard id="pro" name="Negocio Pro" price="499" current={sub.plan_id === 'pro'} />
-                <PlanCard id="enterprise" name="Enterprise" price="1499" current={sub.plan_id === 'enterprise'} />
+                {plans.map(plan => {
+                    const isCurrent = sub.plan_id === plan.id;
+                    return (
+                        <Card key={plan.id} className={cn('p-6 rounded-2xl border transition-all duration-200 relative overflow-hidden', isCurrent ? 'border-primary/30 bg-primary/[0.03]' : 'border-white/[0.06] backdrop-blur-md bg-surface-glass/40 hover:border-primary/15 hover:shadow-md')}>
+                            {isCurrent && <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />}
+                            <h3 className="font-bold text-lg">{plan.name}</h3>
+                            <div className="text-3xl font-black my-3 tabular-nums">${plan.price} <span className="text-sm font-normal text-muted-foreground">/mes</span></div>
+                            <ul className="space-y-2 mb-6">
+                                {plan.features.map(f => (
+                                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Check className="size-3.5 text-success shrink-0" /> {f}
+                                    </li>
+                                ))}
+                            </ul>
+                            {isCurrent ? (
+                                <Badge variant="success" className="w-full text-center justify-center">Plan Actual</Badge>
+                            ) : (
+                                <Button onClick={() => handleUpgrade(plan.id)} disabled={loading} className="w-full">
+                                    {loading ? 'Procesando...' : 'Seleccionar'}
+                                </Button>
+                            )}
+                        </Card>
+                    );
+                })}
             </div>
 
-            <div className="mt-12">
+            <Card className="p-6 mt-8 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
                 <h3 className="font-bold mb-4">Método de Pago</h3>
-                <div className="bg-white p-6 rounded border flex justify-between items-center">
+                <div className="flex justify-between items-center">
                     <div className="flex items-center gap-4">
                         <div className="text-2xl">💳</div>
                         <div>
                             <div className="font-medium">•••• •••• •••• 4242</div>
-                            <div className="text-sm text-gray-500">Expira 12/28</div>
+                            <div className="text-sm text-muted-foreground">Expira 12/28</div>
                         </div>
                     </div>
-                    <button className="text-indigo-600 font-medium hover:underline">Cambiar tarjeta</button>
+                    <Button variant="outline" size="sm">Cambiar tarjeta</Button>
                 </div>
-            </div>
-        </div>
+            </Card>
+        </ViewContainer>
     );
 }
