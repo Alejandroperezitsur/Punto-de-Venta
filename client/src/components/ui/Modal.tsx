@@ -128,7 +128,7 @@ function Modal({
           'absolute inset-0 transition-opacity',
           isReduced ? '' : 'duration-80',
           isOpen ? 'opacity-100' : 'opacity-0',
-          isDrawer ? 'bg-black/45 backdrop-blur-[3px]' : 'bg-black/55 backdrop-blur-[4px]',
+          isDrawer ? 'bg-black/40 backdrop-blur-[2px]' : 'bg-black/50 backdrop-blur-[3px]',
         )}
         onClick={handleOverlayClick}
       />

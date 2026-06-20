@@ -2,7 +2,7 @@
 import { cn } from '../../utils/cn';
 
 interface CardProps {
-  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent' | 'dashboard';
+  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent' | 'dashboard' | 'metric' | 'command';
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -11,17 +11,19 @@ interface CardProps {
 function Card({ variant = 'default', className, children, onClick }: CardProps) {
   const Component = onClick ? 'button' : 'div';
   const variants = {
-    default: 'bg-card text-card-foreground border border-border/60 shadow-xs',
+    default: 'bg-card text-card-foreground border border-border/55 shadow-xs',
     glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm',
     elevated: 'bg-card text-card-foreground border border-border/40 shadow-md',
     interactive:
-      'bg-card text-card-foreground border border-border/50 shadow-xs hover:shadow-md hover:border-primary/25 transition-all duration-150 cursor-pointer active:scale-[0.995] hover:-translate-y-px',
-    outline: 'bg-transparent text-foreground border border-border/50',
+      'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-0.5 transition-all duration-150 cursor-pointer active:scale-[0.995]',
+    outline: 'bg-transparent text-foreground border border-border/45',
     frosted: 'backdrop-blur-xl bg-surface-glass/80 text-foreground border border-white/10 shadow-lg',
     inset: 'bg-surface-inset text-foreground border border-border-subtle shadow-inner-sm',
     premium: 'bg-card text-card-foreground shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px gradient-border',
     accent: 'bg-surface-accent text-foreground border border-border/30 shadow-xs',
     dashboard: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:border-border-accent/40 hover:-translate-y-px transition-all duration-200',
+    metric: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden',
+    command: 'bg-surface-command text-foreground border border-border/20 shadow-lg backdrop-blur-sm',
   };
   return (
     <Component

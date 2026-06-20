@@ -20,6 +20,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   floatingLabel?: boolean;
   scanner?: boolean;
   onIconClick?: () => void;
+  charCount?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -50,8 +51,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             type={inputType}
             className={cn(
               'flex w-full border border-input bg-card font-medium text-foreground',
-              'placeholder:text-muted-foreground/45 transition-all duration-100',
-              'focus-visible:outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/15 focus-visible:shadow-sm focus-visible:shadow-primary/5',
+              'placeholder:text-muted-foreground/40 transition-all duration-150',
+              'focus-visible:outline-none focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/10 focus-visible:shadow-sm focus-visible:shadow-primary/6',
               'disabled:cursor-not-allowed disabled:opacity-40 disabled:bg-muted/20',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               inputSizes[size],
@@ -59,9 +60,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               scanner && 'pl-9 h-[var(--control-xl)] text-base font-semibold',
               IconRight && 'pr-9',
               type === 'password' && 'pr-9',
-              error && 'border-danger focus-visible:border-danger focus-visible:ring-danger/15 animate-[shake_0.3s_ease-in-out]',
+              error && 'border-danger/60 focus-visible:border-danger focus-visible:ring-danger/15',
               success && !error && 'border-success/50 focus-visible:border-success focus-visible:ring-success/15',
-              scanner && 'border-primary/25 focus-visible:border-primary focus-visible:ring-primary/15',
+              scanner && 'border-primary/25 focus-visible:border-primary/50 focus-visible:ring-primary/15',
               !scanner && !error && !success && 'hover:border-foreground/15',
               className,
             )}
@@ -98,6 +99,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p className="mt-1.5 text-[11px] font-medium text-danger ml-0.5 flex items-center gap-1">
             <span className="size-1 rounded-full bg-danger shrink-0" />
             {error}
+          </p>
+        )}
+        {charCount && props.maxLength && (
+          <p className="mt-1 text-[10px] text-muted-foreground/40 text-right tabular-nums font-medium">
+            {(props.value as string)?.length ?? 0}/{props.maxLength}
           </p>
         )}
       </div>

@@ -16,7 +16,7 @@ const maxWidths = {
 
 export function ViewContainer({ children, className, maxWidth = 'full' }: ViewContainerProps) {
   return (
-    <div className={cn('space-y-5 w-full', maxWidths[maxWidth], className)}>
+    <div className={cn('space-y-6 w-full animate-fade-slide-in', maxWidths[maxWidth], className)}>
       {children}
     </div>
   );

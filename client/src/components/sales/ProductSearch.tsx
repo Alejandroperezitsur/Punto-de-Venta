@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Loader2, Plus, ScanLine, WifiOff, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Input } from '../ui/Input';
+import { Loader2, Plus, ScanLine, WifiOff, AlertCircle, CheckCircle2, Mic } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useScan } from '../../hooks/useScan';
 import { useScanSound } from '../../hooks/useScanSound';
@@ -144,37 +143,43 @@ const ProductSearch = React.memo(function ProductSearch() {
     }
   }, [error, addItem, playSuccess, showFeedback, focusInput]);
 
-  const scannerDotColor = () => {
-    if (scannerStatus === 'scanning') return 'bg-primary animate-pulse';
-    if (scannerStatus === 'error') return 'bg-danger';
-    return 'bg-success/50';
-  };
-
-  const borderColor = () => {
+  const barBorderColor = () => {
     if (scannerStatus === 'scanning') return 'border-primary/50 shadow-lg shadow-primary/10';
     if (scannerStatus === 'error') return 'border-danger/50 shadow-lg shadow-danger/8';
-    if (isFocused) return 'border-primary/45 shadow-lg shadow-primary/8';
-    return 'border-border/25';
+    if (isFocused) return 'border-primary/40 shadow-lg shadow-primary/8';
+    return 'border-border/20';
+  };
+
+  const barBgTint = () => {
+    if (scannerStatus === 'scanning') return 'bg-primary/[0.02]';
+    if (scannerStatus === 'error') return 'bg-danger/[0.02]';
+    return 'bg-card';
   };
 
   return (
     <div className="relative">
       <form onSubmit={handleSearch} role="search" aria-label="Buscar producto">
         <div className="relative">
-          {/* Premium hero scan bar */}
+          {/* Enterprise scan bar — taller, more commanding */}
           <div className={cn(
-            'flex items-center gap-3.5 rounded-2xl border-2 bg-card transition-all duration-200',
-            'px-4 h-[4rem]',
-            borderColor(),
+            'flex items-center gap-4 rounded-2xl border-2 transition-all duration-200 relative overflow-hidden',
+            'px-5 h-[4.5rem]',
+            barBorderColor(),
+            barBgTint(),
           )}>
-            {/* Animated scanner icon */}
+            {/* Animated scan sweep line when scanning */}
+            {scannerStatus === 'scanning' && (
+              <div className="absolute inset-0 pointer-events-none scan-sweep-line" />
+            )}
+
+            {/* Scanner icon container */}
             <div className={cn(
-              'shrink-0 size-10 rounded-xl flex items-center justify-center transition-all duration-200',
+              'shrink-0 size-11 rounded-xl flex items-center justify-center transition-all duration-200',
               scannerStatus === 'scanning'
                 ? 'bg-primary/12 text-primary scale-105'
                 : isFocused
                   ? 'bg-primary/8 text-primary/70'
-                  : 'bg-muted/30 text-muted-foreground/35',
+                  : 'bg-muted/25 text-muted-foreground/30',
             )}>
               {loading ? (
                 <Loader2 className="size-5 animate-spin" />
@@ -199,23 +204,37 @@ const ProductSearch = React.memo(function ProductSearch() {
               className="flex-1 bg-transparent border-none text-base font-semibold text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-0 disabled:opacity-50"
             />
 
-            {/* Scanner status indicator */}
-            {scannerStatus === 'idle' ? (
-              <div className="shrink-0" title="Scanner no detectado">
-                <WifiOff className="size-4 text-muted-foreground/20" />
-              </div>
-            ) : (
-              <div className={cn(
-                'shrink-0 size-2.5 rounded-full transition-colors',
-                scannerDotColor(),
-                scannerStatus === 'ready' && 'success-pulse',
-              )} />
-            )}
+            {/* Right-side controls */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Scanner status indicator */}
+              {scannerStatus === 'idle' ? (
+                <div title="Scanner no detectado">
+                  <WifiOff className="size-4 text-muted-foreground/20" />
+                </div>
+              ) : (
+                <div className={cn(
+                  'size-2.5 rounded-full transition-colors',
+                  scannerStatus === 'scanning' && 'bg-primary animate-pulse',
+                  scannerStatus === 'error' && 'bg-danger',
+                  scannerStatus === 'ready' && 'bg-success/50 success-pulse',
+                )} />
+              )}
 
-            {/* Keyboard shortcut hint */}
-            <span className="shrink-0 text-[9px] font-bold text-muted-foreground/18 bg-muted/25 px-2 py-1 rounded-lg hidden xl:inline tracking-wider uppercase">
-              F1
-            </span>
+              {/* Voice search placeholder (future) */}
+              <button
+                type="button"
+                className="p-2 rounded-lg text-muted-foreground/15 hover:text-muted-foreground/40 hover:bg-muted/20 transition-all"
+                title="Búsqueda por voz (próximamente)"
+                tabIndex={-1}
+              >
+                <Mic className="size-4" />
+              </button>
+
+              {/* Shortcut hint */}
+              <span className="text-[9px] font-bold text-muted-foreground/15 bg-muted/20 px-2 py-1 rounded-lg hidden xl:inline tracking-wider uppercase">
+                F1
+              </span>
+            </div>
           </div>
         </div>
       </form>

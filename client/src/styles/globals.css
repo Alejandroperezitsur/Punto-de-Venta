@@ -48,6 +48,14 @@
   --color-pos-offline: hsl(var(--pos-offline));
   --color-surface-panel: hsl(var(--surface-panel));
   --color-border-accent: hsl(var(--border-accent));
+  --color-surface-command: hsl(var(--surface-command));
+  --color-surface-metric: hsl(var(--surface-metric));
+  --color-surface-sidebar-active: hsl(var(--surface-sidebar-active));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
 
   --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
@@ -55,6 +63,7 @@
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
   --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
   --radius-full: var(--radius-full);
 
   --height-sm: var(--control-sm);
@@ -128,10 +137,12 @@ body {
 
 h1 { font-size: var(--text-3xl); font-weight: var(--weight-extrabold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
 h2 { font-size: var(--text-2xl); font-weight: var(--weight-bold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
-h3 { font-size: var(--text-xl); font-weight: var(--weight-bold); line-height: var(--leading-tight); letter-spacing: -0.015em; }
+h3 { font-size: var(--text-xl); font-weight: var(--weight-bold); line-height: var(--leading-snug); letter-spacing: -0.015em; }
 h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
 h5 { font-size: var(--text-base); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
 h6 { font-size: var(--text-sm); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
+
+.text-display { font-size: var(--text-display); font-weight: var(--weight-black); line-height: var(--leading-none); letter-spacing: var(--tracking-tighter); }
 
 a {
   color: hsl(var(--primary));
@@ -276,7 +287,7 @@ img {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.18s var(--ease-out) forwards;
+  animation: fadeIn var(--duration-slow) var(--ease-out) forwards;
 }
 
 /* Slide in from right */
@@ -326,13 +337,13 @@ img {
   border: 1px solid hsl(var(--border) / 0.15);
 }
 
-/* Premium hover lift */
+/* Premium hover lift — refined micro-animation */
 .hover-lift {
-  transition: transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+  transition: transform var(--duration-normal) var(--ease-out-expo), box-shadow var(--duration-normal) var(--ease-out-expo);
 }
 .hover-lift:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Active press effect */
@@ -381,13 +392,109 @@ img {
 .duration-60 { transition-duration: 60ms; }
 .duration-80 { transition-duration: 80ms; }
 
-/* Enterprise panel — premium surface with subtle gradient border */
+/* Enterprise panel — premium surface with refined gradient border */
 .enterprise-panel {
   background: hsl(var(--surface-panel));
-  border: 1px solid hsl(var(--border-accent) / 0.35);
+  border: 1px solid hsl(var(--border-accent) / 0.30);
   box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.03);
   border-radius: var(--radius-xl);
 }
+
+/* Metric card — for KPI / stat displays */
+.metric-card {
+  background: var(--gradient-metric);
+  border: 1px solid hsl(var(--border) / 0.45);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  transition: all var(--duration-normal) var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  opacity: 0.5;
+  transition: opacity var(--duration-slow);
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: hsl(var(--border-accent) / 0.5);
+}
+.metric-card:hover::before { opacity: 0.9; }
+
+/* Sidebar active item background */
+.sidebar-active-bg {
+  background: var(--gradient-sidebar-active);
+  position: relative;
+}
+.sidebar-active-bg::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 15%; bottom: 15%;
+  width: 3px;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  background: var(--gradient-primary);
+}
+
+/* Shimmer effect for buttons at rest */
+@keyframes btnShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.btn-shimmer {
+  background-size: 200% 100%;
+  animation: btnShimmer 3s var(--ease-linear) infinite;
+}
+
+/* Fade slide entrance for page transitions */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-slide-in {
+  animation: fadeSlideIn var(--duration-slower) var(--ease-out-expo) forwards;
+}
+
+/* Status dot pulsing */
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50%       { opacity: 0.8; box-shadow: 0 0 0 4px transparent; }
+}
+.status-pulse { animation: statusPulse 2s var(--ease-smooth) infinite; }
+
+/* Scanner active sweep line */
+@keyframes scanSweep {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.scan-sweep-line {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.scan-sweep-line::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 50%;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.07), transparent);
+  animation: scanSweep 2s var(--ease-linear) infinite;
+}
+
+/* Numpad haptic-press feel */
+.haptic-press { transition: transform 60ms var(--ease-out), box-shadow 60ms var(--ease-out); }
+.haptic-press:active { transform: scale(0.94); box-shadow: var(--shadow-inner-sm); }
 
 /* Stat card for KPI metrics */
 .stat-card {

@@ -22,3 +22,6 @@ export { Select } from './Select';
 export type { SelectOption, SelectProps } from './Select';
 export { Dropdown } from './Dropdown';
 export type { DropdownItem, DropdownProps } from './Dropdown';
+export { DataCard } from './DataCard';
+export { StatusIndicator } from './StatusIndicator';
+export { SegmentedControl } from './SegmentedControl';

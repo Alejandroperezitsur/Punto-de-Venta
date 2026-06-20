@@ -14,12 +14,12 @@ import {
 } from 'lucide-react';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
-  <Card variant="outline" className="p-6 space-y-4 rounded-2xl hover:border-border-accent/30 transition-colors">
-    <div className="flex items-center gap-3 border-b border-border/10 pb-3 mb-2">
-      <div className="size-8 rounded-lg bg-primary/8 flex items-center justify-center">
-        <Icon className="size-4 text-primary" />
+  <Card variant="outline" className="p-6 space-y-4 rounded-2xl border-border/12 hover:border-border/20 transition-colors">
+    <div className="flex items-center gap-3 border-b border-border/8 pb-3 mb-2">
+      <div className="size-8 rounded-lg bg-primary/6 flex items-center justify-center">
+        <Icon className="size-4 text-primary/70" />
       </div>
-      <h3 className="font-semibold text-base">{title}</h3>
+      <h3 className="font-semibold text-base text-foreground">{title}</h3>
     </div>
     {children}
   </Card>
@@ -110,10 +110,10 @@ const BusinessSettings = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-20">
-      <div className="flex justify-between items-center pb-4 border-b border-border/10">
+    <div className="space-y-6 max-w-4xl mx-auto pb-20 animate-fade-slide-in">
+      <div className="flex justify-between items-center pb-5 border-b border-border/8">
         <div className="flex items-center gap-3.5">
-          <div className="size-11 rounded-xl bg-primary/8 border border-primary/10 flex items-center justify-center">
+          <div className="size-11 rounded-xl bg-primary/6 border border-primary/8 flex items-center justify-center shadow-xs shadow-primary/5">
             <Settings className="size-5 text-primary" />
           </div>
           <div>

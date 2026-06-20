@@ -100,9 +100,9 @@ const CustomersView = () => {
       </ViewHeader>
 
       {showForm && (
-        <Card className="p-5 border border-primary/12 rounded-2xl bg-card/80">
+        <Card className="p-5 border border-border/12 rounded-2xl bg-card/80">
           <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-            <div className="size-7 rounded-lg bg-primary/8 flex items-center justify-center">
+            <div className="size-7 rounded-lg bg-primary/6 flex items-center justify-center">
               <Plus className="size-3.5 text-primary" />
             </div>
             Registrar Cliente

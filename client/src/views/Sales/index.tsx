@@ -31,10 +31,10 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'w-full min-h-[5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
+        'w-full min-h-[5.5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
         hasItems && !isProcessing
           ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-0.5 success-pulse'
-          : 'bg-muted/30 text-muted-foreground/25 cursor-not-allowed',
+          : 'bg-muted/25 text-muted-foreground/20 cursor-not-allowed',
       )}
       style={hasItems && !isProcessing ? { background: 'var(--gradient-checkout)' } : undefined}
       disabled={!hasItems || isProcessing}
@@ -48,7 +48,7 @@ const CheckoutButton = React.memo(function CheckoutButton({
         <>
           <Wallet className="size-5" />
           <span className="text-lg tracking-wider">COBRAR</span>
-          <span className="text-[9px] font-bold opacity-25 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">F2</span>
+          <span className="text-[9px] font-bold opacity-20 bg-black/8 px-2 py-0.5 rounded-lg ml-1 tracking-wider">F2</span>
         </>
       )}
     </button>
@@ -511,7 +511,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 min-h-[4rem] px-3.5 text-xs font-bold rounded-2xl bg-warning/8 text-warning border border-warning/12 hover:bg-warning/12 hover:-translate-y-px transition-all flex items-center gap-1.5 touch-target active:scale-[0.97]"
+            className="shrink-0 min-h-[4.5rem] px-4 text-xs font-bold rounded-2xl bg-warning/6 text-warning border border-warning/10 hover:bg-warning/10 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -521,24 +521,24 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         {/* Product catalog grid */}
-        <div className="flex-1 rounded-2xl border border-border/12 bg-card p-3 overflow-y-auto">
+        <div className="flex-1 rounded-2xl border border-border/10 bg-card p-3.5 overflow-y-auto shadow-xs">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
       {/* ===== CART PANEL (Right ~40%) ===== */}
       <div
-        className="flex flex-col rounded-2xl border border-border/12 bg-surface-panel h-full overflow-hidden pos-cart-panel"
+        className="flex flex-col rounded-2xl border border-border/10 bg-surface-panel h-full overflow-hidden pos-cart-panel shadow-sm"
         style={{ flexBasis: '40%', minWidth: '300px', maxWidth: '540px' }}
       >
-        {/* Cart header — premium */}
-        <div className="px-4 py-3 border-b border-border/8 flex items-center justify-between shrink-0">
-          <h2 className="font-bold text-sm flex items-center gap-2.5" id="cart-heading">
-            <div className="size-8 rounded-lg bg-primary/8 flex items-center justify-center">
+        {/* Cart header — frosted glass */}
+        <div className="px-5 py-3.5 border-b border-border/6 flex items-center justify-between shrink-0 bg-muted/5 backdrop-blur-sm">
+          <h2 className="font-bold text-sm flex items-center gap-3" id="cart-heading">
+            <div className="size-9 rounded-xl bg-primary/8 flex items-center justify-center shadow-xs shadow-primary/5">
               <ShoppingBag className="size-4 text-primary" />
             </div>
             <span className="text-foreground">Carrito</span>
-            <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold min-w-[22px] text-center tabular-nums" aria-live="polite">
+            <span className="bg-primary/10 text-primary text-[10px] px-2.5 py-0.5 rounded-full font-bold min-w-[24px] text-center tabular-nums ring-1 ring-primary/8" aria-live="polite">
               {items.length}
             </span>
           </h2>
@@ -636,7 +636,7 @@ const SalesView = React.memo(function SalesView() {
         )}
 
         {/* Bottom: customer + totals + checkout */}
-        <div className="px-4 py-4 border-t border-border/8 space-y-3 shrink-0 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-5 py-5 border-t border-border/6 space-y-3.5 shrink-0 bg-muted/[0.02] pb-[env(safe-area-inset-bottom,0.75rem)]">
           {/* Customer selector */}
           <div className="flex items-center gap-2">
             {selectedCustomer ? (
@@ -664,17 +664,17 @@ const SalesView = React.memo(function SalesView() {
             )}
           </div>
 
-          {/* Totals — premium gradient panel with breakdown */}
-          <div className="rounded-xl p-4" style={{ background: 'var(--gradient-panel)' }}>
+          {/* Totals — metric card with larger total */}
+          <div className="rounded-2xl p-5 border border-border/8" style={{ background: 'var(--gradient-panel)' }}>
             {/* Breakdown rows */}
-            <div className="space-y-1 mb-3">
+            <div className="space-y-1.5 mb-4">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground/50 font-medium">Subtotal</span>
-                <span className="font-semibold text-foreground/70 tabular-nums">{formatMoney(totals.subtotal)}</span>
+                <span className="text-muted-foreground/45 font-medium">Subtotal</span>
+                <span className="font-semibold text-foreground/60 tabular-nums">{formatMoney(totals.subtotal)}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground/50 font-medium">IVA (16%)</span>
-                <span className="font-semibold text-foreground/70 tabular-nums">{formatMoney(totals.tax)}</span>
+                <span className="text-muted-foreground/45 font-medium">IVA (16%)</span>
+                <span className="font-semibold text-foreground/60 tabular-nums">{formatMoney(totals.tax)}</span>
               </div>
               {totals.discount > 0 && (
                 <div className="flex items-center justify-between text-xs">
@@ -683,17 +683,17 @@ const SalesView = React.memo(function SalesView() {
                 </div>
               )}
             </div>
-            {/* Total */}
-            <div className="pt-3 border-t border-border/10 flex items-baseline justify-between gap-3">
-              <span className="text-xs text-muted-foreground/50 font-bold uppercase tracking-wider">Total</span>
-              <span className="text-4xl font-black text-foreground tracking-tight font-mono tabular-nums leading-none">
+            {/* Total — hero display */}
+            <div className="pt-4 border-t border-border/8 flex items-baseline justify-between gap-3">
+              <span className="text-[11px] text-muted-foreground/45 font-bold uppercase tracking-[0.12em]">Total</span>
+              <span className="text-display font-black text-foreground tracking-tighter font-mono tabular-nums leading-none">
                 {formatMoney(totals.total)}
               </span>
             </div>
           </div>
 
           {!hasItems && (
-            <p className="text-[10px] text-muted-foreground/30 text-center font-medium">
+            <p className="text-[10px] text-muted-foreground/25 text-center font-medium">
               Escanee o busque productos para comenzar
             </p>
           )}
@@ -705,33 +705,33 @@ const SalesView = React.memo(function SalesView() {
       {/* ===== SALE COMPLETE OVERLAY ===== */}
       {saleComplete && (
         <div
-          className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/40 backdrop-blur-md"
           onClick={dismissSaleComplete}
           role="alert"
           aria-live="assertive"
         >
-          <div className="bg-card rounded-3xl border border-success/20 shadow-2xl px-10 py-10 text-center max-w-sm animate-scale-in">
+          <div className="bg-card rounded-3xl border border-success/15 shadow-2xl shadow-success/5 px-12 py-12 text-center max-w-sm animate-scale-in">
             {/* Success icon */}
-            <div className="size-20 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-5 ring-4 ring-success/8 success-pulse">
-              <Check className="size-10 text-success" strokeWidth={2.5} />
+            <div className="size-24 rounded-full bg-success/8 flex items-center justify-center mx-auto mb-6 ring-4 ring-success/5 success-pulse">
+              <Check className="size-12 text-success" strokeWidth={2.5} />
             </div>
-            <p className="text-lg font-extrabold text-foreground mb-2 uppercase tracking-wide">Venta Completada</p>
-            <p className="text-5xl font-black text-pos-checkout font-mono tabular-nums mb-3 leading-none">{formatMoney(saleComplete.total)}</p>
+            <p className="text-lg font-extrabold text-foreground mb-3 uppercase tracking-wide">Venta Completada</p>
+            <p className="text-display font-black text-foreground font-mono tabular-nums mb-4 leading-none tracking-tighter">{formatMoney(saleComplete.total)}</p>
             {saleComplete.change > 0 && (
-              <p className="text-sm font-semibold text-muted-foreground mb-2">
+              <p className="text-sm font-semibold text-muted-foreground mb-3">
                 Cambio: <span className="text-foreground font-bold tabular-nums">{formatMoney(saleComplete.change)}</span>
               </p>
             )}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/30 mt-2">
-              <span className="text-xs font-semibold text-muted-foreground/60">
+            <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-muted/20 border border-border/10 mt-2">
+              <span className="text-xs font-semibold text-muted-foreground/50">
                 {saleComplete.method === 'cash' ? 'Efectivo' : saleComplete.method === 'card' ? 'Tarjeta' : saleComplete.method === 'transfer' ? 'Transferencia' : 'Mixto'}
               </span>
             </div>
             {/* Auto-dismiss progress bar */}
-            <div className="mt-6 h-0.5 bg-muted/20 rounded-full overflow-hidden">
-              <div className="h-full bg-success/30 rounded-full progress-dismiss" style={{ '--dismiss-duration': '4s' } as any} />
+            <div className="mt-7 h-0.5 bg-muted/15 rounded-full overflow-hidden">
+              <div className="h-full bg-success/25 rounded-full progress-dismiss" style={{ '--dismiss-duration': '4s' } as any} />
             </div>
-            <p className="text-[11px] text-muted-foreground/30 mt-3 font-medium">
+            <p className="text-[11px] text-muted-foreground/25 mt-3 font-medium">
               Toque para continuar
             </p>
           </div>

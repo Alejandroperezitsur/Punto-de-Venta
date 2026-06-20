@@ -137,8 +137,10 @@ const Login = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1, ease: [0.34, 1.56, 0.64, 1] }}
-            className="size-[7rem] rounded-[1.75rem] bg-primary/10 border border-primary/12 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-primary/8 ring-1 ring-primary/8 backdrop-blur-sm"
+            className="relative size-[7rem] rounded-[1.75rem] bg-primary/10 border border-primary/12 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-primary/8 ring-1 ring-primary/8 backdrop-blur-sm"
           >
+            {/* Animated glow ring */}
+            <div className="absolute inset-0 rounded-[1.75rem] animate-pulse opacity-30" style={{ boxShadow: '0 0 40px 8px hsl(var(--primary) / 0.12)' }} />
             {branding.logo ? (
               <img src={branding.logo} alt="Logo" className="w-full h-full object-contain p-4" />
             ) : (
@@ -147,10 +149,10 @@ const Login = () => {
           </motion.div>
 
           {/* Business name */}
-          <h2 className="text-[2.75rem] font-black tracking-tight mb-3 text-foreground leading-[1.1]">
+          <h2 className="text-[3rem] font-black tracking-tighter mb-3 text-foreground leading-[1.1]">
             {branding.businessName}
           </h2>
-          <p className="text-xs text-primary/70 font-bold tracking-[0.2em] uppercase mb-8">
+          <p className="text-xs text-primary/60 font-bold tracking-[0.25em] uppercase mb-10">
             {branding.businessSubtitle}
           </p>
 
@@ -160,21 +162,21 @@ const Login = () => {
           </p>
 
           {/* Feature pills — frosted glass */}
-          <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
+          <div className="grid grid-cols-2 gap-3.5 w-full max-w-sm">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.label}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-card/40 backdrop-blur-md border border-border/15 hover:border-primary/20 hover:-translate-y-0.5 transition-all cursor-default group"
+                className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-card/30 backdrop-blur-md border border-border/10 hover:border-primary/15 hover:-translate-y-0.5 transition-all cursor-default group hover-lift"
               >
-                <div className="size-8 rounded-lg bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/12 transition-colors">
-                  <f.icon className="size-3.5 text-primary/70" />
+                <div className="size-9 rounded-xl bg-primary/6 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                  <f.icon className="size-3.5 text-primary/60" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs font-bold text-foreground/80">{f.label}</p>
-                  <p className="text-[10px] text-muted-foreground/50 font-medium">{f.desc}</p>
+                  <p className="text-xs font-bold text-foreground/75">{f.label}</p>
+                  <p className="text-[10px] text-muted-foreground/40 font-medium">{f.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -211,9 +213,9 @@ const Login = () => {
           </div>
 
           {/* Login card — premium surface */}
-          <div className="relative bg-card/80 backdrop-blur-sm border border-border/20 rounded-[1.5rem] p-7 md:p-9 shadow-2xl shadow-black/[0.06]">
-            {/* Subtle gradient top accent */}
-            <div className="absolute top-0 left-6 right-6 h-px rounded-full" style={{ background: 'var(--gradient-primary)', opacity: 0.3 }} />
+          <div className="relative bg-card/80 backdrop-blur-sm border border-border/15 rounded-[1.5rem] p-7 md:p-9 shadow-2xl shadow-black/[0.04]">
+            {/* Gradient top accent */}
+            <div className="absolute top-0 left-8 right-8 h-px rounded-full" style={{ background: 'var(--gradient-primary)', opacity: 0.25 }} />
 
             <div className="mb-8 hidden lg:block">
               <h3 className="text-[1.35rem] font-bold text-foreground tracking-tight">Bienvenido de vuelta</h3>
@@ -252,11 +254,11 @@ const Login = () => {
                       Usuario
                     </label>
                     <div className={cn(
-                      'flex items-center gap-3 px-4 h-14 rounded-xl border border-border/30 bg-background/40 transition-all duration-150',
-                      'hover:border-border/50 hover:bg-background/60',
-                      'focus-within:border-primary/40 focus-within:bg-background/80 focus-within:ring-2 focus-within:ring-primary/8 focus-within:shadow-sm focus-within:shadow-primary/5',
+                      'flex items-center gap-3 px-4 h-[3.5rem] rounded-xl border border-border/25 bg-background/30 transition-all duration-200',
+                      'hover:border-border/40 hover:bg-background/50',
+                      'focus-within:border-primary/35 focus-within:bg-background/70 focus-within:ring-2 focus-within:ring-primary/8 focus-within:shadow-sm focus-within:shadow-primary/5',
                     )}>
-                      <User className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                      <User className="w-4 h-4 text-muted-foreground/35 shrink-0" />
                       <input
                         type="text"
                         placeholder="admin"
@@ -264,7 +266,7 @@ const Login = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         autoComplete="username"
                         autoFocus
-                        className="flex-1 bg-transparent border-none text-foreground font-medium text-sm placeholder:text-muted-foreground/30 focus:outline-none focus:ring-0"
+                        className="flex-1 bg-transparent border-none text-foreground font-medium text-sm placeholder:text-muted-foreground/25 focus:outline-none focus:ring-0"
                       />
                     </div>
                   </div>
@@ -274,9 +276,9 @@ const Login = () => {
                       Contraseña
                     </label>
                     <div className={cn(
-                      'flex items-center gap-3 px-4 h-14 rounded-xl border border-border/30 bg-background/40 transition-all duration-150',
-                      'hover:border-border/50 hover:bg-background/60',
-                      'focus-within:border-primary/40 focus-within:bg-background/80 focus-within:ring-2 focus-within:ring-primary/8 focus-within:shadow-sm focus-within:shadow-primary/5',
+                      'flex items-center gap-3 px-4 h-[3.5rem] rounded-xl border border-border/25 bg-background/30 transition-all duration-200',
+                      'hover:border-border/40 hover:bg-background/50',
+                      'focus-within:border-primary/35 focus-within:bg-background/70 focus-within:ring-2 focus-within:ring-primary/8 focus-within:shadow-sm focus-within:shadow-primary/5',
                     )}>
                       <Lock className="w-4 h-4 text-muted-foreground/40 shrink-0" />
                       <input
@@ -322,7 +324,8 @@ const Login = () => {
                       'w-full h-14 mt-3 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2.5 active:scale-[0.97]',
                       'text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-0.5',
                       'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg',
-                      'touch-target',
+                      'touch-target relative overflow-hidden',
+                      !loading && 'btn-shimmer',
                     )}
                     style={{ background: 'var(--gradient-primary)' }}
                   >

@@ -9,6 +9,8 @@ const variants = {
   info: 'bg-info/8 text-info border-info/15',
   neutral: 'bg-muted/60 text-muted-foreground border-border/50',
   premium: 'bg-primary/10 text-primary border-primary/20 shadow-sm shadow-primary/5',
+  'outline-glow': 'bg-transparent text-primary border-primary/40 shadow-glow',
+  'dot-only': 'border-0 bg-transparent p-0',
 };
 
 const sizes = {

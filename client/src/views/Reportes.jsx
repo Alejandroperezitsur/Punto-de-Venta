@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { DataCard } from '../components/ui/DataCard';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { Skeleton } from '../components/ui/Skeleton';
@@ -130,26 +131,26 @@ const MyBusinessView = () => {
     }
 
     return (
-            <div className="max-w-4xl mx-auto flex flex-col justify-between gap-8">
-            <div className="text-center py-10">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-5">Lo que ganaste hoy para ti</p>
+            <div className="max-w-4xl mx-auto flex flex-col justify-between gap-10 animate-fade-slide-in">
+            <div className="text-center py-12">
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.25em] mb-6">Lo que ganaste hoy para ti</p>
                 <div className="flex items-center justify-center gap-4">
-                    <span className="text-8xl font-black tracking-tight text-foreground">
+                    <span className="text-display font-black tracking-tighter text-foreground tabular-nums">
                         ${data.gain.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </span>
                 </div>
-                <p className="mt-5 text-base font-medium text-muted-foreground/70">¡Buen trabajo! Es un día sólido.</p>
+                <p className="mt-6 text-sm font-medium text-muted-foreground/60">Buen trabajo. Es un dı́a sólido.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 border-y border-border/15">
-                <div className="text-center md:text-right md:pr-12 md:border-r md:border-border/15">
-                    <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em] mb-3">Efectivo en caja</p>
-                    <p className="text-5xl font-extrabold text-foreground tracking-tight">${data.cash.toLocaleString()}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-10 border-y border-border/10">
+                <div className="text-center md:text-right md:pr-12 md:border-r md:border-border/10">
+                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-3">Efectivo en caja</p>
+                    <p className="text-5xl font-black text-foreground tracking-tighter tabular-nums">${data.cash.toLocaleString()}</p>
                 </div>
                 <div className="text-center md:text-left md:pl-12 flex flex-col items-center md:items-start">
-                    <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em] mb-3">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
+                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-3">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
                     <div className="flex items-center gap-3">
-                        <p className="text-5xl font-extrabold text-foreground uppercase tracking-tight">{data.status}</p>
+                        <p className="text-5xl font-black text-foreground uppercase tracking-tight">{data.status}</p>
                         {data.status === 'mejor' ? (
                             <ArrowUpRight className="h-8 w-8 text-success stroke-[3]" />
                         ) : (
@@ -160,18 +161,18 @@ const MyBusinessView = () => {
             </div>
 
             <div className="space-y-4 py-10">
-                <Card className="flex items-center gap-4 p-5 border border-primary/8 rounded-2xl hover:border-primary/20 hover:shadow-sm transition-all" variant="dashboard">
-                    <div className="size-12 bg-primary/6 rounded-xl flex items-center justify-center shrink-0">
-                        <Sun className="size-5 text-primary" />
+                <Card className="flex items-center gap-4 p-5 border border-border/10 rounded-2xl hover:border-primary/15 hover:shadow-sm transition-all metric-card">
+                    <div className="size-12 bg-primary/5 rounded-xl flex items-center justify-center shrink-0">
+                        <Sun className="size-5 text-primary/70" />
                     </div>
                     <p className="text-sm font-semibold leading-tight text-foreground">
-                        Tu mejor hora fue a las 2:00 PM. Mañana podrías vender más si refuerzas esa hora.
+                        Tu mejor hora fue a las 2:00 PM. Mañana podrı́as vender más si refuerzas esa hora.
                     </p>
                 </Card>
 
-                <Card className="flex items-center gap-4 p-5 border border-warning/8 rounded-2xl hover:border-warning/20 hover:shadow-sm transition-all" variant="dashboard">
-                    <div className="size-12 bg-warning/6 rounded-xl flex items-center justify-center shrink-0">
-                        <Coffee className="size-5 text-warning" />
+                <Card className="flex items-center gap-4 p-5 border border-border/10 rounded-2xl hover:border-warning/15 hover:shadow-sm transition-all metric-card">
+                    <div className="size-12 bg-warning/5 rounded-xl flex items-center justify-center shrink-0">
+                        <Coffee className="size-5 text-warning/70" />
                     </div>
                     <p className="text-sm font-semibold leading-tight text-foreground">
                         Tu producto estrella hoy fue <span className="underline decoration-2">{data.topProduct}</span>.

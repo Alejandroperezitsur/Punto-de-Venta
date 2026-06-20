@@ -1,9 +1,10 @@
 ﻿import React, { useEffect, useState, useMemo } from 'react';
-import { Sun, Moon, Bell, Menu, Clock, Search, Command } from 'lucide-react';
+import { Sun, Moon, Bell, Menu, Search, Command, ChevronRight } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserStore } from '../../store/userStore';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { ConnectionStatus } from '../common/ConnectionStatus';
+import { StatusIndicator } from '../ui/StatusIndicator';
 import { cn } from '../../utils/cn';
 
 const ROUTE_TITLES = {
@@ -25,6 +26,25 @@ const ROUTE_TITLES = {
   '/admin/enterprise': 'Reportes Enterprise',
 };
 
+const ROUTE_BREADCRUMB = {
+  '/ventas': ['POS', 'Ventas'],
+  '/productos': ['Inventario', 'Productos'],
+  '/clientes': ['CRM', 'Clientes'],
+  '/caja': ['Operaciones', 'Caja'],
+  '/reportes': ['Analytics', 'Reportes'],
+  '/usuarios': ['Admin', 'Usuarios'],
+  '/audits': ['Admin', 'Auditoría'],
+  '/config': ['Sistema', 'Config'],
+  '/branding': ['Sistema', 'Branding'],
+  '/insights': ['Analytics', 'AI Insights'],
+  '/billing': ['Sistema', 'Suscripción'],
+  '/backups': ['Sistema', 'Respaldos'],
+  '/soporte': ['Ayuda', 'Soporte'],
+  '/about': ['Ayuda', 'Acerca de'],
+  '/admin/metrics': ['Admin', 'Métricas'],
+  '/admin/enterprise': ['Admin', 'Enterprise'],
+};
+
 function useCurrentTime() {
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -41,10 +61,9 @@ export const Topbar = React.memo(function Topbar() {
   const [scrolled, setScrolled] = useState(false);
   const currentTime = useCurrentTime();
   const location = useLocation();
-  const navigate = useNavigate();
 
-  const pageTitle = useMemo(() => {
-    return ROUTE_TITLES[location.pathname] || 'POS Pro';
+  const breadcrumb = useMemo(() => {
+    return ROUTE_BREADCRUMB[location.pathname] || ['POS', 'Inicio'];
   }, [location.pathname]);
 
   useEffect(() => {
@@ -79,28 +98,27 @@ export const Topbar = React.memo(function Topbar() {
     return () => main.removeEventListener('scroll', onScroll);
   }, []);
 
-  const timeStr = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const dateStr = currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const timeStr = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const dateStrShort = currentTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
 
   return (
     <header
       role="banner"
       className={cn(
-        'h-[var(--header-height)] flex items-center justify-between px-4 lg:px-5 sticky top-0 z-[var(--z-sticky)] transition-all duration-200',
+        'h-[var(--header-height)] flex items-center justify-between px-4 lg:px-5 sticky top-0 z-[var(--z-sticky)] transition-all duration-300',
         scrolled
-          ? 'bg-background/85 backdrop-blur-xl shadow-sm shadow-black/[0.03]'
-          : 'bg-background/60 backdrop-blur-sm',
+          ? 'bg-background/90 backdrop-blur-xl shadow-[0_1px_3px_0_rgb(0_0_0/0.03)]'
+          : 'bg-background/70 backdrop-blur-md',
       )}
     >
-      {/* Bottom gradient accent line */}
+      {/* Hairline bottom border with gradient */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent 5%, hsl(var(--primary) / 0.12) 30%, hsl(var(--accent) / 0.08) 70%, transparent 95%)' }}
+        className="absolute bottom-0 left-0 right-0 h-px opacity-60"
+        style={{ background: 'linear-gradient(90deg, transparent 2%, hsl(var(--border) / 0.4) 20%, hsl(var(--border) / 0.6) 50%, hsl(var(--border) / 0.4) 80%, transparent 98%)' }}
       />
 
-      {/* Left: Menu + Page title + Cash status */}
-      <div className="flex items-center gap-3 min-w-0">
+      {/* Left: Menu + Breadcrumb + Cash status */}
+      <div className="flex items-center gap-2.5 min-w-0">
         <button
           className="lg:hidden p-2 -ml-1 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors touch-target"
           onClick={toggleSidebar}
@@ -109,53 +127,55 @@ export const Topbar = React.memo(function Topbar() {
           <Menu className="w-4 h-4" />
         </button>
 
-        {/* Page title */}
-        <div className="hidden sm:flex items-center gap-2 min-w-0">
-          <h1 className="text-sm font-bold text-foreground truncate leading-tight">{pageTitle}</h1>
-        </div>
+        {/* Breadcrumb-style page path */}
+        <nav className="hidden sm:flex items-center gap-1 min-w-0" aria-label="Breadcrumb">
+          <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider">{breadcrumb[0]}</span>
+          <ChevronRight className="size-3 text-muted-foreground/30 shrink-0" />
+          <span className="text-sm font-bold text-foreground truncate">{breadcrumb[1]}</span>
+        </nav>
 
-        {/* Cash register status — compact pill */}
-        {cashStatus ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/8 text-success text-[10px] font-bold border border-success/10 shadow-xs shadow-success/5">
-            <span className="relative flex size-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-40" />
-              <span className="relative inline-flex rounded-full size-1.5 bg-success" />
-            </span>
-            <span className="hidden sm:inline">Caja Abierta</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-danger/6 text-danger text-[10px] font-bold border border-danger/10 shadow-xs shadow-danger/3">
-            <span className="w-1.5 h-1.5 rounded-full bg-danger/60" />
-            <span className="hidden sm:inline">Caja Cerrada</span>
+        {/* Cash register status */}
+        {cashStatus !== null && (
+          <div className="hidden md:block ml-1">
+            <StatusIndicator
+              variant={cashStatus ? 'live' : 'idle'}
+              label={cashStatus ? 'Caja Abierta' : 'Caja Cerrada'}
+              size="sm"
+              pulse={!!cashStatus}
+            />
           </div>
         )}
       </div>
 
-      {/* Center: Clock */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-        <Clock className="size-3.5 text-primary/35" />
-        <span className="tabular-nums font-bold text-foreground text-sm tracking-tight">{timeStr}</span>
-        <span className="hidden lg:inline text-muted-foreground/40 text-xs font-medium">{dateStrShort}</span>
+      {/* Center: Refined clock with date pill */}
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted/25 border border-border/10">
+          <span className="tabular-nums font-bold text-foreground text-[13px] tracking-tight">{timeStr}</span>
+          <span className="w-px h-3 bg-border/30" />
+          <span className="text-muted-foreground/60 text-[11px] font-medium">{dateStrShort}</span>
+        </div>
       </div>
 
-      {/* Right: Controls */}
-      <div className="flex items-center gap-1">
-        {/* Quick search trigger (Cmd+K) */}
+      {/* Right: Grouped controls */}
+      <div className="flex items-center gap-0.5">
+        {/* Search trigger (Cmd+K) */}
         <button
           onClick={() => document.dispatchEvent(new CustomEvent('trigger-command-palette'))}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border/25 bg-muted/20 text-muted-foreground/50 hover:text-foreground hover:border-border/40 hover:bg-muted/30 transition-all text-xs font-medium touch-target"
+          className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-all touch-target"
           aria-label="Buscar (Cmd+K)"
         >
           <Search className="size-3.5" />
-          <span className="hidden xl:inline">Buscar...</span>
-          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold bg-muted/60 px-1.5 py-0.5 rounded border border-border/20">
+          <span className="hidden xl:inline text-xs font-medium">Buscar...</span>
+          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/40 bg-muted/40 px-1.5 py-0.5 rounded border border-border/15">
             <Command className="size-2.5" />K
           </kbd>
         </button>
 
-        <div className="w-px h-4 bg-border/25 mx-1.5" />
+        <div className="w-px h-4 bg-border/15 mx-1" />
 
         <ConnectionStatus />
+
+        <div className="w-px h-4 bg-border/15 mx-1" />
 
         <button
           onClick={toggleDark}
