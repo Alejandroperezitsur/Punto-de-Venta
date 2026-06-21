@@ -1,24 +1,30 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
-import { Select } from '../components/ui/Select';
 import { Table } from '../components/ui/Table';
 import { useToast } from '../components/ui/Toast';
-import { Skeleton } from '../components/ui/Skeleton';
-import { EmptyState } from '../components/ui/EmptyState';
 import { ViewContainer } from '../components/layout/ViewContainer';
 import { ViewHeader } from '../components/layout/ViewHeader';
 import { formatMoney } from '../utils/format';
-import { ClipboardList, Search, Calendar, User, ArrowUpDown, Filter } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ClipboardList, Search, ArrowUpDown } from 'lucide-react';
+import { cn } from '../utils/cn';
+
+const FILTER_MAP = {
+  'Todos': null,
+  'Ventas': ['sale_create', 'sale_delete'],
+  'Usuarios': ['user_create', 'user_update', 'user_delete'],
+  'Caja': ['cash_open', 'cash_close', 'cash_withdraw', 'cash_deposit'],
+  'Config': ['settings_update'],
+};
 
 const AuditsView = () => {
   const [audits, setAudits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortDir, setSortDir] = useState('desc');
+  const [activeFilter, setActiveFilter] = useState('Todos');
 
   const loadAudits = async () => {
     setLoading(true);
@@ -38,11 +44,14 @@ const AuditsView = () => {
 
   const filtered = audits.filter(a => {
     const q = search.toLowerCase();
-    return (
+    const matchesSearch = (
       a.action?.toLowerCase().includes(q) ||
       a.entity_type?.toLowerCase().includes(q) ||
       String(a.user_id).includes(q)
     );
+    const filterActions = FILTER_MAP[activeFilter];
+    const matchesFilter = !filterActions || filterActions.includes(a.action);
+    return matchesSearch && matchesFilter;
   });
 
   const sorted = [...filtered].sort((a, b) => {
@@ -88,14 +97,23 @@ const AuditsView = () => {
 
       {/* Filter Chips */}
       <div className="flex flex-wrap gap-2">
-        {['Todos', 'Ventas', 'Usuarios', 'Caja', 'Config'].map(chip => (
-          <button key={chip} className="px-3 py-1.5 text-xs font-medium rounded-full backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] hover:border-primary/20 transition-colors">
+        {Object.keys(FILTER_MAP).map(chip => (
+          <button
+            key={chip}
+            onClick={() => setActiveFilter(chip)}
+            className={cn(
+              'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
+              activeFilter === chip
+                ? 'bg-primary/10 border-primary/25 text-primary'
+                : 'bg-surface-glass/40 border-border/15 text-muted-foreground hover:border-primary/20 hover:text-foreground'
+            )}
+          >
             {chip}
           </button>
         ))}
       </div>
 
-      <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
+      <Card variant="glass" className="p-0 overflow-hidden">
         <Table
           columns={[
             {
@@ -130,8 +148,7 @@ const AuditsView = () => {
               title: 'Usuario',
               render: (row) => (
                 <span className="inline-flex items-center gap-1">
-                  <User className="h-3 w-3" />
-                  {row.user_id}
+                  <span className="size-5 rounded-full bg-primary/8 flex items-center justify-center text-[9px] font-bold text-primary">{row.user_id}</span>
                 </span>
               ),
             },

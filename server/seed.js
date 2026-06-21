@@ -15,12 +15,23 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
+    // Create default reseller first (required by Store foreign key)
+    const defaultReseller = await prisma.reseller.upsert({
+        where: { id: 1 },
+        update: {},
+        create: {
+            name: 'Default Reseller',
+            domain: 'default'
+        }
+    });
+
     const defaultStore = await prisma.store.upsert({
         where: { id: 1 },
         update: {},
         create: {
             name: 'Mi Tienda Principal',
-            active: 1
+            active: 1,
+            reseller_id: 1
         },
     });
 

@@ -31,7 +31,7 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'w-full min-h-[5.5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
+        'w-full min-h-[4.5rem] lg:min-h-[5.5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
         hasItems && !isProcessing
           ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-0.5 success-pulse'
           : 'bg-muted/25 text-muted-foreground/20 cursor-not-allowed',
@@ -707,7 +707,7 @@ const SalesView = React.memo(function SalesView() {
       {/* ===== SALE COMPLETE OVERLAY ===== */}
       {saleComplete && (
         <div
-          className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/40 backdrop-blur-md"
+          className="fixed inset-0 z-500 flex items-center justify-center bg-black/40 backdrop-blur-md"
           onClick={dismissSaleComplete}
           role="alert"
           aria-live="assertive"
@@ -831,7 +831,7 @@ const SalesView = React.memo(function SalesView() {
 
       {/* Cash Gate */}
       {cashOpen === false && (
-        <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-500 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-card rounded-2xl border border-border/30 p-8 text-center max-w-sm shadow-2xl animate-scale-in">
             <div className="size-16 rounded-2xl bg-danger/8 flex items-center justify-center mx-auto mb-5">
               <Lock className="size-8 text-danger" />
@@ -840,13 +840,13 @@ const SalesView = React.memo(function SalesView() {
             <p className="text-sm text-muted-foreground/60 mb-6">
               Debes abrir caja antes de realizar ventas. Ve a la secci&oacute;n de Caja para aperturar.
             </p>
-            <a
-              href="#/caja"
+            <button
+              onClick={() => { window.location.hash = '#/caja'; }}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
             >
               <Wallet className="size-4" />
               Abrir Caja
-            </a>
+            </button>
           </div>
         </div>
       )}

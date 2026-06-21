@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, memo } from 'react';
+﻿import React, { useEffect, useRef, memo } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useLocation } from 'react-router-dom';
@@ -26,7 +26,7 @@ const MainLayout = memo(function MainLayout({ children }) {
 
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[var(--z-overlay)] lg:hidden transition-opacity duration-300"
+            className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-500 lg:hidden transition-opacity duration-300"
             onClick={toggleSidebar}
             onKeyDown={(e) => { if (e.key === 'Escape') toggleSidebar(); }}
             aria-hidden="true"
@@ -34,7 +34,7 @@ const MainLayout = memo(function MainLayout({ children }) {
         )}
 
         <div className={cn(
-          'h-full shrink-0 transition-transform duration-200 ease-out z-[var(--z-sticky)]',
+          'h-full shrink-0 transition-transform duration-200 ease-out z-200',
           'max-lg:fixed max-lg:left-0 max-lg:top-0',
           isSidebarOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full',
         )}>
@@ -47,7 +47,7 @@ const MainLayout = memo(function MainLayout({ children }) {
             ref={mainRef}
             className={cn(
               'flex-1 overflow-y-auto',
-              isPOS ? 'p-2 lg:p-3' : 'p-4 md:p-5 lg:p-6',
+              isPOS ? 'p-2 lg:p-3' : 'p-4 md:p-5 lg:p-6 pb-8 md:pb-10',
             )}
             role="main"
           >

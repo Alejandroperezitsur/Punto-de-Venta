@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
 import { KpiCard } from '../components/ui/KpiCard';
@@ -7,8 +7,8 @@ import { ViewHeader } from '../components/layout/ViewHeader';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
+import { Modal } from '../components/ui/Modal';
 import { useToast } from '../components/ui/Toast';
-import { Skeleton } from '../components/ui/Skeleton';
 import { Table } from '../components/ui/Table';
 import { Select } from '../components/ui/Select';
 import { motion } from 'framer-motion';
@@ -147,6 +147,14 @@ const CashControlView = () => {
         }
     };
 
+    const resetCloseModal = () => {
+        setIsClosing(false);
+        setCloseStep('input');
+        setCountedCash('');
+        setCloseResult(null);
+        setCloseError('');
+    };
+
     return (
         <ViewContainer maxWidth="md">
             <ViewHeader title="Control de Caja" icon={<Wallet className="size-5 text-primary" />}>
@@ -159,12 +167,12 @@ const CashControlView = () => {
             </ViewHeader>
 
             {loading ? (
-                <Card className="p-12 text-center text-muted-foreground">
+                <Card variant="glass" className="p-12 text-center text-muted-foreground">
                     Cargando estado de caja...
                 </Card>
             ) : !session ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <Card className="p-8 space-y-6 border-l-4 border-l-warning rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                    <Card variant="glass" className="p-8 space-y-6 border-l-4 border-l-warning relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-warning to-warning/40" />
                         <div className="flex items-center gap-4">
                             <div className="p-3.5 bg-warning/10 text-warning rounded-xl">
@@ -196,7 +204,7 @@ const CashControlView = () => {
             ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                     {/* Status Banner */}
-                    <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                    <Card variant="glass" className="p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-success to-success/40" />
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
@@ -225,8 +233,8 @@ const CashControlView = () => {
                         </div>
                     )}
 
-                    {/* Movement Form - Glass Panel */}
-                    <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden">
+                    {/* Movement Form */}
+                    <Card variant="glass" className="p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                         <h4 className="font-semibold mb-4 flex items-center gap-2.5">
                             <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -269,7 +277,7 @@ const CashControlView = () => {
                     </Card>
 
                     {/* Movements History */}
-                    <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
+                    <Card variant="glass" className="p-6">
                         <div className="flex items-center gap-2.5 mb-4">
                             <div className="size-7 rounded-lg bg-muted/30 flex items-center justify-center">
                                 <History className="size-3.5 text-muted-foreground" />
@@ -308,139 +316,122 @@ const CashControlView = () => {
                 </motion.div>
             )}
 
-            {isClosing && (
-                <div
-                    className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[var(--z-modal)]"
-                    onKeyDown={(e) => { if (e.key === 'Escape') { setIsClosing(false); setCloseStep('input'); } }}
-                >
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-white/[0.06] rounded-2xl p-6 max-w-md w-full shadow-2xl relative backdrop-blur-md bg-surface-glass/40 overflow-hidden">
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-danger to-danger/40" />
-                        <button
-                            onClick={() => { setIsClosing(false); setCloseStep('input'); }}
-                            className="absolute top-4 right-4 text-xs text-muted-foreground hover:text-foreground font-semibold"
-                        >
-                            CANCELAR
-                        </button>
+            {/* Close Cash Modal */}
+            <Modal
+                open={isClosing}
+                onClose={resetCloseModal}
+                title={closeStep === 'input' ? '¿Cuánto dinero hay en el cajón?' : 'Resultado del Cierre'}
+                size="sm"
+            >
+                {closeStep === 'input' ? (
+                    <div className="text-center space-y-6">
+                        <p className="text-sm text-muted-foreground">Cuenta tu efectivo físicamente antes de continuar.</p>
 
-                        {closeStep === 'input' ? (
-                            <div className="text-center space-y-6">
-                                <h2 className="text-xl font-bold text-foreground">¿Cuánto dinero hay en el cajón?</h2>
-                                <p className="text-sm text-muted-foreground">Cuenta tu efectivo físicamente antes de continuar.</p>
-
-                                {closeError && (
-                                    <div className="bg-danger/10 border border-danger/15 rounded-xl text-danger font-semibold p-3 text-sm">
-                                        {closeError}
-                                    </div>
-                                )}
-
-                                <div className="relative">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-foreground/50">$</span>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        autoFocus
-                                        className="w-full h-14 bg-muted/50 border-2 border-border/30 rounded-xl text-2xl font-bold text-center focus:outline-none focus:border-primary/40 transition-all"
-                                        value={countedCash}
-                                        onChange={(e) => setCountedCash(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') handleCloseSubmit(); }}
-                                        placeholder="0"
-                                    />
-                                </div>
-
-                                <Button
-                                    onClick={handleCloseSubmit}
-                                    disabled={!countedCash || closeLoading}
-                                    isLoading={closeLoading}
-                                    size="lg"
-                                    className="w-full font-bold"
-                                >
-                                    VERIFICAR Y CERRAR CAJA
-                                </Button>
+                        {closeError && (
+                            <div className="bg-danger/10 border border-danger/15 rounded-xl text-danger font-semibold p-3 text-sm">
+                                {closeError}
                             </div>
-                        ) : closeResult ? (
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-6">
-                                {Math.abs(closeResult.difference) < 0.01 ? (
-                                    <>
-                                        <div className="size-16 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto">
-                                            <CheckCircle2 className="size-8" />
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-foreground">Caja Cerrada</h2>
-                                        <p className="text-sm text-muted-foreground">
-                                            Todo cuadra perfectamente. Diferencia: <span className="text-success font-bold">$0.00</span>
-                                        </p>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="size-16 bg-warning/10 text-warning rounded-full flex items-center justify-center mx-auto">
-                                            <AlertCircle className="size-8" />
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-foreground">Discrepancia Detectada</h2>
-                                        <p className="text-sm text-muted-foreground">
-                                            {closeResult.difference > 0 ? (
-                                                <>Sobran <span className="text-success font-bold">${closeResult.difference.toFixed(2)}</span></>
-                                            ) : (
-                                                <>Faltan <span className="text-danger font-bold">${Math.abs(closeResult.difference).toFixed(2)}</span></>
-                                            )}
-                                            <br />
-                                            <span className="text-xs">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
-                                        </p>
-                                    </>
-                                )}
+                        )}
 
-                                <div className="pt-4 border-t border-border">
-                                    <Button
-                                        onClick={() => { setIsClosing(false); setCloseStep('input'); }}
-                                        className="w-full"
-                                    >
-                                        VOLVER AL CONTROL DE CAJA
-                                    </Button>
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-foreground/50">$</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                autoFocus
+                                className="w-full h-14 bg-muted/50 border-2 border-border/30 rounded-xl text-2xl font-bold text-center focus:outline-none focus:border-primary/40 transition-all"
+                                value={countedCash}
+                                onChange={(e) => setCountedCash(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleCloseSubmit(); }}
+                                placeholder="0"
+                            />
+                        </div>
+
+                        <Button
+                            onClick={handleCloseSubmit}
+                            disabled={!countedCash || closeLoading}
+                            isLoading={closeLoading}
+                            size="lg"
+                            className="w-full font-bold"
+                        >
+                            VERIFICAR Y CERRAR CAJA
+                        </Button>
+                    </div>
+                ) : closeResult ? (
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-6">
+                        {Math.abs(closeResult.difference) < 0.01 ? (
+                            <>
+                                <div className="size-16 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto">
+                                    <CheckCircle2 className="size-8" />
                                 </div>
-                            </motion.div>
-                        ) : null}
-                    </motion.div>
-                </div>
-            )}
+                                <h2 className="text-2xl font-bold text-foreground">Caja Cerrada</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Todo cuadra perfectamente. Diferencia: <span className="text-success font-bold">$0.00</span>
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <div className="size-16 bg-warning/10 text-warning rounded-full flex items-center justify-center mx-auto">
+                                    <AlertCircle className="size-8" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-foreground">Discrepancia Detectada</h2>
+                                <p className="text-sm text-muted-foreground">
+                                    {closeResult.difference > 0 ? (
+                                        <>Sobran <span className="text-success font-bold">${closeResult.difference.toFixed(2)}</span></>
+                                    ) : (
+                                        <>Faltan <span className="text-danger font-bold">${Math.abs(closeResult.difference).toFixed(2)}</span></>
+                                    )}
+                                    <br />
+                                    <span className="text-xs">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
+                                </p>
+                            </>
+                        )}
 
-            {showHistory && (
-                <div
-                    className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100]"
-                    onKeyDown={(e) => { if (e.key === 'Escape') setShowHistory(false); }}
-                >
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-white/[0.06] rounded-2xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-2xl backdrop-blur-md bg-surface-glass/40">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold">Historial de Cierres</h2>
-                            <Button variant="ghost" onClick={() => setShowHistory(false)}>
-                                Cerrar
+                        <div className="pt-4 border-t border-border">
+                            <Button
+                                onClick={resetCloseModal}
+                                className="w-full"
+                            >
+                                VOLVER AL CONTROL DE CAJA
                             </Button>
                         </div>
-                        <Table
-                            data={historyData}
-                            searchable={false}
-                            pageSize={historyData.length || 10}
-                            striped={false}
-                            density="compact"
-                            emptyTitle="No hay cierres registrados."
-                            columns={[
-                                { key: 'closed_at', title: 'Fecha', render: (h) => new Date(h.closed_at).toLocaleDateString() },
-                                { key: 'user', title: 'Usuario' },
-                                { key: 'expected_cash', title: 'Esperado', className: 'text-right', render: (h) => `$${h.expected_cash.toFixed(2)}` },
-                                { key: 'counted_cash', title: 'Contado', className: 'text-right', render: (h) => `$${h.counted_cash.toFixed(2)}` },
-                                { key: 'difference', title: 'Diferencia', className: 'text-right font-bold', render: (h) => (
-                                    <span className={Math.abs(h.difference) < 0.01 ? 'text-success' : 'text-danger'}>
-                                        {h.difference > 0 ? '+' : ''}{h.difference.toFixed(2)}
-                                    </span>
-                                )},
-                                { key: 'status', title: 'Estado', className: 'text-center', render: (h) => (
-                                    <Badge variant={h.status === 'closed' ? 'success' : 'danger'} size="sm">
-                                        {h.status === 'closed' ? 'OK' : 'DISCREPANCIA'}
-                                    </Badge>
-                                )},
-                            ]}
-                            rowKey={(h) => h.id}
-                        />
                     </motion.div>
-                </div>
-            )}
+                ) : null}
+            </Modal>
+
+            {/* History Modal */}
+            <Modal
+                open={showHistory}
+                onClose={() => setShowHistory(false)}
+                title="Historial de Cierres"
+                size="lg"
+            >
+                <Table
+                    data={historyData}
+                    searchable={false}
+                    pageSize={historyData.length || 10}
+                    striped={false}
+                    density="compact"
+                    emptyTitle="No hay cierres registrados."
+                    columns={[
+                        { key: 'closed_at', title: 'Fecha', render: (h) => new Date(h.closed_at).toLocaleDateString() },
+                        { key: 'user', title: 'Usuario' },
+                        { key: 'expected_cash', title: 'Esperado', className: 'text-right', render: (h) => `$${h.expected_cash.toFixed(2)}` },
+                        { key: 'counted_cash', title: 'Contado', className: 'text-right', render: (h) => `$${h.counted_cash.toFixed(2)}` },
+                        { key: 'difference', title: 'Diferencia', className: 'text-right font-bold', render: (h) => (
+                            <span className={Math.abs(h.difference) < 0.01 ? 'text-success' : 'text-danger'}>
+                                {h.difference > 0 ? '+' : ''}{h.difference.toFixed(2)}
+                            </span>
+                        )},
+                        { key: 'status', title: 'Estado', className: 'text-center', render: (h) => (
+                            <Badge variant={h.status === 'closed' ? 'success' : 'danger'} size="sm">
+                                {h.status === 'closed' ? 'OK' : 'DISCREPANCIA'}
+                            </Badge>
+                        )},
+                    ]}
+                    rowKey={(h) => h.id}
+                />
+            </Modal>
         </ViewContainer>
     );
 };

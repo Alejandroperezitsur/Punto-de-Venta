@@ -127,7 +127,7 @@ const CustomersView = () => {
       )}
 
       {showForm && (
-        <Card className="p-6 border border-white/[0.06] rounded-2xl backdrop-blur-md bg-surface-glass/40 shadow-lg relative overflow-hidden">
+        <Card variant="glass" className="p-6 shadow-lg relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
           <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
             <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">

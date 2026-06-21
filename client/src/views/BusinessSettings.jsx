@@ -4,17 +4,18 @@ import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Skeleton } from '../components/ui/Skeleton';
 import { Select } from '../components/ui/Select';
 import { useToast } from '../components/ui/Toast';
 import { useTheme } from '../context/ThemeContext';
+import { ViewContainer } from '../components/layout/ViewContainer';
+import { ViewHeader } from '../components/layout/ViewHeader';
 import {
   Settings, Store, Receipt, Palette, Bell, Save, Check,
   Building, Phone, Mail, Globe, Percent, Image
 } from 'lucide-react';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
-  <Card variant="outline" className="p-6 space-y-4 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] hover:border-border/20 transition-all duration-200 relative overflow-hidden">
+  <Card variant="glass" className="p-6 space-y-4 relative overflow-hidden hover:border-border/20 transition-all duration-200">
     <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
     <div className="flex items-center gap-3 border-b border-border/8 pb-3 mb-2">
       <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -84,44 +85,39 @@ const BusinessSettings = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6 max-w-4xl mx-auto pb-20">
+      <ViewContainer maxWidth="lg">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Skeleton className="h-6 w-6" />
-            <Skeleton className="h-8 w-64" />
+            <div className="h-6 w-6 bg-muted/30 rounded animate-pulse" />
+            <div className="h-8 w-64 bg-muted/30 rounded animate-pulse" />
           </div>
-          <Skeleton className="h-10 w-40" />
+          <div className="h-10 w-40 bg-muted/30 rounded animate-pulse" />
         </div>
         {[1, 2, 3].map(i => (
-          <Card key={i} variant="outline" className="p-6 space-y-4">
+          <Card key={i} variant="glass" className="p-6 space-y-4">
             <div className="flex items-center gap-3 border-b border-border pb-3 mb-2">
-              <Skeleton className="h-5 w-5" />
-              <Skeleton className="h-6 w-48" />
+              <div className="h-5 w-5 bg-muted/30 rounded animate-pulse" />
+              <div className="h-6 w-48 bg-muted/30 rounded animate-pulse" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+              <div className="h-10 w-full bg-muted/30 rounded animate-pulse" />
+              <div className="h-10 w-full bg-muted/30 rounded animate-pulse" />
+              <div className="h-10 w-full bg-muted/30 rounded animate-pulse" />
+              <div className="h-10 w-full bg-muted/30 rounded animate-pulse" />
             </div>
           </Card>
         ))}
-      </div>
+      </ViewContainer>
     );
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-20 animate-fade-slide-in">
-      <div className="flex justify-between items-center pb-5 border-b border-border/8">
-        <div className="flex items-center gap-3.5">
-          <div className="size-11 rounded-xl bg-primary/10 border border-primary/10 flex items-center justify-center shadow-xs shadow-primary/5">
-            <Settings className="size-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-[1.5rem] font-bold tracking-tight text-foreground leading-tight">Configuración del Sistema</h1>
-            <p className="text-muted-foreground font-medium text-xs mt-0.5">Personaliza tu punto de venta</p>
-          </div>
-        </div>
+    <ViewContainer maxWidth="lg">
+      <ViewHeader
+        title="Configuración del Sistema"
+        description="Personaliza tu punto de venta"
+        icon={<Settings className="size-5 text-primary" />}
+      >
         <Button onClick={handleSave} isLoading={saving} disabled={saved}>
           {saved ? (
             <motion.span
@@ -139,7 +135,7 @@ const BusinessSettings = () => {
             </>
           )}
         </Button>
-      </div>
+      </ViewHeader>
 
       {/* Business Info */}
       <SettingsSection title="Información del Negocio" icon={Store}>
@@ -394,7 +390,7 @@ const BusinessSettings = () => {
           </label>
         </div>
       </SettingsSection>
-    </div>
+    </ViewContainer>
   );
 };
 
