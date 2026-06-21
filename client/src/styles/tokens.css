@@ -1,21 +1,23 @@
 ﻿:root {
+  /* ── Enterprise 2026 Typography ── */
   --font-sans: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
-  --text-xs:      0.6875rem;
-  --text-sm:      0.8125rem;
-  --text-base:    0.9375rem;
-  --text-lg:      1.0625rem;
-  --text-xl:      1.25rem;
-  --text-2xl:     1.5rem;
-  --text-3xl:     1.875rem;
-  --text-4xl:     2.25rem;
-  --text-5xl:     3rem;
-  --text-display: 3.75rem;
+  /* Fluid type scale */
+  --text-xs:      clamp(0.625rem, 0.4vw, 0.6875rem);
+  --text-sm:      clamp(0.75rem, 0.5vw, 0.8125rem);
+  --text-base:    clamp(0.875rem, 0.6vw, 0.9375rem);
+  --text-lg:      clamp(0.9375rem, 0.8vw, 1.0625rem);
+  --text-xl:      clamp(1.0625rem, 1.2vw, 1.25rem);
+  --text-2xl:     clamp(1.25rem, 1.6vw, 1.5rem);
+  --text-3xl:     clamp(1.5rem, 2.2vw, 1.875rem);
+  --text-4xl:     clamp(1.75rem, 3vw, 2.25rem);
+  --text-5xl:     clamp(2rem, 4vw, 3rem);
+  --text-display: clamp(2.5rem, 5vw, 3.75rem);
 
   --leading-none:    1;
-  --leading-tight:   1.2;
-  --leading-snug:    1.35;
+  --leading-tight:   1.15;
+  --leading-snug:    1.3;
   --leading-normal:  1.5;
   --leading-relaxed: 1.625;
 
@@ -32,6 +34,7 @@
   --tracking-wide:     0.04em;
   --tracking-wider:    0.06em;
 
+  /* ── 8px Grid Spacing System ── */
   --space-0:   0px;
   --space-0-5: 0.125rem;
   --space-1:   0.25rem;
@@ -69,34 +72,34 @@
 
   --section-gap: var(--stack-md);
 
-  /* Enterprise density scale */
-  --density-compact:     0.75rem;
+  /* ── Density Scale ── */
+  --density-compact:     0.625rem;
   --density-comfortable: 1rem;
   --density-spacious:    1.5rem;
-  --pos-grid-gap:        0.625rem;
+  --pos-grid-gap:        0.75rem;
 
-  /* 2026 Enterprise radii — confident, modern curves */
+  /* ── 2026 Retail Radius ── */
   --radius-xs:   0.25rem;
   --radius-sm:   0.5rem;
-  --radius-md:   0.6875rem;
-  --radius-lg:   0.9375rem;
+  --radius-md:   0.75rem;
+  --radius-lg:   1rem;
   --radius-xl:   1.25rem;
-  --radius-2xl:  1.625rem;
+  --radius-2xl:  1.5rem;
   --radius-3xl:  2rem;
   --radius-full: 9999px;
 
-  /* Enterprise 6-level elevation — layered depth with colored tints */
-  --shadow-xs:   0 1px 2px 0 rgb(0 0 0 / 0.05), 0 0 1px 0 rgb(0 0 0 / 0.03);
-  --shadow-sm:   0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04), 0 0 1px 0 rgb(0 0 0 / 0.03);
-  --shadow-md:   0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05), 0 0 1px 0 rgb(0 0 0 / 0.03);
-  --shadow-lg:   0 10px 16px -4px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05), 0 0 1px 0 rgb(0 0 0 / 0.03);
-  --shadow-xl:   0 20px 28px -6px rgb(0 0 0 / 0.10), 0 8px 10px -6px rgb(0 0 0 / 0.05), 0 0 1px 0 rgb(0 0 0 / 0.03);
-  --shadow-2xl:  0 28px 56px -14px rgb(0 0 0 / 0.20);
-  --shadow-glow: 0 0 28px hsl(var(--primary) / 0.18), 0 0 8px hsl(var(--primary) / 0.10);
-  --shadow-glow-success: 0 0 28px hsl(var(--success) / 0.18), 0 0 8px hsl(var(--success) / 0.10);
-  --shadow-glow-accent: 0 0 24px hsl(var(--accent) / 0.15), 0 0 6px hsl(var(--accent) / 0.08);
-  --shadow-inner-sm: inset 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-inner-md: inset 0 2px 4px 0 rgb(0 0 0 / 0.07);
+  /* ── Enterprise 6-Level Depth ── */
+  --shadow-xs:   0 1px 2px 0 rgb(0 0 0 / 0.04), 0 0 1px 0 rgb(0 0 0 / 0.02);
+  --shadow-sm:   0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.03);
+  --shadow-md:   0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-lg:   0 10px 16px -4px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+  --shadow-xl:   0 20px 28px -6px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-2xl:  0 28px 56px -14px rgb(0 0 0 / 0.18);
+  --shadow-glow: 0 0 28px hsl(var(--primary) / 0.15), 0 0 8px hsl(var(--primary) / 0.08);
+  --shadow-glow-success: 0 0 28px hsl(var(--success) / 0.15), 0 0 8px hsl(var(--success) / 0.08);
+  --shadow-glow-accent: 0 0 24px hsl(var(--accent) / 0.12), 0 0 6px hsl(var(--accent) / 0.06);
+  --shadow-inner-sm: inset 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-inner-md: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
 
   --elevation-1: var(--shadow-xs);
   --elevation-2: var(--shadow-sm);
@@ -105,6 +108,7 @@
   --elevation-5: var(--shadow-xl);
   --elevation-6: var(--shadow-2xl);
 
+  /* ── Motion & Easing ── */
   --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in:         cubic-bezier(0.4, 0, 1, 1);
   --ease-linear:     cubic-bezier(0, 0, 1, 1);
@@ -112,8 +116,6 @@
   --ease-smooth:     cubic-bezier(0.25, 0.1, 0.25, 1);
   --ease-out-expo:   cubic-bezier(0.19, 1, 0.22, 1);
   --ease-out-back:   cubic-bezier(0.34, 1.2, 0.64, 1);
-  --motion-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
-  --motion-ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 
   --duration-instant: 60ms;
   --duration-fast:    100ms;
@@ -122,10 +124,10 @@
   --duration-slower:  300ms;
   --duration-deliberate: 450ms;
 
-  /* Enterprise control scale */
-  --control-xs:  2rem;
-  --control-sm:  2.5rem;
-  --control-md:  2.875rem;
+  /* ── Control Sizes ── */
+  --control-xs:  1.75rem;
+  --control-sm:  2.25rem;
+  --control-md:  2.75rem;
   --control-lg:  3.125rem;
   --control-xl:  3.5rem;
   --control-2xl: 4.25rem;
@@ -135,17 +137,19 @@
   --touch-target-lg:  3.5rem;
   --touch-target-xl:  4.25rem;
 
-  --header-height:       3.25rem;
-  --sidebar-width:       14.5rem;
-  --sidebar-collapsed:   4.5rem;
+  /* ── Layout ── */
+  --header-height:       3rem;
+  --sidebar-width:       14rem;
+  --sidebar-collapsed:   4rem;
 
-  --pos-total-height: 5rem;
-  --pos-cart-width: 42%;
-  --pos-catalog-width: 58%;
-  --pos-btn-checkout-height: 3.5rem;
+  --pos-total-height: 4.75rem;
+  --pos-cart-width: 40%;
+  --pos-catalog-width: 60%;
+  --pos-btn-checkout-height: 3.25rem;
   --pos-kiosk-min-width: 1024px;
   --pos-kiosk-min-height: 768px;
 
+  /* ── Z-Index Scale ── */
   --z-dropdown:  100;
   --z-sticky:    200;
   --z-modal:     300;
@@ -153,89 +157,67 @@
   --z-overlay:   500;
   --z-max:       9999;
 
-  /* Glass blur utilities */
+  /* ── Glass Effects ── */
   --blur-sm:  4px;
   --blur-md:  8px;
   --blur-lg:  16px;
   --blur-xl:  24px;
   --blur-2xl: 40px;
 
-  /* Border refinement */
-  --border-hairline-opacity: 0.08;
-
-  /* New surface tokens */
+  /* ── Surface Tokens (HSL) ── */
   --surface-command-h: 220; --surface-command-s: 16%; --surface-command-l: 97%;
   --surface-metric-h:  215; --surface-metric-s: 18%; --surface-metric-l: 98%;
   --surface-sidebar-active-h: 220; --surface-sidebar-active-s: 60%; --surface-sidebar-active-l: 94%;
+  --surface-panel-h: 220; --surface-panel-s: 15%; --surface-panel-l: 98%;
+  --border-accent-h: 220; --border-accent-s: 42%; --border-accent-l: 80%;
 
-  /* Chart / data-viz palette */
+  /* ── Chart / Data-Viz ── */
   --chart-1-h: 220; --chart-1-s: 72%; --chart-1-l: 50%;
   --chart-2-h: 152; --chart-2-s: 60%; --chart-2-l: 44%;
   --chart-3-h: 32;  --chart-3-s: 80%; --chart-3-l: 52%;
   --chart-4-h: 280; --chart-4-s: 60%; --chart-4-l: 55%;
   --chart-5-h: 350; --chart-5-s: 68%; --chart-5-l: 52%;
 
-  /* Status tokens */
+  /* ── Status ── */
   --status-live:    var(--success);
   --status-pending: var(--warning);
   --status-error:   var(--danger);
 
-  /* Gradient tokens (HSL-based, theme-aware) */
+  /* ── Gradient Tokens (Theme-Aware) ── */
   --gradient-primary:       linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.88) 50%, hsl(var(--primary) / 0.82) 100%);
   --gradient-primary-hover: linear-gradient(135deg, hsl(var(--primary) / 0.94) 0%, hsl(var(--primary) / 0.82) 100%);
   --gradient-success:       linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.88) 100%);
-  --gradient-success-hover: linear-gradient(135deg, hsl(var(--success) / 0.92) 0%, hsl(var(--success) / 0.80) 100%);
-  --gradient-surface:       linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-elevated)) 100%);
-  --gradient-sidebar:       linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-hover) / 0.4) 100%);
-  --gradient-checkout:      linear-gradient(135deg, hsl(var(--pos-checkout)) 0%, hsl(var(--pos-checkout) / 0.85) 100%);
   --gradient-accent:        linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.85) 100%);
-  --gradient-hero-scan:     linear-gradient(90deg, hsl(var(--primary) / 0.04) 0%, transparent 40%, transparent 60%, hsl(var(--accent) / 0.04) 100%);
-  --gradient-hero:          linear-gradient(135deg, hsl(var(--primary) / 0.09) 0%, hsl(var(--accent) / 0.06) 40%, hsl(var(--primary) / 0.04) 100%);
-  --gradient-mesh:          radial-gradient(ellipse 80% 60% at 20% 30%, hsl(var(--primary) / 0.08) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 70%, hsl(var(--accent) / 0.06) 0%, transparent 60%);
+  --gradient-sidebar:       linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-hover) / 0.3) 100%);
+  --gradient-checkout:      linear-gradient(135deg, hsl(var(--pos-checkout)) 0%, hsl(var(--pos-checkout) / 0.85) 100%);
+  --gradient-hero:          linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--accent) / 0.05) 40%, hsl(var(--primary) / 0.03) 100%);
+  --gradient-mesh:          radial-gradient(ellipse 80% 60% at 20% 30%, hsl(var(--primary) / 0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 70%, hsl(var(--accent) / 0.04) 0%, transparent 60%);
   --gradient-panel:         linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%);
-  --gradient-sidebar-active: linear-gradient(90deg, hsl(var(--primary) / 0.10) 0%, transparent 100%);
-  --gradient-metric:        linear-gradient(180deg, hsl(var(--surface-metric)) 0%, hsl(var(--card)) 100%);
-  --gradient-shimmer:       linear-gradient(90deg, transparent 0%, hsl(var(--primary) / 0.06) 50%, transparent 100%);
+  --gradient-sidebar-active: linear-gradient(90deg, hsl(var(--primary) / 0.08) 0%, transparent 100%);
+  --gradient-shimmer:       linear-gradient(90deg, transparent 0%, hsl(var(--primary) / 0.04) 50%, transparent 100%);
+  --gradient-glass:         linear-gradient(135deg, hsl(var(--surface) / 0.5) 0%, hsl(var(--surface) / 0.2) 100%);
+  --gradient-premium-border: linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--accent) / 0.1) 50%, hsl(var(--primary) / 0.08) 100%);
 
- /* Glassmorphism utility tokens */
-  --glass-bg-opacity: 0.72;
-  --glass-border-opacity: 0.18;
+  /* ── Glassmorphism ── */
+  --glass-bg-opacity: 0.68;
+  --glass-border-opacity: 0.15;
   --glass-blur: 20px;
   --glass-saturation: 180%;
 
-  /* Premium micro-interaction tokens */
-  --hover-lift-distance: -3px;
-  --press-depth: scale(0.965);
+  /* ── Micro-interactions ── */
+  --hover-lift-distance: -2px;
+  --press-depth: scale(0.97);
   --focus-ring-width: 2px;
   --focus-ring-offset: 3px;
 
-  /* Enterprise data visualization tokens */
+  /* ── Data Viz ── */
   --sparkline-height: 32px;
   --bar-chart-radius: 3px;
   --kpi-trend-up: var(--success);
   --kpi-trend-down: var(--danger);
   --kpi-trend-neutral: var(--muted-foreground);
 
-  /* Gradient tokens for data viz */
-  --gradient-chart-area: linear-gradient(180deg, hsl(var(--chart-1) / 0.12) 0%, transparent 100%);
-  --gradient-success-area: linear-gradient(180deg, hsl(var(--success) / 0.10) 0%, transparent 100%);
-  --gradient-danger-area: linear-gradient(180deg, hsl(var(--danger) / 0.10) 0%, transparent 100%);
-  --gradient-glass: linear-gradient(135deg, hsl(var(--surface) / 0.6) 0%, hsl(var(--surface) / 0.3) 100%);
-  --gradient-glass-hover: linear-gradient(135deg, hsl(var(--surface) / 0.75) 0%, hsl(var(--surface) / 0.45) 100%);
-  --gradient-premium-border: linear-gradient(135deg, hsl(var(--primary) / 0.2) 0%, hsl(var(--accent) / 0.15) 50%, hsl(var(--primary) / 0.1) 100%);
-
-  /* Premium surface accent */
-  --surface-accent-h: 215;
-  --surface-accent-s: 22%;
-  --surface-accent-l: 97%;
-
-  /* Enterprise panel surface — slightly warmer than card */
-  --surface-panel-h: 220;
-  --surface-panel-s: 15%;
-  --surface-panel-l: 98%;
-
-  /* Accent border — subtle primary tint */
-  --border-accent-h: 220;
-  --border-accent-s: 42%;
-  --border-accent-l: 80%;
+  --gradient-chart-area: linear-gradient(180deg, hsl(var(--chart-1) / 0.10) 0%, transparent 100%);
+  --gradient-success-area: linear-gradient(180deg, hsl(var(--success) / 0.08) 0%, transparent 100%);
+  --gradient-danger-area: linear-gradient(180deg, hsl(var(--danger) / 0.08) 0%, transparent 100%);
 }

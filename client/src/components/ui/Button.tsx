@@ -4,33 +4,33 @@ import { Loader2 } from 'lucide-react';
 
 const variants = {
   primary:
-    'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/82 shadow-sm shadow-primary/15 hover:-translate-y-px hover:shadow-md hover:shadow-primary/20 relative overflow-hidden group',
+    'bg-primary text-primary-foreground hover:bg-primary/88 active:bg-primary/78 shadow-sm shadow-primary/15 hover:shadow-md hover:shadow-primary/20 hover:-translate-y-px relative overflow-hidden group',
   secondary:
-    'bg-secondary text-secondary-foreground hover:bg-secondary/75 border border-border/55 active:bg-secondary/65',
+    'bg-secondary text-secondary-foreground hover:bg-secondary/70 border border-border/50 active:bg-secondary/60',
   ghost:
     'text-muted-foreground hover:text-foreground hover:bg-surface-hover active:bg-muted',
   danger:
-    'bg-danger text-danger-foreground hover:bg-danger/90 active:bg-danger/82 shadow-sm shadow-danger/12',
+    'bg-danger text-danger-foreground hover:bg-danger/88 active:bg-danger/78 shadow-sm shadow-danger/12',
   outline:
-    'border border-border/65 text-foreground hover:bg-surface-hover active:bg-muted',
+    'border border-border/60 text-foreground hover:bg-surface-hover active:bg-muted',
   success:
-    'bg-success text-success-foreground hover:bg-success/90 active:bg-success/82 shadow-sm shadow-success/12',
+    'bg-success text-success-foreground hover:bg-success/88 active:bg-success/78 shadow-sm shadow-success/12',
   warning:
-    'bg-warning text-warning-foreground hover:bg-warning/90 active:bg-warning/82 shadow-sm shadow-warning/12',
+    'bg-warning text-warning-foreground hover:bg-warning/88 active:bg-warning/78 shadow-sm shadow-warning/12',
   'primary-glow':
-    'bg-primary text-primary-foreground hover:bg-primary/92 active:bg-primary/82 shadow-glow',
+    'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/78 shadow-glow',
   gradient:
     'text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-px active:translate-y-0 active:shadow-sm',
-  premium:
-    'glass-panel text-foreground shadow-glow hover:shadow-lg active:shadow-md',
   'gradient-success':
     'text-success-foreground shadow-md shadow-success/20 hover:shadow-lg hover:shadow-success/25 hover:-translate-y-px active:translate-y-0 active:shadow-sm',
-  hero:
-    'text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md',
-  dense:
-    'bg-card border border-border/30 text-foreground hover:bg-muted/40 hover:border-border/50 active:bg-muted/60 shadow-xs',
-  glass:
+  'premium':
+    'glass-panel text-foreground shadow-glow hover:shadow-lg active:shadow-md',
+  'glass':
     'backdrop-blur-md bg-surface-glass/50 text-foreground border border-white/10 hover:bg-surface-glass/60 hover:border-white/15 active:bg-surface-glass/40 shadow-sm hover:shadow-md',
+  'hero':
+    'text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md',
+  'dense':
+    'bg-card border border-border/30 text-foreground hover:bg-muted/40 hover:border-border/50 active:bg-muted/60 shadow-xs',
 };
 
 const sizes = {
@@ -60,6 +60,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant === 'gradient-success' ? { background: 'var(--gradient-success)' } :
       variant === 'hero' ? { background: 'var(--gradient-primary)' } :
       undefined;
+
     return (
       <button
         ref={ref}

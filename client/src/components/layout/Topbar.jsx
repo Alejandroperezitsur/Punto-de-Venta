@@ -107,36 +107,36 @@ export const Topbar = React.memo(function Topbar() {
       className={cn(
         'h-[var(--header-height)] flex items-center justify-between px-4 lg:px-5 sticky top-0 z-[var(--z-sticky)] transition-all duration-300',
         scrolled
-          ? 'bg-background/85 backdrop-blur-xl shadow-[0_1px_4px_0_rgb(0_0_0/0.04)]'
-          : 'bg-background/70 backdrop-blur-md',
+          ? 'glass-panel-strong shadow-[0_1px_8px_0_rgb(0_0_0/0.06)]'
+          : 'bg-background/60 backdrop-blur-md',
       )}
     >
       {/* Hairline bottom border with gradient */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-px opacity-50"
-        style={{ background: 'linear-gradient(90deg, transparent 2%, hsl(var(--primary) / 0.15) 20%, hsl(var(--border) / 0.5) 50%, hsl(var(--primary) / 0.15) 80%, transparent 98%)' }}
+        className="absolute bottom-0 left-0 right-0 h-px opacity-40 pointer-events-none"
+        style={{ background: 'linear-gradient(90deg, transparent 2%, hsl(var(--primary) / 0.12) 20%, hsl(var(--border) / 0.4) 50%, hsl(var(--primary) / 0.12) 80%, transparent 98%)' }}
       />
 
       {/* Left: Menu + Breadcrumb + Cash status */}
       <div className="flex items-center gap-2.5 min-w-0">
         <button
-          className="lg:hidden p-2 -ml-1 rounded-lg text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors touch-target"
+          className="lg:hidden p-2 -ml-1 rounded-lg text-muted-foreground/60 hover:bg-muted/30 hover:text-foreground transition-colors touch-target"
           onClick={toggleSidebar}
           aria-label="Menú"
         >
-          <Menu className="w-4 h-4" />
+          <Menu className="size-4" />
         </button>
 
         {/* Breadcrumb-style page path */}
-        <nav className="hidden sm:flex items-center gap-1 min-w-0 group" aria-label="Breadcrumb">
-          <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-wider group-hover:text-muted-foreground/70 transition-colors cursor-default">{breadcrumb[0]}</span>
-          <ChevronRight className="size-3 text-muted-foreground/30 shrink-0" />
+        <nav className="hidden sm:flex items-center gap-1.5 min-w-0 group" aria-label="Breadcrumb">
+          <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.1em] group-hover:text-muted-foreground/60 transition-colors cursor-default">{breadcrumb[0]}</span>
+          <ChevronRight className="size-2.5 text-muted-foreground/20 shrink-0" />
           <span className="text-sm font-bold text-foreground truncate">{breadcrumb[1]}</span>
         </nav>
 
         {/* Cash register status */}
         {cashStatus !== null && (
-          <div className="hidden md:block ml-1">
+          <div className="hidden md:block ml-1.5">
             <StatusIndicator
               variant={cashStatus ? 'live' : 'idle'}
               label={cashStatus ? 'Caja Abierta' : 'Caja Cerrada'}
@@ -149,10 +149,10 @@ export const Topbar = React.memo(function Topbar() {
 
       {/* Center: Refined clock with date pill */}
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] shadow-sm">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md bg-surface-glass/30 border border-border/10 shadow-sm">
           <span className="tabular-nums font-bold text-foreground text-[13px] tracking-tight">{timeStr}</span>
-          <span className="w-px h-3 bg-border/30" />
-          <span className="text-muted-foreground/60 text-[11px] font-medium">{dateStrShort}</span>
+          <span className="w-px h-3 bg-border/20" />
+          <span className="text-muted-foreground/50 text-[10px] font-medium">{dateStrShort}</span>
         </div>
       </div>
 
@@ -161,35 +161,35 @@ export const Topbar = React.memo(function Topbar() {
         {/* Search trigger (Cmd+K) */}
         <button
           onClick={() => document.dispatchEvent(new CustomEvent('trigger-command-palette'))}
-          className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-all touch-target"
+          className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground/45 hover:text-foreground hover:bg-muted/25 transition-all touch-target"
           aria-label="Buscar (Cmd+K)"
         >
           <Search className="size-3.5" />
           <span className="hidden xl:inline text-xs font-medium">Buscar...</span>
-          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/40 bg-muted/40 px-1.5 py-0.5 rounded border border-border/15">
+          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/35 bg-muted/35 px-1.5 py-0.5 rounded border border-border/15">
             <Command className="size-2.5" />K
           </kbd>
         </button>
 
-        <div className="w-px h-4 bg-border/15 mx-1" />
+        <div className="w-px h-4 bg-border/10 mx-1" />
 
         <ConnectionStatus />
 
-        <div className="w-px h-4 bg-border/15 mx-1" />
+        <div className="w-px h-4 bg-border/10 mx-1" />
 
         <button
           onClick={toggleDark}
-          className="p-2 rounded-lg text-muted-foreground/50 hover:bg-muted/30 hover:text-foreground transition-all touch-target"
+          className="p-2 rounded-lg text-muted-foreground/45 hover:bg-muted/25 hover:text-foreground transition-all touch-target"
           aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
         >
-          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
         </button>
 
         <button
-          className="p-2 rounded-lg text-muted-foreground/50 hover:bg-muted/30 hover:text-foreground transition-all relative touch-target"
+          className="p-2 rounded-lg text-muted-foreground/45 hover:bg-muted/25 hover:text-foreground transition-all relative touch-target"
           aria-label="Notificaciones"
         >
-          <Bell className="w-4 h-4" />
+          <Bell className="size-3.5" />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-danger shadow-sm shadow-danger/20 ring-1 ring-card animate-pulse" />
         </button>
       </div>

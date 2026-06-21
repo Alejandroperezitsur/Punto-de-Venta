@@ -31,10 +31,10 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'w-full min-h-[4.5rem] lg:min-h-[5.5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98]',
+        'w-full min-h-[4rem] lg:min-h-[4.75rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98] relative overflow-hidden',
         hasItems && !isProcessing
-          ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-0.5 success-pulse'
-          : 'bg-muted/25 text-muted-foreground/20 cursor-not-allowed',
+          ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-0.5 animate-border-glow'
+          : 'bg-muted/20 text-muted-foreground/15 cursor-not-allowed',
       )}
       style={hasItems && !isProcessing ? { background: 'var(--gradient-checkout)' } : undefined}
       disabled={!hasItems || isProcessing}
@@ -46,11 +46,14 @@ const CheckoutButton = React.memo(function CheckoutButton({
         <><span className="size-2.5 rounded-full bg-current animate-pulse" /><span>Procesando...</span></>
       ) : (
         <>
-          <Wallet className="size-5" />
+          <Wallet className="size-5 transition-transform duration-200 group-hover:scale-110" />
           <span className="text-lg tracking-wider">COBRAR</span>
-          <span className="text-[9px] font-bold opacity-20 bg-black/8 px-2 py-0.5 rounded-lg ml-1 tracking-wider">F2</span>
+          <span className="inline-flex items-center gap-1 text-[9px] font-bold opacity-20 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">
+            <Command className="size-2.5" />F2
+          </span>
         </>
       )}
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
     </button>
   );
 });
@@ -97,11 +100,11 @@ const CustomerSearchModal = React.memo(function CustomerSearchModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]" role="dialog" aria-modal="true" aria-label="Buscar cliente">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-card rounded-2xl shadow-2xl border border-border/30 overflow-hidden">
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[20vh]" role="dialog" aria-modal="true" aria-label="Buscar cliente">
+      <div className="fixed inset-0 bg-black/35 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-card rounded-2xl shadow-2xl border border-border/30 overflow-hidden animate-scale-in">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border/15">
-          <UserPlus className="h-4 w-4 text-muted-foreground/50" />
+          <UserPlus className="size-4 text-muted-foreground/40" />
           <input
             ref={inputRef}
             type="text"
@@ -109,7 +112,7 @@ const CustomerSearchModal = React.memo(function CustomerSearchModal({
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Escape') onClose(); }}
-            className="flex-1 text-sm outline-none bg-transparent placeholder:text-muted-foreground/40 text-foreground font-medium"
+            className="flex-1 text-sm outline-none bg-transparent placeholder:text-muted-foreground/35 text-foreground font-medium"
             autoFocus
           />
         </div>
@@ -134,7 +137,7 @@ const CustomerSearchModal = React.memo(function CustomerSearchModal({
             </button>
           ))}
           {!loading && query.length < 2 && (
-            <p className="text-center text-muted-foreground/40 text-[11px] py-6">Escribe al menos 2 caracteres para buscar</p>
+            <p className="text-center text-muted-foreground/35 text-[11px] py-6">Escribe al menos 2 caracteres para buscar</p>
           )}
         </div>
       </div>
@@ -281,7 +284,7 @@ const SalesView = React.memo(function SalesView() {
     const currentItems = itemsRef.current;
     const subtotal = currentItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
     if (val > subtotal) {
-      toast(`El descuento no puede superar el total de ${formatMoney(subtotal)}`, 'warning');
+      toast(`El descuento no puede superar el subtotal de ${formatMoney(subtotal)}`, 'warning');
       return;
     }
     setDiscount(val);
@@ -350,8 +353,8 @@ const SalesView = React.memo(function SalesView() {
           <tr class="bold"><td>Cambio:</td><td class="right amount">$${data.change.toFixed(2)}</td></tr>
         </table>
         <div class="footer-msg">
-          <p class="bold">\u00A1Gracias por su compra!</p>
-          <p style="color:#888;margin-top:4px">Conserve este ticket para cualquier aclaraci\u00F3n</p>
+          <p class="bold">Gracias por su compra!</p>
+          <p style="color:#888;margin-top:4px">Conserve este ticket para cualquier aclaracion</p>
         </div>
         <script>window.onload = function() { window.print(); setTimeout(() => window.close(), 500); }; <\/script>
       </body></html>
@@ -511,7 +514,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 min-h-[4.5rem] px-4 text-xs font-bold rounded-2xl bg-warning/6 text-warning border border-warning/10 hover:bg-warning/10 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
+            className="shrink-0 min-h-[4rem] lg:min-h-[4.5rem] px-4 text-xs font-bold rounded-2xl bg-warning/6 text-warning border border-warning/10 hover:bg-warning/10 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -521,18 +524,18 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         {/* Product catalog grid */}
-        <div className="flex-1 rounded-2xl border border-border/10 bg-card p-3.5 overflow-y-auto shadow-xs">
+        <div className="flex-1 rounded-2xl border border-border/10 bg-card p-3.5 overflow-y-auto shadow-sm">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
       {/* ===== CART PANEL (Right ~40%) ===== */}
       <div
-        className="flex flex-col rounded-2xl border border-border/10 bg-surface-panel/80 backdrop-blur-sm h-full overflow-hidden pos-cart-panel shadow-sm"
+        className="flex flex-col rounded-2xl border border-border/10 bg-card/90 backdrop-blur-sm h-full overflow-hidden pos-cart-panel shadow-sm"
         style={{ flexBasis: '40%', minWidth: '300px', maxWidth: '540px' }}
       >
-        {/* Cart header — frosted glass */}
-        <div className="px-5 py-3.5 border-b border-border/6 flex items-center justify-between shrink-0 backdrop-blur-md bg-surface-glass/30">
+        {/* Cart header — premium glass */}
+        <div className="px-5 py-3.5 border-b border-border/6 flex items-center justify-between shrink-0 backdrop-blur-md bg-surface-glass/40">
           <h2 className="font-bold text-sm flex items-center gap-3" id="cart-heading">
             <div className="size-9 rounded-xl bg-primary/8 flex items-center justify-center shadow-xs shadow-primary/5">
               <ShoppingBag className="size-4 text-primary" />
@@ -636,7 +639,7 @@ const SalesView = React.memo(function SalesView() {
         )}
 
         {/* Bottom: customer + totals + checkout */}
-        <div className="px-5 py-5 border-t border-border/6 space-y-3.5 shrink-0 bg-muted/[0.02] pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-5 py-4 border-t border-border/6 space-y-3 shrink-0 bg-surface-glass/20 pb-[env(safe-area-inset-bottom,0.75rem)]">
           {/* Customer selector */}
           <div className="flex items-center gap-2">
             {selectedCustomer ? (
@@ -664,12 +667,12 @@ const SalesView = React.memo(function SalesView() {
             )}
           </div>
 
-          {/* Totals — metric card with larger total */}
-          <div className="rounded-2xl p-5 border border-border/8 relative overflow-hidden" style={{ background: 'var(--gradient-panel)' }}>
-            {/* Gradient accent line at top */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40 opacity-60" />
-            {/* Breakdown rows */}
-            <div className="space-y-1.5 mb-4">
+          {/* Totals — premium metric card */}
+          <div className="relative overflow-hidden rounded-2xl border border-border/8 bg-gradient-to-b from-surface-panel to-card shadow-sm">
+            {/* Gradient accent line */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-primary/60 to-primary/30 opacity-60" />
+            
+            <div className="p-4 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground/45 font-medium">Subtotal</span>
                 <span className="font-semibold text-foreground/60 tabular-nums">{formatMoney(totals.subtotal)}</span>
@@ -685,17 +688,18 @@ const SalesView = React.memo(function SalesView() {
                 </div>
               )}
             </div>
+
             {/* Total — hero display */}
-            <div className="pt-4 border-t border-border/8 flex items-baseline justify-between gap-3">
-              <span className="text-[11px] text-muted-foreground/45 font-bold uppercase tracking-[0.12em]">Total</span>
-              <span className="text-display font-black text-foreground tracking-tighter font-mono tabular-nums leading-none">
+            <div className="px-4 pb-4 pt-3 border-t border-border/6 flex items-baseline justify-between gap-3">
+              <span className="text-[10px] text-muted-foreground/40 font-bold uppercase tracking-[0.12em]">Total</span>
+              <span className="text-3xl font-black text-foreground tracking-tighter font-mono tabular-nums leading-none">
                 {formatMoney(totals.total)}
               </span>
             </div>
           </div>
 
           {!hasItems && (
-            <p className="text-[10px] text-muted-foreground/25 text-center font-medium">
+            <p className="text-[10px] text-muted-foreground/20 text-center font-medium">
               Escanee o busque productos para comenzar
             </p>
           )}
@@ -707,7 +711,7 @@ const SalesView = React.memo(function SalesView() {
       {/* ===== SALE COMPLETE OVERLAY ===== */}
       {saleComplete && (
         <div
-          className="fixed inset-0 z-500 flex items-center justify-center bg-black/40 backdrop-blur-md"
+          className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/40 backdrop-blur-md"
           onClick={dismissSaleComplete}
           role="alert"
           aria-live="assertive"
@@ -718,7 +722,7 @@ const SalesView = React.memo(function SalesView() {
               <Check className="size-12 text-success" strokeWidth={2.5} />
             </div>
             <p className="text-lg font-extrabold text-foreground mb-3 uppercase tracking-wide">Venta Completada</p>
-            <p className="text-display font-black text-foreground font-mono tabular-nums mb-4 leading-none tracking-tighter">{formatMoney(saleComplete.total)}</p>
+            <p className="text-4xl font-black text-foreground font-mono tabular-nums mb-4 leading-none tracking-tighter">{formatMoney(saleComplete.total)}</p>
             {saleComplete.change > 0 && (
               <p className="text-sm font-semibold text-muted-foreground mb-3">
                 Cambio: <span className="text-foreground font-bold tabular-nums">{formatMoney(saleComplete.change)}</span>
@@ -729,11 +733,11 @@ const SalesView = React.memo(function SalesView() {
                 {saleComplete.method === 'cash' ? 'Efectivo' : saleComplete.method === 'card' ? 'Tarjeta' : saleComplete.method === 'transfer' ? 'Transferencia' : 'Mixto'}
               </span>
             </div>
-            {/* Auto-dismiss progress bar */}
+            {/* Progress bar */}
             <div className="mt-7 h-0.5 bg-muted/15 rounded-full overflow-hidden">
               <div className="h-full bg-success/25 rounded-full progress-dismiss" style={{ '--dismiss-duration': '4s' } as any} />
             </div>
-            <p className="text-[11px] text-muted-foreground/25 mt-3 font-medium">
+            <p className="text-[11px] text-muted-foreground/20 mt-3 font-medium">
               Toque para continuar
             </p>
           </div>
@@ -746,7 +750,6 @@ const SalesView = React.memo(function SalesView() {
         onClose={() => { setManualModalOpen(false); restoreAfterModal(); }}
         title="Producto Manual"
         size="sm"
-        onRestoreFocus={restoreAfterModal}
       >
         <form onSubmit={handleAddManual} className="space-y-4">
           <div className="space-y-1.5">
@@ -771,7 +774,6 @@ const SalesView = React.memo(function SalesView() {
         onClose={() => { setDiscountOpen(false); restoreAfterModal(); }}
         title="Descuento"
         size="sm"
-        onRestoreFocus={restoreAfterModal}
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -831,7 +833,7 @@ const SalesView = React.memo(function SalesView() {
 
       {/* Cash Gate */}
       {cashOpen === false && (
-        <div className="fixed inset-0 z-500 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-card rounded-2xl border border-border/30 p-8 text-center max-w-sm shadow-2xl animate-scale-in">
             <div className="size-16 rounded-2xl bg-danger/8 flex items-center justify-center mx-auto mb-5">
               <Lock className="size-8 text-danger" />

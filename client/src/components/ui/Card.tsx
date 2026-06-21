@@ -2,7 +2,7 @@
 import { cn } from '../../utils/cn';
 
 interface CardProps {
-  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'frosted' | 'inset' | 'premium' | 'accent' | 'dashboard' | 'metric' | 'command' | 'data-viz';
+  variant?: 'default' | 'glass' | 'elevated' | 'interactive' | 'outline' | 'premium' | 'accent' | 'metric' | 'data-viz';
   className?: string;
   children?: React.ReactNode;
   onClick?: () => void;
@@ -11,24 +11,20 @@ interface CardProps {
 function Card({ variant = 'default', className, children, onClick }: CardProps) {
   const Component = onClick ? 'button' : 'div';
   const variants = {
-    default: 'bg-card text-card-foreground border border-border/55 shadow-xs',
-    glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm',
-    elevated: 'bg-card text-card-foreground border border-border/40 shadow-md',
+    default: 'bg-card text-card-foreground border border-border/55 shadow-xs rounded-xl',
+    glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm rounded-xl',
+    elevated: 'bg-card text-card-foreground border border-border/40 shadow-md rounded-xl',
     interactive:
-      'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200 cursor-pointer active:scale-[0.995]',
-    outline: 'bg-transparent text-foreground border border-border/45',
-    frosted: 'backdrop-blur-xl bg-surface-glass/80 text-foreground border border-white/10 shadow-lg',
-    inset: 'bg-surface-inset text-foreground border border-border-subtle shadow-inner-sm',
-    premium: 'bg-card text-card-foreground shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px gradient-border',
-    accent: 'bg-surface-accent text-foreground border border-border/30 shadow-xs',
-    dashboard: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:border-border-accent/40 hover:-translate-y-px transition-all duration-200',
-    metric: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden',
-    command: 'bg-surface-command text-foreground border border-border/20 shadow-lg backdrop-blur-sm',
-    'data-viz': 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
+      'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200 cursor-pointer active:scale-[0.995] rounded-xl',
+    outline: 'bg-transparent text-foreground border border-border/45 rounded-xl',
+    premium: 'bg-card text-card-foreground shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px gradient-border rounded-xl',
+    accent: 'bg-surface-accent text-foreground border border-border/30 shadow-xs rounded-xl',
+    metric: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden rounded-xl',
+    'data-viz': 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden rounded-xl after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
   };
   return (
     <Component
-      className={cn('rounded-xl p-4 transition-colors text-left relative', variants[variant], className)}
+      className={cn('p-4 transition-all duration-200 text-left relative', variants[variant], className)}
       onClick={onClick}
       {...(onClick ? { type: 'button' as const } : {})}
     >
@@ -43,7 +39,7 @@ function CardHeader({ className, children, ...props }: React.HTMLAttributes<HTML
 
 function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-lg font-bold tracking-tight', className)} {...props}>
+    <h3 className={cn('text-lg font-bold tracking-tight text-foreground', className)} {...props}>
       {children}
     </h3>
   );
@@ -51,7 +47,7 @@ function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLH
 
 function CardDescription({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn('text-sm text-muted-foreground', className)} {...props}>
+    <p className={cn('text-sm text-muted-foreground/80', className)} {...props}>
       {children}
     </p>
   );

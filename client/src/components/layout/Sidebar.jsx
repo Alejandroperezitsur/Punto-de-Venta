@@ -18,10 +18,10 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
       className={({ isActive }) =>
         cn(
           'flex items-center rounded-xl text-[13px] font-medium transition-all duration-200 group relative overflow-hidden',
-          isCollapsed ? 'px-0 py-2.5 justify-center mx-2' : 'px-2.5 py-2.5 mx-2',
+          isCollapsed ? 'px-0 py-2.5 justify-center mx-2' : 'px-3 py-2.5 mx-2',
           isActive
-            ? 'bg-surface-sidebar-active text-foreground font-bold sidebar-active-bg shadow-sm shadow-primary/5'
-            : 'text-muted-foreground/70 hover:text-foreground hover:bg-muted/30',
+            ? 'bg-primary/10 text-foreground font-bold shadow-sm shadow-primary/5'
+            : 'text-muted-foreground/60 hover:text-foreground hover:bg-surface-hover/50',
         )
       }
       aria-label={isCollapsed ? children : undefined}
@@ -30,19 +30,19 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
       {({ isActive }) => (
         <>
           {isActive && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary transition-all duration-300" />
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-primary shadow-sm shadow-primary/40 transition-all duration-300" />
           )}
           <div className={cn('flex items-center gap-3 w-full', isCollapsed && 'justify-center')}>
             <div className={cn(
               'shrink-0 flex items-center justify-center rounded-lg transition-all duration-200',
-              isCollapsed ? 'size-10' : 'size-9',
+              isCollapsed ? 'size-10' : 'size-8',
               isActive
                 ? 'bg-primary/12 text-primary'
-                : 'text-current group-hover:bg-muted/50 group-hover:scale-105',
+                : 'text-current group-hover:bg-muted/40 group-hover:scale-105',
             )}>
               <Icon className={cn(
                 'shrink-0 transition-transform duration-200',
-                isCollapsed ? 'size-[18px]' : 'size-[17px]',
+                isCollapsed ? 'size-[18px]' : 'size-[16px]',
                 isActive && 'scale-105',
               )} />
             </div>
@@ -64,15 +64,15 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
 const SectionLabel = ({ children, isCollapsed }) => {
   if (isCollapsed) return null;
   return (
-    <p className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-[0.12em] px-4 pt-4 pb-2 select-none">
+    <p className="text-[9px] font-bold text-muted-foreground/25 uppercase tracking-[0.14em] px-4 pt-5 pb-1.5 select-none">
       {children}
     </p>
   );
 };
 
 const SectionDivider = () => (
-  <div className="mx-5 my-2">
-    <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, hsl(var(--border) / 0.4) 30%, hsl(var(--border) / 0.4) 70%, transparent 100%)' }} />
+  <div className="mx-5 my-2.5">
+    <div className="h-px bg-gradient-to-r from-transparent via-border/30 to-transparent" />
   </div>
 );
 
@@ -140,46 +140,49 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
   return (
     <aside
       className={cn(
-        'flex flex-col h-full shrink-0 transition-[width] duration-200 ease-out z-[var(--z-sticky)] border-r border-border/10',
+        'flex flex-col h-full shrink-0 transition-[width] duration-200 ease-out z-[var(--z-sticky)] border-r border-border/8',
         isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
       )}
-      style={{ background: 'var(--gradient-sidebar)' }}
+      style={{ background: 'linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-hover) / 0.25) 100%)' }}
       aria-label="Navegación principal"
     >
-      {/* Logo header */}
+      {/* Logo header with glass effect */}
       <div className={cn(
-        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/8 relative',
+        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/6 relative',
         isCollapsed ? 'justify-center px-0' : 'px-4 justify-between',
       )}>
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] to-transparent" />
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 overflow-hidden ring-1 ring-primary/10 shadow-sm shadow-primary/8 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none" />
+        <div className="flex items-center gap-3 min-w-0 relative z-10">
+          <div className={cn(
+            'rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 overflow-hidden shadow-sm shadow-primary/8 backdrop-blur-sm',
+            isCollapsed ? 'size-9' : 'size-9',
+          )}>
             {branding.logo ? (
               <img src={branding.logo} alt="Logo" className="size-full object-contain p-1.5" />
             ) : (
-              <Store className="size-[18px]" />
+              <Store className="size-[17px]" />
             )}
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
               <span className="font-extrabold text-[13px] tracking-tight truncate block leading-tight text-foreground">{branding.businessName}</span>
-              <p className="text-[9px] text-muted-foreground/45 font-semibold tracking-[0.08em] truncate block uppercase mt-0.5">{branding.businessSubtitle}</p>
+              <p className="text-[8px] text-muted-foreground/40 font-semibold tracking-[0.1em] truncate block uppercase mt-0.5">{branding.businessSubtitle}</p>
             </div>
           )}
         </div>
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
-            className="size-7 rounded-lg text-muted-foreground/30 hover:text-foreground hover:bg-muted/40 transition-all flex items-center justify-center"
+            className="size-6 rounded-lg text-muted-foreground/25 hover:text-foreground hover:bg-muted/40 transition-all flex items-center justify-center relative z-10"
             aria-label="Colapsar sidebar"
           >
-            <ChevronLeft className="size-3.5" />
+            <ChevronLeft className="size-3" />
           </button>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-1 py-3 space-y-0 overflow-y-auto" aria-label="Navegación principal">
+      <nav className="flex-1 px-1 py-2 space-y-0 overflow-y-auto overflow-x-hidden" aria-label="Navegación principal">
         <SectionLabel isCollapsed={isCollapsed}>Principal</SectionLabel>
         <NavItem to="/ventas" icon={ShoppingCart} show={hasPermission(PERMISSIONS.SALES_VIEW)} isCollapsed={isCollapsed} onNavigate={onNavigate}>
           Ventas
@@ -223,7 +226,7 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
         <div className="p-2">
           <button
             onClick={() => setIsCollapsed(false)}
-            className="w-full py-2.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
+            className="w-full py-2.5 rounded-lg text-muted-foreground/30 hover:text-foreground hover:bg-muted/40 transition-colors flex items-center justify-center"
             aria-label="Expandir sidebar"
           >
             <ChevronRight className="size-4" />
@@ -234,22 +237,22 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
       {/* User section */}
       <div className="p-2.5 border-t border-border/8">
         {!isCollapsed ? (
-          <div className="rounded-xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] p-2.5 space-y-2 shadow-sm">
-            <div className="flex items-center gap-2.5 px-1.5 py-1.5">
+          <div className="rounded-xl backdrop-blur-md bg-surface-glass/40 border border-border/6 p-2.5 space-y-2 shadow-sm">
+            <div className="flex items-center gap-2.5 px-1.5 py-1">
               <div className="relative shrink-0">
-                <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[11px] ring-2 ring-primary/10 backdrop-blur-sm">
+                <div className="size-9 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center font-bold text-primary text-[11px] ring-1 ring-primary/10 backdrop-blur-sm">
                   {userInitial}
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card" />
+                <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card animate-breathe" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold truncate text-foreground/90 leading-tight">{userName}</p>
+                <p className="text-[11px] font-bold truncate text-foreground/85 leading-tight">{userName}</p>
                 <div className="mt-0.5"><RoleBadge role={role} /></div>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold text-danger/60 hover:text-danger hover:bg-danger/5 transition-colors touch-target"
+              className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold text-danger/50 hover:text-danger hover:bg-danger/5 transition-colors touch-target"
             >
               <LogOut className="size-3.5" />
               <span>Cerrar Sesión</span>
@@ -258,14 +261,14 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
         ) : (
           <div className="flex flex-col gap-2 items-center">
             <div className="relative">
-              <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[11px] ring-2 ring-primary/10">
+              <div className="size-9 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center font-bold text-primary text-[11px] ring-1 ring-primary/10">
                 {userInitial}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card animate-breathe" />
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg text-danger/60 hover:text-danger hover:bg-danger/5 transition-colors"
+              className="p-2 rounded-lg text-danger/50 hover:text-danger hover:bg-danger/5 transition-colors"
               title="Cerrar Sesión"
             >
               <LogOut className="size-4" />

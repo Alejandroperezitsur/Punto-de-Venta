@@ -24,29 +24,33 @@ const MainLayout = memo(function MainLayout({ children }) {
           Ir al contenido principal
         </a>
 
+        {/* Mobile overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-500 lg:hidden transition-opacity duration-300"
+            className="fixed inset-0 bg-black/25 backdrop-blur-sm z-500 lg:hidden transition-all duration-300 animate-fade-in"
             onClick={toggleSidebar}
             onKeyDown={(e) => { if (e.key === 'Escape') toggleSidebar(); }}
             aria-hidden="true"
           />
         )}
 
+        {/* Sidebar */}
         <div className={cn(
-          'h-full shrink-0 transition-transform duration-200 ease-out z-200',
-          'max-lg:fixed max-lg:left-0 max-lg:top-0',
+          'h-full shrink-0 transition-transform duration-200 ease-out z-200 shadow-sm',
+          'max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:shadow-xl',
           isSidebarOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full',
         )}>
           <Sidebar onNavigate={toggleSidebar} />
         </div>
+
+        {/* Main content area */}
         <div className="flex-1 flex flex-col min-w-0 bg-background">
           <Topbar />
           <main
             id="main-content"
             ref={mainRef}
             className={cn(
-              'flex-1 overflow-y-auto',
+              'flex-1 overflow-y-auto overflow-x-hidden',
               isPOS ? 'p-2 lg:p-3' : 'p-4 md:p-5 lg:p-6 pb-8 md:pb-10',
             )}
             role="main"

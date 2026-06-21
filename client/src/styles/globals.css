@@ -91,6 +91,7 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -102,6 +103,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 #root {
@@ -115,20 +117,21 @@ body {
   color: hsl(var(--foreground));
 }
 
+/* ── Refined Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.10);
+  background: hsl(var(--muted-foreground) / 0.12);
   border-radius: var(--radius-full);
-  transition: background 0.2s;
+  transition: background 0.2s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.22);
+  background: hsl(var(--muted-foreground) / 0.25);
 }
 
 :focus-visible {
@@ -136,12 +139,13 @@ body {
   outline-offset: 2px;
 }
 
+/* ── Typography ── */
 h1 { font-size: var(--text-3xl); font-weight: var(--weight-extrabold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
 h2 { font-size: var(--text-2xl); font-weight: var(--weight-bold); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight); }
 h3 { font-size: var(--text-xl); font-weight: var(--weight-bold); line-height: var(--leading-snug); letter-spacing: -0.015em; }
-h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
-h5 { font-size: var(--text-base); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
-h6 { font-size: var(--text-sm); font-weight: var(--weight-semibold); line-height: var(--leading-normal); letter-spacing: var(--tracking-normal); }
+h4 { font-size: var(--text-lg); font-weight: var(--weight-semibold); line-height: var(--leading-normal); }
+h5 { font-size: var(--text-base); font-weight: var(--weight-semibold); line-height: var(--leading-normal); }
+h6 { font-size: var(--text-sm); font-weight: var(--weight-semibold); line-height: var(--leading-normal); }
 
 .text-display { font-size: var(--text-display); font-weight: var(--weight-black); line-height: var(--leading-none); letter-spacing: var(--tracking-tighter); }
 
@@ -150,6 +154,9 @@ a {
   text-decoration: none;
   transition: color var(--duration-fast) var(--ease-out);
 }
+a:hover {
+  color: hsl(var(--primary) / 0.85);
+}
 
 img {
   max-width: 100%;
@@ -157,19 +164,18 @@ img {
   display: block;
 }
 
+/* ── Dark Mode Shadow Overrides ── */
 [data-mode="dark"] {
-  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.3), 0 0 1px 0 rgb(0 0 0 / 0.2);
-  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.3), 0 0 1px 0 rgb(0 0 0 / 0.2);
-  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3), 0 0 1px 0 rgb(0 0 0 / 0.2);
-  --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.3), 0 0 1px 0 rgb(0 0 0 / 0.2);
-  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.3), 0 0 1px 0 rgb(0 0 0 / 0.2);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
-  --shadow-glow: 0 0 24px hsl(var(--primary) / 0.1), 0 0 6px hsl(var(--primary) / 0.06);
-  --shadow-glow-success: 0 0 24px hsl(var(--success) / 0.1), 0 0 6px hsl(var(--success) / 0.06);
-  --shadow-inner-sm: inset 0 1px 2px 0 rgb(0 0 0 / 0.15);
-  --shadow-inner-md: inset 0 2px 4px 0 rgb(0 0 0 / 0.2);
+  --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.25);
+  --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.35);
+  --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.4);
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.45);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.55);
+  --shadow-glow: 0 0 24px hsl(var(--primary) / 0.08), 0 0 6px hsl(var(--primary) / 0.05);
 }
 
+/* ── Accessibility ── */
 .skip-to-content {
   position: absolute;
   top: -100%;
@@ -209,7 +215,7 @@ img {
   }
 }
 
-/* Cart item entrance animation */
+/* ── Animations ── */
 .cart-item-enter {
   animation: cartSlideIn 0.22s var(--ease-spring) forwards;
 }
@@ -219,7 +225,6 @@ img {
   to { opacity: 1; transform: translateX(0) scale(1); }
 }
 
-/* Scan pulse animation */
 @keyframes scanPulse {
   0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.3); }
   50% { box-shadow: 0 0 0 6px hsl(var(--primary) / 0); }
@@ -229,7 +234,6 @@ img {
   animation: scanPulse 1.5s var(--ease-smooth) infinite;
 }
 
-/* Success pulse */
 @keyframes successPulse {
   0%, 100% { box-shadow: 0 0 0 0 hsl(var(--success) / 0.3); }
   50% { box-shadow: 0 0 0 8px hsl(var(--success) / 0); }
@@ -239,7 +243,6 @@ img {
   animation: successPulse 2s var(--ease-smooth) infinite;
 }
 
-/* Subtle shimmer for loading states */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -251,7 +254,6 @@ img {
   animation: shimmer 1.8s var(--ease-linear) infinite;
 }
 
-/* Progress bar for auto-dismiss */
 @keyframes progressShrink {
   from { width: 100%; }
   to { width: 0%; }
@@ -261,7 +263,6 @@ img {
   animation: progressShrink var(--dismiss-duration, 4s) linear forwards;
 }
 
-/* Fade up entrance */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -271,7 +272,6 @@ img {
   animation: fadeUp 0.3s var(--ease-out) forwards;
 }
 
-/* Scale in */
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
@@ -281,7 +281,6 @@ img {
   animation: scaleIn 0.2s var(--ease-spring) forwards;
 }
 
-/* Fade in — subtle page transition */
 @keyframes fadeIn {
   from { opacity: 0.6; }
   to   { opacity: 1; }
@@ -291,7 +290,6 @@ img {
   animation: fadeIn var(--duration-slow) var(--ease-out) forwards;
 }
 
-/* Slide in from right */
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(12px); }
   to   { opacity: 1; transform: translateX(0); }
@@ -301,7 +299,6 @@ img {
   animation: slideInRight 0.28s var(--ease-out) forwards;
 }
 
-/* Pulse glow for active elements */
 @keyframes pulseGlow {
   0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.25); }
   50%       { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
@@ -311,7 +308,6 @@ img {
   animation: pulseGlow 2s var(--ease-smooth) infinite;
 }
 
-/* Number tick for totals */
 @keyframes numberTick {
   0%   { transform: translateY(-4px); opacity: 0; }
   100% { transform: translateY(0);    opacity: 1; }
@@ -321,7 +317,7 @@ img {
   animation: numberTick 0.18s var(--ease-spring) forwards;
 }
 
-/* Gradient surface utility */
+/* ── Surface & Glass Utilities ── */
 .surface-gradient {
   background: var(--gradient-surface);
 }
@@ -330,32 +326,35 @@ img {
   background: hsl(var(--surface-accent));
 }
 
-/* Glass panel utility */
 .glass-panel {
-  background: hsl(var(--surface-glass) / 0.7);
-  backdrop-filter: blur(var(--blur-lg));
-  -webkit-backdrop-filter: blur(var(--blur-lg));
-  border: 1px solid hsl(var(--border) / 0.15);
+  background: hsl(var(--surface-glass) / var(--glass-bg-opacity));
+  backdrop-filter: blur(var(--blur-lg)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(var(--blur-lg)) saturate(var(--glass-saturation));
+  border: 1px solid hsl(var(--border) / var(--glass-border-opacity));
 }
 
-/* Premium hover lift — refined micro-animation */
+.glass-panel-strong {
+  background: hsl(var(--surface) / 0.82);
+  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-xl)) saturate(180%);
+  border: 1px solid hsl(var(--border) / 0.10);
+}
+
 .hover-lift {
   transition: transform var(--duration-normal) var(--ease-out-expo), box-shadow var(--duration-normal) var(--ease-out-expo);
 }
 .hover-lift:hover {
-  transform: translateY(-2px);
+  transform: translateY(var(--hover-lift-distance));
   box-shadow: var(--shadow-lg);
 }
 
-/* Active press effect */
 .press-effect {
   transition: transform 0.06s var(--ease-out);
 }
 .press-effect:active {
-  transform: scale(0.97);
+  transform: var(--press-depth);
 }
 
-/* Gradient border utility */
 .gradient-border {
   position: relative;
   border: none;
@@ -389,11 +388,7 @@ img {
   }
 }
 
-/* GPU-safe transition utilities */
-.duration-60 { transition-duration: 60ms; }
-.duration-80 { transition-duration: 80ms; }
-
-/* Enterprise panel — premium surface with refined gradient border */
+/* ── Enterprise Panel ── */
 .enterprise-panel {
   background: hsl(var(--surface-panel));
   border: 1px solid hsl(var(--border-accent) / 0.30);
@@ -401,9 +396,9 @@ img {
   border-radius: var(--radius-xl);
 }
 
-/* Metric card — for KPI / stat displays */
+/* ── Metric Card ── */
 .metric-card {
-  background: var(--gradient-metric);
+  background: var(--gradient-metric, linear-gradient(180deg, hsl(var(--surface-metric)) 0%, hsl(var(--card)) 100%));
   border: 1px solid hsl(var(--border) / 0.45);
   border-radius: var(--radius-xl);
   padding: var(--space-4) var(--space-5);
@@ -430,7 +425,7 @@ img {
 }
 .metric-card:hover::before { opacity: 0.9; }
 
-/* Sidebar active item background */
+/* ── Sidebar Active ── */
 .sidebar-active-bg {
   background: var(--gradient-sidebar-active);
   position: relative;
@@ -444,7 +439,6 @@ img {
   background: var(--gradient-primary);
 }
 
-/* Shimmer effect for buttons at rest */
 @keyframes btnShimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -454,7 +448,6 @@ img {
   animation: btnShimmer 3s var(--ease-linear) infinite;
 }
 
-/* Fade slide entrance for page transitions */
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -463,14 +456,12 @@ img {
   animation: fadeSlideIn var(--duration-slower) var(--ease-out-expo) forwards;
 }
 
-/* Status dot pulsing */
 @keyframes statusPulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
   50%       { opacity: 0.8; box-shadow: 0 0 0 4px transparent; }
 }
 .status-pulse { animation: statusPulse 2s var(--ease-smooth) infinite; }
 
-/* Scanner active sweep line */
 @keyframes scanSweep {
   0%   { transform: translateX(-100%); opacity: 0; }
   20%  { opacity: 1; }
@@ -493,11 +484,10 @@ img {
   animation: scanSweep 2s var(--ease-linear) infinite;
 }
 
-/* Numpad haptic-press feel */
 .haptic-press { transition: transform 60ms var(--ease-out), box-shadow 60ms var(--ease-out); }
 .haptic-press:active { transform: scale(0.94); box-shadow: var(--shadow-inner-sm); }
 
-/* Stat card for KPI metrics */
+/* ── Stat Card ── */
 .stat-card {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.5);
@@ -514,7 +504,6 @@ img {
   border-color: hsl(var(--border-accent) / 0.4);
 }
 
-/* Slide in from left */
 @keyframes slideInLeft {
   from { opacity: 0; transform: translateX(-12px); }
   to   { opacity: 1; transform: translateX(0); }
@@ -523,7 +512,6 @@ img {
   animation: slideInLeft 0.28s var(--ease-out) forwards;
 }
 
-/* Pulse scale — subtle attention getter */
 @keyframes pulseScale {
   0%, 100% { transform: scale(1); }
   50%       { transform: scale(1.03); }
@@ -532,7 +520,6 @@ img {
   animation: pulseScale 2s var(--ease-smooth) infinite;
 }
 
-/* Gradient shift — animated background gradient */
 @keyframes gradientShift {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
@@ -543,13 +530,11 @@ img {
   animation: gradientShift 8s ease infinite;
 }
 
-/* Dot grid background pattern */
 .dot-pattern {
   background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.06) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
-/* Ensure all animations use transform/opacity for GPU compositing */
 .cart-item-enter,
 [role="dialog"] > div:first-child,
 [role="dialog"] > div:last-child,
@@ -558,11 +543,8 @@ img {
   will-change: opacity, transform;
 }
 
-/* ═══════════════════════════════════════════════
-   ENTERPRISE 2026 — Premium Utility Classes
-   ═══════════════════════════════════════════════ */
+/* ── 2026 Premium Utility Classes ── */
 
-/* Glass card — frosted glass surface */
 .glass-card {
   background: hsl(var(--surface) / var(--glass-bg-opacity));
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
@@ -576,9 +558,8 @@ img {
   border-color: hsl(var(--border) / calc(var(--glass-border-opacity) + 0.06));
 }
 
-/* Premium surface — elevated card with subtle gradient border */
 .premium-surface {
-  background: var(--gradient-panel);
+  background: var(--gradient-panel, linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%));
   border: 1px solid hsl(var(--border-accent) / 0.25);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.03);
@@ -600,7 +581,7 @@ img {
 }
 .premium-surface:hover::before { opacity: 1; }
 
-/* Data visualization card — for charts, KPIs */
+/* ── Data Viz Card ── */
 .data-viz-card {
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.4);
@@ -631,7 +612,7 @@ img {
 }
 .data-viz-card:hover::after { opacity: 0.6; }
 
-/* Command bar — premium search/command input */
+/* ── Command Bar ── */
 .command-bar {
   background: hsl(var(--card));
   border: 1.5px solid hsl(var(--border) / 0.2);
@@ -644,7 +625,7 @@ img {
   box-shadow: var(--shadow-lg), 0 0 0 3px hsl(var(--primary) / 0.08), var(--shadow-glow);
 }
 
-/* KPI display — large metric value */
+/* ── KPI Display ── */
 .kpi-display {
   display: flex;
   flex-direction: column;
@@ -675,7 +656,7 @@ img {
 .kpi-display .kpi-trend.up { color: hsl(var(--kpi-trend-up)); }
 .kpi-display .kpi-trend.down { color: hsl(var(--kpi-trend-down)); }
 
-/* CSS bar chart — pure CSS horizontal bars */
+/* ── CSS Bar Chart ── */
 .bar-chart-css {
   display: flex;
   align-items: flex-end;
@@ -693,7 +674,7 @@ img {
   background: hsl(var(--chart-1));
 }
 
-/* Staggered entrance for grids */
+/* ── Staggered Entrance ── */
 .stagger-enter > * {
   opacity: 0;
   animation: fadeUp 0.35s var(--ease-out) forwards;
@@ -708,7 +689,6 @@ img {
 .stagger-enter > *:nth-child(8) { animation-delay: 280ms; }
 .stagger-enter > *:nth-child(n+9) { animation-delay: 320ms; }
 
-/* Premium page transition */
 @keyframes pageEnter {
   from { opacity: 0; transform: translateY(10px) scale(0.995); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -717,7 +697,6 @@ img {
   animation: pageEnter var(--duration-slower) var(--ease-out-expo) forwards;
 }
 
-/* Confetti burst for sale complete */
 @keyframes confettiBurst {
   0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
   100% { transform: translateY(-60px) rotate(360deg); opacity: 0; }
@@ -730,15 +709,6 @@ img {
   animation: confettiBurst 1.2s var(--ease-out) forwards;
 }
 
-/* Glassmorphism panel for sidebar/topbar */
-.glass-panel-strong {
-  background: hsl(var(--surface) / 0.85);
-  backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--blur-xl)) saturate(180%);
-  border: 1px solid hsl(var(--border) / 0.12);
-}
-
-/* Premium button hover shimmer */
 @keyframes premiumShimmer {
   0%   { background-position: -100% 0; }
   100% { background-position: 200% 0; }
@@ -756,3 +726,52 @@ img {
   transition: opacity var(--duration-slow);
 }
 .premium-shimmer:hover::after { opacity: 1; }
+
+/* ── New 2026 Animations ── */
+
+/* Glow pulse for premium elements */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px hsl(var(--primary) / 0.1), 0 0 20px hsl(var(--primary) / 0.05); }
+  50% { box-shadow: 0 0 12px hsl(var(--primary) / 0.18), 0 0 30px hsl(var(--primary) / 0.08); }
+}
+.animate-glow-pulse {
+  animation: glowPulse 3s var(--ease-smooth) infinite;
+}
+
+/* Slide up entrance */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slideUp 0.4s var(--ease-out-expo) forwards;
+}
+
+/* Scale shimmer for loading */
+@keyframes scaleShimmer {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(1); transform-origin: left; }
+  51% { transform: scaleX(1); transform-origin: right; }
+  100% { transform: scaleX(0); transform-origin: right; }
+}
+.animate-scale-shimmer {
+  animation: scaleShimmer 1.8s var(--ease-in-out) infinite;
+}
+
+/* Border glow animation */
+@keyframes borderGlow {
+  0%, 100% { border-color: hsl(var(--primary) / 0.15); }
+  50% { border-color: hsl(var(--primary) / 0.35); }
+}
+.animate-border-glow {
+  animation: borderGlow 2.5s var(--ease-smooth) infinite;
+}
+
+/* Breathing opacity for status indicators */
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-breathe {
+  animation: breathe 2.5s var(--ease-smooth) infinite;
+}
