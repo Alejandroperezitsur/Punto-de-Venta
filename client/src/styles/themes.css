@@ -118,6 +118,17 @@
   --surface-panel-h: 222; --surface-panel-s: 14%; --surface-panel-l: 9%;
   --border-accent-h: 220; --border-accent-s: 36%; --border-accent-l: 28%;
 
+  /* Dark mode surface overrides */
+  --surface-command-h: 222; --surface-command-s: 16%; --surface-command-l: 12%;
+  --surface-metric-h: 222; --surface-metric-s: 15%; --surface-metric-l: 11%;
+  --surface-sidebar-active-h: 222; --surface-sidebar-active-s: 50%; --surface-sidebar-active-l: 16%;
+
+  /* Dark mode glass overrides */
+  --glass-bg-opacity: 0.40;
+  --glass-border-opacity: 0.10;
+  --glass-blur: 16px;
+  --glass-saturation: 140%;
+
   --chart-1-h: 220; --chart-1-s: 66%; --chart-1-l: 62%;
   --chart-2-h: 152; --chart-2-s: 54%; --chart-2-l: 56%;
   --chart-3-h: 28;  --chart-3-s: 72%; --chart-3-l: 60%;

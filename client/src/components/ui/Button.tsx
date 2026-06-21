@@ -26,7 +26,7 @@ const variants = {
   'premium':
     'glass-panel text-foreground shadow-glow hover:shadow-lg active:shadow-md',
   'glass':
-    'backdrop-blur-md bg-surface-glass/50 text-foreground border border-white/10 hover:bg-surface-glass/60 hover:border-white/15 active:bg-surface-glass/40 shadow-sm hover:shadow-md',
+    'backdrop-blur-md bg-surface-glass/50 text-foreground border border-white/10 hover:bg-surface-glass/60 hover:border-white/15 active:bg-surface-glass/40 shadow-sm hover:shadow-md btn-glass',
   'hero':
     'text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md',
   'dense':
@@ -67,7 +67,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         type={type}
         className={cn(
           'inline-flex items-center justify-center font-semibold transition-all duration-75',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-card',
           'disabled:pointer-events-none disabled:opacity-40 select-none',
           'active:scale-[0.97]',
           'touch-target',

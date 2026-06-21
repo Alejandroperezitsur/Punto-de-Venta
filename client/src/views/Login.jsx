@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Store, Eye, EyeOff, Loader2, Sun, Moon } from 'lucide-react';
 import { api } from '../lib/api';
 import { useUserStore } from '../store/userStore';
 import { useTheme } from '../context/ThemeContext';
@@ -40,26 +40,27 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
-      {/* Background pattern */}
-      <div className="absolute inset-0 dot-pattern opacity-40" />
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-accent/[0.02]" />
-      
-      {/* Mesh gradient background */}
-      <div className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-primary/[0.04] blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-accent/[0.03] blur-3xl" />
+      {/* Background mesh gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-transparent to-accent/[0.03]" />
+      <div className="absolute -top-48 -right-48 w-[700px] h-[700px] rounded-full bg-primary/[0.05] blur-[80px]" />
+      <div className="absolute -bottom-48 -left-48 w-[600px] h-[600px] rounded-full bg-accent/[0.04] blur-[80px]" />
+      <div className="absolute inset-0 dot-pattern opacity-30" />
 
       {/* Theme toggle */}
       <button
         onClick={toggleDark}
-        className="absolute top-4 right-4 p-2.5 rounded-xl text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-all z-10"
+        className="absolute top-5 right-5 p-3 rounded-xl text-muted-foreground/50 hover:text-foreground hover:bg-muted/25 backdrop-blur-md border border-border/10 transition-all z-10 shadow-sm"
         aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
       >
-        <span className="text-lg">{isDark ? '☀️' : '🌙'}</span>
+        {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
       </button>
 
       {/* Login card */}
       <div className="relative w-full max-w-md px-4">
-        <div className="bg-card border border-border/40 shadow-2xl rounded-2xl p-8 backdrop-blur-md bg-card/90">
+        <div className="glass-card p-8 sm:p-10 shadow-2xl">
+          {/* Top accent line */}
+          <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+
           {/* Logo & Brand */}
           <div className="text-center mb-8">
             <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary/10 shadow-sm shadow-primary/8">
@@ -75,15 +76,15 @@ export default function Login() {
 
           {/* Error */}
           {error && (
-            <div className="mb-5 px-4 py-3 rounded-xl bg-danger/8 border border-danger/15 text-sm font-medium text-danger flex items-center gap-2">
+            <div className="mb-5 px-4 py-3 rounded-xl bg-danger/10 border border-danger/15 text-sm font-medium text-danger flex items-center gap-2">
               <span className="size-1.5 rounded-full bg-danger shrink-0" />
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground/60 mb-1.5 ml-0.5">
+              <label className="block text-xs font-semibold text-muted-foreground/60 mb-2 ml-0.5">
                 Usuario
               </label>
               <input
@@ -94,17 +95,18 @@ export default function Login() {
                 autoFocus
                 autoComplete="username"
                 className={cn(
-                  'w-full h-[var(--control-md)] px-3.5 rounded-xl border bg-card text-foreground text-sm',
+                  'w-full h-[var(--control-lg)] px-4 rounded-xl border bg-card/80 text-foreground text-sm',
                   'placeholder:text-muted-foreground/35',
-                  'border-border/60 hover:border-border',
-                  'focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring/40',
+                  'border-border/50 hover:border-border/70',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40',
+                  'focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.06)]',
                   'transition-all duration-200',
                 )}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground/60 mb-1.5 ml-0.5">
+              <label className="block text-xs font-semibold text-muted-foreground/60 mb-2 ml-0.5">
                 Contraseña
               </label>
               <div className="relative">
@@ -115,17 +117,18 @@ export default function Login() {
                   placeholder="Ingrese su contraseña"
                   autoComplete="current-password"
                   className={cn(
-                    'w-full h-[var(--control-md)] px-3.5 rounded-xl border bg-card text-foreground text-sm pr-10',
+                    'w-full h-[var(--control-lg)] px-4 rounded-xl border bg-card/80 text-foreground text-sm pr-11',
                     'placeholder:text-muted-foreground/35',
-                    'border-border/60 hover:border-border',
-                    'focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring/40',
+                    'border-border/50 hover:border-border/70',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40',
+                    'focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.06)]',
                     'transition-all duration-200',
                   )}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/20"
                   tabIndex={-1}
                   aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
                 >
@@ -138,9 +141,9 @@ export default function Login() {
               type="submit"
               disabled={loading}
               className={cn(
-                'w-full h-[var(--control-xl)] rounded-xl font-bold text-sm text-primary-foreground',
+                'w-full h-[var(--control-xl)] rounded-xl font-bold text-sm text-primary-foreground mt-2',
                 'transition-all duration-200 active:scale-[0.98]',
-                'shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25',
+                'shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25',
                 'disabled:opacity-40 disabled:cursor-not-allowed',
                 loading ? 'bg-primary/80' : 'bg-primary hover:bg-primary/90',
               )}
@@ -156,7 +159,7 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-muted-foreground/30 mt-6 font-medium">
+          <p className="text-center text-[11px] text-muted-foreground/35 mt-7 font-medium">
             POS Pro v0.1 · Punto de Venta Enterprise
           </p>
         </div>

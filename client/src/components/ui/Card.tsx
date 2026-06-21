@@ -12,7 +12,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
   const Component = onClick ? 'button' : 'div';
   const variants = {
     default: 'bg-card text-card-foreground border border-border/55 shadow-xs rounded-xl',
-    glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm rounded-xl',
+    glass: 'backdrop-blur-lg bg-surface/70 text-foreground border border-border/20 shadow-sm rounded-xl card-glass',
     elevated: 'bg-card text-card-foreground border border-border/40 shadow-md rounded-xl',
     interactive:
       'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200 cursor-pointer active:scale-[0.995] rounded-xl',
@@ -47,7 +47,7 @@ function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLH
 
 function CardDescription({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn('text-sm text-muted-foreground/80', className)} {...props}>
+    <p className={cn('text-sm text-muted-foreground', className)} {...props}>
       {children}
     </p>
   );
@@ -59,7 +59,7 @@ function CardBody({ className, children, ...props }: React.HTMLAttributes<HTMLDi
 
 function CardFooter({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('flex items-center pt-4 mt-4 border-t border-border/40', className)} {...props}>
+    <div className={cn('flex items-center pt-4 mt-4 border-t border-border/30', className)} {...props}>
       {children}
     </div>
   );

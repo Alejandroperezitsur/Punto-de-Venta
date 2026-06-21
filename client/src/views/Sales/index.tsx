@@ -504,9 +504,9 @@ const SalesView = React.memo(function SalesView() {
   const hasItems = items.length > 0;
 
   return (
-    <div className="h-full min-h-0 flex gap-3 overflow-hidden">
+    <div className="h-full min-h-0 flex gap-3 lg:gap-4 overflow-hidden">
       {/* ===== CATALOG PANEL (Left ~60%) ===== */}
-      <div className="flex-1 min-w-0 flex flex-col gap-2.5" style={{ flexBasis: '60%' }}>
+      <div className="flex-1 min-w-0 flex flex-col gap-3" style={{ flexBasis: '60%' }}>
         {/* Scan bar — top zone */}
         <div className="flex gap-2 shrink-0">
           <div className="flex-1">
@@ -531,8 +531,8 @@ const SalesView = React.memo(function SalesView() {
 
       {/* ===== CART PANEL (Right ~40%) ===== */}
       <div
-        className="flex flex-col rounded-2xl border border-border/10 bg-card/90 backdrop-blur-sm h-full overflow-hidden pos-cart-panel shadow-sm"
-        style={{ flexBasis: '40%', minWidth: '300px', maxWidth: '540px' }}
+        className="flex flex-col rounded-2xl border border-border/10 bg-card/95 backdrop-blur-sm h-full overflow-hidden pos-cart-panel shadow-sm"
+        style={{ flexBasis: '40%', minWidth: '280px', maxWidth: '420px' }}
       >
         {/* Cart header — premium glass */}
         <div className="px-5 py-3.5 border-b border-border/6 flex items-center justify-between shrink-0 backdrop-blur-md bg-surface-glass/40">

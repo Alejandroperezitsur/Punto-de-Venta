@@ -10,7 +10,6 @@ import { Table } from '../components/ui/Table';
 import { Select } from '../components/ui/Select';
 import { ViewContainer } from '../components/layout/ViewContainer';
 import { ViewHeader } from '../components/layout/ViewHeader';
-import { motion } from 'framer-motion';
 import { Plus, Trash2, Edit2, X, Check, UserCog } from 'lucide-react';
 import { ConfirmModal } from '../components/sales/ConfirmModal';
 import { useConfirmDialog } from '../hooks/useConfirmDialog';
@@ -103,7 +102,7 @@ const UsersView = () => {
             </ViewHeader>
 
             {showForm && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                <div className="animate-fade-slide-in">
                     <Card variant="glass" className="p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                         <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -146,7 +145,7 @@ const UsersView = () => {
                             </Button>
                         </form>
                     </Card>
-                </motion.div>
+                </div>
             )}
 
             <Card variant="glass" className="p-0 overflow-hidden">
@@ -168,7 +167,7 @@ const UsersView = () => {
                 ) : (
                     <Table
                         columns={[
-                            { key: 'username', title: 'Usuario', render: (row) => (
+                            { key: 'username', label: 'Usuario', render: (row) => (
                                 <div className="flex items-center gap-3">
                                     <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                                         {row.username.charAt(0).toUpperCase()}
@@ -176,9 +175,9 @@ const UsersView = () => {
                                     <span className="font-medium">{row.username}</span>
                                 </div>
                             )},
-                            { key: 'role', title: 'Rol', render: (row) => <Badge variant={row.role === 'admin' ? 'danger' : row.role === 'supervisor' ? 'info' : 'success'}>{row.role === 'admin' ? 'Administrador' : row.role === 'supervisor' ? 'Supervisor' : 'Cajero'}</Badge> },
-                            { key: 'active', title: 'Estado', render: (row) => <Badge variant={row.active !== 0 ? 'success' : 'neutral'} dot>{row.active !== 0 ? 'Activo' : 'Inactivo'}</Badge> },
-                            { key: 'actions', title: 'Acciones', render: (row) => (
+                            { key: 'role', label: 'Rol', render: (row) => <Badge variant={row.role === 'admin' ? 'danger' : row.role === 'supervisor' ? 'info' : 'success'}>{row.role === 'admin' ? 'Administrador' : row.role === 'supervisor' ? 'Supervisor' : 'Cajero'}</Badge> },
+                            { key: 'active', label: 'Estado', render: (row) => <Badge variant={row.active !== 0 ? 'success' : 'neutral'} dot>{row.active !== 0 ? 'Activo' : 'Inactivo'}</Badge> },
+                            { key: 'actions', label: 'Acciones', render: (row) => (
                                 <div className="flex justify-end gap-2">
                                     <Button variant="ghost" size="sm" onClick={() => handleEdit(row)}>
                                         <Edit2 className="size-4" />
@@ -192,6 +191,7 @@ const UsersView = () => {
                             )},
                         ]}
                         data={users}
+                        keyExtractor={(u) => u.id}
                         loading={loading}
                         searchable
                         searchPlaceholder="Buscar usuarios..."

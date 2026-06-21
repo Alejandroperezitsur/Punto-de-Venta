@@ -70,7 +70,7 @@ const Modal = Object.assign(React.memo(function Modal({
       <div
         className={cn(
           'absolute inset-0 transition-all duration-200',
-          animate === 'open' ? 'bg-black/30 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-0',
+          animate === 'open' ? 'bg-black/40 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-0',
         )}
         aria-hidden="true"
       />
@@ -81,7 +81,7 @@ const Modal = Object.assign(React.memo(function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative w-full bg-card border border-border/40 shadow-2xl overflow-hidden',
+          'relative w-full bg-card border border-border/30 shadow-2xl overflow-hidden',
           'transition-all duration-200',
           animate === 'open' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4',
           isFullscreen ? 'h-full max-w-full rounded-none' : 'rounded-2xl',
@@ -97,16 +97,16 @@ const Modal = Object.assign(React.memo(function Modal({
         {(title || !hideClose) && (
           <div className={cn(
             'flex items-center justify-between',
-            'px-5 py-4 border-b border-border/30',
+            'px-5 py-4 border-b border-border/25',
           )}>
             <div className="min-w-0 flex-1">
               {title && <h2 className="text-base font-bold text-foreground truncate">{title}</h2>}
-              {description && <p className="text-sm text-muted-foreground/70 mt-0.5">{description}</p>}
+              {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
             </div>
             {!hideClose && (
               <button
                 onClick={onClose}
-                className="size-8 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-muted/40 transition-all shrink-0 ml-3"
+                className="size-8 rounded-lg flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-all shrink-0 ml-3"
                 aria-label="Cerrar"
               >
                 <X className="size-4" />
@@ -126,7 +126,7 @@ const Modal = Object.assign(React.memo(function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="px-5 py-4 border-t border-border/30 flex items-center justify-end gap-2">
+          <div className="px-5 py-4 border-t border-border/25 flex items-center justify-end gap-2">
             {footer}
           </div>
         )}

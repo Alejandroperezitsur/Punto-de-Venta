@@ -78,7 +78,7 @@ const CustomersView = () => {
   };
 
   const columns = [
-    { title: 'Nombre', key: 'name', sortable: true, className: 'font-semibold min-w-[160px]', render: (row) => (
+    { label: 'Nombre', key: 'name', sortable: true, className: 'font-semibold min-w-[160px]', render: (row) => (
       <div className="flex items-center gap-3">
         <div className={cn('size-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-xs shrink-0', getAvatarColor(row.name))}>
           {(row.name || '?').charAt(0).toUpperCase()}
@@ -86,14 +86,14 @@ const CustomersView = () => {
         <span>{row.name}</span>
       </div>
     )},
-    { title: 'Email', key: 'email', sortable: true, hideOnMobile: true, render: (row) =>
+    { label: 'Email', key: 'email', sortable: true, hideOnMobile: true, render: (row) =>
       row.email ? <span className="flex items-center gap-1.5 text-muted-foreground"><Mail className="size-3 text-muted-foreground/60" />{row.email}</span> : <span className="text-muted-foreground/40">—</span>
     },
-    { title: 'Teléfono', key: 'phone', render: (row) =>
+    { label: 'Teléfono', key: 'phone', render: (row) =>
       row.phone ? <span className="flex items-center gap-1.5 text-muted-foreground"><Phone className="size-3 text-muted-foreground/60" />{row.phone}</span> : <span className="text-muted-foreground/40">—</span>
     },
-    { title: 'RFC', key: 'rfc', hideOnMobile: true, render: (row) => row.rfc || <span className="text-muted-foreground/40">—</span> },
-    { title: '', key: 'actions', width: '48px', render: (row) => (
+    { label: 'RFC', key: 'rfc', hideOnMobile: true, render: (row) => row.rfc || <span className="text-muted-foreground/40">—</span> },
+    { label: '', key: 'actions', width: '48px', render: (row) => (
       <button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(row.id); }}
         className="size-8 flex items-center justify-center rounded-lg text-muted-foreground/50 hover:text-danger hover:bg-danger/10 transition-all duration-200 touch-target opacity-0 group-hover:opacity-100"
         aria-label="Eliminar cliente">
@@ -168,15 +168,14 @@ const CustomersView = () => {
         <Table
           columns={columns}
           data={customers}
+          keyExtractor={(c) => c.id}
           searchable
           searchPlaceholder="Buscar clientes..."
           pageSize={15}
           density="compact"
           loading={loading}
           emptyIcon={Users}
-          emptyTitle="No hay clientes"
-          emptyDescription="Registra tu primer cliente para comenzar"
-          emptyAction={{ label: 'Crear Cliente', onClick: () => setShowForm(true) }}
+          emptyMessage="No hay clientes"
         />
       )}
 

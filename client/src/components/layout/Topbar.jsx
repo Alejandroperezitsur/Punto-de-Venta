@@ -120,17 +120,17 @@ export const Topbar = React.memo(function Topbar() {
       {/* Left: Menu + Breadcrumb + Cash status */}
       <div className="flex items-center gap-2.5 min-w-0">
         <button
-          className="lg:hidden p-2 -ml-1 rounded-lg text-muted-foreground/60 hover:bg-muted/30 hover:text-foreground transition-colors touch-target"
+          className="lg:hidden p-2.5 -ml-1 rounded-lg text-muted-foreground/60 hover:bg-muted/30 hover:text-foreground transition-colors touch-target min-h-[44px] min-w-[44px] flex items-center justify-center"
           onClick={toggleSidebar}
           aria-label="Menú"
         >
-          <Menu className="size-4" />
+          <Menu className="size-5" />
         </button>
 
         {/* Breadcrumb-style page path */}
         <nav className="hidden sm:flex items-center gap-1.5 min-w-0 group" aria-label="Breadcrumb">
-          <span className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-[0.1em] group-hover:text-muted-foreground/60 transition-colors cursor-default">{breadcrumb[0]}</span>
-          <ChevronRight className="size-2.5 text-muted-foreground/20 shrink-0" />
+          <span className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.1em] group-hover:text-muted-foreground/60 transition-colors cursor-default">{breadcrumb[0]}</span>
+          <ChevronRight className="size-2.5 text-muted-foreground/25 shrink-0" />
           <span className="text-sm font-bold text-foreground truncate">{breadcrumb[1]}</span>
         </nav>
 
@@ -147,9 +147,9 @@ export const Topbar = React.memo(function Topbar() {
         )}
       </div>
 
-      {/* Center: Refined clock with date pill */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md bg-surface-glass/30 border border-border/10 shadow-sm">
+      {/* Center: Refined clock with date pill — hidden on small/medium to avoid overlap */}
+      <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-2.5">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md bg-surface-glass/30 border border-border/10 shadow-sm">
           <span className="tabular-nums font-bold text-foreground text-[13px] tracking-tight">{timeStr}</span>
           <span className="w-px h-3 bg-border/20" />
           <span className="text-muted-foreground/50 text-[10px] font-medium">{dateStrShort}</span>
@@ -158,6 +158,11 @@ export const Topbar = React.memo(function Topbar() {
 
       {/* Right: Grouped controls */}
       <div className="flex items-center gap-0.5">
+        {/* Clock on small/medium screens (inline, not centered) */}
+        <div className="lg:hidden flex items-center gap-1.5 mr-2">
+          <span className="tabular-nums font-bold text-foreground text-[12px] tracking-tight">{timeStr}</span>
+        </div>
+
         {/* Search trigger (Cmd+K) */}
         <button
           onClick={() => document.dispatchEvent(new CustomEvent('trigger-command-palette'))}

@@ -297,9 +297,9 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
         </div>
       )}
 
-      {/* Product grid — responsive 2-6 columns */}
+      {/* Product grid — responsive inside catalog panel */}
       {displayProducts.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2.5">
           {paginatedProducts.map((p) => (
             <QuickProductButton
               key={p.id}

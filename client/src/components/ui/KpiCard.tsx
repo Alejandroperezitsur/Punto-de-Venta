@@ -23,7 +23,7 @@ const iconColors = {
   warning: 'bg-warning/10 text-warning',
   danger: 'bg-danger/10 text-danger',
   info: 'bg-info/10 text-info',
-  muted: 'bg-muted text-muted-foreground',
+  muted: 'bg-muted/60 text-muted-foreground',
 };
 
 function KpiCard({
@@ -48,8 +48,8 @@ function KpiCard({
   return (
     <Component
       className={cn(
-        'relative rounded-xl border border-border/40 bg-card p-4 transition-all duration-200',
-        'hover:shadow-md hover:-translate-y-0.5 hover:border-border-accent/40',
+        'relative rounded-xl border border-border/35 bg-card p-4 transition-all duration-200',
+        'hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20',
         'after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5',
         'after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
         onClick && 'cursor-pointer active:scale-[0.995]',
@@ -61,7 +61,7 @@ function KpiCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">{label}</p>
           <div className="mt-1.5 flex items-baseline gap-1">
             {prefix && <span className="text-sm font-medium text-muted-foreground">{prefix}</span>}
             <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">

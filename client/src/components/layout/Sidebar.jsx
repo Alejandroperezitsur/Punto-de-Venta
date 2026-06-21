@@ -2,7 +2,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Package, Users, BarChart3, Settings, LogOut, Wallet,
-  Shield, ClipboardList, ChevronLeft, Store, Palette, ChevronRight,
+  Shield, ClipboardList, ChevronLeft, Store, Palette, ChevronRight, X,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
@@ -91,6 +91,7 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
   const { user, logout } = useUserStore();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const isSidebarOpen = useUserStore(state => state.isSidebarOpen);
   const [branding, setBranding] = React.useState({
     logo: null,
     businessName: 'POS Pro',
@@ -170,10 +171,19 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
             </div>
           )}
         </div>
+        {/* Mobile close button - visible only on small screens */}
+        <button
+          onClick={onNavigate}
+          className="lg:hidden size-8 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-all flex items-center justify-center relative z-10"
+          aria-label="Cerrar menú"
+        >
+          <X className="size-4" />
+        </button>
+        {/* Desktop collapse button */}
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
-            className="size-6 rounded-lg text-muted-foreground/25 hover:text-foreground hover:bg-muted/40 transition-all flex items-center justify-center relative z-10"
+            className="hidden lg:flex size-6 rounded-lg text-muted-foreground/25 hover:text-foreground hover:bg-muted/40 transition-all items-center justify-center relative z-10"
             aria-label="Colapsar sidebar"
           >
             <ChevronLeft className="size-3" />

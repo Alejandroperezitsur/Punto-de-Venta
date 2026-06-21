@@ -81,7 +81,7 @@ function Table<T extends Record<string, any>>({
 
   const variantStyles = {
     default: 'bg-card border border-border/40 rounded-xl overflow-hidden shadow-xs',
-    glass: 'backdrop-blur-lg bg-surface-glass/40 border border-border/20 rounded-xl overflow-hidden shadow-sm',
+    glass: 'backdrop-blur-lg bg-surface-glass/40 border border-border/20 rounded-xl overflow-hidden shadow-sm table-glass',
     bordered: 'border border-border/30 rounded-xl overflow-hidden',
   };
 
@@ -108,13 +108,13 @@ function Table<T extends Record<string, any>>({
             <tr className={cn(
               'border-b border-border/20',
               stickyHeader && 'sticky top-0 z-10',
-              variant === 'glass' ? 'bg-surface-glass/60 backdrop-blur-md' : 'bg-muted/40',
+              variant === 'glass' ? 'bg-surface-glass/60 backdrop-blur-md' : 'bg-muted/50',
             )}>
               {columns.map(col => (
                 <th
                   key={col.key}
                   className={cn(
-                    'text-left font-semibold text-muted-foreground/70 text-xs uppercase tracking-[0.08em] select-none',
+                    'text-left font-semibold text-muted-foreground text-xs uppercase tracking-[0.08em] select-none',
                     densityStyles[density],
                     col.sortable !== false && sortable && 'cursor-pointer hover:text-foreground transition-colors',
                     col.hideOnMobile && 'hidden md:table-cell',
@@ -166,7 +166,7 @@ function Table<T extends Record<string, any>>({
                   className={cn(
                     'border-b border-border/10 last:border-0 transition-colors duration-150',
                     onRowClick && 'cursor-pointer hover:bg-muted/40 active:bg-muted/60',
-                    idx % 2 === 0 ? 'bg-transparent' : 'bg-muted/15',
+                    idx % 2 === 0 ? 'bg-transparent' : 'bg-muted/20',
                   )}
                   onClick={() => onRowClick?.(item)}
                 >
@@ -192,8 +192,8 @@ function Table<T extends Record<string, any>>({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border/20 bg-muted/20">
-          <span className="text-xs text-muted-foreground/60">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border/20 bg-muted/25">
+          <span className="text-xs text-muted-foreground/70">
             {filtered.length} registro{(filtered.length !== 1) ? 's' : ''}
           </span>
           <div className="flex items-center gap-1.5">

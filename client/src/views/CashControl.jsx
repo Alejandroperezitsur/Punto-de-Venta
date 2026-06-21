@@ -11,7 +11,6 @@ import { Modal } from '../components/ui/Modal';
 import { useToast } from '../components/ui/Toast';
 import { Table } from '../components/ui/Table';
 import { Select } from '../components/ui/Select';
-import { motion } from 'framer-motion';
 import {
     DoorOpen, DoorClosed, ArrowDownCircle, ArrowUpCircle, RefreshCw,
     AlertCircle, Wallet, History, CheckCircle2, DollarSign, TrendingUp
@@ -171,7 +170,7 @@ const CashControlView = () => {
                     Cargando estado de caja...
                 </Card>
             ) : !session ? (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div className="animate-fade-slide-in">
                     <Card variant="glass" className="p-8 space-y-6 border-l-4 border-l-warning relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-warning to-warning/40" />
                         <div className="flex items-center gap-4">
@@ -192,7 +191,7 @@ const CashControlView = () => {
                                     placeholder="0.00"
                                     value={openingBalance}
                                     onChange={e => setOpeningBalance(e.target.value)}
-                                    icon={Wallet}
+                                    icon={<Wallet className="size-4" />}
                                 />
                             </div>
                             <Button onClick={handleOpen} isLoading={actionLoading} className="h-10">
@@ -200,9 +199,9 @@ const CashControlView = () => {
                             </Button>
                         </div>
                     </Card>
-                </motion.div>
+                </div>
             ) : (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div className="animate-fade-slide-in space-y-6">
                     {/* Status Banner */}
                     <Card variant="glass" className="p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-success to-success/40" />
@@ -289,11 +288,10 @@ const CashControlView = () => {
                             data={movements}
                             searchable={false}
                             pageSize={movements.length || 10}
-                            striped={false}
                             density="compact"
-                            emptyTitle="Sin movimientos registrados."
+                            emptyMessage="Sin movimientos registrados."
                             columns={[
-                                { key: 'type', title: 'Tipo', render: (m) => (
+                                { key: 'type', label: 'Tipo', render: (m) => (
                                     <Badge variant={
                                         m.type === 'sale' ? 'success' :
                                         m.type === 'deposit' || m.type === 'opening' ? 'info' :
@@ -302,18 +300,18 @@ const CashControlView = () => {
                                         {m.type === 'sale' ? 'Venta' : m.type === 'opening' ? 'Apertura' : m.type === 'deposit' ? 'Depósito' : 'Retiro'}
                                     </Badge>
                                 )},
-                                { key: 'reference', title: 'Referencia', render: (m) => <span className="text-muted-foreground">{m.reference || '-'}</span> },
-                                { key: 'amount', title: 'Monto', className: 'text-right', render: (m) => (
+                                { key: 'reference', label: 'Referencia', render: (m) => <span className="text-muted-foreground">{m.reference || '-'}</span> },
+                                { key: 'amount', label: 'Monto', className: 'text-right', render: (m) => (
                                     <span className={`font-semibold ${m.amount >= 0 ? 'text-success' : 'text-danger'}`}>
                                         {m.amount >= 0 ? '+' : ''}{formatMoney(m.amount)}
                                     </span>
                                 )},
-                                { key: 'created_at', title: 'Fecha', render: (m) => <span className="text-muted-foreground font-mono text-xs">{new Date(m.created_at).toLocaleString()}</span> },
+                                { key: 'created_at', label: 'Fecha', render: (m) => <span className="text-muted-foreground font-mono text-xs">{new Date(m.created_at).toLocaleString()}</span> },
                             ]}
-                            rowKey={(m) => m.id}
+                            keyExtractor={(m) => m.id}
                         />
                     </Card>
-                </motion.div>
+                </div>
             )}
 
             {/* Close Cash Modal */}
@@ -358,7 +356,7 @@ const CashControlView = () => {
                         </Button>
                     </div>
                 ) : closeResult ? (
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-6">
+                    <div className="animate-fade-slide-in text-center space-y-6">
                         {Math.abs(closeResult.difference) < 0.01 ? (
                             <>
                                 <div className="size-16 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto">
@@ -395,7 +393,7 @@ const CashControlView = () => {
                                 VOLVER AL CONTROL DE CAJA
                             </Button>
                         </div>
-                    </motion.div>
+                    </div>
                 ) : null}
             </Modal>
 
@@ -410,26 +408,25 @@ const CashControlView = () => {
                     data={historyData}
                     searchable={false}
                     pageSize={historyData.length || 10}
-                    striped={false}
                     density="compact"
-                    emptyTitle="No hay cierres registrados."
+                    emptyMessage="No hay cierres registrados."
                     columns={[
-                        { key: 'closed_at', title: 'Fecha', render: (h) => new Date(h.closed_at).toLocaleDateString() },
-                        { key: 'user', title: 'Usuario' },
-                        { key: 'expected_cash', title: 'Esperado', className: 'text-right', render: (h) => `$${h.expected_cash.toFixed(2)}` },
-                        { key: 'counted_cash', title: 'Contado', className: 'text-right', render: (h) => `$${h.counted_cash.toFixed(2)}` },
-                        { key: 'difference', title: 'Diferencia', className: 'text-right font-bold', render: (h) => (
+                        { key: 'closed_at', label: 'Fecha', render: (h) => new Date(h.closed_at).toLocaleDateString() },
+                        { key: 'user', label: 'Usuario' },
+                        { key: 'expected_cash', label: 'Esperado', className: 'text-right', render: (h) => `$${h.expected_cash.toFixed(2)}` },
+                        { key: 'counted_cash', label: 'Contado', className: 'text-right', render: (h) => `$${h.counted_cash.toFixed(2)}` },
+                        { key: 'difference', label: 'Diferencia', className: 'text-right font-bold', render: (h) => (
                             <span className={Math.abs(h.difference) < 0.01 ? 'text-success' : 'text-danger'}>
                                 {h.difference > 0 ? '+' : ''}{h.difference.toFixed(2)}
                             </span>
                         )},
-                        { key: 'status', title: 'Estado', className: 'text-center', render: (h) => (
+                        { key: 'status', label: 'Estado', className: 'text-center', render: (h) => (
                             <Badge variant={h.status === 'closed' ? 'success' : 'danger'} size="sm">
                                 {h.status === 'closed' ? 'OK' : 'DISCREPANCIA'}
                             </Badge>
                         )},
                     ]}
-                    rowKey={(h) => h.id}
+                    keyExtractor={(h) => h.id}
                 />
             </Modal>
         </ViewContainer>

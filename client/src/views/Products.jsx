@@ -207,7 +207,7 @@ const ProductsView = () => {
           ref={searchRef}
           type="text"
           placeholder="Buscar por nombre o código de barras..."
-          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-2xl border-2 border-border/20 bg-card/80 backdrop-blur-sm text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 focus:shadow-md focus:shadow-primary/8 transition-all placeholder:text-muted-foreground/40"
+          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-2xl border-2 border-border/25 bg-card/80 backdrop-blur-sm text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 focus:shadow-md focus:shadow-primary/8 transition-all placeholder:text-muted-foreground/45"
           value={search}
           onChange={handleSearch}
           aria-label="Buscar productos"
@@ -256,14 +256,14 @@ const ProductsView = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground/70">Nombre del producto</label>
+            <label className="text-xs font-bold text-muted-foreground">Nombre del producto</label>
             <Input placeholder="Ej: Coca Cola 600ml..." value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
               required autoFocus={!editingProduct} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground/70">Precio de venta</label>
+              <label className="text-xs font-bold text-muted-foreground">Precio de venta</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground z-10">$</span>
                 <Input className="pl-7" placeholder="0.00" type="number" step="0.01" min="0"
@@ -271,14 +271,14 @@ const ProductsView = () => {
               </div>
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground/70">Stock inicial</label>
+              <label className="text-xs font-bold text-muted-foreground">Stock inicial</label>
               <Input placeholder="999" type="number" min="0"
                 value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground/70 flex items-center gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
               <ScanLine className="size-3" /> Codigo de barras
             </label>
             <Input
@@ -287,7 +287,7 @@ const ProductsView = () => {
               onChange={e => setForm({ ...form, barcode: e.target.value })}
               autoComplete="off"
             />
-            <p className="text-[10px] text-muted-foreground/60">Escribe o escanea el codigo de barras del producto</p>
+            <p className="text-[10px] text-muted-foreground/70">Escribe o escanea el codigo de barras del producto</p>
           </div>
 
           {editingProduct && (

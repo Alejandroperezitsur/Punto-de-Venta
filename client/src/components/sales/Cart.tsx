@@ -81,8 +81,8 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
         </div>
       </div>
 
-      {/* Quantity stepper — refined pill design with glass background */}
-      <div className="flex items-center gap-0.5 backdrop-blur-md bg-surface-glass/40 rounded-xl border border-white/[0.06] shadow-xs">
+      {/* Quantity stepper — refined pill design */}
+      <div className="flex items-center gap-0.5 bg-muted/25 rounded-xl border border-border/15 shadow-xs">
         <button
           className={cn(
             'size-9 flex items-center justify-center rounded-l-xl transition-all duration-100',

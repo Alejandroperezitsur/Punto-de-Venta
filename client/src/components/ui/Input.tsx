@@ -32,13 +32,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative w-full">
         {(label && !floating) && (
-          <label className="block text-[11px] font-semibold text-muted-foreground/70 mb-1.5 ml-0.5">
+          <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5 ml-0.5">
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none z-10">
+            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 pointer-events-none z-10">
               {icon}
             </div>
           )}
@@ -48,15 +48,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             onFocus={(e) => { setIsFocused(true); props.onFocus?.(e); }}
             onBlur={(e) => { setIsFocused(false); props.onBlur?.(e); }}
             className={cn(
-              'w-full rounded-lg border bg-card text-foreground placeholder:text-muted-foreground/35',
+              'w-full rounded-lg border bg-card text-foreground placeholder:text-muted-foreground/45',
               'transition-all duration-200',
-              'focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring/40',
+              'focus:outline-none focus:ring-2 focus:ring-ring/35 focus:border-ring/50 focus:shadow-[0_0_0_3px_hsl(var(--ring)/0.08)]',
               'disabled:opacity-40 disabled:cursor-not-allowed',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               icon && 'pl-9',
               scannerMode && 'pr-10',
               showPasswordToggle && 'pr-10',
-              error ? 'border-danger/50 focus:border-danger/60 focus:ring-danger/20' : 'border-border/65 hover:border-border',
+              error ? 'border-danger/50 focus:border-danger/60 focus:ring-danger/20' : 'border-border/60 hover:border-border/80',
               success && 'border-success/50 focus:border-success/60 focus:ring-success/20',
               floating && 'pt-5 pb-2',
               sizeStyles[size],
@@ -92,7 +92,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-0.5"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors p-0.5"
               tabIndex={-1}
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             >

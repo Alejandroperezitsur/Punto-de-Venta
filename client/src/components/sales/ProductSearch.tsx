@@ -243,11 +243,11 @@ const ProductSearch = React.memo(function ProductSearch() {
       {feedback && (
         <div
           className={cn(
-            'absolute top-full left-0 right-0 mt-2 z-[var(--z-dropdown)] animate-fade-up',
-            'px-4 py-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2.5 shadow-md',
-            feedback.type === 'success' && 'bg-success/8 border-success/15 text-success',
-            feedback.type === 'warning' && 'bg-warning/8 border-warning/15 text-warning',
-            feedback.type === 'error' && 'bg-danger/8 border-danger/15 text-danger',
+            'absolute top-full left-0 right-0 mt-3 z-[var(--z-dropdown)] animate-fade-up',
+            'px-4 py-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2.5 shadow-lg',
+            feedback.type === 'success' && 'bg-success/10 border-success/15 text-success',
+            feedback.type === 'warning' && 'bg-warning/10 border-warning/15 text-warning',
+            feedback.type === 'error' && 'bg-danger/10 border-danger/15 text-danger',
           )}
           role="status"
           aria-live="polite"

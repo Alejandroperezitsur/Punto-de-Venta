@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -15,9 +14,9 @@ import {
 } from 'lucide-react';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
-  <Card variant="glass" className="p-6 space-y-4 relative overflow-hidden hover:border-border/20 transition-all duration-200">
+  <Card variant="glass" className="p-6 space-y-4 relative overflow-hidden transition-all duration-200">
     <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
-    <div className="flex items-center gap-3 border-b border-border/8 pb-3 mb-2">
+    <div className="flex items-center gap-3 border-b border-border/12 pb-3 mb-2">
       <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
         <Icon className="size-4 text-primary" />
       </div>
@@ -120,14 +119,10 @@ const BusinessSettings = () => {
       >
         <Button onClick={handleSave} isLoading={saving} disabled={saved}>
           {saved ? (
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="flex items-center"
-            >
+            <span className="flex items-center animate-fade-slide-in">
               <Check className="h-4 w-4 mr-2" />
               Guardado
-            </motion.span>
+            </span>
           ) : (
             <>
               <Save className="h-4 w-4 mr-2" />
@@ -146,7 +141,7 @@ const BusinessSettings = () => {
               placeholder="Mi Tienda"
               value={settings.business_name || ''}
               onChange={e => updateSetting('business_name', e.target.value)}
-              icon={Building}
+              icon={<Building className="size-4" />}
             />
           </div>
           <div>
@@ -163,7 +158,7 @@ const BusinessSettings = () => {
               placeholder="Calle, Número, Colonia, CP, Ciudad"
               value={settings.business_address || ''}
               onChange={e => updateSetting('business_address', e.target.value)}
-              icon={Globe}
+              icon={<Globe className="size-4" />}
             />
           </div>
           <div>
@@ -172,7 +167,7 @@ const BusinessSettings = () => {
               placeholder="+52 55 1234 5678"
               value={settings.business_phone || ''}
               onChange={e => updateSetting('business_phone', e.target.value)}
-              icon={Phone}
+              icon={<Phone className="size-4" />}
             />
           </div>
           <div>
@@ -182,7 +177,7 @@ const BusinessSettings = () => {
               placeholder="contacto@mitienda.com"
               value={settings.business_email || ''}
               onChange={e => updateSetting('business_email', e.target.value)}
-              icon={Mail}
+              icon={<Mail className="size-4" />}
             />
           </div>
           <div className="md:col-span-2">

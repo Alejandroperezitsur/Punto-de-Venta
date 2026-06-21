@@ -11,7 +11,7 @@ const variants = {
   premium: 'bg-primary/8 text-primary border border-primary/20 shadow-sm shadow-primary/8',
   'outline-glow': 'bg-transparent text-foreground border border-ring/30 shadow-glow',
   'dot-only': 'bg-transparent text-foreground',
-  glass: 'backdrop-blur-md bg-surface-glass/40 text-foreground border border-white/10',
+  glass: 'backdrop-blur-md bg-surface-glass/40 text-foreground border border-white/10 badge-glass',
 };
 
 const sizes = {

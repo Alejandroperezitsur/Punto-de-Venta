@@ -83,7 +83,7 @@ const AuditsView = () => {
           placeholder="Buscar acción, entidad..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          icon={Search}
+          icon={<Search className="size-4" />}
           className="w-64"
         />
         <button
