@@ -20,7 +20,7 @@ function createWindow() {
             contextIsolation: true,
         },
         icon: path.join(__dirname, 'assets', 'icon.png'),
-        title: 'POS Pro',
+        title: 'POS Pro by APV Labs',
         show: false,
     });
 
@@ -50,6 +50,19 @@ function createWindow() {
         {
             label: 'POS Pro',
             submenu: [
+                { 
+                    label: 'Acerca de POS Pro',
+                    click: async () => {
+                        const { dialog } = require('electron');
+                        dialog.showMessageBox(mainWindow, {
+                            type: 'info',
+                            title: 'Acerca de POS Pro',
+                            message: 'POS Pro 2026\n\nDesarrollado por Alejandro Pérez Vázquez (APV Labs)\n\nSistema de Punto de Venta Profesional\n© 2026 APV Labs. Todos los derechos reservados.',
+                            buttons: ['OK']
+                        });
+                    }
+                },
+                { type: 'separator' },
                 { role: 'about' },
                 { type: 'separator' },
                 { role: 'quit' }
