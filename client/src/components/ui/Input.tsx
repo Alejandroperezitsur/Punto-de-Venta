@@ -69,10 +69,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {floating && label && (
             <label
               className={cn(
-                'absolute left-3 transition-all duration-200 pointer-events-none z-20',
-                'text-muted-foreground/55 font-medium',
+                'absolute left-3 transition-all duration-200 pointer-events-none z-10',
+                'text-muted-foreground/70 font-medium',
                 (isFocused || hasValue)
-                  ? 'text-[10px] -translate-y-2 top-1.5'
+                  ? 'text-[10px] -translate-y-2 top-1.5 text-foreground/70'
                   : 'text-sm top-1/2 -translate-y-1/2',
               )}
             >

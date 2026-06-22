@@ -11,20 +11,20 @@ interface CardProps {
 function Card({ variant = 'default', className, children, onClick }: CardProps) {
   const Component = onClick ? 'button' : 'div';
   const variants = {
-    default: 'bg-card text-card-foreground border border-border/55 shadow-xs rounded-xl',
-    glass: 'backdrop-blur-lg bg-surface/75 text-foreground border border-border/25 shadow-sm rounded-xl card-glass',
-    elevated: 'bg-card text-card-foreground border border-border/40 shadow-md rounded-xl',
+    default: 'bg-card text-card-foreground border border-border/55 shadow-xs rounded-2xl',
+    glass: 'backdrop-blur-lg bg-surface/75 text-foreground border border-border/25 shadow-sm rounded-2xl card-glass',
+    elevated: 'bg-card text-card-foreground border border-border/40 shadow-md rounded-2xl',
     interactive:
-      'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200 cursor-pointer active:scale-[0.995] rounded-xl',
-    outline: 'bg-transparent text-foreground border border-border/45 rounded-xl',
-    premium: 'bg-card text-card-foreground shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px gradient-border rounded-xl',
-    accent: 'bg-surface-accent text-foreground border border-border/30 shadow-xs rounded-xl',
-    metric: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden rounded-xl',
-    'data-viz': 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden rounded-xl after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
+      'bg-card text-card-foreground border border-border/45 shadow-xs hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200 cursor-pointer active:scale-[0.995] rounded-2xl',
+    outline: 'bg-transparent text-foreground border border-border/45 rounded-2xl',
+    premium: 'bg-card text-card-foreground shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-px gradient-border rounded-2xl',
+    accent: 'bg-surface-accent text-foreground border border-border/30 shadow-xs rounded-2xl',
+    metric: 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden rounded-2xl',
+    'data-viz': 'bg-card text-card-foreground border border-border/40 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden rounded-2xl after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1 after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
   };
   return (
     <Component
-      className={cn('p-4 transition-all duration-200 text-left relative', variants[variant], className)}
+      className={cn('p-5 transition-all duration-200 text-left relative', variants[variant], className)}
       onClick={onClick}
       {...(onClick ? { type: 'button' as const } : {})}
     >
@@ -34,7 +34,7 @@ function Card({ variant = 'default', className, children, onClick }: CardProps) 
 }
 
 function CardHeader({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col space-y-1.5 mb-4', className)} {...props} />;
+  return <div className={cn('flex flex-col gap-1.5 mb-4', className)} {...props} />;
 }
 
 function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
@@ -59,7 +59,7 @@ function CardBody({ className, children, ...props }: React.HTMLAttributes<HTMLDi
 
 function CardFooter({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('flex items-center pt-4 mt-4 border-t border-border/30', className)} {...props}>
+    <div className={cn('flex items-center pt-4 mt-4 border-t border-border/35', className)} {...props}>
       {children}
     </div>
   );

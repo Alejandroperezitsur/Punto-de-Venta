@@ -24,10 +24,10 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
       onClick={() => onEdit(p)}
     >
       {/* Edit button */}
-      <button className="absolute top-3 right-3 p-1.5 rounded-lg bg-muted/40 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all z-10"
+      <button className="absolute top-3 right-3 size-9 rounded-lg bg-muted/40 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all flex items-center justify-center z-10"
         onClick={(e) => { e.stopPropagation(); onEdit(p); }}
         aria-label="Editar producto">
-        <Edit3 className="size-3.5" />
+        <Edit3 className="size-4" />
       </button>
 
       {/* Product image */}
@@ -56,7 +56,7 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
         <Badge
           variant={p.stock <= 0 ? 'danger' : p.stock <= 5 ? 'warning' : 'success'}
           size="sm"
-          className="text-[9px]"
+          className="text-[11px]"
         >
           Stock: {Number(p.stock).toFixed(0)}
         </Badge>
@@ -201,18 +201,18 @@ const ProductsView = () => {
         </Button>
       </ViewHeader>
 
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-        <input
-          ref={searchRef}
-          type="text"
-          placeholder="Buscar por nombre o código de barras..."
-          className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-2xl border-2 border-border/25 bg-card/80 backdrop-blur-sm text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 focus:shadow-md focus:shadow-primary/8 transition-all placeholder:text-muted-foreground/45"
-          value={search}
-          onChange={handleSearch}
-          aria-label="Buscar productos"
-        />
-      </div>
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/60 pointer-events-none" />
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Buscar por nombre o código de barras..."
+            className="w-full h-[var(--control-xl)] pl-10 pr-4 rounded-2xl border-2 border-border/25 bg-card/80 backdrop-blur-sm text-sm font-medium focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 focus:shadow-md focus:shadow-primary/8 transition-all placeholder:text-muted-foreground/45"
+            value={search}
+            onChange={handleSearch}
+            aria-label="Buscar productos"
+          />
+        </div>
 
       {error ? (
         <ErrorState error={error.message || error} onRetry={() => loadData(null)} />

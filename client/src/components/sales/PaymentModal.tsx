@@ -259,7 +259,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
                 )}
                 style={isExactCash ? { background: 'var(--gradient-success)' } : undefined}
               >
-                <Check className="size-3.5" /> Exacto
+                <Check className="size-4" /> Exacto
               </button>
               {quickAmounts.filter(a => Math.abs(a - total) > 0.01).map(amt => (
                 <QuickAmountButton

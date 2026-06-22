@@ -82,27 +82,27 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       </div>
 
       {/* Quantity stepper — refined pill design */}
-      <div className="flex items-center gap-1 bg-muted/30 rounded-xl border border-border/20 shadow-xs">
+      <div className="flex items-center gap-0.5 bg-muted/30 rounded-xl border border-border/20 shadow-xs">
         <button
           className={cn(
-            'size-9 flex items-center justify-center rounded-l-xl transition-all duration-100',
+            'size-11 flex items-center justify-center rounded-l-xl transition-all duration-100',
             'text-muted-foreground hover:bg-muted/40 active:scale-90 active:bg-muted/60',
           )}
           onClick={() => item.quantity <= 1 ? onRemove(item.id) : onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity <= 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
         >
-          {item.quantity <= 1 ? <Trash2 className="size-3.5 text-danger/50" /> : <Minus className="size-3.5" />}
+          {item.quantity <= 1 ? <Trash2 className="size-4 text-danger/50" /> : <Minus className="size-4" />}
         </button>
-        <span className="w-9 text-center text-sm font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
+        <span className="w-12 text-center text-sm font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
         <button
           className={cn(
-            'size-9 flex items-center justify-center rounded-r-xl transition-all duration-100',
+            'size-11 flex items-center justify-center rounded-r-xl transition-all duration-100',
             'text-muted-foreground hover:bg-muted/40 active:scale-90 active:bg-muted/60',
           )}
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-4" />
         </button>
       </div>
 

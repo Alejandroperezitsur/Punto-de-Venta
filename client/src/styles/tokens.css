@@ -34,6 +34,12 @@
   --tracking-wide:     0.04em;
   --tracking-wider:    0.06em;
 
+  /* Touch & spacing polish */
+  --touch-target-min: 2.75rem;
+  --touch-target-opt: 3.125rem;
+  --touch-target-lg:  3.5rem;
+  --touch-target-xl:  4.25rem;
+
   /* ── 8px Grid Spacing System ── */
   --space-0:   0px;
   --space-0-5: 0.125rem;
@@ -131,11 +137,6 @@
   --control-lg:  3.125rem;
   --control-xl:  3.5rem;
   --control-2xl: 4.25rem;
-
-  --touch-target-min: 2.75rem;
-  --touch-target-opt: 3.125rem;
-  --touch-target-lg:  3.5rem;
-  --touch-target-xl:  4.25rem;
 
   /* ── Layout ── */
   --header-height:       3rem;

@@ -95,9 +95,9 @@ const CustomersView = () => {
     { label: 'RFC', key: 'rfc', hideOnMobile: true, render: (row) => row.rfc || <span className="text-muted-foreground/40">—</span> },
     { label: '', key: 'actions', width: '48px', render: (row) => (
       <button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(row.id); }}
-        className="size-8 flex items-center justify-center rounded-lg text-muted-foreground/50 hover:text-danger hover:bg-danger/10 transition-all duration-200 touch-target opacity-0 group-hover:opacity-100"
+        className="size-9 flex items-center justify-center rounded-lg text-muted-foreground/50 hover:text-danger hover:bg-danger/10 transition-all duration-200 touch-target opacity-0 group-hover:opacity-100"
         aria-label="Eliminar cliente">
-        <Trash2 className="size-3.5" />
+        <Trash2 className="size-4" />
       </button>
     )},
   ];
@@ -128,8 +128,8 @@ const CustomersView = () => {
 
       {showForm && (
         <Card variant="glass" className="p-6 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
-          <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/60 to-primary/30" />
+          <h3 className="text-base font-bold mb-5 flex items-center gap-2.5">
             <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
               <UserPlus className="size-3.5 text-primary" />
             </div>
@@ -148,11 +148,11 @@ const CustomersView = () => {
               <Input placeholder="+52 555 123 4567" value={form.phone}
                 onChange={e => setForm({ ...form, phone: e.target.value })} label="Teléfono" />
             </div>
-            <div className="md:col-span-2">
+            <div className="md:col-span-4">
               <Input placeholder="RFC (opcional)" value={form.rfc}
                 onChange={e => setForm({ ...form, rfc: e.target.value })} label="RFC" />
             </div>
-            <div className="flex gap-2 justify-end md:col-span-2">
+          <div className="flex gap-2 justify-end md:col-span-4">
               <Button type="button" variant="ghost" onClick={() => setShowForm(false)} size="sm">Cancelar</Button>
               <Button type="submit" isLoading={saving} disabled={!form.name.trim()} className="font-bold" size="sm">
                 <Plus className="size-3.5 mr-1" /> Registrar

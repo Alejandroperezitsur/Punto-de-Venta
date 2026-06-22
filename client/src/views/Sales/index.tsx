@@ -541,7 +541,7 @@ const SalesView = React.memo(function SalesView() {
               <ShoppingBag className="size-4 text-primary" />
             </div>
             <span className="text-foreground">Carrito</span>
-            <span className="bg-primary/10 text-primary text-[10px] px-2.5 py-0.5 rounded-full font-bold min-w-[24px] text-center tabular-nums ring-1 ring-primary/8" aria-live="polite">
+            <span className="bg-primary/12 text-primary text-[11px] px-2.5 py-0.5 rounded-full font-bold min-w-[24px] text-center tabular-nums ring-1 ring-primary/10" aria-live="polite">
               {items.length}
             </span>
           </h2>
@@ -551,49 +551,49 @@ const SalesView = React.memo(function SalesView() {
             {heldTickets.length > 0 && (
               <button
                 onClick={() => setShowHeldTickets(!showHeldTickets)}
-                className="p-1.5 rounded-lg text-pos-hold hover:bg-pos-hold/8 transition-colors touch-target"
+                className="size-9 rounded-lg text-pos-hold hover:bg-pos-hold/8 transition-colors flex items-center justify-center touch-target shrink-0"
                 title={`Tickets en espera (${heldTickets.length})`}
               >
-                <Clock className="size-3.5" />
+                <Clock className="size-4" />
               </button>
             )}
             <button
               onClick={() => { if (hasItems) { holdCurrentTicket(); toast('Ticket en pausa', 'info'); } }}
               disabled={!hasItems}
-              className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-25 touch-target"
+              className="size-9 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-25 flex items-center justify-center touch-target shrink-0"
               title="Pausar ticket"
             >
-              <Pause className="size-3.5" />
+              <Pause className="size-4" />
             </button>
             <button
               onClick={() => setDiscountOpen(true)}
               disabled={!hasItems}
-              className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-25 touch-target"
+              className="size-9 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-25 flex items-center justify-center touch-target shrink-0"
               title="Descuento"
             >
-              <Percent className="size-3.5" />
+              <Percent className="size-4" />
             </button>
             <button
               onClick={() => setCustomerModalOpen(true)}
-              className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors touch-target"
+              className="size-9 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-muted/25 transition-colors flex items-center justify-center touch-target shrink-0"
               title="Agregar cliente"
             >
-              <UserPlus className="size-3.5" />
+              <UserPlus className="size-4" />
             </button>
-            <div className="w-px h-3.5 bg-border/25 mx-1" />
+            <div className="w-px h-4 bg-border/25 mx-0.5 shrink-0" />
             <button
               onClick={() => { if (hasItems) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } }}
               disabled={!hasItems}
-              className="p-1.5 rounded-lg text-muted-foreground/30 hover:text-danger hover:bg-danger/5 transition-colors disabled:opacity-25 touch-target"
+              className="size-9 rounded-lg text-muted-foreground/30 hover:text-danger hover:bg-danger/5 transition-colors disabled:opacity-25 flex items-center justify-center touch-target shrink-0"
               title="Vaciar carrito"
             >
-              <Trash2 className="size-3.5" />
+              <Trash2 className="size-4" />
             </button>
           </div>
         </div>
 
         {/* Cart items list */}
-        <div className="flex-1 overflow-y-auto px-2.5 py-1.5" role="region" aria-labelledby="cart-heading" aria-live="polite">
+        <div className="flex-1 overflow-y-auto px-3 py-2" role="region" aria-labelledby="cart-heading" aria-live="polite">
           {showHeldTickets && heldTickets.length > 0 && (
             <div className="mb-2 border border-pos-hold/15 rounded-xl bg-pos-hold/5 overflow-hidden">
               <div className="px-3 py-2 border-b border-pos-hold/10 flex items-center justify-between">
@@ -625,7 +625,7 @@ const SalesView = React.memo(function SalesView() {
 
         {/* Discount indicator */}
         {discount > 0 && (
-          <div className="px-4 py-1.5 bg-info/5 border-t border-info/8 flex items-center justify-between text-[11px]">
+          <div className="px-4 py-2 bg-info/5 border-t border-info/10 flex items-center justify-between text-xs">
             <span className="font-semibold text-info flex items-center gap-1.5"><Percent className="size-3" />Descuento</span>
             <span className="font-bold text-info tabular-nums">-{formatMoney(discount)}</span>
           </div>
@@ -639,11 +639,11 @@ const SalesView = React.memo(function SalesView() {
         )}
 
         {/* Bottom: customer + totals + checkout */}
-        <div className="px-5 py-4 border-t border-border/6 space-y-3 shrink-0 bg-surface-glass/20 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-5 py-4 border-t border-border/8 space-y-3 shrink-0 bg-surface-glass/25 pb-[env(safe-area-inset-bottom,0.75rem)]">
           {/* Customer selector */}
           <div className="flex items-center gap-2">
             {selectedCustomer ? (
-              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-info/5 border border-info/12 text-xs">
+              <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-info/6 border border-info/15 text-xs">
                 <div className="size-6 rounded-full bg-info/10 flex items-center justify-center shrink-0">
                   <span className="text-[10px] font-bold text-info">{selectedCustomer.name.charAt(0).toUpperCase()}</span>
                 </div>

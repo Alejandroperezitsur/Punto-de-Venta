@@ -15,10 +15,10 @@ const variants = {
 };
 
 const sizes = {
-  xs: 'px-1.5 py-0.5 text-[9px]',
-  sm: 'px-2 py-0.5 text-[10px]',
-  md: 'px-2.5 py-1 text-[11px]',
-  lg: 'px-3 py-1 text-xs',
+  xs: 'px-1.5 py-0.5 text-[10px]',
+  sm: 'px-2.5 py-0.5 text-[11px]',
+  md: 'px-3 py-1 text-xs',
+  lg: 'px-3.5 py-1 text-sm',
 };
 
 interface BadgeProps {
@@ -40,11 +40,12 @@ function Badge({ variant = 'default', size = 'sm', dot, pulse, className, childr
         sizes[size],
         className,
       )}
+      style={{ lineHeight: '1.2' }}
     >
       {dot && (
         <span
           className={cn(
-            'size-1.5 rounded-full',
+            'size-1.5 rounded-full shrink-0',
             pulse && 'animate-pulse',
           )}
         />
