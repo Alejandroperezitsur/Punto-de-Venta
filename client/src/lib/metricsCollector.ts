@@ -187,7 +187,7 @@ class MetricsCollector {
     );
   }
 
-  private encodeKey(name: string, labels: Record<string, string>): string {
+  encodeKey(name: string, labels: Record<string, string>): string {
     const sorted = Object.entries(labels).sort(([a], [b]) => a.localeCompare(b));
     return `${name}{${sorted.map(([k, v]) => `${k}="${v}"`).join(',')}}`;
   }

@@ -282,7 +282,14 @@ export const syncStateMachine = {
     issues: string[]
   }> {
     const issues: string[] = []
-    const result = {
+    const result: {
+      valid: boolean
+      queueIntegrity: boolean
+      transactionOrdering: boolean
+      staleReplay: boolean
+      orphanedOperations: boolean
+      issues: string[]
+    } = {
       valid: true,
       queueIntegrity: true,
       transactionOrdering: true,

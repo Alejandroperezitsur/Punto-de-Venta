@@ -98,6 +98,8 @@ export class NetworkQualityDetector {
     return this.estimate();
   }
 
+  private packetLossThreshold = 0.1;
+
   private estimate(): NetworkQuality {
     if (this.forcedQuality !== null) {
       return { latencyMs: 0, packetLoss: 0, quality: this.forcedQuality, timestamp: Date.now() };
@@ -111,7 +113,7 @@ export class NetworkQualityDetector {
     const loss = failures / recent.length;
     let quality: NetworkQuality['quality'];
     if (loss > 0.5) quality = 'dead';
-    else if (loss > (this.packetLossThreshold || 0.1) || avgLatency > 3000) quality = 'poor';
+    else if (loss > this.packetLossThreshold || avgLatency > 3000) quality = 'poor';
     else if (avgLatency > 1000) quality = 'degraded';
     else quality = 'good';
     return { latencyMs: Math.round(avgLatency), packetLoss: loss, quality, timestamp: Date.now() };

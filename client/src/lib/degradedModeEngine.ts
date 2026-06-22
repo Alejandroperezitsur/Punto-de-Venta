@@ -1,5 +1,5 @@
 import { createLogger } from './structuredLogger'
-import { getDB } from './db'
+import { getDB, type QueueItemType } from './db'
 import { incidentForensics } from './incidentForensics'
 import { metrics } from './metricsCollector'
 
@@ -482,7 +482,7 @@ export const degradedModeEngine = {
         if (!item) break
         await db.put('queueItems', {
           id: item.id,
-          type: item.type,
+          type: item.type as QueueItemType,
           priority: 0,
           payload: item.payload,
           idempotencyKey: `mem-fallback-${item.id}`,

@@ -36,7 +36,7 @@ export class LifecycleGuard {
   setTimeout(handler: TimerHandler, timeout?: number): ReturnType<typeof setTimeout> {
     const id = setTimeout(() => {
       this.timers.delete(id)
-      if (this.mounted) handler()
+      if (this.mounted) (handler as Function)()
     }, timeout) as unknown as ReturnType<typeof setTimeout>
     this.timers.add(id)
     return id
@@ -44,7 +44,7 @@ export class LifecycleGuard {
 
   setInterval(handler: TimerHandler, timeout?: number): ReturnType<typeof setInterval> {
     const id = setInterval(() => {
-      if (this.mounted) handler()
+      if (this.mounted) (handler as Function)()
     }, timeout) as unknown as ReturnType<typeof setInterval>
     this.timers.add(id)
     return id

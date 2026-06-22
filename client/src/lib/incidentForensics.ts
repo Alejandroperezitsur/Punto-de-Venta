@@ -261,7 +261,7 @@ export const incidentForensics = {
     for (const event of events) {
       let severity: 'critical' | 'warning' | 'info' = 'info'
       let recovered = false
-      let description = event.type
+      let description: string = event.type
 
       switch (event.type) {
         case 'critical_error':

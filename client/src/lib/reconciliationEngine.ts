@@ -338,3 +338,18 @@ export async function resolveConflict(
 
   logger.info(`Conflict resolved for ${productId}: ${resolution}`);
 }
+
+export async function reconcileStock(_storeId: string): Promise<{ reconciled: number; conflicts: number }> {
+  logger.info('Stock reconciliation not yet implemented');
+  return { reconciled: 0, conflicts: 0 };
+}
+
+export async function getConflictHistory(_storeId: string, _limit = 50): Promise<ReconciliationLog[]> {
+  try {
+    const db = await getDB();
+    const logs = await db.getAll('reconciliationLogs');
+    return logs.slice(-_limit);
+  } catch {
+    return [];
+  }
+}

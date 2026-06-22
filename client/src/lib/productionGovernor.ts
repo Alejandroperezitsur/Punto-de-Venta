@@ -34,6 +34,7 @@ export interface RecoveryGovernorState {
   lastRepairAt: number | null
   governorLocked: boolean
   governorLockedUntil: number | null
+  telemetryCountThisMinute: number
 }
 
 export interface RuntimeSafetyState {
@@ -88,6 +89,7 @@ const governor: RecoveryGovernorState = {
   selfHealFrequency: 0, selfHealLimitPerHour: MAX_SELF_HEAL_PER_HOUR,
   lastRecoveryAt: null, lastRepairAt: null,
   governorLocked: false, governorLockedUntil: null,
+  telemetryCountThisMinute: 0,
 }
 
 const safety: RuntimeSafetyState = {

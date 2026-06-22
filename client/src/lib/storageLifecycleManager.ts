@@ -226,7 +226,7 @@ export const storageLifecycleManager = {
     const actions: CleanupAction[] = []
     const now = Date.now()
 
-    const cleanupOps = [
+    const cleanupOps: Array<{ store: 'apiCache' | 'metrics' | 'syncLog'; retention: number; action: string; field: string }> = [
       {
         store: 'apiCache',
         retention: CACHE_RETENTION,

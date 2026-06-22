@@ -14,7 +14,7 @@ async function getKey(): Promise<CryptoKey> {
     sessionStorage.setItem('encryption_key', Array.from(keyData).join(','));
   }
 
-  cachedKey = await crypto.subtle.importKey('raw', keyData, ALGORITHM, false, ['encrypt', 'decrypt']);
+  cachedKey = await crypto.subtle.importKey('raw', keyData as BufferSource, ALGORITHM, false, ['encrypt', 'decrypt']);
   return cachedKey;
 }
 
