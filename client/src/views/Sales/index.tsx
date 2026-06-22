@@ -31,7 +31,7 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'w-full min-h-[4rem] lg:min-h-[4.75rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98] relative overflow-hidden',
+        'group w-full min-h-[4rem] lg:min-h-[4.75rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98] relative overflow-hidden',
         hasItems && !isProcessing
           ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-0.5 animate-border-glow'
           : 'bg-muted/20 text-muted-foreground/15 cursor-not-allowed',
@@ -514,7 +514,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 min-h-[4rem] lg:min-h-[4.5rem] px-4 text-xs font-bold rounded-2xl bg-warning/6 text-warning border border-warning/10 hover:bg-warning/10 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
+            className="shrink-0 h-[4.5rem] px-4 text-xs font-bold rounded-2xl bg-warning/8 text-warning border border-warning/15 hover:bg-warning/12 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -524,15 +524,15 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         {/* Product catalog grid */}
-        <div className="flex-1 rounded-2xl border border-border/10 bg-card p-3.5 overflow-y-auto shadow-sm">
+        <div className="flex-1 rounded-2xl border border-border/10 bg-card p-3 lg:p-4 overflow-y-auto shadow-sm">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
       {/* ===== CART PANEL (Right ~40%) ===== */}
       <div
-        className="flex flex-col rounded-2xl border border-border/10 bg-card/95 backdrop-blur-sm h-full overflow-hidden pos-cart-panel shadow-sm"
-        style={{ flexBasis: '40%', minWidth: '280px', maxWidth: '420px' }}
+        className="flex flex-col rounded-2xl border border-border/10 bg-card h-full overflow-hidden pos-cart-panel shadow-sm"
+        style={{ flexBasis: '40%', minWidth: '320px', maxWidth: '420px' }}
       >
         {/* Cart header — premium glass */}
         <div className="px-5 py-3.5 border-b border-border/6 flex items-center justify-between shrink-0 backdrop-blur-md bg-surface-glass/40">
@@ -547,7 +547,7 @@ const SalesView = React.memo(function SalesView() {
           </h2>
 
           {/* Quick action icons */}
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-2">
             {heldTickets.length > 0 && (
               <button
                 onClick={() => setShowHeldTickets(!showHeldTickets)}
@@ -580,7 +580,7 @@ const SalesView = React.memo(function SalesView() {
             >
               <UserPlus className="size-3.5" />
             </button>
-            <div className="w-px h-3.5 bg-border/20 mx-1" />
+            <div className="w-px h-3.5 bg-border/25 mx-1" />
             <button
               onClick={() => { if (hasItems) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } }}
               disabled={!hasItems}

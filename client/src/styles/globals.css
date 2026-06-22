@@ -760,7 +760,7 @@ img {
   100% { transform: scaleX(0); transform-origin: right; }
 }
 .animate-scale-shimmer {
-  animation: scaleShimmer 1.8s var(--ease-in-out) infinite;
+  animation: scaleShimmer 1.8s ease-in-out infinite;
 }
 
 /* Border glow animation */
@@ -794,24 +794,25 @@ img {
 }
 [data-mode="dark"] .glass-card,
 [data-theme="dark"] .glass-card {
-  background: hsl(var(--surface) / 0.35);
-  border-color: hsl(var(--border) / 0.10);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 0 hsl(var(--surface) / 0.15);
+  background: hsl(var(--surface) / 0.45);
+  border-color: hsl(var(--border) / 0.14);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 0 hsl(var(--surface) / 0.18);
 }
 [data-mode="dark"] .glass-card:hover,
 [data-theme="dark"] .glass-card:hover {
-  background: hsl(var(--surface) / 0.45);
-  border-color: hsl(var(--border) / 0.18);
+  background: hsl(var(--surface) / 0.55);
+  border-color: hsl(var(--border) / 0.22);
 }
 [data-mode="dark"] .premium-surface,
 [data-theme="dark"] .premium-surface {
   background: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%);
-  border-color: hsl(var(--border-accent) / 0.18);
+  border-color: hsl(var(--border-accent) / 0.22);
+  box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.04);
 }
 [data-mode="dark"] .enterprise-panel,
 [data-theme="dark"] .enterprise-panel {
   background: hsl(var(--surface-panel));
-  border-color: hsl(var(--border-accent) / 0.20);
+  border-color: hsl(var(--border-accent) / 0.24);
 }
 
 /* ── Dark Mode Scrollbar ── */
@@ -825,10 +826,7 @@ img {
 }
 
 /* ── Dark Mode Alternating Rows ── */
-[data-mode="dark"] tr:nth-child(even),
-[data-theme="dark"] tr:nth-child(even) {
-  background-color: hsl(var(--muted) / 0.5);
-}
+/* Disabled: Table component handles its own striping via bg-muted/20 */
 
 /* ── Improved Focus Ring for Dark Mode ── */
 [data-mode="dark"] :focus-visible,
@@ -839,28 +837,34 @@ img {
 /* ── Dark Mode Component Glass Overrides ── */
 [data-mode="dark"] .btn-glass,
 [data-theme="dark"] .btn-glass {
-  background: hsl(var(--surface) / 0.30);
-  border-color: hsl(var(--border) / 0.18);
+  background: hsl(var(--surface) / 0.40);
+  border-color: hsl(var(--border) / 0.22);
 }
 [data-mode="dark"] .btn-glass:hover,
 [data-theme="dark"] .btn-glass:hover {
-  background: hsl(var(--surface) / 0.40);
-  border-color: hsl(var(--border) / 0.25);
+  background: hsl(var(--surface) / 0.52);
+  border-color: hsl(var(--border) / 0.30);
 }
 [data-mode="dark"] .card-glass,
 [data-theme="dark"] .card-glass {
-  background: hsl(var(--surface) / 0.40);
-  border-color: hsl(var(--border) / 0.12);
+  background: hsl(var(--surface) / 0.50);
+  border-color: hsl(var(--border) / 0.16);
 }
 [data-mode="dark"] .table-glass,
 [data-theme="dark"] .table-glass {
-  background: hsl(var(--surface-glass) / 0.30);
-  border-color: hsl(var(--border) / 0.12);
+  background: hsl(var(--surface-glass) / 0.40);
+  border-color: hsl(var(--border) / 0.16);
 }
 [data-mode="dark"] .badge-glass,
 [data-theme="dark"] .badge-glass {
-  background: hsl(var(--surface) / 0.35);
-  border-color: hsl(var(--border) / 0.15);
+  background: hsl(var(--surface) / 0.45);
+  border-color: hsl(var(--border) / 0.20);
+}
+
+/* ── Dark Mode Numpad Key Override ── */
+[data-mode="dark"] button:has(.haptic-press),
+[data-theme="dark"] button:has(.haptic-press) {
+  background: hsl(var(--surface-glass) / 0.70);
 }
 
 /* ── Dark Mode Table Sticky Header ── */
@@ -872,7 +876,17 @@ img {
 /* ── Dark Mode Modal Backdrop ── */
 [data-mode="dark"] [role="dialog"] ~ div:first-child,
 [data-theme="dark"] [role="dialog"] ~ div:first-child {
-  background-color: hsl(0 0% 0% / 0.55);
+  background-color: hsl(0 0% 0% / 0.65);
+}
+
+/* ── Dark Mode Surface & Border Refinements ── */
+[data-mode="dark"] .border-dashed,
+[data-theme="dark"] .border-dashed {
+  border-color: hsl(var(--border) / 0.25);
+}
+[data-mode="dark"] .bg-card\/95,
+[data-theme="dark"] .bg-card\/95 {
+  background: hsl(var(--card) / 0.98);
 }
 
 /* ── Dark Surface Glass Utility ── */

@@ -184,7 +184,7 @@ const CashControlView = () => {
                         </div>
                         <div className="flex items-end gap-4">
                             <div className="flex-1">
-                                <label className="text-xs font-medium mb-1 block">Saldo Inicial</label>
+                                <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Saldo Inicial</label>
                                 <Input
                                     type="number"
                                     step="0.01"
@@ -251,7 +251,7 @@ const CashControlView = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium mb-1 block">Monto</label>
+                                <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Monto</label>
                                 <Input
                                     type="number"
                                     step="0.01"
@@ -261,7 +261,7 @@ const CashControlView = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium mb-1 block">Referencia</label>
+                                <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Referencia</label>
                                 <Input
                                     placeholder="Ej: Pago proveedor"
                                     value={actionRef}
@@ -326,7 +326,7 @@ const CashControlView = () => {
                         <p className="text-sm text-muted-foreground">Cuenta tu efectivo físicamente antes de continuar.</p>
 
                         {closeError && (
-                            <div className="bg-danger/10 border border-danger/15 rounded-xl text-danger font-semibold p-3 text-sm">
+                            <div className="bg-danger/12 border border-danger/20 rounded-xl text-danger font-semibold p-3 text-sm">
                                 {closeError}
                             </div>
                         )}

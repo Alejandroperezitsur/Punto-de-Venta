@@ -26,11 +26,11 @@ const variants = {
   'premium':
     'glass-panel text-foreground shadow-glow hover:shadow-lg active:shadow-md',
   'glass':
-    'backdrop-blur-md bg-surface-glass/50 text-foreground border border-white/10 hover:bg-surface-glass/60 hover:border-white/15 active:bg-surface-glass/40 shadow-sm hover:shadow-md btn-glass',
+    'backdrop-blur-md bg-surface-glass/55 text-foreground border border-white/12 hover:bg-surface-glass/65 hover:border-white/18 active:bg-surface-glass/45 shadow-sm hover:shadow-md btn-glass',
   'hero':
     'text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md',
   'dense':
-    'bg-card border border-border/30 text-foreground hover:bg-muted/40 hover:border-border/50 active:bg-muted/60 shadow-xs',
+    'bg-card border border-border/35 text-foreground hover:bg-muted/40 hover:border-border/50 active:bg-muted/60 shadow-xs',
 };
 
 const sizes = {
@@ -66,9 +66,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-          'inline-flex items-center justify-center font-semibold transition-all duration-75',
+          'inline-flex items-center justify-center font-semibold transition-all duration-150',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-card',
-          'disabled:pointer-events-none disabled:opacity-40 select-none',
+          'disabled:pointer-events-none disabled:opacity-50 select-none',
           'active:scale-[0.97]',
           'touch-target',
           variants[variant],

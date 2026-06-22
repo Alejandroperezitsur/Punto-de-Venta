@@ -16,7 +16,7 @@ import {
 const SettingsSection = ({ title, icon: Icon, children }) => (
   <Card variant="glass" className="p-6 space-y-4 relative overflow-hidden transition-all duration-200">
     <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 to-transparent opacity-0 hover:opacity-100 transition-opacity" />
-    <div className="flex items-center gap-3 border-b border-border/12 pb-3 mb-2">
+    <div className="flex items-center gap-3 border-b border-border/15 pb-3 mb-2">
       <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
         <Icon className="size-4 text-primary" />
       </div>
@@ -136,7 +136,7 @@ const BusinessSettings = () => {
       <SettingsSection title="Información del Negocio" icon={Store}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-medium mb-1 block">Nombre del Negocio</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Nombre del Negocio</label>
             <Input
               placeholder="Mi Tienda"
               value={settings.business_name || ''}
@@ -145,7 +145,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">RFC</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">RFC</label>
             <Input
               placeholder="XAXX010101000"
               value={settings.business_rfc || ''}
@@ -153,7 +153,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs font-medium mb-1 block">Dirección</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Dirección</label>
             <Input
               placeholder="Calle, Número, Colonia, CP, Ciudad"
               value={settings.business_address || ''}
@@ -162,7 +162,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Teléfono</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Teléfono</label>
             <Input
               placeholder="+52 55 1234 5678"
               value={settings.business_phone || ''}
@@ -171,7 +171,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Email</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Email</label>
             <Input
               type="email"
               placeholder="contacto@mitienda.com"
@@ -181,7 +181,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="text-xs font-medium mb-1 block">Logo del Negocio</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Logo del Negocio</label>
             <div className="flex items-center gap-4">
               {settings.business_logo ? (
                 <img src={settings.business_logo} alt="Logo" className="h-16 w-16 object-contain rounded-lg border border-border" />
@@ -226,7 +226,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Nombre del Impuesto</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Nombre del Impuesto</label>
             <Input
               placeholder="IVA"
               value={settings.tax_name || 'IVA'}
@@ -234,7 +234,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Tasa de Impuesto (%)</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Tasa de Impuesto (%)</label>
             <Input
               type="number"
               step="0.01"
@@ -272,7 +272,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Mensaje de Pie</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Mensaje de Pie</label>
             <Input
               placeholder="¡Gracias por su compra!"
               value={settings.ticket_footer || ''}
@@ -281,7 +281,7 @@ const BusinessSettings = () => {
           </div>
         </div>
         <div className="mt-4">
-          <label className="text-xs font-medium mb-2 block">Vista Previa del Ticket</label>
+          <label className="text-xs font-semibold text-muted-foreground/75 mb-2 block">Vista Previa del Ticket</label>
           <div className="bg-muted border border-border rounded-2xl p-6 font-mono text-sm max-w-xs mx-auto">
             <div className="text-center border-b border-dashed border-border pb-3 mb-3">
               <p className="font-bold">{settings.business_name || 'Mi Negocio'}</p>
@@ -299,7 +299,7 @@ const BusinessSettings = () => {
       <SettingsSection title="Apariencia" icon={Palette}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-xs font-medium mb-1 block">Tema</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Tema</label>
             <Select 
               options={themes.map(t => ({value: t, label: t.charAt(0).toUpperCase() + t.slice(1)}))}
               value={theme}
@@ -308,7 +308,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Color Primario</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Color Primario</label>
             <input
               type="color"
               className="h-10 w-full rounded-md border border-border cursor-pointer bg-card"
@@ -334,7 +334,7 @@ const BusinessSettings = () => {
       <SettingsSection title="Personalización de Marca" icon={Store}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-medium mb-1 block">Nombre de la Aplicación</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Nombre de la Aplicación</label>
             <Input
               placeholder="POS Pro"
               value={settings.app_name || 'POS Pro'}
@@ -342,7 +342,7 @@ const BusinessSettings = () => {
             />
           </div>
           <div>
-            <label className="text-xs font-medium mb-1 block">Copyright del Footer</label>
+            <label className="text-xs font-semibold text-muted-foreground/75 mb-1 block">Copyright del Footer</label>
             <Input
               placeholder="© 2024 Mi Empresa"
               value={settings.app_copyright || ''}

@@ -110,7 +110,7 @@ const BackupsView = () => {
     const columns = [
         {
             key: 'filename',
-            title: 'Nombre',
+            label: 'Nombre',
             sortable: true,
             render: (b) => (
                 <span className="font-mono text-xs">{b.filename}</span>
@@ -118,7 +118,7 @@ const BackupsView = () => {
         },
         {
             key: 'type',
-            title: 'Tipo',
+            label: 'Tipo',
             render: (b) => (
                 <Badge variant={b.type === 'manual' ? 'info' : 'success'}>
                     {b.type === 'manual' ? 'Manual' : 'Automático'}
@@ -127,19 +127,19 @@ const BackupsView = () => {
         },
         {
             key: 'size',
-            title: 'Tamaño',
+            label: 'Tamaño',
             sortable: true,
             render: (b) => formatBytes(b.size),
         },
         {
             key: 'created_at',
-            title: 'Fecha',
+            label: 'Fecha',
             sortable: true,
             render: (b) => new Date(b.created_at).toLocaleString(),
         },
         {
             key: 'actions',
-            title: 'Acciones',
+            label: 'Acciones',
             className: 'text-right',
             render: (b) => (
                 <div className="flex justify-end gap-2">
@@ -177,9 +177,9 @@ const BackupsView = () => {
                 </Button>
             </ViewHeader>
 
-            <Card className="p-4 bg-warning/6 border-warning/15 flex items-start gap-3 rounded-xl">
-                <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
-                <div className="text-sm text-amber-800">
+            <Card className="p-4 bg-warning/8 border-warning/20 flex items-start gap-3 rounded-xl">
+                <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
+                <div className="text-sm text-foreground/80">
                     <p className="font-semibold">Importante</p>
                     <p>Los backups contienen TODA la información del sistema: productos, ventas, clientes, configuración y usuarios.</p>
                 </div>
@@ -193,7 +193,7 @@ const BackupsView = () => {
                         Exportar Configuración
                     </Button>
                 </div>
-                <p className="text-xs text-muted-foreground/60 mt-2">
+                <p className="text-xs text-muted-foreground/65 mt-2">
                     Exporta solo la configuración del sistema (sin datos de ventas ni productos).
                 </p>
             </Card>

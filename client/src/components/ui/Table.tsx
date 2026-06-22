@@ -80,9 +80,9 @@ function Table<T extends Record<string, any>>({
   };
 
   const variantStyles = {
-    default: 'bg-card border border-border/40 rounded-xl overflow-hidden shadow-xs',
-    glass: 'backdrop-blur-lg bg-surface-glass/40 border border-border/20 rounded-xl overflow-hidden shadow-sm table-glass',
-    bordered: 'border border-border/30 rounded-xl overflow-hidden',
+    default: 'bg-card border border-border/45 rounded-xl overflow-hidden shadow-xs',
+    glass: 'backdrop-blur-lg bg-surface-glass/45 border border-border/20 rounded-xl overflow-hidden shadow-sm table-glass',
+    bordered: 'border border-border/35 rounded-xl overflow-hidden',
   };
 
   return (
@@ -192,7 +192,7 @@ function Table<T extends Record<string, any>>({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border/20 bg-muted/25">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border/20 bg-muted/30">
           <span className="text-xs text-muted-foreground/70">
             {filtered.length} registro{(filtered.length !== 1) ? 's' : ''}
           </span>
@@ -203,7 +203,7 @@ function Table<T extends Record<string, any>>({
               className={cn(
                 'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all',
                 'hover:bg-muted/50 active:bg-muted',
-                'disabled:opacity-30 disabled:cursor-not-allowed',
+                'disabled:opacity-40 disabled:cursor-not-allowed',
               )}
             >
               Anterior
@@ -213,7 +213,7 @@ function Table<T extends Record<string, any>>({
                 key={i}
                 onClick={() => setPage(i)}
                 className={cn(
-                  'size-7 rounded-md text-xs font-medium transition-all',
+                  'size-8 rounded-md text-xs font-medium transition-all',
                   i === page
                     ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                     : 'hover:bg-muted/50 text-muted-foreground',
@@ -228,7 +228,7 @@ function Table<T extends Record<string, any>>({
               className={cn(
                 'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all',
                 'hover:bg-muted/50 active:bg-muted',
-                'disabled:opacity-30 disabled:cursor-not-allowed',
+                'disabled:opacity-40 disabled:cursor-not-allowed',
               )}
             >
               Siguiente

@@ -88,7 +88,7 @@ const AuditsView = () => {
         />
         <button
           onClick={() => setSortDir(sortDir === 'desc' ? 'asc' : 'desc')}
-          className="p-2 rounded-lg border border-border/30 hover:bg-muted/50 backdrop-blur-sm transition-colors"
+          className="p-2 rounded-lg border border-border/35 hover:bg-muted/50 backdrop-blur-sm transition-colors"
           title="Cambiar orden"
         >
           <ArrowUpDown className="h-4 w-4" />
@@ -104,8 +104,8 @@ const AuditsView = () => {
             className={cn(
               'px-3 py-1.5 text-xs font-medium rounded-full border transition-colors',
               activeFilter === chip
-                ? 'bg-primary/10 border-primary/25 text-primary'
-                : 'bg-surface-glass/40 border-border/15 text-muted-foreground hover:border-primary/20 hover:text-foreground'
+                ? 'bg-primary/12 border-primary/30 text-primary'
+                : 'bg-surface-glass/50 border-border/20 text-muted-foreground hover:border-primary/25 hover:text-foreground'
             )}
           >
             {chip}
@@ -118,7 +118,7 @@ const AuditsView = () => {
           columns={[
             {
               key: 'date',
-              title: 'Fecha/Hora',
+              label: 'Fecha/Hora',
               render: (row) => (
                 <span className="font-mono text-xs text-muted-foreground">
                   {new Date(row.created_at).toLocaleString()}
@@ -127,7 +127,7 @@ const AuditsView = () => {
             },
             {
               key: 'action',
-              title: 'Acción',
+              label: 'Acción',
               render: (row) => (
                 <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${getActionBadge(row.action)}`}>
                   {row.action}
@@ -136,7 +136,7 @@ const AuditsView = () => {
             },
             {
               key: 'entity',
-              title: 'Entidad',
+              label: 'Entidad',
               render: (row) => (
                 <span className="text-muted-foreground">
                   {row.entity_type} #{row.entity_id}
@@ -145,7 +145,7 @@ const AuditsView = () => {
             },
             {
               key: 'user',
-              title: 'Usuario',
+              label: 'Usuario',
               render: (row) => (
                 <span className="inline-flex items-center gap-1">
                   <span className="size-5 rounded-full bg-primary/8 flex items-center justify-center text-[9px] font-bold text-primary">{row.user_id}</span>
@@ -154,7 +154,7 @@ const AuditsView = () => {
             },
             {
               key: 'details',
-              title: 'Detalles',
+              label: 'Detalles',
               render: (row) => {
                 if (!row.details) return '-';
                 try {

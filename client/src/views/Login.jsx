@@ -49,7 +49,7 @@ export default function Login() {
       {/* Theme toggle */}
       <button
         onClick={toggleDark}
-        className="absolute top-5 right-5 p-3 rounded-xl text-muted-foreground/50 hover:text-foreground hover:bg-muted/25 backdrop-blur-md border border-border/10 transition-all z-10 shadow-sm"
+        className="absolute top-5 right-5 p-3 rounded-xl text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 backdrop-blur-md border border-border/15 transition-all z-10 shadow-sm"
         aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
       >
         {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -57,7 +57,7 @@ export default function Login() {
 
       {/* Login card */}
       <div className="relative w-full max-w-md px-4">
-        <div className="glass-card p-8 sm:p-10 shadow-2xl">
+        <div className="glass-card p-8 sm:p-10 shadow-2xl animate-fade-up">
           {/* Top accent line */}
           <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
 
@@ -69,14 +69,14 @@ export default function Login() {
             <h1 className="text-2xl font-extrabold text-foreground tracking-tight">
               POS Pro
             </h1>
-            <p className="text-sm text-muted-foreground/60 mt-1 font-medium">
+            <p className="text-sm text-muted-foreground/70 mt-1 font-medium">
               Punto de Venta Enterprise
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-5 px-4 py-3 rounded-xl bg-danger/10 border border-danger/15 text-sm font-medium text-danger flex items-center gap-2">
+            <div className="mb-5 px-4 py-3 rounded-xl bg-danger/15 border border-danger/20 text-sm font-medium text-danger flex items-center gap-2">
               <span className="size-1.5 rounded-full bg-danger shrink-0" />
               {error}
             </div>
@@ -84,7 +84,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground/60 mb-2 ml-0.5">
+              <label className="block text-xs font-semibold text-muted-foreground/70 mb-2 ml-0.5">
                 Usuario
               </label>
               <input
@@ -106,7 +106,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground/60 mb-2 ml-0.5">
+              <label className="block text-xs font-semibold text-muted-foreground/70 mb-2 ml-0.5">
                 Contraseña
               </label>
               <div className="relative">
@@ -128,7 +128,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted/20"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted/25"
                   tabIndex={-1}
                   aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
                 >
@@ -144,7 +144,7 @@ export default function Login() {
                 'w-full h-[var(--control-xl)] rounded-xl font-bold text-sm text-primary-foreground mt-2',
                 'transition-all duration-200 active:scale-[0.98]',
                 'shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25',
-                'disabled:opacity-40 disabled:cursor-not-allowed',
+                'disabled:opacity-70 disabled:cursor-not-allowed',
                 loading ? 'bg-primary/80' : 'bg-primary hover:bg-primary/90',
               )}
             >
@@ -159,7 +159,7 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-muted-foreground/35 mt-7 font-medium">
+          <p className="text-center text-[11px] text-muted-foreground/45 mt-7 font-medium">
             POS Pro v0.1 · Punto de Venta Enterprise
           </p>
         </div>

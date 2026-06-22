@@ -109,7 +109,7 @@
   --ring-h: 220; --ring-s: 62%; --ring-l: 58%;
 
   --muted-h: 222; --muted-s: 12%; --muted-l: 13%;
-  --muted-foreground-h: 215; --muted-foreground-s: 10%; --muted-foreground-l: 58%;
+  --muted-foreground-h: 215; --muted-foreground-s: 12%; --muted-foreground-l: 62%;
 
   --pos-checkout-h: 152; --pos-checkout-s: 54%; --pos-checkout-l: 48%;
   --pos-hold-h: 36; --pos-hold-s: 72%; --pos-hold-l: 55%;
@@ -124,16 +124,21 @@
   --surface-sidebar-active-h: 222; --surface-sidebar-active-s: 50%; --surface-sidebar-active-l: 16%;
 
   /* Dark mode glass overrides */
-  --glass-bg-opacity: 0.40;
-  --glass-border-opacity: 0.10;
+  --glass-bg-opacity: 0.50;
+  --glass-border-opacity: 0.14;
   --glass-blur: 16px;
-  --glass-saturation: 140%;
+  --glass-saturation: 150%;
 
   --chart-1-h: 220; --chart-1-s: 66%; --chart-1-l: 62%;
   --chart-2-h: 152; --chart-2-s: 54%; --chart-2-l: 56%;
   --chart-3-h: 28;  --chart-3-s: 72%; --chart-3-l: 60%;
   --chart-4-h: 280; --chart-4-s: 54%; --chart-4-l: 64%;
   --chart-5-h: 350; --chart-5-s: 60%; --chart-5-l: 60%;
+
+  /* Dark mode gradient overrides */
+  --gradient-checkout: linear-gradient(135deg, hsl(var(--pos-checkout)) 0%, hsl(var(--pos-checkout) / 0.80) 100%);
+  --gradient-success: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.80) 100%);
+  --gradient-surface: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--card)) 100%);
 }
 
 /* ── Composite HSL Variables ── */

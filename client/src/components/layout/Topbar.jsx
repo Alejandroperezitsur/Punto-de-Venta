@@ -129,8 +129,8 @@ export const Topbar = React.memo(function Topbar() {
 
         {/* Breadcrumb-style page path */}
         <nav className="hidden sm:flex items-center gap-1.5 min-w-0 group" aria-label="Breadcrumb">
-          <span className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.1em] group-hover:text-muted-foreground/60 transition-colors cursor-default">{breadcrumb[0]}</span>
-          <ChevronRight className="size-2.5 text-muted-foreground/25 shrink-0" />
+          <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.1em] group-hover:text-muted-foreground/70 transition-colors cursor-default">{breadcrumb[0]}</span>
+          <ChevronRight className="size-2.5 text-muted-foreground/30 shrink-0" />
           <span className="text-sm font-bold text-foreground truncate">{breadcrumb[1]}</span>
         </nav>
 
@@ -149,15 +149,15 @@ export const Topbar = React.memo(function Topbar() {
 
       {/* Center: Refined clock with date pill — hidden on small/medium to avoid overlap */}
       <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-2.5">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full backdrop-blur-md bg-surface-glass/30 border border-border/10 shadow-sm">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md bg-surface-glass/40 border border-border/12 shadow-sm hover:bg-surface-glass/60 transition-colors">
           <span className="tabular-nums font-bold text-foreground text-[13px] tracking-tight">{timeStr}</span>
-          <span className="w-px h-3 bg-border/20" />
-          <span className="text-muted-foreground/50 text-[10px] font-medium">{dateStrShort}</span>
+          <span className="w-px h-3 bg-border/25" />
+          <span className="text-muted-foreground/60 text-[11px] font-medium">{dateStrShort}</span>
         </div>
       </div>
 
       {/* Right: Grouped controls */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-2">
         {/* Clock on small/medium screens (inline, not centered) */}
         <div className="lg:hidden flex items-center gap-1.5 mr-2">
           <span className="tabular-nums font-bold text-foreground text-[12px] tracking-tight">{timeStr}</span>
@@ -166,36 +166,36 @@ export const Topbar = React.memo(function Topbar() {
         {/* Search trigger (Cmd+K) */}
         <button
           onClick={() => document.dispatchEvent(new CustomEvent('trigger-command-palette'))}
-          className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-muted-foreground/45 hover:text-foreground hover:bg-muted/25 transition-all touch-target"
+          className="hidden md:flex items-center gap-2 px-2.5 py-2 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-all touch-target"
           aria-label="Buscar (Cmd+K)"
         >
-          <Search className="size-3.5" />
-          <span className="hidden xl:inline text-xs font-medium">Buscar...</span>
-          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/35 bg-muted/35 px-1.5 py-0.5 rounded border border-border/15">
+          <Search className="size-5" />
+          <span className="hidden xl:inline text-sm font-medium">Buscar...</span>
+          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/40 bg-muted/40 px-1.5 py-0.5 rounded border border-border/15">
             <Command className="size-2.5" />K
           </kbd>
         </button>
 
-        <div className="w-px h-4 bg-border/10 mx-1" />
+        <div className="w-px h-4 bg-border/15 mx-0.5" />
 
         <ConnectionStatus />
 
-        <div className="w-px h-4 bg-border/10 mx-1" />
+        <div className="w-px h-4 bg-border/15 mx-0.5" />
 
         <button
           onClick={toggleDark}
-          className="p-2 rounded-lg text-muted-foreground/45 hover:bg-muted/25 hover:text-foreground transition-all touch-target"
+          className="p-2 rounded-lg text-muted-foreground/50 hover:bg-muted/30 hover:text-foreground transition-all touch-target"
           aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
         >
-          {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+          {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>
 
         <button
-          className="p-2 rounded-lg text-muted-foreground/45 hover:bg-muted/25 hover:text-foreground transition-all relative touch-target"
+          className="p-2 rounded-lg text-muted-foreground/50 hover:bg-muted/30 hover:text-foreground transition-all relative touch-target"
           aria-label="Notificaciones"
         >
-          <Bell className="size-3.5" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-danger shadow-sm shadow-danger/20 ring-1 ring-card animate-pulse" />
+          <Bell className="size-5" />
+          <span className="absolute top-[5px] right-[5px] w-2 h-2 rounded-full bg-danger shadow-sm shadow-danger/20 ring-[3px] ring-background" />
         </button>
       </div>
     </header>

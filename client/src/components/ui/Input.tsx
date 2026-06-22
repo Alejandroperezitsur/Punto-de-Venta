@@ -51,7 +51,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'w-full rounded-lg border bg-card text-foreground placeholder:text-muted-foreground/45',
               'transition-all duration-200',
               'focus:outline-none focus:ring-2 focus:ring-ring/35 focus:border-ring/50 focus:shadow-[0_0_0_3px_hsl(var(--ring)/0.08)]',
-              'disabled:opacity-40 disabled:cursor-not-allowed',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
               'file:border-0 file:bg-transparent file:text-sm file:font-medium',
               icon && 'pl-9',
               scannerMode && 'pr-10',
@@ -69,8 +69,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {floating && label && (
             <label
               className={cn(
-                'absolute left-3 transition-all duration-200 pointer-events-none z-10',
-                'text-muted-foreground/50 font-medium',
+                'absolute left-3 transition-all duration-200 pointer-events-none z-20',
+                'text-muted-foreground/55 font-medium',
                 (isFocused || hasValue)
                   ? 'text-[10px] -translate-y-2 top-1.5'
                   : 'text-sm top-1/2 -translate-y-1/2',
@@ -82,7 +82,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
           {/* Scanner mode indicator */}
           {scannerMode && (
-            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary/50 pointer-events-none">
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-primary/60 pointer-events-none">
               <Scan className="size-4" />
             </div>
           )}

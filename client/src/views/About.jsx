@@ -91,7 +91,7 @@ const AboutView = () => {
         <div className="space-y-6 max-w-3xl mx-auto">
             <div className="flex items-center gap-3">
                 <Info className="h-6 w-6 text-primary" />
-                <h1 className="text-2xl font-bold tracking-tight">Acerca de {license?.appName || 'POS Pro'}</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Acerca de {license?.appName || 'POS Pro'}</h1>
             </div>
 
             {/* Hero Card */}
@@ -106,7 +106,7 @@ const AboutView = () => {
                             {getLicenseBadge()}
                         </div>
                         <p className="text-white/80">Sistema Profesional de Punto de Venta</p>
-                        <p className="text-sm text-white/60 mt-2">Versión {license?.appVersion || '1.0.0'}</p>
+                        <p className="text-sm text-muted-foreground/70 mt-2">Versión {license?.appVersion || '1.0.0'}</p>
                     </div>
                 </div>
             </Card>
@@ -119,39 +119,39 @@ const AboutView = () => {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-4 rounded-xl bg-muted/50">
-                        <p className="text-xs text-muted-foreground uppercase">Tipo</p>
+                        <p className="text-xs text-muted-foreground/80 uppercase">Tipo</p>
                         <p className="font-bold capitalize">{license?.type || 'Trial'}</p>
                     </div>
                     <div className="p-4 rounded-xl bg-muted/50">
-                        <p className="text-xs text-muted-foreground uppercase">Estado</p>
-                        <p className={`font-bold ${license?.isValid ? 'text-green-600' : 'text-red-500'}`}>
+                        <p className="text-xs text-muted-foreground/80 uppercase">Estado</p>
+                        <p className={`font-bold ${license?.isValid ? 'text-success' : 'text-danger'}`}>
                             {license?.isValid ? 'Activa' : 'Expirada'}
                         </p>
                     </div>
                     {license?.daysRemaining !== null && (
                         <div className="p-4 rounded-xl bg-muted/50">
-                            <p className="text-xs text-muted-foreground uppercase">Días Restantes</p>
-                            <p className={`font-bold ${license.daysRemaining <= 7 ? 'text-amber-500' : ''}`}>
+                            <p className="text-xs text-muted-foreground/80 uppercase">Días Restantes</p>
+                            <p className={`font-bold ${license.daysRemaining <= 7 ? 'text-warning' : ''}`}>
                                 {license.daysRemaining}
                             </p>
                         </div>
                     )}
                     <div className="p-4 rounded-xl bg-muted/50">
-                        <p className="text-xs text-muted-foreground uppercase">Productos</p>
+                        <p className="text-xs text-muted-foreground/80 uppercase">Productos</p>
                         <p className="font-bold">
                             {license?.features?.maxProducts === -1 ? 'Ilimitados' : license?.features?.maxProducts || '50'}
                         </p>
                     </div>
                 </div>
                 {license?.type !== 'pro' && (
-                    <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/30 rounded-xl flex items-center justify-between">
+                    <div className="mt-4 p-4 bg-primary/5 border border-primary/15 rounded-xl flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <AlertTriangle className="h-5 w-5 text-purple-600" />
-                            <span className="text-sm text-purple-700">Actualiza a PRO para desbloquear todas las funciones</span>
+                            <AlertTriangle className="h-5 w-5 text-primary" />
+                            <span className="text-sm text-foreground/80">Actualiza a PRO para desbloquear todas las funciones</span>
                         </div>
                         <Button
                             variant="outline"
-                            className="border-purple-300 text-purple-700"
+                            className="border-primary/25 text-primary"
                             onClick={() => setShowActivation(true)}
                         >
                             Activar Licencia
@@ -165,7 +165,7 @@ const AboutView = () => {
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <Card className="w-full max-w-md p-6 bg-card border border-border/30 rounded-2xl animate-in zoom-in-95">
                         <h3 className="text-lg font-bold mb-4">Activar Licencia</h3>
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-sm text-muted-foreground mb-4">
                             Ingresa tu clave de producto. Si no tienes una, contacta al proveedor.
                         </p>
                         <div className="space-y-4">
@@ -180,7 +180,7 @@ const AboutView = () => {
                                     maxLength={19}
                                 />
                             </div>
-                            {activationError && <p className="text-xs text-red-500">{activationError}</p>}
+                            {activationError && <p className="text-xs text-danger">{activationError}</p>}
                             <div className="flex justify-end gap-2 mt-6">
                                 <Button variant="ghost" onClick={() => { setShowActivation(false); setActivationError(null); }}>
                                     Cancelar

@@ -27,7 +27,7 @@ const MainLayout = memo(function MainLayout({ children }) {
         {/* Mobile overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[499] lg:hidden transition-all duration-300 animate-fade-in"
+            className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[499] lg:hidden transition-opacity duration-200 animate-fade-in"
             onClick={toggleSidebar}
             onKeyDown={(e) => { if (e.key === 'Escape') toggleSidebar(); }}
             aria-hidden="true"
@@ -36,7 +36,7 @@ const MainLayout = memo(function MainLayout({ children }) {
 
         {/* Sidebar */}
         <div className={cn(
-          'h-full shrink-0 transition-transform duration-200 ease-out shadow-sm',
+          'h-full shrink-0 transition-transform duration-200 ease-out shadow-sm will-change-transform',
           'max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:shadow-xl',
           isSidebarOpen ? 'max-lg:translate-x-0 max-lg:z-[500]' : 'max-lg:-translate-x-full max-lg:z-[200]',
         )}>

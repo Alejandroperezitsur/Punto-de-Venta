@@ -20,7 +20,7 @@ import { cn } from '../utils/cn';
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
   const stockPct = Math.min((Number(p.stock) / 50) * 100, 100);
   return (
-    <div className="relative rounded-2xl border border-border/15 bg-card p-4 hover:border-primary/25 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/8 transition-all duration-200 flex flex-col cursor-pointer group overflow-hidden"
+    <div className="relative rounded-2xl border border-border/20 bg-card p-4 hover:border-primary/30 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/8 transition-all duration-200 flex flex-col cursor-pointer group overflow-hidden"
       onClick={() => onEdit(p)}
     >
       {/* Edit button */}
@@ -31,7 +31,7 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
       </button>
 
       {/* Product image */}
-      <div className="size-[4.5rem] rounded-xl bg-muted/30 flex items-center justify-center mb-4 border border-border/8 mx-auto overflow-hidden group-hover:border-primary/15 group-hover:scale-105 transition-all duration-200">
+      <div className="size-[4.5rem] rounded-xl bg-muted/30 flex items-center justify-center mb-4 border border-border/12 mx-auto overflow-hidden group-hover:border-primary/20 group-hover:scale-105 transition-all duration-200">
         {p.image_url ? (
           <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-xl" loading="lazy" />
         ) : (
@@ -43,13 +43,13 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
 
       <div className="mt-auto pt-2 space-y-2 w-full text-center">
         <div className="flex items-baseline justify-center gap-0.5">
-          <span className="text-[10px] font-semibold text-primary/50">$</span>
+          <span className="text-[10px] font-semibold text-primary/60">$</span>
           <p className="text-xl font-black text-primary tracking-tight tabular-nums">
             {formatMoney(p.price)}
           </p>
         </div>
         {(p.barcodes?.length > 0 || p.sku) && (
-          <p className="text-[10px] text-muted-foreground/50 font-mono truncate">
+          <p className="text-[10px] text-muted-foreground/55 font-mono truncate">
             {p.barcodes?.[0]?.code || p.sku}
           </p>
         )}

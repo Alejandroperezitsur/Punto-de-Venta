@@ -82,7 +82,7 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       </div>
 
       {/* Quantity stepper — refined pill design */}
-      <div className="flex items-center gap-0.5 bg-muted/25 rounded-xl border border-border/15 shadow-xs">
+      <div className="flex items-center gap-1 bg-muted/30 rounded-xl border border-border/20 shadow-xs">
         <button
           className={cn(
             'size-9 flex items-center justify-center rounded-l-xl transition-all duration-100',
@@ -107,7 +107,7 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       </div>
 
       {/* Line total */}
-      <div className="text-right w-[76px] shrink-0">
+      <div className="text-right w-[80px] shrink-0">
         <span className="text-sm font-bold tabular-nums text-foreground">{formatMoney(lineTotal)}</span>
       </div>
     </div>

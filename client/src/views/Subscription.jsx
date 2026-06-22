@@ -53,7 +53,7 @@ export default function Subscription() {
                 {plans.map(plan => {
                     const isCurrent = sub.plan_id === plan.id;
                     return (
-                        <Card key={plan.id} className={cn('p-6 rounded-2xl border transition-all duration-200 relative overflow-hidden', isCurrent ? 'border-primary/30 bg-primary/[0.03]' : 'border-white/[0.06] backdrop-blur-md bg-surface-glass/40 hover:border-primary/15 hover:shadow-md')}>
+                        <Card key={plan.id} className={cn('p-6 rounded-2xl border transition-all duration-200 relative overflow-hidden', isCurrent ? 'border-primary/30 bg-primary/[0.03]' : 'border-border/25 backdrop-blur-md bg-surface-glass/50 hover:border-primary/20 hover:shadow-md')}>
                             {isCurrent && <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />}
                             <h3 className="font-bold text-lg">{plan.name}</h3>
                             <div className="text-3xl font-black my-3 tabular-nums">${plan.price} <span className="text-sm font-normal text-muted-foreground">/mes</span></div>
@@ -76,7 +76,7 @@ export default function Subscription() {
                 })}
             </div>
 
-            <Card className="p-6 mt-8 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
+            <Card className="p-6 mt-8 rounded-2xl backdrop-blur-md bg-surface-glass/50 border border-border/20">
                 <h3 className="font-bold mb-4">Método de Pago</h3>
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-4">

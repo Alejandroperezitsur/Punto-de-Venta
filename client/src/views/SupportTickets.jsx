@@ -49,7 +49,7 @@ export default function SupportTickets() {
             </ViewHeader>
 
             {newTicket && (
-                <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06] relative overflow-hidden mb-6">
+                <Card className="p-6 rounded-2xl backdrop-blur-md bg-surface-glass/50 border border-border/20 relative overflow-hidden mb-6">
                     <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                     <h3 className="font-bold mb-4">Crear Ticket</h3>
                     <form onSubmit={handleCreate} className="space-y-4">
@@ -69,7 +69,7 @@ export default function SupportTickets() {
                 </Card>
             )}
 
-            <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
+            <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/50 border border-border/20">
                 <Table
                     data={tickets}
                     searchable={false}
@@ -78,14 +78,14 @@ export default function SupportTickets() {
                     density="compact"
                     emptyTitle="No hay tickets de soporte."
                     columns={[
-                        { key: 'subject', title: 'Asunto', render: (t) => <span className="font-medium">{t.subject}</span> },
-                        { key: 'status', title: 'Estado', render: (t) => (
+                        { key: 'subject', label: 'Asunto', render: (t) => <span className="font-medium">{t.subject}</span> },
+                        { key: 'status', label: 'Estado', render: (t) => (
                             <Badge variant={t.status === 'open' ? 'info' : 'success'} size="sm">
                                 {t.status}
                             </Badge>
                         )},
-                        { key: 'created_at', title: 'Fecha', render: (t) => <span className="text-muted-foreground text-sm">{new Date(t.created_at).toLocaleDateString()}</span> },
-                        { key: 'messages', title: 'Mensajes', render: (t) => t.messages.length },
+                        { key: 'created_at', label: 'Fecha', render: (t) => <span className="text-muted-foreground text-sm">{new Date(t.created_at).toLocaleDateString()}</span> },
+                        { key: 'messages', label: 'Mensajes', render: (t) => t.messages.length },
                     ]}
                     rowKey={(t) => t.id}
                 />

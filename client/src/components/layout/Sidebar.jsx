@@ -20,8 +20,8 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
           'flex items-center rounded-xl text-[13px] font-medium transition-all duration-200 group relative overflow-hidden',
           isCollapsed ? 'px-0 py-2.5 justify-center mx-2' : 'px-3 py-2.5 mx-2',
           isActive
-            ? 'bg-primary/10 text-foreground font-bold shadow-sm shadow-primary/5'
-            : 'text-muted-foreground/60 hover:text-foreground hover:bg-surface-hover/50',
+            ? 'bg-primary/10 text-foreground font-semibold shadow-sm shadow-primary/5'
+            : 'text-muted-foreground/70 hover:text-foreground hover:bg-surface-hover/50',
         )
       }
       aria-label={isCollapsed ? children : undefined}
@@ -64,7 +64,7 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
 const SectionLabel = ({ children, isCollapsed }) => {
   if (isCollapsed) return null;
   return (
-    <p className="text-[9px] font-bold text-muted-foreground/25 uppercase tracking-[0.14em] px-4 pt-5 pb-1.5 select-none">
+    <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] px-4 pt-5 pb-1.5 select-none">
       {children}
     </p>
   );
@@ -245,9 +245,9 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
       )}
 
       {/* User section */}
-      <div className="p-2.5 border-t border-border/8">
+      <div className="p-2.5 border-t border-border/10">
         {!isCollapsed ? (
-          <div className="rounded-xl backdrop-blur-md bg-surface-glass/40 border border-border/6 p-2.5 space-y-2 shadow-sm">
+          <div className="rounded-xl backdrop-blur-md bg-surface-glass/60 border border-border/10 p-2.5 space-y-2 shadow-sm">
             <div className="flex items-center gap-2.5 px-1.5 py-1">
               <div className="relative shrink-0">
                 <div className="size-9 rounded-full bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center font-bold text-primary text-[11px] ring-1 ring-primary/10 backdrop-blur-sm">
@@ -262,7 +262,7 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
             </div>
             <button
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold text-danger/50 hover:text-danger hover:bg-danger/5 transition-colors touch-target"
+              className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold text-danger/70 hover:text-danger hover:bg-danger/10 transition-colors touch-target"
             >
               <LogOut className="size-3.5" />
               <span>Cerrar Sesión</span>
@@ -278,7 +278,7 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-lg text-danger/50 hover:text-danger hover:bg-danger/5 transition-colors"
+              className="p-2 rounded-lg text-danger/60 hover:text-danger hover:bg-danger/8 transition-colors"
               title="Cerrar Sesión"
             >
               <LogOut className="size-4" />

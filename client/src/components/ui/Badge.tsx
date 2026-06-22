@@ -2,16 +2,16 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 
 const variants = {
-  default: 'bg-primary/10 text-primary border border-primary/15',
+  default: 'bg-primary/12 text-primary border border-primary/18',
   success: 'bg-success/10 text-success border border-success/15',
   warning: 'bg-warning/10 text-warning border border-warning/15',
   danger: 'bg-danger/10 text-danger border border-danger/15',
   info: 'bg-info/10 text-info border border-info/15',
   neutral: 'bg-muted text-muted-foreground border border-border/30',
-  premium: 'bg-primary/8 text-primary border border-primary/20 shadow-sm shadow-primary/8',
+  premium: 'bg-primary/10 text-primary border border-primary/22 shadow-sm shadow-primary/8',
   'outline-glow': 'bg-transparent text-foreground border border-ring/30 shadow-glow',
   'dot-only': 'bg-transparent text-foreground',
-  glass: 'backdrop-blur-md bg-surface-glass/40 text-foreground border border-white/10 badge-glass',
+  glass: 'backdrop-blur-md bg-surface-glass/50 text-foreground border border-white/12 badge-glass',
 };
 
 const sizes = {

@@ -38,7 +38,7 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect 
         'hover:border-primary/30 hover:bg-primary/[0.02] hover:shadow-lg hover:-translate-y-1',
         'active:bg-primary/[0.04] active:border-primary/20 active:scale-[0.98] active:translate-y-0',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-1',
-        'min-h-[6.5rem] px-3.5 py-3 border-border/15',
+        'min-h-[7.5rem] px-3.5 py-3 border-border/15',
         isOutOfStock && 'pointer-events-none opacity-60',
       )}
       title={`${product.name} — ${formatMoney(product.price)}`}
@@ -186,7 +186,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
         <div className="flex gap-1.5">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-8 w-20 rounded-full shrink-0" />)}</div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
           {Array.from({ length: 12 }).map((_, i) => (
-            <Skeleton key={i} className="h-[6.5rem] rounded-2xl" />
+            <Skeleton key={i} className="h-[7rem] rounded-2xl" />
           ))}
         </div>
       </div>
@@ -251,33 +251,33 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
         <div className="relative shrink-0">
           {/* Edge fade */}
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-card to-transparent z-10 pointer-events-none" />
-          <div className="flex gap-1.5 overflow-x-auto pb-1 shrink-0 scrollbar-none">
+          <div className="flex gap-1.5 overflow-x-auto pb-1.5 shrink-0 scrollbar-none">
             <button
               onClick={() => { setActiveCategory(null); setPage(1); }}
               className={cn(
-                'shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-200 whitespace-nowrap',
+                'shrink-0 px-4 py-2 rounded-full text-[11px] font-semibold transition-all duration-200 whitespace-nowrap',
                 !activeCategory
                   ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/15'
-                  : 'text-muted-foreground/50 hover:text-foreground hover:bg-muted/25 border border-border/12',
+                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/15',
               )}
             >
               Todos
-              <span className="ml-1.5 text-[9px] opacity-50 font-bold">{products.length}</span>
+              <span className="ml-1.5 text-[9px] opacity-60 font-bold">{products.length}</span>
             </button>
             {categories.map(([cat, count]) => (
               <button
                 key={cat}
                 onClick={() => { setActiveCategory(cat === activeCategory ? null : cat); setPage(1); }}
                 className={cn(
-                  'shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-200 truncate max-w-[130px] whitespace-nowrap',
+                  'shrink-0 px-4 py-2 rounded-full text-[11px] font-semibold transition-all duration-200 truncate max-w-[130px] whitespace-nowrap',
                   activeCategory === cat
                     ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/15'
-                    : 'text-muted-foreground/50 hover:text-foreground hover:bg-muted/25 border border-border/12',
+                    : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/15',
                 )}
                 title={`${cat} (${count})`}
               >
                 {cat}
-                <span className="ml-1 text-[9px] opacity-50 font-bold">{count}</span>
+                <span className="ml-1 text-[9px] opacity-60 font-bold">{count}</span>
               </button>
             ))}
           </div>
@@ -299,7 +299,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
 
       {/* Product grid — responsive inside catalog panel */}
       {displayProducts.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2.5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2.5">
           {paginatedProducts.map((p) => (
             <QuickProductButton
               key={p.id}

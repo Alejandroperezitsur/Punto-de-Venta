@@ -37,11 +37,11 @@ const NumpadKey = memo(function NumpadKey({ label, onClick, disabled, variant }:
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'rounded-xl border text-base font-bold transition-all duration-75 flex items-center justify-center active:scale-[0.93] haptic-press',
+        'rounded-xl border text-base font-bold transition-all duration-100 flex items-center justify-center active:scale-[0.93] haptic-press',
         'min-h-[var(--touch-target-opt)] min-w-[var(--touch-target-opt)]',
         variant === 'danger'
-          ? 'bg-danger/8 text-danger border-danger/15 text-sm active:bg-danger/15 shadow-sm shadow-danger/5'
-          : 'backdrop-blur-md bg-surface-glass/50 border-white/[0.06] text-foreground hover:bg-surface-glass/70 active:bg-surface-glass/40 shadow-sm',
+          ? 'bg-danger/10 text-danger border-danger/20 text-sm active:bg-danger/18 shadow-sm shadow-danger/5'
+          : 'backdrop-blur-md bg-surface-glass/60 border-white/[0.08] text-foreground hover:bg-surface-glass/75 active:bg-surface-glass/50 shadow-sm',
         disabled && 'opacity-50 cursor-not-allowed',
       )}
       aria-label={typeof label === 'string' && label === 'DEL' ? 'Borrar' : String(label)}
@@ -73,8 +73,8 @@ const PaymentMethodButton = memo(function PaymentMethodButton({ method, isSelect
       aria-label={`Pago con ${method.label}`}
       aria-pressed={isSelected}
     >
-      <Icon className="size-6" />
-      <span className="text-[10px] tracking-wide font-bold">{method.label}</span>
+      <Icon className="size-6" strokeWidth={2.2} />
+      <span className="text-[11px] tracking-wide font-bold">{method.label}</span>
     </button>
   );
 });
@@ -90,7 +90,7 @@ const QuickAmountButton = memo(function QuickAmountButton({ amount, isSelected, 
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'min-h-[var(--touch-target-min)] rounded-xl text-xs font-bold transition-all duration-75 px-3',
+        'min-h-[var(--touch-target-min)] rounded-xl text-xs font-bold transition-all duration-100 px-3.5 py-2',
         isSelected
           ? 'bg-primary/15 text-primary border-2 border-primary/30'
           : 'bg-muted/15 text-muted-foreground border border-border/15 hover:bg-muted/30',
@@ -187,10 +187,10 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
     <Modal open={true} onClose={onClose} size="xl" hideClose={submitLocked.current}>
       <div className="flex flex-col gap-5">
         {/* Total header — premium gradient panel with larger total */}
-        <div className="text-center py-6 rounded-2xl" style={{ background: 'var(--gradient-surface)' }}>
-          <p className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.15em] mb-3">Total a pagar</p>
+        <div className="text-center py-6 rounded-2xl" style={{ background: 'var(--gradient-checkout)' }}>
+          <p className="text-[11px] font-semibold text-muted-foreground/55 uppercase tracking-[0.15em] mb-3">Total a pagar</p>
           <p className="text-6xl font-black tracking-tighter tabular-nums font-mono text-foreground leading-none">{formatMoney(total)}</p>
-          <p className="text-xs text-muted-foreground/40 mt-3">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
+          <p className="text-xs text-muted-foreground/50 mt-3">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
         </div>
 
         {/* Payment method selection — larger, more visual */}
@@ -273,7 +273,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
             </div>
 
             {/* Numpad — larger keys with haptic feel */}
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-3 gap-2.5 pb-2">
               {numpadKeys.map(k => (
                 <NumpadKey
                   key={k}
@@ -311,7 +311,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
           onClick={handleConfirm}
           disabled={!isReady || submitLocked.current}
           className={cn(
-            'w-full min-h-[5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 uppercase tracking-wide active:scale-[0.98]',
+            'w-full min-h-[5.5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 uppercase tracking-wide active:scale-[0.98]',
             isReady && !submitLocked.current
               ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-px success-pulse'
               : 'bg-muted/50 text-muted-foreground/40 cursor-not-allowed',
@@ -324,7 +324,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
           ) : (
             <>
               <span className="text-lg tracking-wider">{getButtonLabel()}</span>
-              <span className="text-[10px] opacity-40 bg-black/8 px-2 py-0.5 rounded-lg tracking-wider font-bold">Enter</span>
+              <span className="text-[10px] opacity-50 bg-black/10 px-2 py-0.5 rounded-lg tracking-wider font-bold">Enter ↵</span>
             </>
           )}
         </button>

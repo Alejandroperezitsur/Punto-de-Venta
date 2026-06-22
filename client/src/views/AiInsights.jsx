@@ -37,7 +37,7 @@ export default function AiInsights() {
                         <Bell className="size-4 text-warning" /> Alertas Activas
                     </h2>
                     {insights.map((ins, idx) => (
-                        <Card key={idx} className={cn('p-4 flex gap-4 rounded-2xl border-l-4 backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]', ins.priority === 'high' ? 'border-l-danger' : 'border-l-warning')}>
+                        <Card key={idx} className={cn('p-4 flex gap-4 rounded-2xl border-l-4 backdrop-blur-md bg-surface-glass/50 border border-border/20', ins.priority === 'high' ? 'border-l-danger' : 'border-l-warning')}>
                             <div className="size-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
                                 {ins.priority === 'high' ? <AlertTriangle className="size-4 text-danger" /> : <Bell className="size-4 text-warning" />}
                             </div>
@@ -51,7 +51,7 @@ export default function AiInsights() {
             )}
 
             {/* Inventory Predictions */}
-            <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/40 border border-white/[0.06]">
+            <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/50 border border-border/20">
                 <div className="p-6 border-b border-border/10">
                     <h2 className="font-bold text-lg flex items-center gap-2">
                         <Package className="size-4 text-primary" /> Predicción de Inventario
@@ -66,15 +66,15 @@ export default function AiInsights() {
                     density="compact"
                     emptyTitle="Tu inventario parece saludable."
                     columns={[
-                        { key: 'product', title: 'Producto', render: (p) => <span className="font-medium">{p.product}</span> },
-                        { key: 'stock', title: 'Stock Actual', className: 'text-right' },
-                        { key: 'dailyAvg', title: 'Venta Diaria Prom.', className: 'text-right' },
-                        { key: 'daysLeft', title: 'Se agota en', className: 'text-center', render: (p) => (
+                        { key: 'product', label: 'Producto', render: (p) => <span className="font-medium">{p.product}</span> },
+                        { key: 'stock', label: 'Stock Actual', className: 'text-right' },
+                        { key: 'dailyAvg', label: 'Venta Diaria Prom.', className: 'text-right' },
+                        { key: 'daysLeft', label: 'Se agota en', className: 'text-center', render: (p) => (
                             <Badge variant={p.daysLeft <= 3 ? 'danger' : 'warning'} size="sm">
                                 {p.daysLeft} días
                             </Badge>
                         )},
-                        { key: 'depletionDate', title: 'Fecha Estimada', render: (p) => <span className="text-muted-foreground">{new Date(p.depletionDate).toLocaleDateString()}</span> },
+                        { key: 'depletionDate', label: 'Fecha Estimada', render: (p) => <span className="text-muted-foreground">{new Date(p.depletionDate).toLocaleDateString()}</span> },
                     ]}
                 />
             </Card>

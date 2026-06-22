@@ -48,7 +48,7 @@ function KpiCard({
   return (
     <Component
       className={cn(
-        'relative rounded-xl border border-border/35 bg-card p-4 transition-all duration-200',
+        'relative rounded-xl border border-border/40 bg-card p-4 transition-all duration-200',
         'hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20',
         'after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5',
         'after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
@@ -61,7 +61,7 @@ function KpiCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">{label}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/85">{label}</p>
           <div className="mt-1.5 flex items-baseline gap-1">
             {prefix && <span className="text-sm font-medium text-muted-foreground">{prefix}</span>}
             <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
@@ -95,7 +95,7 @@ function KpiCard({
           {sparkline.map((val, i) => (
             <div
               key={i}
-              className="flex-1 rounded-t-sm bg-primary/20 transition-all duration-300"
+              className="flex-1 rounded-t-sm bg-primary/25 transition-all duration-300"
               style={{
                 height: `${Math.max((val / maxSpark) * 100, 4)}%`,
                 opacity: 0.4 + (i / sparkline.length) * 0.6,
