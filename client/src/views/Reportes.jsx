@@ -140,7 +140,7 @@ const ReportesView = () => {
 
             {/* Hero Section */}
             <div className="text-center py-6">
-                <p className="text-[11px] font-bold text-muted-foreground/55 uppercase tracking-[0.25em] mb-4">Lo que ganaste hoy para ti</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.25em] mb-4">Lo que ganaste hoy para ti</p>
                 <div className="flex items-center justify-center gap-4">
                     <span className="text-display font-black tracking-tighter text-foreground tabular-nums">
                         ${data.gain.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
@@ -162,7 +162,7 @@ const ReportesView = () => {
                 <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="text-center md:text-right md:pr-8 md:border-r md:border-border/10">
-                        <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em] mb-2">Efectivo en caja</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.15em] mb-2">Efectivo en caja</p>
                         <p className="text-4xl font-black text-foreground tracking-tighter tabular-nums">${data.cash.toLocaleString()}</p>
                     </div>
                     <div className="text-center md:text-left md:pl-8 flex flex-col items-center md:items-start">

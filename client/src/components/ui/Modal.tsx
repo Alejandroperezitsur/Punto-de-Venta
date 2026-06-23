@@ -126,7 +126,7 @@ const Modal = Object.assign(React.memo(function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="px-5 py-4 border-t border-border/25 flex items-center justify-end gap-2">
+          <div className="px-6 py-4 border-t border-border/25 flex items-center justify-end gap-2">
             {footer}
           </div>
         )}

@@ -54,7 +54,7 @@ export function DataCard({ label, value, trend = 'flat', trendValue, icon, accen
 
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground/60 mb-1 truncate">{label}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground mb-1 truncate">{label}</p>
           <p className="text-2xl font-black tracking-tighter tabular-nums text-foreground leading-none">{value}</p>
         </div>
         {icon && (

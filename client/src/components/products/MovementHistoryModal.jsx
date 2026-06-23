@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { X, ArrowDown, ArrowUp, ArrowRight } from 'lucide-react';
+import { X, ArrowDown, ArrowUp, Package } from 'lucide-react';
 import { api } from '../../lib/api';
 import { formatMoney } from '../../utils/format';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { cn } from '../../utils/cn';
 
 export const MovementHistoryModal = ({ product, onClose }) => {
     const [movements, setMovements] = useState([]);
@@ -22,49 +26,63 @@ export const MovementHistoryModal = ({ product, onClose }) => {
     }, [product]);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4">
-            <div className="bg-[hsl(var(--card))] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-[hsl(var(--border))] flex flex-col max-h-[80vh]">
-                <div className="p-5 border-b border-[hsl(var(--border))] flex justify-between items-center bg-[hsl(var(--bg-muted))/0.5]">
-                    <div>
-                        <h3 className="font-bold text-xl">Kardex / Movimientos</h3>
-                        <p className="text-sm text-[hsl(var(--muted-foreground))]">{product.name} ({product.sku})</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)] animate-fade-in">
+            <Card className="w-full max-w-2xl overflow-hidden border border-border/40 flex flex-col max-h-[80vh]">
+                <div className="p-5 border-b border-border/20 flex justify-between items-center bg-muted/10">
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <Package className="size-5 text-primary" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg text-foreground">Kardex / Movimientos</h3>
+                            <p className="text-xs text-muted-foreground">{product.name} ({product.sku})</p>
+                        </div>
                     </div>
-                    <button onClick={onClose} className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] p-2 rounded-full hover:bg-[hsl(var(--bg-muted))] transition-colors">
-                        <X className="h-6 w-6" />
-                    </button>
+                    <Button variant="ghost" size="icon" onClick={onClose}>
+                        <X className="size-5" />
+                    </Button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-0">
+                <div className="flex-1 overflow-y-auto">
                     {loading ? (
-                        <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">Cargando movimientos...</div>
+                        <div className="p-8 text-center text-muted-foreground">
+                            <div className="size-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-2" />
+                            Cargando movimientos...
+                        </div>
                     ) : movements.length === 0 ? (
-                        <div className="p-8 text-center text-[hsl(var(--muted-foreground))]">No hay movimientos registrados</div>
+                        <div className="p-8 text-center text-muted-foreground">
+                            <Package className="size-8 mx-auto mb-2 opacity-30" />
+                            No hay movimientos registrados
+                        </div>
                     ) : (
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-[hsl(var(--bg-muted))] text-[hsl(var(--muted-foreground))] font-medium sticky top-0">
+                            <thead className="bg-muted/30 text-muted-foreground font-medium sticky top-0">
                                 <tr>
-                                    <th className="px-6 py-3">Fecha</th>
-                                    <th className="px-6 py-3">Tipo / Razón</th>
-                                    <th className="px-6 py-3 text-right">Cambio</th>
+                                    <th className="px-5 py-3 text-xs uppercase tracking-wider">Fecha</th>
+                                    <th className="px-5 py-3 text-xs uppercase tracking-wider">Tipo / Razon</th>
+                                    <th className="px-5 py-3 text-xs uppercase tracking-wider text-right">Cambio</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-[hsl(var(--border))]">
+                            <tbody className="divide-y divide-border/10">
                                 {movements.map((m) => (
-                                    <tr key={m.id} className="hover:bg-[hsl(var(--bg-muted))/0.5]">
-                                        <td className="px-6 py-4 whitespace-nowrap text-[hsl(var(--muted-foreground))] font-mono text-xs">
+                                    <tr key={m.id} className="hover:bg-muted/20 transition-colors">
+                                        <td className="px-5 py-3 whitespace-nowrap text-muted-foreground font-mono text-xs">
                                             {new Date(m.created_at).toLocaleString()}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className="font-medium text-[hsl(var(--foreground))]">{m.reason}</span>
+                                        <td className="px-5 py-3">
+                                            <span className="font-medium text-foreground">{m.reason}</span>
                                             {m.reference_type && (
-                                                <span className="ml-2 text-xs bg-[hsl(var(--secondary))] px-1.5 py-0.5 rounded text-[hsl(var(--muted-foreground))]">
+                                                <Badge size="xs" variant="neutral" className="ml-2">
                                                     {m.reference_type}
-                                                </span>
+                                                </Badge>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <span className={`inline-flex items-center gap-1 font-bold ${m.change > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                                {m.change > 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                                        <td className="px-5 py-3 text-right">
+                                            <span className={cn(
+                                                'inline-flex items-center gap-1 font-bold text-sm',
+                                                m.change > 0 ? 'text-success' : 'text-danger'
+                                            )}>
+                                                {m.change > 0 ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />}
                                                 {m.change > 0 ? '+' : ''}{m.change}
                                             </span>
                                         </td>
@@ -74,7 +92,7 @@ export const MovementHistoryModal = ({ product, onClose }) => {
                         </table>
                     )}
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };

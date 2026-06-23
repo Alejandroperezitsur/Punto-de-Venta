@@ -2,6 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getDB } from '../../lib/db';
 import { reconcileStock, getConflictHistory } from '../../lib/reconciliationEngine';
 import { computeStockChecksums, createReconciliationSnapshot, compareSnapshots, applyRepair, type DivergenceReport, type RepairSuggestion } from '../../lib/reconciliationEngineExtension';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { X, Loader, AlertTriangle, CheckCircle2, Shield } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => void }> = ({ storeId, onClose }) => {
   const [tab, setTab] = useState<'drift' | 'conflicts' | 'repairs'>('drift');
@@ -72,58 +77,82 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
     loadData();
   }, [loadData]);
 
+  const tabs = [
+    { key: 'drift', label: 'Drift de Stock' },
+    { key: 'conflicts', label: 'Conflictos' },
+    { key: 'repairs', label: 'Reparaciones' },
+  ] as const;
+
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-md">
-      <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem] shadow-2xl border-4 border-gray-100 p-8">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]">
+      <div className="bg-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-border/40 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-black tracking-tight">Reconciliación de Inventario</h2>
-          <button onClick={onClose} className="p-3 hover:bg-red-50 text-red-500 rounded-2xl text-2xl">&times;</button>
+          <div className="flex items-center gap-3">
+            <div className="size-10 rounded-xl bg-info/10 flex items-center justify-center">
+              <Shield className="size-5 text-info" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Reconciliacion de Inventario</h2>
+              <p className="text-xs text-muted-foreground">Detecta y repara divergencias de stock</p>
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="size-5" />
+          </Button>
         </div>
 
-        <div className="flex gap-2 mb-6">
-          {(['drift', 'conflicts', 'repairs'] as const).map(t => (
+        <div className="flex gap-1 p-1 bg-muted/20 rounded-xl mb-6">
+          {tabs.map(t => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-6 py-3 rounded-xl font-bold text-sm transition-all ${
-                tab === t ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={cn(
+                'flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all',
+                tab === t.key
+                  ? 'bg-card text-foreground shadow-sm border border-border/20'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+              )}
             >
-              {t === 'drift' ? 'Drift de Stock' : t === 'conflicts' ? 'Conflictos' : 'Reparaciones'}
+              {t.label}
             </button>
           ))}
         </div>
 
         {tab === 'drift' && (
           <div className="space-y-6">
-            <button
+            <Button
               onClick={runDriftDetection}
               disabled={processing}
-              className="px-8 py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 disabled:opacity-50 transition-all"
+              isLoading={processing}
+              size="lg"
+              className="w-full"
             >
-              {processing ? 'Analizando...' : 'Ejecutar Detección de Drift'}
-            </button>
+              {processing ? 'Analizando...' : 'Ejecutar Deteccion de Drift'}
+            </Button>
 
             {report && report.affectedProducts > 0 && (
-              <div className={`p-6 rounded-2xl border-4 ${
-                report.severity === 'critical' ? 'bg-red-50 border-red-200' :
-                report.severity === 'high' ? 'bg-orange-50 border-orange-200' :
-                'bg-yellow-50 border-yellow-200'
-              }`}>
-                <h3 className="text-xl font-black mb-4">
-                  {report.affectedProducts} productos con divergencia — Impacto estimado: ${report.estimatedFinancialImpact}
-                </h3>
+              <Card className={cn('p-5 border-l-4', 
+                report.severity === 'critical' ? 'border-l-danger bg-danger/5' :
+                report.severity === 'high' ? 'border-l-warning bg-warning/5' :
+                'border-l-warning bg-warning/5'
+              )}>
+                <div className="flex items-center gap-3 mb-4">
+                  <AlertTriangle className="size-5 text-warning" />
+                  <h3 className="text-lg font-bold text-foreground">
+                    {report.affectedProducts} productos con divergencia — Impacto: ${report.estimatedFinancialImpact}
+                  </h3>
+                </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-bold">Producto</th>
-                        <th className="text-right py-2 px-3 font-bold">Stock Local</th>
-                        <th className="text-right py-2 px-3 font-bold">Stock Servidor</th>
-                        <th className="text-right py-2 px-3 font-bold">Diferencia</th>
-                        <th className="text-left py-2 px-3 font-bold">Acción Sugerida</th>
-                        <th className="text-left py-2 px-3 font-bold">Confianza</th>
+                      <tr className="border-b border-border/20">
+                        <th className="text-left py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Producto</th>
+                        <th className="text-right py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Local</th>
+                        <th className="text-right py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Servidor</th>
+                        <th className="text-right py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Diferencia</th>
+                        <th className="text-left py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Accion</th>
+                        <th className="text-left py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Confianza</th>
                         <th className="py-2 px-3"></th>
                       </tr>
                     </thead>
@@ -131,35 +160,31 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
                       {report.criticalDivergences.map(d => {
                         const suggestion = report.repairSuggestions.find(s => s.productId === d.productId);
                         return (
-                          <tr key={d.productId} className="border-b hover:bg-gray-50">
-                            <td className="py-2 px-3 font-medium">{d.productId}</td>
-                            <td className="py-2 px-3 text-right">{d.localStock}</td>
-                            <td className="py-2 px-3 text-right">{d.serverStock}</td>
-                            <td className={`py-2 px-3 text-right font-bold ${
-                              Math.abs(d.divergence) > 5 ? 'text-red-600' : 'text-yellow-600'
-                            }`}>{d.divergence > 0 ? '+' : ''}{d.divergence}</td>
-                            <td className="py-2 px-3">
-                              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                                suggestion?.suggestedAction === 'merge' ? 'bg-green-100 text-green-700' :
-                                suggestion?.suggestedAction === 'manual_review' ? 'bg-red-100 text-red-700' :
-                                'bg-blue-100 text-blue-700'
-                              }`}>
-                                {suggestion?.suggestedAction === 'merge' ? 'Merge Auto' :
-                                 suggestion?.suggestedAction === 'use_server' ? 'Usar Servidor' :
-                                 suggestion?.suggestedAction === 'use_local' ? 'Usar Local' : 'Revisión Manual'}
-                              </span>
+                          <tr key={d.productId} className="border-b border-border/10 hover:bg-muted/20">
+                            <td className="py-2.5 px-3 font-medium text-foreground">{d.productId}</td>
+                            <td className="py-2.5 px-3 text-right text-foreground">{d.localStock}</td>
+                            <td className="py-2.5 px-3 text-right text-foreground">{d.serverStock}</td>
+                            <td className={cn('py-2.5 px-3 text-right font-bold',
+                              Math.abs(d.divergence) > 5 ? 'text-danger' : 'text-warning'
+                            )}>{d.divergence > 0 ? '+' : ''}{d.divergence}</td>
+                            <td className="py-2.5 px-3">
+                              <Badge variant={
+                                suggestion?.suggestedAction === 'merge' ? 'success' :
+                                suggestion?.suggestedAction === 'manual_review' ? 'danger' : 'info'
+                              } size="xs">
+                                {suggestion?.suggestedAction === 'merge' ? 'Auto' :
+                                 suggestion?.suggestedAction === 'use_server' ? 'Servidor' :
+                                 suggestion?.suggestedAction === 'use_local' ? 'Local' : 'Manual'}
+                              </Badge>
                             </td>
-                            <td className="py-2 px-3">
+                            <td className="py-2.5 px-3 text-muted-foreground">
                               {suggestion ? `${Math.round(suggestion.confidence * 100)}%` : '-'}
                             </td>
-                            <td className="py-2 px-3">
+                            <td className="py-2.5 px-3">
                               {suggestion && suggestion.suggestedAction !== 'manual_review' && (
-                                <button
-                                  onClick={() => handleRepair(suggestion)}
-                                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700"
-                                >
+                                <Button size="xs" onClick={() => handleRepair(suggestion)}>
                                   Aplicar
-                                </button>
+                                </Button>
                               )}
                             </td>
                           </tr>
@@ -168,60 +193,56 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </Card>
             )}
 
             {report && report.affectedProducts === 0 && (
-              <div className="p-8 bg-green-50 border-4 border-green-200 rounded-2xl text-center">
-                <p className="text-xl font-black text-green-700">✓ Sin divergencias detectadas</p>
-                <p className="text-green-600 mt-2">Stock local y servidor están sincronizados</p>
-              </div>
+              <Card className="p-8 text-center border-success/20 bg-success/5">
+                <CheckCircle2 className="size-10 text-success mx-auto mb-3" />
+                <p className="text-lg font-bold text-foreground">Sin divergencias detectadas</p>
+                <p className="text-sm text-muted-foreground mt-1">Stock local y servidor estan sincronizados</p>
+              </Card>
             )}
           </div>
         )}
 
         {tab === 'conflicts' && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {conflicts.length === 0 ? (
-              <div className="p-8 bg-gray-50 rounded-2xl text-center">
-                <p className="text-lg font-bold text-gray-500">Sin conflictos registrados</p>
-              </div>
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">Sin conflictos registrados</p>
+              </Card>
             ) : (
               conflicts.map(c => (
-                <div key={c.id || Math.random()} className="p-6 bg-gray-50 rounded-2xl border-2 border-gray-100">
-                  <div className="flex justify-between items-start">
+                <Card key={c.id || Math.random()} className="p-4">
+                  <div className="flex justify-between items-start gap-4">
                     <div>
-                      <p className="font-bold">{c.productId || 'Conflicto'}</p>
-                      <p className="text-sm text-gray-500">{c.type || 'sync'} — {new Date(c.timestamp || Date.now()).toLocaleString()}</p>
+                      <p className="font-semibold text-foreground">{c.productId || 'Conflicto'}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{c.type || 'sync'} — {new Date(c.timestamp || Date.now()).toLocaleString()}</p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => handleResolveConflict(c.id, 'server_wins')} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold">Usar Servidor</button>
-                      <button onClick={() => handleResolveConflict(c.id, 'client_wins')} className="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-bold">Usar Local</button>
-                      <button onClick={() => handleResolveConflict(c.id, 'merge')} className="px-4 py-2 bg-purple-600 text-white rounded-lg text-xs font-bold">Merge</button>
+                      <Button size="xs" variant="outline" onClick={() => handleResolveConflict(c.id, 'server_wins')}>Servidor</Button>
+                      <Button size="xs" variant="outline" onClick={() => handleResolveConflict(c.id, 'client_wins')}>Local</Button>
+                      <Button size="xs" variant="outline" onClick={() => handleResolveConflict(c.id, 'merge')}>Merge</Button>
                     </div>
                   </div>
-                </div>
+                </Card>
               ))
             )}
           </div>
         )}
 
         {tab === 'repairs' && (
-          <div className="space-y-4">
-            <p className="text-gray-500 font-medium">Las reparaciones sugeridas se aplicarán automáticamente según nivel de confianza.</p>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Las reparaciones sugeridas se aplicaran automaticamente segun nivel de confianza.</p>
             {report?.repairSuggestions.map(s => (
-              <div key={s.productId} className="p-4 border-2 border-gray-100 rounded-xl flex justify-between items-center">
+              <Card key={s.productId} className="p-4 flex justify-between items-center">
                 <div>
-                  <p className="font-bold">{s.productId}</p>
-                  <p className="text-sm text-gray-500">{s.description}</p>
+                  <p className="font-semibold text-foreground">{s.productId}</p>
+                  <p className="text-xs text-muted-foreground">{s.description}</p>
                 </div>
-                <button
-                  onClick={() => handleRepair(s)}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700"
-                >
-                  Aplicar
-                </button>
-              </div>
+                <Button size="sm" onClick={() => handleRepair(s)}>Aplicar</Button>
+              </Card>
             ))}
           </div>
         )}

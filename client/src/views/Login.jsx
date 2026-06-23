@@ -123,7 +123,7 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-[11px] text-muted-foreground/50 mt-7 font-medium">
+          <p className="text-center text-xs text-muted-foreground/50 mt-7 font-medium">
             POS Pro v2026 · Punto de Venta Enterprise
           </p>
         </div>

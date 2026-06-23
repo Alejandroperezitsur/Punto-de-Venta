@@ -27,7 +27,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="relative w-full">
         {label && (
-          <label className="block text-[11px] font-semibold text-muted-foreground/70 mb-1.5 ml-0.5">
+          <label className="block text-xs font-semibold text-muted-foreground/70 mb-1.5 ml-0.5">
             {label}
           </label>
         )}
@@ -63,7 +63,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         </div>
         {error && (
-          <p className="text-[11px] font-medium text-danger/80 mt-1 ml-0.5">{error}</p>
+          <p className="text-xs font-medium text-danger/80 mt-1 ml-0.5">{error}</p>
         )}
       </div>
     );

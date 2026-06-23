@@ -60,11 +60,11 @@ export default function AiInsights() {
                 </div>
                 <Table
                     data={predictions}
+                    keyExtractor={(p) => p.product}
                     searchable={false}
                     pageSize={predictions.length || 10}
-                    striped={false}
                     density="compact"
-                    emptyTitle="Tu inventario parece saludable."
+                    emptyMessage="Tu inventario parece saludable."
                     columns={[
                         { key: 'product', label: 'Producto', render: (p) => <span className="font-medium">{p.product}</span> },
                         { key: 'stock', label: 'Stock Actual', className: 'text-right' },

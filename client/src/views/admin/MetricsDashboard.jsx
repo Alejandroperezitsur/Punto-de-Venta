@@ -36,18 +36,17 @@ export default function MetricsDashboard() {
                 <div className="overflow-auto max-h-96">
                     <Table
                         data={recentEvents}
+                        keyExtractor={(ev) => ev.id}
                         searchable={false}
                         pageSize={recentEvents.length || 10}
-                        striped={false}
                         density="compact"
                         columns={[
-                            { key: 'type', title: 'Evento', render: (ev) => <span className="font-medium text-primary">{ev.type}</span> },
-                            { key: 'store_id', title: 'Store ID', render: (ev) => ev.store_id || '-' },
-                            { key: 'user_id', title: 'User', render: (ev) => ev.user_id || '-' },
-                            { key: 'data', title: 'Data', render: (ev) => <span className="font-mono text-xs text-muted-foreground truncate max-w-xs block">{ev.data}</span> },
-                            { key: 'created_at', title: 'Tiempo', render: (ev) => <span className="text-muted-foreground">{new Date(ev.created_at).toLocaleTimeString()}</span> },
+                            { key: 'type', label: 'Evento', render: (ev) => <span className="font-medium text-primary">{ev.type}</span> },
+                            { key: 'store_id', label: 'Store ID', render: (ev) => ev.store_id || '-' },
+                            { key: 'user_id', label: 'User', render: (ev) => ev.user_id || '-' },
+                            { key: 'data', label: 'Data', render: (ev) => <span className="font-mono text-xs text-muted-foreground truncate max-w-xs block">{ev.data}</span> },
+                            { key: 'created_at', label: 'Tiempo', render: (ev) => <span className="text-muted-foreground">{new Date(ev.created_at).toLocaleTimeString()}</span> },
                         ]}
-                        rowKey={(ev) => ev.id}
                     />
                 </div>
             </Card>

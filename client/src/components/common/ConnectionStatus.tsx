@@ -110,7 +110,7 @@ export const ConnectionStatus: React.FC = memo(function ConnectionStatus() {
         <Activity className="size-3.5" />
       </button>
       {showDetails && health && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-card rounded-lg shadow-xl border border-border p-4 z-50 text-xs" role="dialog" aria-label="Detalles del sistema">
+        <div className="absolute top-full right-0 mt-2 w-80 bg-card rounded-lg shadow-xl border border-border p-4 z-[var(--z-dropdown)] text-xs" role="dialog" aria-label="Detalles del sistema">
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="font-bold text-foreground">Servidor:</span>

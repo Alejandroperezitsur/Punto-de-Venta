@@ -231,7 +231,7 @@ const ProductSearch = React.memo(function ProductSearch() {
               </button>
 
               {/* Shortcut hint */}
-              <span className="text-[9px] font-bold text-muted-foreground/15 bg-muted/20 px-2 py-1 rounded-lg hidden xl:inline tracking-wider uppercase">
+              <span className="text-xs font-bold text-muted-foreground/15 bg-muted/20 px-2 py-1 rounded-lg hidden xl:inline tracking-wider uppercase">
                 F1
               </span>
             </div>
@@ -257,7 +257,7 @@ const ProductSearch = React.memo(function ProductSearch() {
           {feedback.type === 'error' && <AlertCircle className="size-4 shrink-0" />}
           <span className="truncate">{feedback.message}</span>
           {feedback.code && (
-            <span className="text-[11px] opacity-50 shrink-0 ml-auto font-mono">{feedback.code}</span>
+            <span className="text-xs opacity-50 shrink-0 ml-auto font-mono">{feedback.code}</span>
           )}
           <button
             onClick={clearFeedback}
@@ -279,7 +279,7 @@ const ProductSearch = React.memo(function ProductSearch() {
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-warning truncate">Producto no encontrado</p>
-                <p className="text-[11px] font-medium text-warning/60 font-mono">{error}</p>
+                <p className="text-xs font-medium text-warning/60 font-mono">{error}</p>
               </div>
             </div>
             <Button

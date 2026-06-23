@@ -847,27 +847,6 @@ img {
     border-color: hsl(var(--border) / 0.22);
   }
 
-  /* ── Improved Focus Ring for Dark Mode ── */
-  [data-theme="dark"] :focus-visible {
-    outline-color: hsl(var(--ring) / 0.7);
-  }
-[data-theme="dark"] .btn-glass:hover {
-  background: hsl(var(--surface) / 0.55);
-  border-color: hsl(var(--border) / 0.32);
-}
-[data-theme="dark"] .card-glass {
-  background: hsl(var(--surface) / 0.52);
-  border-color: hsl(var(--border) / 0.18);
-}
-[data-theme="dark"] .table-glass {
-  background: hsl(var(--surface-glass) / 0.42);
-  border-color: hsl(var(--border) / 0.18);
-}
-[data-theme="dark"] .badge-glass {
-  background: hsl(var(--surface) / 0.48);
-  border-color: hsl(var(--border) / 0.22);
-}
-
 /* ── Dark Mode Numpad Key Override ── */
 [data-theme="dark"] button:has(.haptic-press) {
   background: hsl(var(--surface-glass) / 0.72);

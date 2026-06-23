@@ -65,7 +65,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[15vh]" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
       <div className="relative w-full max-w-xl bg-card rounded-xl shadow-2xl border border-border overflow-hidden">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
@@ -159,7 +159,7 @@ export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> 
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-black/60" onClick={onClose}>
       <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Atajos de teclado">
         <h2 className="text-lg font-bold mb-4 text-foreground">Atajos de Teclado</h2>
         <div className="space-y-1">

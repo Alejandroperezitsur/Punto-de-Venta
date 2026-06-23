@@ -34,7 +34,7 @@ const variants = {
 };
 
 const sizes = {
-  xs: 'h-[var(--control-xs)] px-2 text-[11px] rounded-md gap-1',
+  xs: 'h-[var(--control-xs)] px-2 text-xs rounded-md gap-1',
   sm: 'h-[var(--control-sm)] px-3 text-xs rounded-md gap-1',
   md: 'h-[var(--control-md)] px-3.5 text-sm rounded-lg gap-1.5',
   lg: 'h-[var(--control-lg)] px-4 text-sm rounded-lg gap-2',

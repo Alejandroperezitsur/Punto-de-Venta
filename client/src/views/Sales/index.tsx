@@ -49,7 +49,7 @@ const CheckoutButton = React.memo(function CheckoutButton({
         <>
           <Wallet className="size-5 transition-transform duration-200 group-hover:scale-110" />
           <span className="text-lg tracking-wider">COBRAR</span>
-          <span className="inline-flex items-center gap-1 text-[9px] font-bold opacity-20 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">
+          <span className="inline-flex items-center gap-1 text-xs font-bold opacity-20 bg-black/10 px-2 py-0.5 rounded-lg ml-1 tracking-wider">
             <Command className="size-2.5" />F2
           </span>
         </>
@@ -602,7 +602,7 @@ const SalesView = React.memo(function SalesView() {
           {showHeldTickets && heldTickets.length > 0 && (
             <div className="mb-2 border border-pos-hold/20 rounded-xl bg-pos-hold/8 overflow-hidden">
               <div className="px-3 py-2 border-b border-pos-hold/12 flex items-center justify-between">
-                <span className="text-[9px] font-bold text-pos-hold uppercase tracking-[0.1em]">Tickets en espera</span>
+                <span className="text-xs font-bold text-pos-hold uppercase tracking-[0.1em]">Tickets en espera</span>
                 <button onClick={() => setShowHeldTickets(false)} className="text-pos-hold/50 hover:text-foreground touch-target" aria-label="Cerrar tickets en espera"><X className="size-3" /></button>
               </div>
               {heldTickets.map(t => (
@@ -613,7 +613,7 @@ const SalesView = React.memo(function SalesView() {
                     aria-label={`Restaurar ticket ${t.label}`}
                   >
                     <p className="text-xs font-semibold text-foreground truncate">{t.label}</p>
-                    <p className="text-[10px] text-muted-foreground/60">{t.items.length} items · {new Date(t.heldAt).toLocaleTimeString()}</p>
+                    <p className="text-xs text-muted-foreground/60">{t.items.length} items · {new Date(t.heldAt).toLocaleTimeString()}</p>
                   </button>
                   <button
                     onClick={() => { removeHeldTicket(t.id); toast('Ticket descartado', 'info'); }}
@@ -742,7 +742,7 @@ const SalesView = React.memo(function SalesView() {
              <div className="mt-7 h-0.5 bg-muted/15 rounded-full overflow-hidden">
                <div className="h-full bg-success/30 rounded-full progress-dismiss" style={{ '--dismiss-duration': '4s' } as any} />
              </div>
-             <p className="text-[11px] text-muted-foreground/40 mt-3 font-medium">
+             <p className="text-xs text-muted-foreground/40 mt-3 font-medium">
                Toque para continuar
              </p>
            </div>
@@ -758,11 +758,11 @@ const SalesView = React.memo(function SalesView() {
       >
         <form onSubmit={handleAddManual} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">Nombre del producto</label>
+            <label className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">Nombre del producto</label>
             <Input placeholder="Nombre del producto..." value={manualForm.name} onChange={e => setManualForm({ ...manualForm, name: e.target.value })} autoFocus required />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">Precio</label>
+            <label className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">Precio</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground/60 z-10 text-sm">$</span>
               <Input className="pl-7" type="number" step="0.01" min="0" placeholder="0.00" value={manualForm.price} onChange={e => setManualForm({ ...manualForm, price: e.target.value })} required />
@@ -782,7 +782,7 @@ const SalesView = React.memo(function SalesView() {
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold text-muted-foreground/70 uppercase tracking-wider">Monto a descontar</label>
+            <label className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">Monto a descontar</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground/60 z-10 text-sm">$</span>
               <Input

@@ -72,11 +72,11 @@ export default function SupportTickets() {
             <Card className="p-0 overflow-hidden rounded-2xl backdrop-blur-md bg-surface-glass/50 border border-border/20">
                 <Table
                     data={tickets}
+                    keyExtractor={(t) => t.id}
                     searchable={false}
                     pageSize={tickets.length || 10}
-                    striped={false}
                     density="compact"
-                    emptyTitle="No hay tickets de soporte."
+                    emptyMessage="No hay tickets de soporte."
                     columns={[
                         { key: 'subject', label: 'Asunto', render: (t) => <span className="font-medium">{t.subject}</span> },
                         { key: 'status', label: 'Estado', render: (t) => (

@@ -43,20 +43,20 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
 
       <div className="mt-auto pt-2 space-y-2 w-full text-center">
         <div className="flex items-baseline justify-center gap-0.5">
-          <span className="text-[10px] font-semibold text-primary/60">$</span>
+          <span className="text-xs font-semibold text-primary/60">$</span>
           <p className="text-xl font-black text-primary tracking-tight tabular-nums">
             {formatMoney(p.price)}
           </p>
         </div>
         {(p.barcodes?.length > 0 || p.sku) && (
-          <p className="text-[10px] text-muted-foreground/55 font-mono truncate">
+          <p className="text-xs text-muted-foreground/55 font-mono truncate">
             {p.barcodes?.[0]?.code || p.sku}
           </p>
         )}
         <Badge
           variant={p.stock <= 0 ? 'danger' : p.stock <= 5 ? 'warning' : 'success'}
           size="sm"
-          className="text-[11px]"
+          className="text-xs"
         >
           Stock: {Number(p.stock).toFixed(0)}
         </Badge>

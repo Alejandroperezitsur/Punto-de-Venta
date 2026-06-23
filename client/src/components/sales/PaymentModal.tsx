@@ -188,7 +188,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
       <div className="flex flex-col gap-5">
          {/* Total header — premium gradient panel with larger total */}
          <div className="text-center py-5 rounded-2xl" style={{ background: 'var(--gradient-checkout)' }}>
-           <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.15em] mb-2">Total a pagar</p>
+           <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.15em] mb-2">Total a pagar</p>
            <p className="text-5xl lg:text-6xl font-black tracking-tighter tabular-nums font-mono text-foreground leading-none">{formatMoney(total)}</p>
            <p className="text-xs text-muted-foreground/55 mt-2">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
          </div>
@@ -211,7 +211,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
             {/* Received amount display */}
             <div className="rounded-2xl border border-border/18 backdrop-blur-sm bg-surface-glass/35 p-4 shadow-sm">
               <div className="flex justify-between items-baseline mb-3">
-                <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.1em]">Recibido</span>
+                <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.1em]">Recibido</span>
                 {receivedNum > 0 && (
                   <span className="text-[11px] font-medium text-muted-foreground/50">
                     {isShort ? `Falta ${formatMoney(total - receivedNum)}` : ''}

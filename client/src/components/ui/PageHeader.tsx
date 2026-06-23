@@ -32,7 +32,7 @@ function PageHeader({
   return (
     <div className={cn('space-y-3', className)}>
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-1 text-[11px] font-medium" aria-label="Breadcrumb">
+        <nav className="flex items-center gap-1 text-xs font-medium" aria-label="Breadcrumb">
           {breadcrumbs.map((crumb, i) => (
             <React.Fragment key={i}>
               {i > 0 && <ChevronRight className="size-3 text-muted-foreground/40" />}

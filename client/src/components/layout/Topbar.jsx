@@ -152,7 +152,7 @@ export const Topbar = React.memo(function Topbar() {
         <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md bg-surface-glass/40 border border-border/12 shadow-sm hover:bg-surface-glass/60 transition-colors">
           <span className="tabular-nums font-bold text-foreground text-[13px] tracking-tight">{timeStr}</span>
           <span className="w-px h-3 bg-border/25" />
-          <span className="text-muted-foreground/60 text-[11px] font-medium">{dateStrShort}</span>
+          <span className="text-muted-foreground/60 text-xs font-medium">{dateStrShort}</span>
         </div>
       </div>
 
@@ -171,7 +171,7 @@ export const Topbar = React.memo(function Topbar() {
         >
           <Search className="size-5" />
           <span className="hidden xl:inline text-sm font-medium">Buscar...</span>
-          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/45 bg-muted/40 px-1.5 py-0.5 rounded border border-border/18">
+          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-xs font-bold text-muted-foreground/45 bg-muted/40 px-1.5 py-0.5 rounded border border-border/18">
             <Command className="size-2.5" />K
           </kbd>
         </button>

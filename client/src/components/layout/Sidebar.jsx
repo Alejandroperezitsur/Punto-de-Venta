@@ -64,7 +64,7 @@ const NavItem = React.memo(function NavItem({ to, icon: Icon, children, shortcut
 const SectionLabel = ({ children, isCollapsed }) => {
   if (isCollapsed) return null;
   return (
-    <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.14em] px-4 pt-5 pb-1.5 select-none">
+            <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-[0.14em] px-4 pt-5 pb-1.5 select-none">
       {children}
     </p>
   );
@@ -167,7 +167,7 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
           {!isCollapsed && (
             <div className="min-w-0">
               <span className="font-extrabold text-[13px] tracking-tight truncate block leading-tight text-foreground">{branding.businessName}</span>
-              <p className="text-[8px] text-muted-foreground/40 font-semibold tracking-[0.1em] truncate block uppercase mt-0.5">{branding.businessSubtitle}</p>
+              <p className="text-[10px] text-muted-foreground/40 font-semibold tracking-[0.1em] truncate block uppercase mt-0.5">{branding.businessSubtitle}</p>
             </div>
           )}
         </div>
@@ -256,13 +256,13 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
                 <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-success border-2 border-card animate-breathe" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold truncate text-foreground/85 leading-tight">{userName}</p>
+                <p className="text-xs font-bold truncate text-foreground/85 leading-tight">{userName}</p>
                 <div className="mt-0.5"><RoleBadge role={role} /></div>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold text-danger/70 hover:text-danger hover:bg-danger/10 transition-colors touch-target"
+              className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-danger/70 hover:text-danger hover:bg-danger/10 transition-colors touch-target"
             >
               <LogOut className="size-3.5" />
               <span>Cerrar Sesión</span>

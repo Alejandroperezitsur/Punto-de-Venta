@@ -61,7 +61,7 @@ function KpiCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/85">{label}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
           <div className="mt-1.5 flex items-baseline gap-1">
             {prefix && <span className="text-sm font-medium text-muted-foreground">{prefix}</span>}
             <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
@@ -71,7 +71,7 @@ function KpiCard({
           </div>
           {trendDir && (
             <div className={cn(
-              'mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold',
+              'mt-1.5 inline-flex items-center gap-1 text-xs font-semibold',
               trendDir === 'up' && 'text-success',
               trendDir === 'down' && 'text-danger',
               trendDir === 'neutral' && 'text-muted-foreground',

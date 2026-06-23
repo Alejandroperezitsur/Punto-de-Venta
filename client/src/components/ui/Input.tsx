@@ -32,7 +32,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative w-full">
         {(label && !floating) && (
-          <label className="block text-[11px] font-semibold text-muted-foreground mb-1.5 ml-0.5">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1.5 ml-0.5">
             {label}
           </label>
         )}

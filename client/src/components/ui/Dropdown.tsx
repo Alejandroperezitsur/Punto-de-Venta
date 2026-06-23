@@ -50,7 +50,7 @@ function Dropdown({ trigger, items, align = 'end', className }: DropdownProps) {
       {shouldRender && (
         <div
           className={cn(
-            'absolute z-50 mt-1 min-w-[200px] rounded-lg border border-border bg-card shadow-md overflow-hidden p-1',
+            'absolute z-[var(--z-dropdown)] mt-1 min-w-[200px] rounded-lg border border-border bg-card shadow-md overflow-hidden p-1',
             'transition-all duration-80',
             isOpen
               ? 'opacity-100 translate-y-0 pointer-events-auto'

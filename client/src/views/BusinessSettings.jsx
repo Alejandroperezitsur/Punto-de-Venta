@@ -8,7 +8,7 @@ import { useToast } from '../components/ui/Toast';
 import { useTheme } from '../context/ThemeContext';
 import { ViewContainer } from '../components/layout/ViewContainer';
 import { ViewHeader } from '../components/layout/ViewHeader';
-import { Save, Check, Store, Phone, Mail, Globe, Percent, Image, Building, Receipt, Palette, Bell } from 'lucide-react';
+import { Save, Check, Store, Phone, Mail, Globe, Percent, Image, Building, Receipt, Palette, Bell, Settings } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (

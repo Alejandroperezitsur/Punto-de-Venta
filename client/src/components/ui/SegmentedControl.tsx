@@ -38,7 +38,7 @@ export function SegmentedControl({ segments, value, onChange, size = 'sm', class
             <span>{label}</span>
             {count !== undefined && (
               <span className={cn(
-                'text-[8px] tabular-nums font-bold px-1 py-0.5 rounded-md min-w-[1.125rem] text-center',
+                'text-[10px] tabular-nums font-bold px-1 py-0.5 rounded-md min-w-[1.125rem] text-center',
                 isActive ? 'bg-primary/10 text-primary' : 'bg-muted/40 text-muted-foreground/50',
               )}>
                 {count}

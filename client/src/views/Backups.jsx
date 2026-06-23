@@ -201,13 +201,12 @@ const BackupsView = () => {
             <Table
                 columns={columns}
                 data={backups}
+                keyExtractor={(b) => b.id}
                 searchable={false}
                 pageSize={50}
                 density="comfortable"
-                striped={false}
                 loading={loading}
-                emptyTitle="No hay backups disponibles"
-                emptyDescription="Crea tu primer backup para proteger tus datos"
+                emptyMessage="No hay backups disponibles"
                 emptyIcon={HardDrive}
             />
         </ViewContainer>
