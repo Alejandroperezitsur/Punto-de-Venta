@@ -781,32 +781,32 @@ img {
 }
 
 /* ── Dark Mode Glass & Surface Overrides ── */
-[data-theme="dark"] .glass-panel {
-  background: hsl(var(--surface-glass) / 0.40);
-  border-color: hsl(var(--border) / 0.10);
-}
-[data-theme="dark"] .glass-panel-strong {
-  background: hsl(var(--surface) / 0.70);
-  border-color: hsl(var(--border) / 0.14);
-}
-[data-theme="dark"] .glass-card {
-  background: hsl(var(--surface) / 0.50);
-  border-color: hsl(var(--border) / 0.16);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 0 hsl(var(--surface) / 0.20);
-}
-[data-theme="dark"] .glass-card:hover {
-  background: hsl(var(--surface) / 0.60);
-  border-color: hsl(var(--border) / 0.24);
-}
-[data-theme="dark"] .premium-surface {
-  background: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%);
-  border-color: hsl(var(--border-accent) / 0.24);
-  box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.04);
-}
-[data-theme="dark"] .enterprise-panel {
-  background: hsl(var(--surface-panel));
-  border-color: hsl(var(--border-accent) / 0.26);
-}
+  [data-theme="dark"] .glass-panel {
+    background: hsl(var(--surface-glass) / 0.35);
+    border-color: hsl(var(--border) / 0.12);
+  }
+  [data-theme="dark"] .glass-panel-strong {
+    background: hsl(var(--surface) / 0.60);
+    border-color: hsl(var(--border) / 0.18);
+  }
+  [data-theme="dark"] .glass-card {
+    background: hsl(var(--surface) / 0.45);
+    border-color: hsl(var(--border) / 0.20);
+    box-shadow: var(--shadow-xs), inset 0 1px 0 0 hsl(var(--surface) / 0.15);
+  }
+  [data-theme="dark"] .glass-card:hover {
+    background: hsl(var(--surface) / 0.55);
+    border-color: hsl(var(--border) / 0.28);
+  }
+  [data-theme="dark"] .premium-surface {
+    background: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%);
+    border-color: hsl(var(--border-accent) / 0.30);
+    box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.06);
+  }
+  [data-theme="dark"] .enterprise-panel {
+    background: hsl(var(--surface-panel));
+    border-color: hsl(var(--border-accent) / 0.30);
+  }
 
 /* ── Dark Mode Scrollbar ── */
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
@@ -826,11 +826,31 @@ img {
 }
 
 /* ── Dark Mode Component Glass Overrides ── */
-[data-mode="dark"] .btn-glass,
-[data-theme="dark"] .btn-glass {
-  background: hsl(var(--surface) / 0.42);
-  border-color: hsl(var(--border) / 0.24);
-}
+  [data-theme="dark"] .btn-glass {
+    background: hsl(var(--surface) / 0.42);
+    border-color: hsl(var(--border) / 0.24);
+  }
+  [data-theme="dark"] .btn-glass:hover {
+    background: hsl(var(--surface) / 0.55);
+    border-color: hsl(var(--border) / 0.32);
+  }
+  [data-theme="dark"] .card-glass {
+    background: hsl(var(--surface) / 0.52);
+    border-color: hsl(var(--border) / 0.18);
+  }
+  [data-theme="dark"] .table-glass {
+    background: hsl(var(--surface-glass) / 0.42);
+    border-color: hsl(var(--border) / 0.18);
+  }
+  [data-theme="dark"] .badge-glass {
+    background: hsl(var(--surface) / 0.48);
+    border-color: hsl(var(--border) / 0.22);
+  }
+
+  /* ── Improved Focus Ring for Dark Mode ── */
+  [data-theme="dark"] :focus-visible {
+    outline-color: hsl(var(--ring) / 0.7);
+  }
 [data-theme="dark"] .btn-glass:hover {
   background: hsl(var(--surface) / 0.55);
   border-color: hsl(var(--border) / 0.32);
@@ -908,20 +928,39 @@ img {
     flex-direction: column !important;
   }
   .pos-cart-panel {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     flex-basis: auto !important;
     max-width: 100% !important;
     min-width: 100% !important;
     max-height: 50vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+    z-index: 10;
+  }
+  .pos-cart-handle {
+    display: block !important;
   }
   .pos-catalog-panel {
     flex-basis: auto !important;
+    padding-bottom: calc(60vh + var(--header-height));
+  }
+}
+
+@media (max-width: 767px) {
+  .pos-cart-panel {
+    max-height: 45vh;
+  }
+  .pos-catalog-panel {
+    padding-bottom: calc(50vh + var(--header-height));
   }
 }
 
 @media (max-width: 639px) {
   .pos-cart-panel {
-    max-height: 60vh;
-    border-radius: var(--radius-lg) !important;
+    max-height: 40vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
   }
   .pos-catalog-panel {
     border-radius: var(--radius-lg) !important;

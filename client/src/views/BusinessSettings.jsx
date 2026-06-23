@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../lib/api';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -8,10 +8,8 @@ import { useToast } from '../components/ui/Toast';
 import { useTheme } from '../context/ThemeContext';
 import { ViewContainer } from '../components/layout/ViewContainer';
 import { ViewHeader } from '../components/layout/ViewHeader';
-import {
-  Settings, Store, Receipt, Palette, Bell, Save, Check,
-  Building, Phone, Mail, Globe, Percent, Image
-} from 'lucide-react';
+import { Save, Check, Store, Phone, Mail, Globe, Percent, Image, Building, Receipt, Palette, Bell } from 'lucide-react';
+import { cn } from '../utils/cn';
 
 const SettingsSection = ({ title, icon: Icon, children }) => (
   <Card variant="glass" className="p-6 space-y-4 relative overflow-hidden transition-all duration-200">
@@ -33,6 +31,7 @@ const BusinessSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const saveTimerRef = useRef(null);
 
   const loadSettings = async () => {
     setLoading(true);
@@ -50,12 +49,37 @@ const BusinessSettings = () => {
     loadSettings();
   }, []);
 
+  useEffect(() => () => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+  }, []);
+
   const updateSetting = (key, value) => {
     setSettings(prev => ({ ...prev, [key]: value }));
     setSaved(false);
+    
+    // Auto-save with debounce
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      setSaving(true);
+      try {
+        await api('/settings', {
+          method: 'PUT',
+          body: JSON.stringify({ ...settings, [key]: value })
+        });
+        setSaved(true);
+      } catch (e) {
+        console.error('Auto-save failed:', e);
+      } finally {
+        setSaving(false);
+      }
+    }, 2000);
   };
 
   const handleSave = async () => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
     setSaving(true);
     try {
       await api('/settings', {

@@ -13,9 +13,10 @@ import { CommandPalette, ShortcutsOverlay, useKeyboardShortcuts } from '../../co
 import { useScannerFocusEngine } from '../../hooks/useScannerFocusEngine';
 import { api } from '../../lib/api';
 import { enqueueSale, initSyncManager } from '../../lib/syncManager';
-import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check, Lock, Wallet, UserPlus, X, Pause, Clock, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Plus, Zap, ShoppingBag, Command, Percent, XCircle, Check, Lock, Wallet, UserPlus, X, Pause, Clock, Trash2, GripHorizontal } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
+import { useNavigate } from 'react-router-dom';
 
 const CheckoutButton = React.memo(function CheckoutButton({
   hasItems,
@@ -145,6 +146,7 @@ const CustomerSearchModal = React.memo(function CustomerSearchModal({
 });
 
 const SalesView = React.memo(function SalesView() {
+  const navigate = useNavigate();
   const items = useCartStore(s => s.items);
   const addItem = useCartStore(s => s.addItem);
   const clearCart = useCartStore(s => s.clearCart);
@@ -513,7 +515,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 h-[4.5rem] px-4 text-xs font-bold rounded-2xl bg-warning/10 text-warning border border-warning/20 hover:bg-warning/15 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
+            className="shrink-0 h-[3.5rem] lg:h-[4rem] px-4 text-sm font-bold rounded-xl bg-warning/10 text-warning border border-warning/20 hover:bg-warning/15 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -523,24 +525,28 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         {/* Product catalog grid */}
-        <div className="flex-1 rounded-2xl border border-border/12 bg-card p-3 lg:p-4 overflow-y-auto shadow-sm">
+        <div className="flex-1 rounded-xl border border-border/15 bg-card p-3 lg:p-4 overflow-y-auto shadow-sm">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
       {/* ===== CART PANEL (Right ~40%) ===== */}
       <div
-        className="flex flex-col rounded-2xl border border-border/12 bg-card h-full overflow-hidden pos-cart-panel shadow-sm"
-        style={{ flexBasis: '40%', minWidth: '320px', maxWidth: '420px' }}
+        className="flex flex-col rounded-xl border border-border/15 bg-card h-full overflow-hidden pos-cart-panel shadow-sm"
       >
+        {/* Cart handle indicator for mobile */}
+        <div className="pos-cart-handle hidden w-full h-2 items-center justify-center cursor-pointer">
+          <GripHorizontal className="size-4 text-muted-foreground/40" />
+        </div>
+
         {/* Cart header */}
-        <div className="px-4 py-3 border-b border-border/8 flex items-center justify-between shrink-0 backdrop-blur-sm bg-surface-glass/30">
-          <h2 className="font-bold text-sm flex items-center gap-3" id="cart-heading">
-            <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shadow-xs shadow-primary/5">
+        <div className="px-4 py-3 border-b border-border/10 flex items-center justify-between shrink-0 backdrop-blur-sm bg-surface-glass/40">
+          <h2 className="font-bold text-base flex items-center gap-3" id="cart-heading">
+            <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shadow-xs">
               <ShoppingBag className="size-4 text-primary" />
             </div>
             <span className="text-foreground">Carrito</span>
-            <span className="bg-primary/14 text-primary text-[11px] px-2.5 py-0.5 rounded-full font-bold min-w-[24px] text-center tabular-nums ring-1 ring-primary/12" aria-live="polite">
+            <span className="bg-primary/15 text-primary text-sm font-bold px-2.5 py-1 rounded-full min-w-[28px] text-center tabular-nums ring-1 ring-primary/15" aria-live="polite">
               {items.length}
             </span>
           </h2>
@@ -551,7 +557,6 @@ const SalesView = React.memo(function SalesView() {
               <button
                 onClick={() => setShowHeldTickets(!showHeldTickets)}
                 className="size-9 rounded-lg text-pos-hold hover:bg-pos-hold/10 transition-colors flex items-center justify-center touch-target shrink-0"
-                title={`Tickets en espera (${heldTickets.length})`}
                 aria-label={`Ver tickets en espera (${heldTickets.length})`}
               >
                 <Clock className="size-4" />
@@ -560,8 +565,7 @@ const SalesView = React.memo(function SalesView() {
             <button
               onClick={() => { if (hasItems) { holdCurrentTicket(); toast('Ticket en pausa', 'info'); } }}
               disabled={!hasItems}
-              className="size-9 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-30 flex items-center justify-center touch-target shrink-0"
-              title="Pausar ticket"
+              className="size-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors disabled:opacity-30 flex items-center justify-center touch-target shrink-0"
               aria-label="Pausar ticket actual"
             >
               <Pause className="size-4" />
@@ -569,16 +573,14 @@ const SalesView = React.memo(function SalesView() {
             <button
               onClick={() => setDiscountOpen(true)}
               disabled={!hasItems}
-              className="size-9 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/25 transition-colors disabled:opacity-30 flex items-center justify-center touch-target shrink-0"
-              title="Descuento"
+              className="size-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors disabled:opacity-30 flex items-center justify-center touch-target shrink-0"
               aria-label="Aplicar descuento"
             >
               <Percent className="size-4" />
             </button>
             <button
               onClick={() => setCustomerModalOpen(true)}
-              className="size-9 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/25 transition-colors flex items-center justify-center touch-target shrink-0"
-              title="Agregar cliente"
+              className="size-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors flex items-center justify-center touch-target shrink-0"
               aria-label="Buscar y agregar cliente"
             >
               <UserPlus className="size-4" />
@@ -587,8 +589,7 @@ const SalesView = React.memo(function SalesView() {
             <button
               onClick={() => { if (hasItems) { clearCart(); toast('Carrito vaciado', 'info'); focusSearch(); } }}
               disabled={!hasItems}
-              className="size-9 rounded-lg text-muted-foreground/40 hover:text-danger hover:bg-danger/8 transition-colors disabled:opacity-30 flex items-center justify-center touch-target shrink-0"
-              title="Vaciar carrito"
+              className="size-9 rounded-lg text-muted-foreground/50 hover:text-danger hover:bg-danger/8 transition-colors disabled:opacity-30 flex items-center justify-center touch-target shrink-0"
               aria-label="Vaciar carrito"
             >
               <Trash2 className="size-4" />
@@ -630,7 +631,7 @@ const SalesView = React.memo(function SalesView() {
 
         {/* Discount indicator */}
         {discount > 0 && (
-          <div className="px-4 py-2 bg-info/8 border-t border-info/12 flex items-center justify-between text-xs">
+          <div className="px-4 py-2 bg-info/10 border-t border-info/15 flex items-center justify-between text-sm">
             <span className="font-semibold text-info flex items-center gap-1.5"><Percent className="size-3" />Descuento</span>
             <span className="font-bold text-info tabular-nums">-{formatMoney(discount)}</span>
           </div>
@@ -638,19 +639,19 @@ const SalesView = React.memo(function SalesView() {
 
         {/* Error */}
         {payError && (
-          <div className="px-3 py-2 bg-danger/8 border-t-2 border-danger/15 flex items-center gap-1.5" role="alert">
-            <span className="text-[11px] font-semibold text-danger">{payError}</span>
+          <div className="px-3 py-2 bg-danger/10 border-t-2 border-danger/20 flex items-center gap-1.5" role="alert">
+            <span className="text-sm font-semibold text-danger">{payError}</span>
           </div>
         )}
 
         {/* Bottom: customer + totals + checkout */}
-        <div className="px-4 py-3 border-t border-border/10 space-y-3 shrink-0 bg-surface-glass/20 pb-[env(safe-area-inset-bottom,0.75rem)]">
+        <div className="px-4 py-3 border-t border-border/15 space-y-3 shrink-0 bg-surface-glass/30 pb-[env(safe-area-inset-bottom,0.75rem)]">
           {/* Customer selector */}
           <div className="flex items-center gap-2">
             {selectedCustomer ? (
-              <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-info/8 border border-info/18 text-xs">
-                <div className="size-6 rounded-full bg-info/12 flex items-center justify-center shrink-0">
-                  <span className="text-[10px] font-bold text-info">{selectedCustomer.name.charAt(0).toUpperCase()}</span>
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-info/10 border border-info/20 text-sm">
+                <div className="size-7 rounded-full bg-info/15 flex items-center justify-center shrink-0">
+                  <span className="text-sm font-bold text-info">{selectedCustomer.name.charAt(0).toUpperCase()}</span>
                 </div>
                 <span className="font-semibold text-info truncate flex-1">{selectedCustomer.name}</span>
                 <button
@@ -658,36 +659,35 @@ const SalesView = React.memo(function SalesView() {
                   className="text-info/50 hover:text-danger transition-colors shrink-0"
                   aria-label="Quitar cliente"
                 >
-                  <X className="size-3" />
+                  <X className="size-4" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => setCustomerModalOpen(true)}
-                className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-border/25 text-[11px] text-muted-foreground/60 hover:border-info/30 hover:text-info/70 hover:bg-info/[0.03] transition-all"
+                className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-border/30 text-sm text-muted-foreground hover:border-info/40 hover:text-info hover:bg-info/[0.05] transition-all"
               >
-                <UserPlus className="size-3" />
+                <UserPlus className="size-4" />
                 <span>Agregar cliente (F6)</span>
               </button>
             )}
           </div>
 
           {/* Totals — premium metric card */}
-          <div className="relative overflow-hidden rounded-2xl border border-border/10 bg-gradient-to-b from-surface-panel to-card shadow-sm">
-            {/* Gradient accent line */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-primary/60 to-primary/30 opacity-60" />
+          <div className="relative overflow-hidden rounded-xl border border-border/15 bg-gradient-to-b from-surface-panel/50 to-card shadow-xs">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-primary/50 to-transparent opacity-50" />
             
             <div className="p-4 space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground/70 font-medium">Subtotal</span>
-                <span className="font-semibold text-foreground/75 tabular-nums">{formatMoney(totals.subtotal)}</span>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground font-medium">Subtotal</span>
+                <span className="font-semibold text-foreground/90 tabular-nums">{formatMoney(totals.subtotal)}</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground/70 font-medium">IVA (16%)</span>
-                <span className="font-semibold text-foreground/75 tabular-nums">{formatMoney(totals.tax)}</span>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground font-medium">IVA (16%)</span>
+                <span className="font-semibold text-foreground/90 tabular-nums">{formatMoney(totals.tax)}</span>
               </div>
               {totals.discount > 0 && (
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-info font-medium">Descuento</span>
                   <span className="font-semibold text-info tabular-nums">-{formatMoney(totals.discount)}</span>
                 </div>
@@ -695,17 +695,17 @@ const SalesView = React.memo(function SalesView() {
             </div>
 
             {/* Total — hero display */}
-            <div className="px-4 pb-4 pt-3 border-t border-border/8 flex items-baseline justify-between gap-3">
-              <span className="text-[10px] text-muted-foreground/60 font-bold uppercase tracking-[0.12em]">Total</span>
-              <span className="text-3xl font-black text-foreground tracking-tighter font-mono tabular-nums leading-none">
+            <div className="px-4 pb-4 pt-2.5 border-t border-border/10 flex items-baseline justify-between gap-3">
+              <span className="text-sm text-muted-foreground/70 font-bold uppercase tracking-wider">Total</span>
+              <span className="text-2xl lg:text-3xl font-black text-foreground tracking-tighter font-mono tabular-nums leading-none">
                 {formatMoney(totals.total)}
               </span>
             </div>
           </div>
 
           {!hasItems && (
-            <p className="text-[10px] text-muted-foreground/40 text-center font-medium">
-              Escanee o busque productos para comenzar
+            <p className="text-sm text-muted-foreground/60 text-center font-medium">
+              Escanee un producto para comenzar
             </p>
           )}
 
@@ -836,20 +836,20 @@ const SalesView = React.memo(function SalesView() {
         onSelect={(c) => { setSelectedCustomer(c); setCustomerModalOpen(false); toast(`Cliente: ${c.name}`, 'info'); restoreAfterModal(); }}
       />
 
-      {/* Cash Gate */}
+{/* Cash Gate */}
       {cashOpen === false && (
-        <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/55 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl border border-border/35 p-8 text-center max-w-sm shadow-2xl animate-scale-in">
-            <div className="size-16 rounded-2xl bg-danger/10 flex items-center justify-center mx-auto mb-5">
-              <Lock className="size-8 text-danger" />
+        <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-card rounded-xl border border-border/20 p-6 text-center max-w-sm shadow-xl animate-scale-in">
+            <div className="size-14 rounded-xl bg-danger/10 flex items-center justify-center mx-auto mb-4">
+              <Lock className="size-7 text-danger" />
             </div>
-            <h3 className="text-lg font-black text-foreground mb-2">Caja Cerrada</h3>
-            <p className="text-sm text-muted-foreground/70 mb-6">
-              Debes abrir caja antes de realizar ventas. Ve a la sección de Caja para aperturar.
+            <h3 className="text-lg font-bold text-foreground mb-2">Caja Cerrada</h3>
+            <p className="text-sm text-muted-foreground/70 mb-5">
+              Debes abrir caja antes de realizar ventas.
             </p>
             <button
-              onClick={() => { window.location.hash = '#/caja'; }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
+              onClick={() => navigate('/caja')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors"
             >
               <Wallet className="size-4" />
               Abrir Caja

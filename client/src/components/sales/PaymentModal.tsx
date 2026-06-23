@@ -37,12 +37,12 @@ const NumpadKey = memo(function NumpadKey({ label, onClick, disabled, variant }:
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'rounded-xl border text-base font-bold transition-all duration-100 flex items-center justify-center active:scale-[0.93] haptic-press',
-        'min-h-[var(--touch-target-opt)] min-w-[var(--touch-target-opt)]',
+        'rounded-lg border text-base font-semibold transition-all duration-100 flex items-center justify-center active:scale-[0.94] haptic-press touch-target',
+        'min-h-[44px] min-w-[44px]',
         variant === 'danger'
-          ? 'bg-danger/10 text-danger border-danger/20 text-sm active:bg-danger/18 shadow-sm shadow-danger/5'
-          : 'backdrop-blur-md bg-surface-glass/60 border-white/[0.08] text-foreground hover:bg-surface-glass/75 active:bg-surface-glass/50 shadow-sm',
-        disabled && 'opacity-50 cursor-not-allowed',
+          ? 'bg-danger/10 text-danger border-danger/20'
+          : 'backdrop-blur-sm bg-surface/80 border-border/20 text-foreground hover:bg-muted/40 active:bg-muted/50',
+        disabled && 'opacity-40 cursor-not-allowed',
       )}
       aria-label={typeof label === 'string' && label === 'DEL' ? 'Borrar' : String(label)}
     >
@@ -63,18 +63,18 @@ const PaymentMethodButton = memo(function PaymentMethodButton({ method, isSelect
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'min-h-[var(--touch-target-opt)] rounded-2xl border-2 text-xs font-bold transition-all duration-200 flex flex-col items-center justify-center gap-2 active:scale-[0.96]',
+        'min-h-[44px] rounded-xl border text-sm font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-1.5 active:scale-[0.96]',
         isSelected
-          ? 'text-primary-foreground shadow-lg shadow-primary/20'
-          : 'bg-card border-border/20 text-muted-foreground hover:border-border/40 hover:-translate-y-px',
-        disabled && 'opacity-50 cursor-not-allowed',
+          ? 'text-primary-foreground shadow-md shadow-primary/20'
+          : 'bg-card border-border/25 text-muted-foreground hover:border-border/40 hover:-translate-y-px',
+        disabled && 'opacity-40 cursor-not-allowed',
       )}
-      style={isSelected ? { background: 'var(--gradient-primary)', borderColor: 'transparent' } : undefined}
+      style={isSelected ? { background: 'var(--gradient-primary)' } : undefined}
       aria-label={`Pago con ${method.label}`}
       aria-pressed={isSelected}
     >
-      <Icon className="size-6" strokeWidth={2.2} />
-      <span className="text-[11px] tracking-wide font-bold">{method.label}</span>
+      <Icon className="size-5 stroke-[2]" />
+      <span className="text-xs font-semibold">{method.label}</span>
     </button>
   );
 });

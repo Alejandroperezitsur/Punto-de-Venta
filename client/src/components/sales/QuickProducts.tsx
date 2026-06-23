@@ -34,65 +34,50 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect 
       onClick={() => !isOutOfStock && onSelect(product)}
       disabled={isOutOfStock}
       className={cn(
-        'rounded-2xl border bg-card flex flex-col justify-between gap-2 transition-all duration-200 group relative overflow-hidden',
-        'hover:border-primary/30 hover:bg-primary/[0.02] hover:shadow-lg hover:-translate-y-1',
-        'active:bg-primary/[0.04] active:border-primary/20 active:scale-[0.98] active:translate-y-0',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/25 focus-visible:ring-offset-1',
-        'min-h-[7.5rem] px-3.5 py-3 border-border/15',
-        isOutOfStock && 'pointer-events-none opacity-60',
+        'rounded-xl border bg-card flex flex-col justify-between gap-2 transition-all duration-200 group relative overflow-hidden',
+        'hover:border-primary/30 hover:bg-primary/[0.015] hover:shadow-md',
+        'active:bg-primary/[0.03] active:border-primary/20 active:scale-[0.98]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-1',
+        'min-h-[4.5rem] sm:min-h-[5rem] lg:min-h-[5.5rem] px-3 py-2.5 border-border/20',
+        isOutOfStock && 'pointer-events-none opacity-40',
       )}
       title={`${product.name} — ${formatMoney(product.price)}`}
       aria-label={`Agregar ${product.name} - ${formatMoney(product.price)}`}
     >
       {/* Out of stock overlay */}
       {isOutOfStock && (
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px] flex items-center justify-center z-10 rounded-2xl">
-          <span className="text-[10px] font-black text-danger/60 uppercase tracking-widest">Agotado</span>
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-xl">
+          <span className="text-xs font-bold text-danger/70 uppercase tracking-wider">Agotado</span>
         </div>
       )}
 
-      {/* Low stock amber dot */}
-      {isLowStock && (
-        <span
-          className="absolute top-2.5 right-2.5 size-2 rounded-full bg-warning shadow-sm shadow-warning/20 ring-1 ring-warning/15 animate-pulse"
-          title={`Solo quedan ${product.stock}`}
-        />
-      )}
-
-      {/* Stock dot for in-stock items */}
-      {!isOutOfStock && !isLowStock && (
-        <span className="absolute top-2.5 right-2.5 size-1.5 rounded-full bg-success/30" />
-      )}
-
-      <div className="flex-1 flex flex-col justify-center min-w-0">
-        <span className="font-bold truncate leading-tight text-left text-[13px] text-foreground/90 group-hover:text-foreground transition-colors group-hover:translate-x-0.5 duration-200">
-          {product.name}
-        </span>
-        <div className="flex items-baseline gap-1 mt-2">
-          <span className="text-[10px] font-semibold text-primary/50">$</span>
-          <span className="text-base font-black text-primary tabular-nums leading-none tracking-tight">
-            {formatMoney(product.price)}
-          </span>
-        </div>
-        {isLowStock && (
-          <span className="mt-1.5 text-[8px] font-bold text-warning bg-warning/10 px-1.5 py-0.5 rounded-md w-fit leading-none">
-            {product.stock} left
-          </span>
-        )}
-      </div>
-
-      {/* Stock indicator bar at bottom */}
+      {/* Stock indicator bar at top */}
       {product.stock !== undefined && product.stock > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-muted/20">
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted/15">
           <div
             className={cn(
               'h-full rounded-r-full transition-all duration-300',
               isLowStock ? 'bg-warning' : 'bg-success/40',
             )}
-            style={{ width: `${Math.min((product.stock / 50) * 100, 100)}%` }}
+            style={{ width: `${Math.min((Math.max(product.stock, 0) / 50) * 100, 100)}%` }}
           />
         </div>
       )}
+
+      <div className="flex-1 flex flex-col justify-center min-w-0 pt-1">
+        <span className="text-sm font-bold truncate leading-tight text-left text-foreground/95 group-hover:text-foreground transition-colors">{product.name}</span>
+        <div className="flex items-baseline gap-1 mt-2">
+          <span className="text-xs font-semibold text-primary/60">$</span>
+          <span className="text-lg font-black text-primary tabular-nums leading-none tracking-tight">
+            {formatMoney(product.price)}
+          </span>
+        </div>
+        {isLowStock && (
+          <span className="mt-1.5 text-xs font-bold text-warning bg-warning/12 px-2 py-0.5 rounded-md w-fit leading-none">
+            {product.stock} uds
+          </span>
+        )}
+      </div>
     </button>
   );
 });
@@ -299,7 +284,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
 
       {/* Product grid — responsive inside catalog panel */}
       {displayProducts.length > 0 && (
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
         {paginatedProducts.map((p) => (
           <QuickProductButton
             key={p.id}

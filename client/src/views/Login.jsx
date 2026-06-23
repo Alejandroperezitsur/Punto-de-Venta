@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Eye, EyeOff, Loader2, Sun, Moon } from 'lucide-react';
+import { Store, Sun, Moon } from 'lucide-react';
 import { api } from '../lib/api';
 import { useUserStore } from '../store/userStore';
 import { useTheme } from '../context/ThemeContext';
-import { cn } from '../utils/cn';
 import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -13,7 +13,6 @@ export default function Login() {
   const { isDark, toggleDark } = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -85,7 +84,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground/70 mb-2 ml-0.5">
+              <label className="block text-sm font-semibold text-muted-foreground/80 mb-1.5 ml-0.5">
                 Usuario
               </label>
               <Input
@@ -95,16 +94,16 @@ export default function Login() {
                 placeholder="Ingrese su usuario"
                 autoFocus
                 autoComplete="username"
-                icon={<Store className="size-3.5" />}
+                icon={<Store className="size-4" />}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground/70 mb-2 ml-0.5">
+              <label className="block text-sm font-semibold text-muted-foreground/80 mb-1.5 ml-0.5">
                 Contraseña
               </label>
               <Input
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Ingrese su contraseña"
@@ -113,26 +112,15 @@ export default function Login() {
               />
             </div>
 
-            <button
+            <Button
               type="submit"
+              isLoading={loading}
               disabled={loading}
-              className={cn(
-                'w-full h-[var(--control-xl)] rounded-xl font-bold text-sm text-primary-foreground mt-2',
-                'transition-all duration-200 active:scale-[0.98]',
-                'shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25',
-                'disabled:opacity-70 disabled:cursor-not-allowed',
-                loading ? 'bg-primary/80' : 'bg-primary hover:bg-primary/90',
-              )}
+              size="xl"
+              className="w-full font-bold"
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="size-4 animate-spin" />
-                  Iniciando sesión...
-                </span>
-              ) : (
-                'Iniciar Sesión'
-              )}
-            </button>
+              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            </Button>
           </form>
 
           <p className="text-center text-[11px] text-muted-foreground/50 mt-7 font-medium">

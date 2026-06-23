@@ -2,140 +2,237 @@
 
 ## Auditoría Profunda del Estado Actual
 
-### 1. Arquitectura de Diseño (tokens.css + themes.css) — SÓLIDO
-- Sistema de tokens HSL con 6 niveles de profundidad, gradientes temáticos, glassmorphism
-- Fluid type scale, 8px grid, 4 niveles de densidad
-- Dark mode completo con overrides de sombras, opacidades y superficies
-- 3 temas: light, dark, corporate
+### 1. Arquitectura de Diseño (tokens.css + themes.css)
+- ✅ Sistema de tokens HSL con 6 niveles de profundidad, gradientes temáticos, glassmorphism
+- ✅ Fluid type scale, 8px grid spacing system
+- ⚠️ Touch target mínimo es `2.75rem` (44px) pero algunos botones usan `h-[4.5rem]` que es excesivo
+- ❌ Opacidades extremadamente bajas: `/15`, `/20` hacen texto invisible en ambos temas
 
-### 2. Layout (MainLayout + Sidebar + Topbar) — SÓLIDO
-- Sidebar colapsable con navegación por permisos, active indicator, atajos de teclado
-- Topbar con breadcrumb, reloj, estado de caja, toggle dark, notificaciones
-- Mobile overlay con backdrop-blur, safe-area-inset support
-- Animaciones de página (page-enter)
+### 2. Layout (MainLayout + Sidebar + Topbar)
+- ✅ Sidebar colapsable con navegación por permisos, active indicator, atajos de teclado
+- ✅ Topbar con breadcrumb, reloj, estado de caja, toggle dark
+- ✅ Mobile overlay con backdrop-blur, safe-area-inset support
+- ⚠️ Header height fija `3rem` puede verse pequeño en móviles
+- ⚠️ No hay menú contextual en móvil para acciones rápidas del POS
 
-### 3. Punto de Venta (Sales/index.tsx) — SÓLIDO PERO MEJORABLE
-- Panel izquierdo (60%): búsqueda + grid de productos
-- Panel derecho (40%): carrito + totales + checkout
-- Modal de pago con numpad, montos rápidos, múltiples métodos
-- Tickets en espera, descuentos, búsqueda de cliente
-- Keyboard shortcuts completos (F2-F6, etc.)
-- Cash gate (caja cerrada)
+### 3. Punto de Venta (Sales/index.tsx)
+- ✅ Panel izquierdo (60%): búsqueda + grid de productos
+- ✅ Panel derecho (40%): carrito + totales + checkout
+- ⚠️ `gap-3 lg:gap-4` fijo - no hay breakpoint intermedio
+- ❌ `min-width: 320px` fuerza scroll horizontal en móviles
+- ❌ `maxWidth: 420px` en carrito hace que se comprima en tablets
+- ⚠️ Cash gate usa `window.location.hash = '#/caja'` en vez de `useNavigate()`
 
-### 4. Componentes UI — SÓLIDO
-- Button: 12 variantes, 10 tamaños, loading state
-- Input: iconos, scanner mode, floating label, password toggle
-- Modal: 6 tamaños, 4 variantes (default, fullscreen, sheet, drawer), animado
-- Toast: 4 variantes, progress bar, actions
-- Cart: virtualización, low-stock indicator, animaciones de entrada
-- QuickProducts: búsqueda, categorías, sort, paginación
+### 4. Componentes UI
+- ✅ Button: 12 variantes, 10 tamaños
+- ✅ Input: iconos, scanner mode, password toggle
+- ⚠️ Modal backdrop usa `bg-black/50` pero en dark mode el override `bg-black/0.65` no es suficiente
+- ⚠️ Toast usa `z-[var(--z-toast)]` pero el toast-container no está definido en tokens
 
-### 5. Problemas Detectados (Oportunidades de Mejora)
+### 5. Problemas Críticos Identificados
 
-| Área | Problema | Severidad |
-|------|----------|-----------|
-| **Contraste** | `text-muted-foreground/45`, `/40`, `/35` — textos auxiliares extremadamente tenues, fallan WCAG AA en ambas temas | Alta |
-| **Dark mode** | Múltiples selectores `[data-mode="dark"]` y `[data-theme="dark"]` duplicados, inconsistentes | Media |
-| **Responsive** | POS layout usa `flex gap-3` fijo, no hay breakpoint para tablet (768px-1024px), carrito se comprime | Alta |
-| **Móvil** | No hay vista móvil dedicada; el POS asume desktop. Touch targets OK pero layout no se adapta | Alta |
-| **Animaciones** | `animate-border-glow`, `success-pulse`, `pulse-glow` — exceso de animaciones simultáneas que distraen | Media |
-| **Blur** | `backdrop-blur-md` en modales + `backdrop-blur-sm` en overlays + glass panels — apilamiento de blur costoso en dispositivos bajos | Media |
-| **Botones** | Checkout usa `min-h-[4rem]` que puede verse gigante en móvil; PaymentModal `min-h-[5.5rem]` | Baja |
-| **Espaciado** | Mezcla de `px-5 py-3.5`, `px-4 py-3`, `p-4` — inconsistente entre paneles del POS | Baja |
-| **Productos** | Grid `minmax(140px, 1fr)` puede verse muy apretado en pantallas medianas | Media |
-| **Empty states** | Carrito vacío decora con iconos pero no guía al usuario claramente | Baja |
-| **Accesibilidad** | Algunos `aria-label` faltan en botones de acción rápida del carrito | Media |
-| **Login** | Usa `bg-card/80` inline en vez de token; no usa el componente `<Input>` | Baja |
+| Tema | Problema | Severidad | Ubicación |
+|------|----------|-----------|-----------|
+| **Contraste** | Textos con opacity `/15`, `/20`, `/25` invisibles — fallan WCAG AA | 🔴 Alta | `globals.css:129`, `themes.css:111-112` |
+| **Dark Mode** | Selectores `[data-mode="dark"]` vs `[data-theme="dark"]` inconsistens | 🔴 Alta | `globals.css:823-872` |
+| **Responsive** | No hay layout para tablet (1024-1279px), carrito se rompe | 🔴 Alta | `Sales/index.tsx:532-535` |
+| **Móvil** | Layout asume desktop, no hay vista móvil optimizada | 🔴 Alta | `globals.css:894-929` |
+| **Blur** | `backdrop-blur-sm`, `md`, `lg`, `xl` usados simultáneamente | 🟡 Media | Múltiples archivos |
+| **Animaciones** | `success-pulse`, `animate-border-glow` distrae del flujo | 🟡 Media | `globals.css:246-286` |
+| **Iconos sobrepuestos** | Botones del carrito header con `size-9` pueden tapar texto | 🟡 Media | `Sales/index.tsx:548-596` |
+| **Textos pequeños** | `text-[10px]`, `text-[11px]` usado excesivamente | 🟡 Media | Múltiples archivos |
+| **Espaciado inconsistente** | Mezcla `px-3 py-2.5`, `px-4 py-3`, `p-4` sin sistema | 🟡 Media | `Sales/index.tsx` |
+| **Autoguardado** | Settings no tiene autoguardado, solo botón manual | 🟡 Media | `BusinessSettings.jsx:58-73` |
+
+### 6. Hallazgos Específicos
+
+**Iconos tapando elementos:**
+- `size-9` botones en carrito header (`Sales/index.tsx:557, 566, 576, 584, 594`) están muy cerca
+- Posición absoluta del botón edit en productos (`Products.jsx:27`) puede tapar contenido
+
+**Textos repetidos:**
+- "Ventas" título principal vs "Ventas" en breadcrumb vs "Ventas" en nav — confuso
+- Botón "COBRAR" en mayúsculas puede ser agresivo visualmente
+
+**Textos muy pequeños:**
+- `text-[10px]` para badges, labels, precios secundarios — difícil de leer en POS
+- `text-[11px]` para descripciones, links, hints
+
+**Blur excesivo:**
+- `backdrop-blur-sm` en modales (4px) + `backdrop-blur-md` en overlays (8px) + `backdrop-blur-lg` (16px) en glass panels
+- En dispositivos de gama baja causa jank
+
+**Dark mode contrastes:**
+- `--muted-foreground-l: 72%` en dark es muy claro (debería ser ~55%)
+- `--border-l: 22%` es muy claro, debería ser ~15% para mejor contraste
 
 ---
 
-## Plan de Rediseño
+## Plan de Rediseño 2026 — Walmart Grade
 
-### Fase 1: Fundación de Contraste y Accesibilidad
-1. **Elevar contraste de textos secundarios** — mínimo `muted-foreground/65` (subir de `/45`)
-2. **Auditar todos los `/opacity` en colores** — reemplazar `text-foreground/45` → `text-foreground/70`, `text-muted-foreground/40` → `text-muted-foreground/65`
-3. **Agregar `aria-label` faltantes** en iconos de acción del carrito (pausar, descuento, cliente, vaciar)
-4. **Focus ring consistente** en todos los inputs nativos (Login usa estilo inline, unificar con `focus-visible:ring-ring/50`)
+### Fase 1: Contraste y Legibilidad (Prioridad Crítica)
 
-### Fase 2: Dark Mode Unificado
-5. **Eliminar selectores duplicados** — consolidar `[data-mode="dark"]` y `[data-theme="dark"]` en uno solo
-6. **Ajustar opacidades de glass en dark** — `--glass-bg-opacity: 0.50` es muy bajo, subir a `0.60`
-7. **Mejorar contraste de bordes en dark** — `border-border/8` (8% de un color ya oscuro) es invisible, subir a `border-border/15`
+**Objetivo:** WCAG AA compliance + legibilidad premium
 
-### Fase 3: Diseño Responsivo y Mobile-First
-8. **POS layout responsivo completo**:
-   - Desktop (≥1280px): 60/40 split actual
-   - Tablet (768-1279px): 55/45 split, carrito más estrecho
-   - Mobile (<786px): stack vertical — carrito colapsable arriba, productos abajo
-9. **Agregar bottom sheet móvil** para el carrito en vez de panel lateral
-10. **Touch targets** — verificar que todos los botones tengan `min-h-[44px]` en móvil
-11. **Product grid responsive** — `minmax(120px, 1fr)` en móvil, `minmax(160px, 1fr)` en desktop
+1. **Contraste mínimo 4.5:1** para texto principal:
+   - `text-muted-foreground/45` → `text-muted-foreground/65`
+   - `text-muted-foreground/40` → `text-muted-foreground/60`
+   - `text-muted-foreground/35` → `text-muted-foreground/55`
 
-### Fase 4: Refinamiento Visual 2026
-12. **Reducir animaciones** — eliminar `animate-border-glow` del checkout (distrae), mantener solo `scale-in` en modales
-13. **Simplificar blur** — usar `backdrop-blur-sm` (4px) en overlays, reservar `blur-lg` solo para modales
-14. **Unificar espaciado POS** — carrito header `px-4 py-3`, totales `p-4`, checkout `mt-3`
-15. **Mejorar empty state del carrito** — agregar ilustración o animación sutil
-16. **Checkout button** — reducir a `min-h-[3.5rem]` en desktop, `min-h-[3rem]` en móvil
-17. **Agregar haptic feedback** en numpad keys (ya existe `.haptic-press`, aplicar consistentemente)
+2. **Tamaño de texto legible en POS:**
+   - Precio de productos: `text-base` (16px) mínimo en grid
+   - Total del carrito: `text-4xl` consistente
+   - Labels: `text-sm` no `text-xs`
 
-### Fase 5: Componentes Premium
-18. **Login** — migrar a componente `<Input>` para consistencia
-19. **Sale complete overlay** — agregar confetti sutil o check animado más elegante
-20. **Toast notifications** — agregar sonido opcional en venta exitosa
-21. **Agregar skeleton** al PaymentModal mientras carga productos
-22. **QuickProducts** — agregar shimmer loading en vez de skeleton estático
+3. **Dark mode refinado:**
+   - `--muted-foreground-l: 60%` (no 72%)
+   - `--border-l: 16%` (no 22%)
+   - Unificar selectores: solo `[data-theme="dark"]`
 
-### Fase 6: Polish Final
-23. **Auditoría de rendimiento** — eliminar `backdrop-blur` apilados, usar `will-change` solo donde sea necesario
-24. **Verificar prefers-reduced-motion** — ya existe, pero asegurar que todas las animaciones lo respeten
-25. **Print styles** — mejorar impresión de tickets
-26. **Verificar z-index scale** — asegurar que cash gate overlay (z-overlay) esté sobre modales (z-modal)
+### Fase 2: Layout Responsivo Enterprise
+
+**Objetivo:** Funcionamiento perfecto 1920px → 375px
+
+4. **Mobile-first POS layout:**
+```css
+/* Desktop (≥1280px) */
+.pos-layout { flex-direction: row; }
+.pos-cart-panel { flex-basis: 40%; max-width: 420px; }
+
+/* Tablet (768-1279px) */
+@media (max-width: 1279px) {
+  .pos-cart-panel { flex-basis: 45%; min-width: 280px; }
+  .pos-catalog-panel { flex-basis: 55%; }
+}
+
+/* Mobile (<768px) */
+@media (max-width: 767px) {
+  .pos-layout { 
+    flex-direction: column; 
+    height: calc(100vh - var(--header-height));
+  }
+  .pos-cart-panel { 
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    right: 0;
+    max-height: 40vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+}
+```
+
+5. **Bottom sheet para carrito en móvil:**
+   - Sheet que se desliza desde abajo
+   - Handle indicator visual
+   - Collapse/expand con gestos touch
+
+6. **Product grid adaptativo:**
+   - Desktop: `minmax(160px, 1fr)` — 3 columnas mínimo
+   - Tablet: `minmax(140px, 1fr)` — 2 columnas más espacio
+   - Móvil: `minmax(120px, 1fr)` — 2 columnas compactas
+
+### Fase 3: Componentes Premium
+
+**Objetivo:** Experiencia Walmart-level polish
+
+7. **Card Product Redesign:**
+   - Imagen más grande (`size-16` no `4.5rem`)
+   - Precio con jeroglífico más claro
+   - Stock indicator como barra superior, no bottom
+   - Eliminar status dot superpuesto (línea 64-65 QuickProducts.tsx)
+
+8. **Cart Redesign:**
+   - Items con más padding vertical (`py-4` no `py-3`)
+   - Quantity stepper más ancho (`w-12` no `w-12`)
+   - Line total con acento verde cuando es reciente
+   - Empty state con ilustración + CTA "Escanea un producto"
+
+9. **Payment Modal Premium:**
+   - Header con total más grande y prominente
+   - Métodos de pago con iconos más grandes
+   - Numpad con haptic feedback suave
+   - Quick amounts como pills horizontales scrolleables
+   - Confirm button con progress bar animado
+
+10. **Settings Auto-save:**
+    - Guardado automático con debounce 2s
+    - Indicador "Guardando..." / "Guardado ✓"
+    - Solo guardar cambios significativos (profundidad 1 nivel)
+
+### Fase 4: Micro-interacciones 2026
+
+**Objetivo:** Feedback táctil premium
+
+11. **Haptic feedback:**
+    - Producto agregado: `navigator.vibrate([15])` ✓
+    - Error de scan: `navigator.vibrate([30, 50, 30])` patrón error
+    - Pago exitoso: `navigator.vibrate([50])`
+    - Botón presionado: `navigator.vibrate([5])` sutil
+
+12. **Animaciones funcionales (no decorativas):**
+    - Eliminar: `animate-border-glow`, `success-pulse` infinito
+    - Mantener: `cart-item-enter`, `scale-in` en modales
+    - Agregar: `number-tick` cuando cambian totales
+
+13. **Reduced motion compliance:**
+    - Verificar que `prefers-reduced-motion: reduce` detenga todas las animaciones
+
+### Fase 5: Performance
+
+**Objetivo:** 60fps en dispositivos de gama baja
+
+14. **Blur optimization:**
+    - Un solo nivel de blur por pantalla: overlays o modales
+    - Eliminar blur de `.metric-card::before` hover effect
+    - Usar `transform: translateZ(0)` para aceleración GPU
+
+15. **Virtualización:**
+    - Cart ya usa `@tanstack/react-virtual` ✓
+    - QuickProducts debería usar virtualización en listas largas
+
+16. **Bundle optimization:**
+    - Code splitting por rutas
+    - Lazy load de modales pesados
 
 ---
 
 ## Archivos a Modificar
 
-| Archivo | Cambios |
-|---------|---------|
-| `client/src/styles/globals.css` | Unificar dark mode, reducir animaciones excesivas |
-| `client/src/styles/themes.css` | Ajustar contrastes dark, opacidades glass |
-| `client/src/styles/tokens.css` | Agregar tokens responsive, ajustar touch targets |
-| `client/src/views/Sales/index.tsx` | Layout responsive, espaciado unificado, aria-labels |
-| `client/src/components/sales/PaymentModal.tsx` | Tamaño responsive, haptic consistente |
-| `client/src/components/sales/Cart.tsx` | Empty state mejorado, responsive |
-| `client/src/components/sales/QuickProducts.tsx` | Grid responsive, shimmer loading |
-| `client/src/components/layout/MainLayout.jsx` | Mobile POS layout |
-| `client/src/components/layout/Sidebar.jsx` | Mejorar contraste dark |
-| `client/src/components/layout/Topbar.jsx` | Responsive clock/controls |
-| `client/src/components/ui/Button.tsx` | Ajustar sizes para POS |
-| `client/src/components/ui/Input.tsx` | Unificar focus ring |
-| `client/src/views/Login.jsx` | Migrar a <Input>, consistencia |
-
----
-
-## Decisiones de Diseño
-
-1. **Idioma**: Mantener español (proyecto es LATAM)
-2. **Paleta**: Mantener azul enterprise (220/82%) como primario, verde éxito (152/68%)
-3. **Tipografía**: Mantener Inter + JetBrains Mono
-4. **Sidebar**: Mantener colapsable, no eliminar
-5. **Glassmorphism**: Reducir intensidad, no eliminar — es parte de la identidad 2026
-6. **Animaciones**: Solo las funcionales (entrada/salida), eliminar las decorativas infinitas
-7. **Mobile**: Layout adaptativo, no app separada
+| Archivo | Prioridad | Cambios |
+|---------|-----------|---------|
+| `client/src/styles/tokens.css` | 🔴 Alta | Contraste minimo 65/1, touch targets 44px |
+| `client/src/styles/themes.css` | 🔴 Alta | Dark mode muted/border contrastes |
+| `client/src/styles/globals.css` | 🔴 Alta | Unificar dark mode, reducir blur |
+| `client/src/views/Sales/index.tsx` | 🔴 Alta | Mobile layout, autoguardado settings |
+| `client/src/components/sales/Cart.tsx` | 🔴 Alta | Empty state, contraste |
+| `client/src/components/sales/QuickProducts.tsx` | 🔴 Alta | Grid responsive, eliminar dots superpuestos |
+| `client/src/components/sales/PaymentModal.tsx` | 🟡 Media | Haptic, tamaño responsive |
+| `client/src/views/BusinessSettings.jsx` | 🟡 Media | Auto-save con debounce |
+| `client/src/views/Products.jsx` | 🟡 Media | Card redesign |
+| `client/src/components/layout/Topbar.jsx` | 🟡 Media | Mobile controls |
 
 ---
 
 ## Validación
 
-1. `npm run dev` — verificar que no hay errores de build
-2. `npm run test` — tests existentes pasan
-3. Manual testing:
-   - POS en 1920px, 1366px, 1024px, 768px, 375px
-   - Dark/light mode toggle
-   - Venta completa flujo
-   - Modal de pago numpad
-   - Carrito vacío → lleno → checkout
-   - Cash gate overlay
-   - Sidebar collapse/expand
-   - Keyboard shortcuts
+- [ ] WCAG AA contrast test en textos secundarios
+- [ ] POS layout funcional en 1920px → 375px
+- [ ] Dark mode toggle sin parpadeos
+- [ ] Venta completa end-to-end sin errores
+- [ ] Cash gate overlay correcto
+- [ ] Sidebar collapse/expand suave
+- [ ] Keyboard shortcuts (F1-F10)
+- [ ] Performance en móvil (Chrome dev tools)
+
+---
+
+## Pregunta para el Usuario
+
+¿Qué prioridad tienes para el rediseño?
+1. **Contraste y accesibilidad** (texto legible, WCAG compliance)
+2. **Mobile-first** (vista móvil optimizada)
+3. **Dark mode polish** (contraste mejorado)
+4. **Todo incluido** (implementar completo)
+
+¿Quieres que priorice alguna fase o prefieres el orden propuesto?

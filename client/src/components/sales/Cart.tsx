@@ -53,9 +53,9 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       ref={rowRef}
       className={cn(
         'flex items-center gap-3 py-3 px-3 rounded-xl transition-all duration-150 cart-item-enter relative',
-        isRecent && 'bg-success/[0.06]',
+        isRecent && 'bg-success/[0.05]',
         isOutOfStock && 'opacity-40',
-        'hover:bg-muted/20',
+        'hover:bg-muted/15',
       )}
       role="listitem"
       tabIndex={0}
@@ -64,17 +64,17 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     >
       {/* Recent item accent bar */}
       {isRecent && (
-        <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-success/60" />
+        <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-success/50" />
       )}
 
       {/* Product info */}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold truncate leading-tight text-foreground/95" title={item.name}>{item.name}</p>
-        <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-[10px] text-muted-foreground/55 tabular-nums font-medium">@ {formatMoney(item.price)}</span>
+        <p className="text-sm font-semibold truncate leading-tight text-foreground" title={item.name}>{item.name}</p>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-xs text-muted-foreground/60 tabular-nums font-medium">@ {formatMoney(item.price)}</span>
           {isLowStock && (
-            <span className="flex items-center gap-1 text-[8px] font-bold text-warning bg-warning/10 px-1.5 py-0.5 rounded-md">
-              <span className="size-1 rounded-full bg-warning" />
+            <span className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/12 px-1.5 py-0.5 rounded-md">
+              <span className="size-1.5 rounded-full bg-warning" />
               stock bajo
             </span>
           )}
@@ -82,11 +82,11 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       </div>
 
       {/* Quantity stepper — refined pill design */}
-      <div className="flex items-center gap-0.5 bg-muted/30 rounded-xl border border-border/20 shadow-xs">
+      <div className="flex items-center gap-0.5 bg-muted/20 rounded-xl border border-border/15 shadow-xs">
         <button
           className={cn(
-            'size-11 flex items-center justify-center rounded-l-xl transition-all duration-100',
-            'text-muted-foreground hover:bg-muted/40 active:scale-90 active:bg-muted/60',
+            'size-10 flex items-center justify-center rounded-l-xl transition-all duration-100',
+            'text-muted-foreground hover:bg-muted/30 active:scale-90 active:bg-muted/50',
           )}
           onClick={() => item.quantity <= 1 ? onRemove(item.id) : onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity <= 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
@@ -96,8 +96,8 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
         <span className="w-12 text-center text-sm font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
         <button
           className={cn(
-            'size-11 flex items-center justify-center rounded-r-xl transition-all duration-100',
-            'text-muted-foreground hover:bg-muted/40 active:scale-90 active:bg-muted/60',
+            'size-10 flex items-center justify-center rounded-r-xl transition-all duration-100',
+            'text-muted-foreground hover:bg-muted/30 active:scale-90 active:bg-muted/50',
           )}
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
@@ -108,7 +108,10 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
 
       {/* Line total */}
       <div className="text-right w-[80px] shrink-0">
-        <span className="text-sm font-bold tabular-nums text-foreground">{formatMoney(lineTotal)}</span>
+        <span className={cn(
+          'text-sm font-bold tabular-nums',
+          isRecent ? 'text-success' : 'text-foreground'
+        )}>{formatMoney(lineTotal)}</span>
       </div>
     </div>
   );
@@ -150,17 +153,23 @@ export const Cart = memo(function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-16" role="status">
-        <div className="relative mb-6">
-          <div className="size-20 rounded-2xl bg-muted/12 flex items-center justify-center border border-border/10 shadow-inner-sm">
-            <ShoppingBag className="size-9 opacity-15" />
-          </div>
-          <Package className="size-4 text-muted-foreground/15 absolute -bottom-1 -right-1" />
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8" role="status">
+        <div className="size-16 rounded-xl bg-primary/8 flex items-center justify-center mb-4 border border-border/12 shadow-sm">
+          <ShoppingBag className="size-8 text-primary/30" />
         </div>
-        <p className="text-sm font-bold text-foreground/50">Carrito vacío</p>
-        <p className="text-xs font-medium text-muted-foreground/45 mt-2 max-w-[180px] text-center leading-relaxed">
-          Escanee o busque productos para comenzar una venta
+        <p className="text-base font-bold text-foreground/70 mb-2">Carrito vacío</p>
+        <p className="text-sm text-muted-foreground/60 max-w-xs text-center leading-relaxed">
+          Escanee un código de barras o busque productos para agregarlos a la venta
         </p>
+        <button
+          onClick={() => {
+            const input = document.querySelector('[data-scan-input]');
+            if (input instanceof HTMLElement) input.focus();
+          }}
+          className="mt-4 px-4 py-2 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+        >
+          Escanear producto
+        </button>
       </div>
     );
   }
