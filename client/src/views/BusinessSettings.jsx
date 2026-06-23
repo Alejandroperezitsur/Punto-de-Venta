@@ -108,7 +108,7 @@ const BusinessSettings = () => {
 
   if (loading) {
     return (
-      <ViewContainer maxWidth="lg">
+      <ViewContainer maxWidth="full">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="h-6 w-6 bg-muted/30 rounded animate-pulse" />
@@ -135,7 +135,7 @@ const BusinessSettings = () => {
   }
 
   return (
-    <ViewContainer maxWidth="lg">
+    <ViewContainer maxWidth="full">
       <ViewHeader
         title="Configuración del Sistema"
         description="Personaliza tu punto de venta"

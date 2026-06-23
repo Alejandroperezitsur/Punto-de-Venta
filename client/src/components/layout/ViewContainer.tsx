@@ -4,13 +4,14 @@ import { cn } from '../../utils/cn';
 interface ViewContainerProps {
   children: React.ReactNode;
   className?: string;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'full';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
 }
 
 const maxWidths = {
-  sm: 'max-w-2xl',
-  md: 'max-w-4xl',
-  lg: 'max-w-6xl',
+  sm: 'max-w-3xl',
+  md: 'max-w-6xl',
+  lg: 'max-w-7xl',
+  xl: 'max-w-full',
   full: 'max-w-full',
 };
 

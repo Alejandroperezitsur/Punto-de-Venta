@@ -88,7 +88,7 @@ const AboutView = () => {
     }
 
     return (
-        <div className="space-y-6 max-w-3xl mx-auto">
+        <div className="space-y-6 max-w-5xl mx-auto">
             <div className="flex items-center gap-3">
                 <Info className="h-6 w-6 text-primary" />
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Acerca de {license?.appName || 'POS Pro'}</h1>

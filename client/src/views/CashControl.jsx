@@ -155,7 +155,7 @@ const CashControlView = () => {
     };
 
     return (
-        <ViewContainer maxWidth="md">
+        <ViewContainer maxWidth="full">
             <ViewHeader title="Control de Caja" icon={<Wallet className="size-5 text-primary" />}>
                 <Button variant="ghost" onClick={loadHistory} isLoading={historyLoading} size="sm">
                     <History className="h-4 w-4 mr-2" /> Historial

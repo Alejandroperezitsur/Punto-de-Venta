@@ -118,7 +118,7 @@ const ReportesView = () => {
 
     if (loading) {
         return (
-            <ViewContainer maxWidth="lg">
+            <ViewContainer maxWidth="full">
                 <div className="flex flex-col justify-between gap-8">
                     <div className="text-center space-y-6">
                         <div className="h-4 w-48 mx-auto bg-muted/30 rounded animate-pulse" />
@@ -131,7 +131,7 @@ const ReportesView = () => {
     }
 
     return (
-        <ViewContainer maxWidth="lg">
+        <ViewContainer maxWidth="full">
             <ViewHeader
                 title="Reportes del Día"
                 description="Resumen de ventas y rendimiento de hoy"

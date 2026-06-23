@@ -93,7 +93,7 @@ const UsersView = () => {
 
     return (
         <>
-            <ViewContainer maxWidth="md">
+            <ViewContainer maxWidth="full">
             <ViewHeader title="Gestión de Usuarios" icon={<UserCog className="size-5 text-primary" />}>
                 <Button onClick={() => { setShowForm(!showForm); setEditingId(null); setForm({ username: '', password: '', role: 'cajero' }); }}>
                     {showForm ? <X className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
@@ -123,7 +123,7 @@ const UsersView = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-muted-foreground/70 mb-1 block">Contraseña {editingId && '(dejar vacío para no cambiar)'}</label>
+                                <label className="text-xs font-bold text-muted-foreground/70 mb-1 block">Contraseña {editingId && <span className="font-normal text-muted-foreground/50">(vacío = sin cambio)</span>}</label>
                                 <Input
                                     type="password"
                                     placeholder={editingId ? '••••••••' : 'Contraseña'}
