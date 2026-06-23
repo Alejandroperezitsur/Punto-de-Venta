@@ -1,0 +1,1 @@
+import{j as u,c as d}from"./index-D078vCgy.js";function r({className:l,variant:e="text"}){return u.jsx("div",{className:d("shimmer rounded-md",e==="text"&&"h-4 w-full",e==="card"&&"h-48 w-full rounded-lg",e==="avatar"&&"size-12 rounded-full",e==="table-row"&&"h-12 w-full",e==="chart"&&"h-32 w-full rounded-lg",l)})}export{r as S};
