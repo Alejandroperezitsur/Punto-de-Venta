@@ -3,8 +3,11 @@ const router = express.Router();
 const prisma = require('../db');
 const { productCreateRules, productUpdateRules } = require('../validators/productsValidator');
 const { validationResult } = require('express-validator');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
+
+// Apply token rotation after auth for all routes in this router
+router.use(attachTokenRotation);
 
 const PAGE_SIZE = 50;
 

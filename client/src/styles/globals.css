@@ -4,7 +4,7 @@
 
 @plugin "tailwindcss-animate";
 
-@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
   --font-sans: var(--font-sans);
@@ -165,7 +165,6 @@ img {
 }
 
 /* ── Dark Mode Shadow Overrides ── */
-[data-mode="dark"],
 [data-theme="dark"] {
   --shadow-xs:  0 1px 2px 0 rgb(0 0 0 / 0.30), 0 0 1px 0 rgb(0 0 0 / 0.15);
   --shadow-sm:  0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.20);
@@ -782,47 +781,39 @@ img {
 }
 
 /* ── Dark Mode Glass & Surface Overrides ── */
-[data-mode="dark"] .glass-panel,
 [data-theme="dark"] .glass-panel {
-  background: hsl(var(--surface-glass) / 0.35);
-  border-color: hsl(var(--border) / 0.08);
+  background: hsl(var(--surface-glass) / 0.40);
+  border-color: hsl(var(--border) / 0.10);
 }
-[data-mode="dark"] .glass-panel-strong,
 [data-theme="dark"] .glass-panel-strong {
-  background: hsl(var(--surface) / 0.65);
-  border-color: hsl(var(--border) / 0.12);
-}
-[data-mode="dark"] .glass-card,
-[data-theme="dark"] .glass-card {
-  background: hsl(var(--surface) / 0.45);
+  background: hsl(var(--surface) / 0.70);
   border-color: hsl(var(--border) / 0.14);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 0 hsl(var(--surface) / 0.18);
 }
-[data-mode="dark"] .glass-card:hover,
+[data-theme="dark"] .glass-card {
+  background: hsl(var(--surface) / 0.50);
+  border-color: hsl(var(--border) / 0.16);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 0 hsl(var(--surface) / 0.20);
+}
 [data-theme="dark"] .glass-card:hover {
-  background: hsl(var(--surface) / 0.55);
-  border-color: hsl(var(--border) / 0.22);
+  background: hsl(var(--surface) / 0.60);
+  border-color: hsl(var(--border) / 0.24);
 }
-[data-mode="dark"] .premium-surface,
 [data-theme="dark"] .premium-surface {
   background: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%);
-  border-color: hsl(var(--border-accent) / 0.22);
+  border-color: hsl(var(--border-accent) / 0.24);
   box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--primary) / 0.04);
 }
-[data-mode="dark"] .enterprise-panel,
 [data-theme="dark"] .enterprise-panel {
   background: hsl(var(--surface-panel));
-  border-color: hsl(var(--border-accent) / 0.24);
+  border-color: hsl(var(--border-accent) / 0.26);
 }
 
 /* ── Dark Mode Scrollbar ── */
-[data-mode="dark"] ::-webkit-scrollbar-thumb,
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.18);
+  background: hsl(var(--muted-foreground) / 0.20);
 }
-[data-mode="dark"] ::-webkit-scrollbar-thumb:hover,
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.35);
+  background: hsl(var(--muted-foreground) / 0.38);
 }
 
 /* ── Dark Mode Alternating Rows ── */
@@ -837,68 +828,58 @@ img {
 /* ── Dark Mode Component Glass Overrides ── */
 [data-mode="dark"] .btn-glass,
 [data-theme="dark"] .btn-glass {
-  background: hsl(var(--surface) / 0.40);
-  border-color: hsl(var(--border) / 0.22);
+  background: hsl(var(--surface) / 0.42);
+  border-color: hsl(var(--border) / 0.24);
 }
-[data-mode="dark"] .btn-glass:hover,
 [data-theme="dark"] .btn-glass:hover {
-  background: hsl(var(--surface) / 0.52);
-  border-color: hsl(var(--border) / 0.30);
+  background: hsl(var(--surface) / 0.55);
+  border-color: hsl(var(--border) / 0.32);
 }
-[data-mode="dark"] .card-glass,
 [data-theme="dark"] .card-glass {
-  background: hsl(var(--surface) / 0.50);
-  border-color: hsl(var(--border) / 0.16);
+  background: hsl(var(--surface) / 0.52);
+  border-color: hsl(var(--border) / 0.18);
 }
-[data-mode="dark"] .table-glass,
 [data-theme="dark"] .table-glass {
-  background: hsl(var(--surface-glass) / 0.40);
-  border-color: hsl(var(--border) / 0.16);
+  background: hsl(var(--surface-glass) / 0.42);
+  border-color: hsl(var(--border) / 0.18);
 }
-[data-mode="dark"] .badge-glass,
 [data-theme="dark"] .badge-glass {
-  background: hsl(var(--surface) / 0.45);
-  border-color: hsl(var(--border) / 0.20);
+  background: hsl(var(--surface) / 0.48);
+  border-color: hsl(var(--border) / 0.22);
 }
 
 /* ── Dark Mode Numpad Key Override ── */
-[data-mode="dark"] button:has(.haptic-press),
 [data-theme="dark"] button:has(.haptic-press) {
-  background: hsl(var(--surface-glass) / 0.70);
+  background: hsl(var(--surface-glass) / 0.72);
 }
 
 /* ── Dark Mode Table Sticky Header ── */
-[data-mode="dark"] thead tr,
 [data-theme="dark"] thead tr {
   background-color: hsl(var(--muted) / 0.55);
 }
 
 /* ── Dark Mode Modal Backdrop ── */
-[data-mode="dark"] [role="dialog"] ~ div:first-child,
 [data-theme="dark"] [role="dialog"] ~ div:first-child {
   background-color: hsl(0 0% 0% / 0.65);
 }
 
 /* ── Dark Mode Surface & Border Refinements ── */
-[data-mode="dark"] .border-dashed,
 [data-theme="dark"] .border-dashed {
-  border-color: hsl(var(--border) / 0.25);
+  border-color: hsl(var(--border) / 0.28);
 }
-[data-mode="dark"] .bg-card\/95,
 [data-theme="dark"] .bg-card\/95 {
   background: hsl(var(--card) / 0.98);
 }
 
 /* ── Dark Surface Glass Utility ── */
 .dark-surface-glass {
-  background: hsl(var(--surface) / 0.30);
-  border-color: hsl(var(--border) / 0.12);
-  backdrop-filter: blur(var(--glass-blur, 16px));
+  background: hsl(var(--surface) / 0.32);
+  border-color: hsl(var(--border) / 0.14);
+  backdrop-filter: blur(var(--glass-blur, 18px));
 }
-[data-mode="light"] .dark-surface-glass,
 [data-theme="light"] .dark-surface-glass {
-  background: hsl(var(--surface-glass) / var(--glass-bg-opacity, 0.68));
-  border-color: hsl(var(--border) / var(--glass-border-opacity, 0.15));
+  background: hsl(var(--surface-glass) / var(--glass-bg-opacity, 0.62));
+  border-color: hsl(var(--border) / var(--glass-border-opacity, 0.16));
 }
 
 /* ── Smooth Page Enter ── */
@@ -908,4 +889,41 @@ img {
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── POS Responsive Layout ── */
+@media (max-width: 1279px) {
+  .pos-cart-panel {
+    flex-basis: 45% !important;
+    min-width: 280px !important;
+    max-width: 100% !important;
+  }
+  .pos-catalog-panel {
+    flex-basis: 55% !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .pos-layout {
+    flex-direction: column !important;
+  }
+  .pos-cart-panel {
+    flex-basis: auto !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    max-height: 50vh;
+  }
+  .pos-catalog-panel {
+    flex-basis: auto !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .pos-cart-panel {
+    max-height: 60vh;
+    border-radius: var(--radius-lg) !important;
+  }
+  .pos-catalog-panel {
+    border-radius: var(--radius-lg) !important;
+  }
 }

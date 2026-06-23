@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { receivablePayRules } = require('../validators/receivablesValidator');
 const { validationResult } = require('express-validator');
+router.use(attachTokenRotation);
 
 router.get('/', auth, async (req, res) => {
   try {

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 const { evaluateSaleRisk } = require('../services/fraudDetectionService');
+router.use(attachTokenRotation);
 
 // GET /api/fraud/alerts — list fraud alerts
 router.get('/alerts', auth, requirePermission(PERMISSIONS.REPORTS_VIEW), async (req, res) => {

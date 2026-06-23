@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
+router.use(attachTokenRotation);
 
 const DASHBOARDS = {
   operations: {

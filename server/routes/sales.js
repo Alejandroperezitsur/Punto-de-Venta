@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 const { createSale, deleteSaleWithReversal } = require('../services/salesService');
 const { idempotency } = require('../middleware/idempotency');
 const { fraudInterceptor } = require('../middleware/fraudInterceptor');
 const { saleRules } = require('../validators/salesValidator');
 const { validationResult } = require('express-validator');
+router.use(attachTokenRotation);
 
 // Pagination defaults
 const PAGE_SIZE = 50;

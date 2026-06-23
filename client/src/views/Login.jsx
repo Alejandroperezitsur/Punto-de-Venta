@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { useUserStore } from '../store/userStore';
 import { useTheme } from '../context/ThemeContext';
 import { cn } from '../utils/cn';
+import { Input } from '../components/ui/Input';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function Login() {
       {/* Theme toggle */}
       <button
         onClick={toggleDark}
-        className="absolute top-5 right-5 p-3 rounded-xl text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 backdrop-blur-md border border-border/15 transition-all z-10 shadow-sm"
+        className="absolute top-5 right-5 p-3 rounded-xl text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 backdrop-blur-sm border border-border/18 transition-all z-10 shadow-sm"
         aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
       >
         {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -59,11 +60,11 @@ export default function Login() {
       <div className="relative w-full max-w-md px-4">
         <div className="glass-card p-8 sm:p-10 shadow-2xl animate-fade-up">
           {/* Top accent line */}
-          <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+          <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
           {/* Logo & Brand */}
           <div className="text-center mb-8">
-            <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary/10 shadow-sm shadow-primary/8">
+            <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary/12 shadow-sm shadow-primary/8">
               <Store className="size-7 text-primary" />
             </div>
             <h1 className="text-2xl font-extrabold text-foreground tracking-tight">
@@ -76,7 +77,7 @@ export default function Login() {
 
           {/* Error */}
           {error && (
-            <div className="mb-5 px-4 py-3 rounded-xl bg-danger/15 border border-danger/20 text-sm font-medium text-danger flex items-center gap-2">
+            <div className="mb-5 px-4 py-3 rounded-xl bg-danger/15 border border-danger/25 text-sm font-medium text-danger flex items-center gap-2">
               <span className="size-1.5 rounded-full bg-danger shrink-0" />
               {error}
             </div>
@@ -87,21 +88,14 @@ export default function Login() {
               <label className="block text-xs font-semibold text-muted-foreground/70 mb-2 ml-0.5">
                 Usuario
               </label>
-              <input
+              <Input
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 placeholder="Ingrese su usuario"
                 autoFocus
                 autoComplete="username"
-                className={cn(
-                  'w-full h-[var(--control-lg)] px-4 rounded-xl border bg-card/80 text-foreground text-sm',
-                  'placeholder:text-muted-foreground/35',
-                  'border-border/50 hover:border-border/70',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40',
-                  'focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.06)]',
-                  'transition-all duration-200',
-                )}
+                icon={<Store className="size-3.5" />}
               />
             </div>
 
@@ -109,32 +103,14 @@ export default function Login() {
               <label className="block text-xs font-semibold text-muted-foreground/70 mb-2 ml-0.5">
                 Contraseña
               </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Ingrese su contraseña"
-                  autoComplete="current-password"
-                  className={cn(
-                    'w-full h-[var(--control-lg)] px-4 rounded-xl border bg-card/80 text-foreground text-sm pr-11',
-                    'placeholder:text-muted-foreground/35',
-                    'border-border/50 hover:border-border/70',
-                    'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40',
-                    'focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.06)]',
-                    'transition-all duration-200',
-                  )}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors p-1.5 rounded-md hover:bg-muted/25"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Ingrese su contraseña"
+                autoComplete="current-password"
+                showPasswordToggle
+              />
             </div>
 
             <button
@@ -159,8 +135,8 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-muted-foreground/45 mt-7 font-medium">
-            POS Pro v0.1 · Punto de Venta Enterprise
+          <p className="text-center text-[11px] text-muted-foreground/50 mt-7 font-medium">
+            POS Pro v2026 · Punto de Venta Enterprise
           </p>
         </div>
       </div>

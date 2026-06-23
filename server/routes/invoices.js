@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const invoiceService = require('../services/invoiceService');
+router.use(attachTokenRotation);
 
 // Helper to get Fiscal Config
 async function getStoreFiscalData(storeId) {

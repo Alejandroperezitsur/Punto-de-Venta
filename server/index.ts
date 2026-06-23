@@ -87,15 +87,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Token rotation — BEFORE routes so it wraps res.json() on all authenticated endpoints
+// Token rotation — applied per-router after auth middleware
 const { attachTokenRotation } = authModule;
-app.use(attachTokenRotation);
-
-// API Rate Limiters
-app.use('/api/auth', loginLimiter);
-app.use('/api/auth', apiLimiter);
-app.use('/api/cash', cashLimiter);
-app.use('/api/', apiLimiter);
 
 // API Routes (fraudInterceptor moved inside sales router after auth)
 app.use('/api/products', productsRouter);

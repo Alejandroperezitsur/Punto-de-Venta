@@ -46,7 +46,7 @@
   --ring-h: 220; --ring-s: 70%; --ring-l: 28%;
 
   --muted-h: 220; --muted-s: 12%; --muted-l: 94%;
-  --muted-foreground-h: 215; --muted-foreground-s: 10%; --muted-foreground-l: 46%;
+  --muted-foreground-h: 215; --muted-foreground-s: 10%; --muted-foreground-l: 54%;
 
   /* POS semantic */
   --pos-checkout-h: 152; --pos-checkout-s: 68%; --pos-checkout-l: 36%;
@@ -91,7 +91,7 @@
 
   --surface-h: 222; --surface-s: 16%; --surface-l: 10%;
   --surface-foreground-h: 210; --surface-foreground-s: 20%; --surface-foreground-l: 92%;
-  --surface-hover-h: 222; --surface-hover-s: 14%; --surface-hover-l: 15%;
+  --surface-hover-h: 222; --surface-hover-s: 14%; --surface-hover-l: 17%;
   --surface-elevated-h: 222; --surface-elevated-s: 15%; --surface-elevated-l: 13%;
   --surface-glass-h: 222; --surface-glass-s: 15%; --surface-glass-l: 12%;
   --surface-inset-h: 222; --surface-inset-s: 18%; --surface-inset-l: 4.5%;
@@ -103,13 +103,13 @@
   --popover-h: 222; --popover-s: 15%; --popover-l: 14%;
   --popover-foreground-h: 210; --popover-foreground-s: 20%; --popover-foreground-l: 92%;
 
-  --border-h: 222; --border-s: 12%; --border-l: 18%;
-  --border-subtle-h: 222; --border-s: 10%; --border-l: 14%;
+  --border-h: 222; --border-s: 12%; --border-l: 22%;
+  --border-subtle-h: 222; --border-s: 10%; --border-l: 16%;
   --input-h: 222; --input-s: 12%; --input-l: 20%;
   --ring-h: 220; --ring-s: 62%; --ring-l: 58%;
 
   --muted-h: 222; --muted-s: 12%; --muted-l: 13%;
-  --muted-foreground-h: 215; --muted-foreground-s: 12%; --muted-foreground-l: 65%;
+  --muted-foreground-h: 215; --muted-foreground-s: 12%; --muted-foreground-l: 72%;
 
   --pos-checkout-h: 152; --pos-checkout-s: 54%; --pos-checkout-l: 48%;
   --pos-hold-h: 36; --pos-hold-s: 72%; --pos-hold-l: 55%;
@@ -124,10 +124,10 @@
   --surface-sidebar-active-h: 222; --surface-sidebar-active-s: 50%; --surface-sidebar-active-l: 16%;
 
   /* Dark mode glass overrides */
-  --glass-bg-opacity: 0.50;
-  --glass-border-opacity: 0.14;
-  --glass-blur: 16px;
-  --glass-saturation: 150%;
+  --glass-bg-opacity: 0.62;
+  --glass-border-opacity: 0.16;
+  --glass-blur: 18px;
+  --glass-saturation: 160%;
 
   --chart-1-h: 220; --chart-1-s: 66%; --chart-1-l: 62%;
   --chart-2-h: 152; --chart-2-s: 54%; --chart-2-l: 56%;

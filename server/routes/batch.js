@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('./../middleware/permissions');
 const { createSale } = require('./../services/salesService');
 const { logger } = require('./../logger');
+router.use(attachTokenRotation);
 
 // POST /api/sales/batch
 // Processes multiple sales in a single transaction

@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
+router.use(attachTokenRotation);
 
 function parseRange(q) {
   const from = q.from ? new Date(q.from) : new Date(0); // 1970

@@ -53,9 +53,9 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       ref={rowRef}
       className={cn(
         'flex items-center gap-3 py-3 px-3 rounded-xl transition-all duration-150 cart-item-enter relative',
-        isRecent && 'bg-success/[0.04]',
-        isOutOfStock && 'opacity-35',
-        'hover:bg-muted/15',
+        isRecent && 'bg-success/[0.06]',
+        isOutOfStock && 'opacity-40',
+        'hover:bg-muted/20',
       )}
       role="listitem"
       tabIndex={0}
@@ -64,16 +64,16 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     >
       {/* Recent item accent bar */}
       {isRecent && (
-        <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-success/50" />
+        <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-success/60" />
       )}
 
       {/* Product info */}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold truncate leading-tight text-foreground/90" title={item.name}>{item.name}</p>
+        <p className="text-[13px] font-semibold truncate leading-tight text-foreground/95" title={item.name}>{item.name}</p>
         <div className="flex items-center gap-2 mt-1.5">
-          <span className="text-[10px] text-muted-foreground/40 tabular-nums font-medium">@ {formatMoney(item.price)}</span>
+          <span className="text-[10px] text-muted-foreground/55 tabular-nums font-medium">@ {formatMoney(item.price)}</span>
           {isLowStock && (
-            <span className="flex items-center gap-1 text-[8px] font-bold text-warning bg-warning/8 px-1.5 py-0.5 rounded-md">
+            <span className="flex items-center gap-1 text-[8px] font-bold text-warning bg-warning/10 px-1.5 py-0.5 rounded-md">
               <span className="size-1 rounded-full bg-warning" />
               stock bajo
             </span>
@@ -152,13 +152,13 @@ export const Cart = memo(function Cart() {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-16" role="status">
         <div className="relative mb-6">
-          <div className="size-24 rounded-3xl bg-muted/10 flex items-center justify-center border border-border/8 shadow-inner-sm">
-            <ShoppingBag className="size-10 opacity-12" />
+          <div className="size-20 rounded-2xl bg-muted/12 flex items-center justify-center border border-border/10 shadow-inner-sm">
+            <ShoppingBag className="size-9 opacity-15" />
           </div>
-          <Package className="size-5 text-muted-foreground/10 absolute -bottom-1 -right-1" />
+          <Package className="size-4 text-muted-foreground/15 absolute -bottom-1 -right-1" />
         </div>
-        <p className="text-sm font-bold text-foreground/45">Carrito vacío</p>
-        <p className="text-xs font-medium text-muted-foreground/30 mt-2 max-w-[180px] text-center leading-relaxed">
+        <p className="text-sm font-bold text-foreground/50">Carrito vacío</p>
+        <p className="text-xs font-medium text-muted-foreground/45 mt-2 max-w-[180px] text-center leading-relaxed">
           Escanee o busque productos para comenzar una venta
         </p>
       </div>

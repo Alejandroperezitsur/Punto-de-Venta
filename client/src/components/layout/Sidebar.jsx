@@ -144,14 +144,14 @@ export const Sidebar = React.memo(function Sidebar({ onNavigate }) {
         'flex flex-col h-full shrink-0 transition-[width] duration-200 ease-out z-[var(--z-sticky)] border-r border-border/8',
         isCollapsed ? 'w-[var(--sidebar-collapsed)]' : 'w-[var(--sidebar-width)]',
       )}
-      style={{ background: 'linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-hover) / 0.25) 100%)' }}
-      aria-label="Navegación principal"
-    >
-      {/* Logo header with glass effect */}
-      <div className={cn(
-        'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/6 relative',
-        isCollapsed ? 'justify-center px-0' : 'px-4 justify-between',
-      )}>
+       style={{ background: 'linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-hover) / 0.25) 100%)' }}
+       aria-label="Navegación principal"
+     >
+       {/* Logo header with glass effect */}
+       <div className={cn(
+         'h-[var(--header-height)] flex items-center shrink-0 border-b border-border/8 relative',
+         isCollapsed ? 'justify-center px-0' : 'px-4 justify-between',
+       )}>
         <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent pointer-events-none" />
         <div className="flex items-center gap-3 min-w-0 relative z-10">
           <div className={cn(

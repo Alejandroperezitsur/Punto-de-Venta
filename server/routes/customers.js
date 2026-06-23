@@ -3,8 +3,9 @@ const router = express.Router();
 const prisma = require('../db');
 const { customersCreateRules, customersUpdateRules } = require('../validators/customersValidator');
 const { validationResult } = require('express-validator');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
+router.use(attachTokenRotation);
 
 router.get('/', auth, requirePermission(PERMISSIONS.CUSTOMERS_VIEW), async (req, res) => {
   try {

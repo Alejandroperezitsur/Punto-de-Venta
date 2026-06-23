@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
+router.use(attachTokenRotation);
 
 // Note: Categories should probably be authenticated to ensure store isolation.
 // Adding auth middleware to all routes here.

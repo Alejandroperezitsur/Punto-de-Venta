@@ -5,8 +5,9 @@ const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
+router.use(attachTokenRotation);
 
 const BACKUP_DIR = path.join(__dirname, '../backups');
 

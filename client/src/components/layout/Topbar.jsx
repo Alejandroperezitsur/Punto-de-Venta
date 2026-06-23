@@ -108,7 +108,7 @@ export const Topbar = React.memo(function Topbar() {
         'h-[var(--header-height)] flex items-center justify-between px-4 lg:px-5 sticky top-0 z-[var(--z-sticky)] transition-all duration-300',
         scrolled
           ? 'glass-panel-strong shadow-[0_1px_8px_0_rgb(0_0_0/0.06)]'
-          : 'bg-background/60 backdrop-blur-md',
+          : 'bg-background/70 backdrop-blur-sm',
       )}
     >
       {/* Hairline bottom border with gradient */}
@@ -166,12 +166,12 @@ export const Topbar = React.memo(function Topbar() {
         {/* Search trigger (Cmd+K) */}
         <button
           onClick={() => document.dispatchEvent(new CustomEvent('trigger-command-palette'))}
-          className="hidden md:flex items-center gap-2 px-2.5 py-2 rounded-lg text-muted-foreground/50 hover:text-foreground hover:bg-muted/30 transition-all touch-target"
+          className="hidden md:flex items-center gap-2 px-2.5 py-2 rounded-lg text-muted-foreground/55 hover:text-foreground hover:bg-muted/30 transition-all touch-target"
           aria-label="Buscar (Cmd+K)"
         >
           <Search className="size-5" />
           <span className="hidden xl:inline text-sm font-medium">Buscar...</span>
-          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/40 bg-muted/40 px-1.5 py-0.5 rounded border border-border/15">
+          <kbd className="hidden xl:inline-flex items-center gap-0.5 text-[9px] font-bold text-muted-foreground/45 bg-muted/40 px-1.5 py-0.5 rounded border border-border/18">
             <Command className="size-2.5" />K
           </kbd>
         </button>
@@ -184,14 +184,14 @@ export const Topbar = React.memo(function Topbar() {
 
         <button
           onClick={toggleDark}
-          className="p-2 rounded-lg text-muted-foreground/50 hover:bg-muted/30 hover:text-foreground transition-all touch-target"
+          className="p-2 rounded-lg text-muted-foreground/55 hover:bg-muted/30 hover:text-foreground transition-all touch-target"
           aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
         >
           {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>
 
         <button
-          className="p-2 rounded-lg text-muted-foreground/50 hover:bg-muted/30 hover:text-foreground transition-all relative touch-target"
+          className="p-2 rounded-lg text-muted-foreground/55 hover:bg-muted/30 hover:text-foreground transition-all relative touch-target"
           aria-label="Notificaciones"
         >
           <Bell className="size-5" />

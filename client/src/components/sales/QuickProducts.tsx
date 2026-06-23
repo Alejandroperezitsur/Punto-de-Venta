@@ -184,7 +184,7 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
     return (
       <div className="space-y-3">
         <div className="flex gap-1.5">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-8 w-20 rounded-full shrink-0" />)}</div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
           {Array.from({ length: 12 }).map((_, i) => (
             <Skeleton key={i} className="h-[7rem] rounded-2xl" />
           ))}
@@ -299,15 +299,15 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
 
       {/* Product grid — responsive inside catalog panel */}
       {displayProducts.length > 0 && (
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2.5">
-          {paginatedProducts.map((p) => (
-            <QuickProductButton
-              key={p.id}
-              product={p}
-              onSelect={handleSelect}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
+        {paginatedProducts.map((p) => (
+          <QuickProductButton
+            key={p.id}
+            product={p}
+            onSelect={handleSelect}
+          />
+        ))}
+      </div>
       )}
 
       {/* Load more */}

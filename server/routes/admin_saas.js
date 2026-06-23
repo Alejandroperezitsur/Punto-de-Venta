@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const bcrypt = require('bcryptjs');
+router.use(attachTokenRotation);
 
 // Middleware to enforce Super Admin
 const requireSuperAdmin = (req, res, next) => {

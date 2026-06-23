@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const aiService = require('../services/aiService');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
+router.use(attachTokenRotation);
 
 // Predictions
 router.get('/inventory', auth, async (req, res) => {

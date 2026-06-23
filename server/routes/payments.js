@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { v4: uuidv4 } = require('uuid');
+router.use(attachTokenRotation);
 
 // Mock Gateway Service (Internal Helper)
 const gateway = {

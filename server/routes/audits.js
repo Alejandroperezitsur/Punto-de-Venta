@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../db');
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, requireRole, PERMISSIONS } = require('../middleware/permissions');
 const { logger } = require('../logger');
+router.use(attachTokenRotation);
 
 router.get('/', auth, requirePermission(PERMISSIONS.AUDITS_VIEW), async (req, res) => {
   try {

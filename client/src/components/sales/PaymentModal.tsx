@@ -186,12 +186,12 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
   return (
     <Modal open={true} onClose={onClose} size="xl" hideClose={submitLocked.current}>
       <div className="flex flex-col gap-5">
-        {/* Total header — premium gradient panel with larger total */}
-        <div className="text-center py-6 rounded-2xl" style={{ background: 'var(--gradient-checkout)' }}>
-          <p className="text-[11px] font-semibold text-muted-foreground/55 uppercase tracking-[0.15em] mb-3">Total a pagar</p>
-          <p className="text-6xl font-black tracking-tighter tabular-nums font-mono text-foreground leading-none">{formatMoney(total)}</p>
-          <p className="text-xs text-muted-foreground/50 mt-3">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
-        </div>
+         {/* Total header — premium gradient panel with larger total */}
+         <div className="text-center py-5 rounded-2xl" style={{ background: 'var(--gradient-checkout)' }}>
+           <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.15em] mb-2">Total a pagar</p>
+           <p className="text-5xl lg:text-6xl font-black tracking-tighter tabular-nums font-mono text-foreground leading-none">{formatMoney(total)}</p>
+           <p className="text-xs text-muted-foreground/55 mt-2">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
+         </div>
 
         {/* Payment method selection — larger, more visual */}
         <div className="grid grid-cols-4 gap-3">
@@ -209,28 +209,28 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         {isCashOrMixed && (
           <>
             {/* Received amount display */}
-            <div className="rounded-2xl border border-border/15 backdrop-blur-md bg-surface-glass/30 p-5 shadow-sm">
+            <div className="rounded-2xl border border-border/18 backdrop-blur-sm bg-surface-glass/35 p-4 shadow-sm">
               <div className="flex justify-between items-baseline mb-3">
-                <span className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.1em]">Recibido</span>
+                <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.1em]">Recibido</span>
                 {receivedNum > 0 && (
-                  <span className="text-[11px] font-medium text-muted-foreground/40">
+                  <span className="text-[11px] font-medium text-muted-foreground/50">
                     {isShort ? `Falta ${formatMoney(total - receivedNum)}` : ''}
                   </span>
                 )}
               </div>
               <p className={cn(
-                'text-4xl font-bold tracking-tight tabular-nums font-mono',
-                receivedNum <= 0 ? 'text-muted-foreground/20' : 'text-foreground',
+                'text-3xl lg:text-4xl font-bold tracking-tight tabular-nums font-mono',
+                receivedNum <= 0 ? 'text-muted-foreground/25' : 'text-foreground',
               )}>
-                <span className="text-muted-foreground/25 mr-1 text-2xl">$</span>{received || '0'}
+                <span className="text-muted-foreground/30 mr-1 text-xl lg:text-2xl">$</span>{received || '0'}
               </p>
               {receivedNum > 0 && (
                 <div className={cn(
                   'mt-4 pt-4 border-t text-right',
-                  change >= 0 && !isShort ? 'border-success/15' : 'border-danger/15',
+                  change >= 0 && !isShort ? 'border-success/18' : 'border-danger/18',
                 )}>
                   {change > 0 && !isShort && (
-                    <div className="rounded-lg bg-success/8 px-3 py-2 inline-block">
+                    <div className="rounded-lg bg-success/10 px-3 py-2 inline-block">
                       <span className="text-sm font-bold tabular-nums text-success">
                         Cambio: {formatMoney(change)}
                       </span>
@@ -288,15 +288,15 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         )}
 
         {!isCashOrMixed && (
-          <div className="flex flex-col items-center justify-center text-center py-12 rounded-2xl border border-dashed border-primary/12" style={{ background: 'var(--gradient-surface)' }}>
-            <div className="size-18 rounded-2xl bg-card flex items-center justify-center mb-4 border border-border/15 shadow-sm">
-              <Check className="size-8 text-primary" />
+          <div className="flex flex-col items-center justify-center text-center py-10 rounded-2xl border border-dashed border-primary/15" style={{ background: 'var(--gradient-surface)' }}>
+            <div className="size-16 rounded-2xl bg-card flex items-center justify-center mb-4 border border-border/18 shadow-sm">
+              <Check className="size-7 text-primary" />
             </div>
             <h3 className="text-sm font-bold">Pago con {method === 'card' ? 'tarjeta' : 'transferencia'}</h3>
-            <p className="text-xs text-muted-foreground/50 font-medium mt-2">
+            <p className="text-xs text-muted-foreground/60 font-medium mt-2">
               {method === 'card' ? 'Cobra primero en la terminal.' : 'Solicita la transferencia.'}
             </p>
-            <p className="font-black text-4xl mt-5 text-primary tabular-nums tracking-tight">{formatMoney(total)}</p>
+            <p className="font-black text-3xl mt-4 text-primary tabular-nums tracking-tight">{formatMoney(total)}</p>
           </div>
         )}
 
@@ -311,9 +311,9 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
           onClick={handleConfirm}
           disabled={!isReady || submitLocked.current}
           className={cn(
-            'w-full min-h-[5.5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 uppercase tracking-wide active:scale-[0.98]',
+            'w-full min-h-[4.5rem] lg:min-h-[5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 uppercase tracking-wide active:scale-[0.98]',
             isReady && !submitLocked.current
-              ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-px success-pulse'
+              ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-px'
               : 'bg-muted/50 text-muted-foreground/40 cursor-not-allowed',
           )}
           style={isReady && !submitLocked.current ? { background: 'var(--gradient-checkout)' } : undefined}

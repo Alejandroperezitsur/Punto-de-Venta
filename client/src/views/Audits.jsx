@@ -30,7 +30,8 @@ const AuditsView = () => {
     setLoading(true);
     try {
       const data = await api('/audits');
-      setAudits(data);
+      const auditsList = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      setAudits(auditsList);
     } catch (e) {
       console.error(e);
     } finally {

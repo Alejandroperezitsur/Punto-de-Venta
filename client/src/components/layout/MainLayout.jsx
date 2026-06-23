@@ -27,7 +27,7 @@ const MainLayout = memo(function MainLayout({ children }) {
         {/* Mobile overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[499] lg:hidden transition-opacity duration-200 animate-fade-in"
+            className="fixed inset-0 bg-black/45 backdrop-blur-[2px] z-[499] lg:hidden transition-opacity duration-200 animate-fade-in"
             onClick={toggleSidebar}
             onKeyDown={(e) => { if (e.key === 'Escape') toggleSidebar(); }}
             aria-hidden="true"
@@ -51,7 +51,7 @@ const MainLayout = memo(function MainLayout({ children }) {
             ref={mainRef}
             className={cn(
               'flex-1 overflow-y-auto overflow-x-hidden',
-              isPOS ? 'p-3 lg:p-4' : 'p-4 md:p-5 lg:p-6 pb-8 md:pb-10',
+              isPOS ? 'p-2 sm:p-3 lg:p-4' : 'p-3 sm:p-4 md:p-5 lg:p-6 pb-8 md:pb-10',
             )}
             role="main"
           >

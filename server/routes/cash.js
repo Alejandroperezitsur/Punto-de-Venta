@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { auth } = require('./auth');
+const { auth, attachTokenRotation } = require('./auth');
 const { requirePermission, PERMISSIONS } = require('../middleware/permissions');
 const {
   openSession,
@@ -10,6 +10,7 @@ const {
   getSessionHistory,
   getDailySummary
 } = require('../services/cashService');
+router.use(attachTokenRotation);
 
 router.post('/open', auth, requirePermission(PERMISSIONS.CASH_OPEN), async (req, res) => {
   const { opening_balance = 0 } = req.body || {};
