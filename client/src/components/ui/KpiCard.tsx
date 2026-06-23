@@ -23,33 +23,23 @@ const iconColors = {
   warning: 'bg-warning/10 text-warning',
   danger: 'bg-danger/10 text-danger',
   info: 'bg-info/10 text-info',
-  muted: 'bg-muted/60 text-muted-foreground',
+  muted: 'bg-muted/50 text-muted-foreground',
 };
 
 function KpiCard({
-  label,
-  value,
-  trend,
-  trendLabel,
-  prefix,
-  suffix,
-  icon: Icon,
-  iconColor = 'primary',
-  sparkline,
-  loading = false,
-  className,
-  onClick,
+  label, value, trend, trendLabel, prefix, suffix,
+  icon: Icon, iconColor = 'primary', sparkline,
+  loading = false, className, onClick,
 }: KpiCardProps) {
   const Component = onClick ? 'button' : 'div';
   const trendDir = trend != null ? (trend > 0 ? 'up' : trend < 0 ? 'down' : 'neutral') : null;
-
   const maxSpark = sparkline ? Math.max(...sparkline, 1) : 0;
 
   return (
     <Component
       className={cn(
-        'relative rounded-xl border border-border/40 bg-card p-4 transition-all duration-200',
-        'hover:shadow-md hover:-translate-y-0.5 hover:border-primary/20',
+        'relative rounded-xl border border-border/25 bg-card p-5 transition-all duration-200',
+        'shadow-card hover:shadow-card-hover hover:-translate-y-0.5 hover:border-primary/15',
         'after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5',
         'after:bg-gradient-to-r after:from-primary after:to-primary/40 after:opacity-0 hover:after:opacity-100 after:transition-opacity',
         onClick && 'cursor-pointer active:scale-[0.995]',
@@ -62,16 +52,16 @@ function KpiCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-          <div className="mt-1.5 flex items-baseline gap-1">
+          <div className="mt-2 flex items-baseline gap-1">
             {prefix && <span className="text-sm font-medium text-muted-foreground">{prefix}</span>}
-            <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
+            <span className="text-2xl font-black tracking-tight tabular-nums text-foreground leading-none">
               {loading ? '\u2014' : value}
             </span>
             {suffix && <span className="text-sm font-medium text-muted-foreground">{suffix}</span>}
           </div>
           {trendDir && (
             <div className={cn(
-              'mt-1.5 inline-flex items-center gap-1 text-xs font-semibold',
+              'mt-2 inline-flex items-center gap-1 text-xs font-semibold',
               trendDir === 'up' && 'text-success',
               trendDir === 'down' && 'text-danger',
               trendDir === 'neutral' && 'text-muted-foreground',
@@ -85,7 +75,7 @@ function KpiCard({
           )}
         </div>
         {Icon && (
-          <div className={cn('size-10 rounded-lg flex items-center justify-center shrink-0', iconColors[iconColor])}>
+          <div className={cn('size-10 rounded-xl flex items-center justify-center shrink-0', iconColors[iconColor])}>
             <Icon className="size-5" />
           </div>
         )}

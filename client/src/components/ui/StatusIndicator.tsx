@@ -23,7 +23,12 @@ export function StatusIndicator({ variant, label, pulse = true, size = 'md', cla
   const dotSize = size === 'sm' ? 'size-1.5' : 'size-2';
 
   return (
-    <div className={cn('inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border font-bold', cfg.bg, cfg.border, cfg.text, size === 'sm' ? 'text-xs' : 'text-xs', className)}>
+    <div className={cn(
+      'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border font-semibold',
+      cfg.bg, cfg.border, cfg.text,
+      size === 'sm' ? 'text-xs' : 'text-xs',
+      className,
+    )}>
       <span className="relative flex shrink-0">
         {pulse && variant === 'live' && (
           <span className={cn('animate-ping absolute inline-flex h-full w-full rounded-full opacity-40', cfg.dot)} />

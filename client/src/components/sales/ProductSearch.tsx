@@ -161,9 +161,9 @@ const ProductSearch = React.memo(function ProductSearch() {
       <form onSubmit={handleSearch} role="search" aria-label="Buscar producto">
         <div className="relative">
           {/* Enterprise scan bar — taller, more commanding with glass surface */}
-          <div className={cn(
-            'flex items-center gap-4 rounded-2xl border-2 transition-all duration-200 relative overflow-hidden',
-            'px-5 h-[4.5rem]',
+           <div className={cn(
+            'flex items-center gap-3 rounded-xl border transition-all duration-200 relative overflow-hidden',
+            'px-4 h-[3.5rem]',
             barBorderColor(),
             barBgTint(),
           )}>
@@ -174,12 +174,12 @@ const ProductSearch = React.memo(function ProductSearch() {
 
             {/* Scanner icon container */}
             <div className={cn(
-              'shrink-0 size-11 rounded-xl flex items-center justify-center transition-all duration-200',
+              'shrink-0 size-9 rounded-lg flex items-center justify-center transition-all duration-200',
               scannerStatus === 'scanning'
                 ? 'bg-primary/12 text-primary scale-105'
                 : isFocused
                   ? 'bg-primary/8 text-primary/70'
-                  : 'bg-muted/25 text-muted-foreground/30',
+                  : 'bg-muted/20 text-muted-foreground/25',
             )}>
               {loading ? (
                 <Loader2 className="size-5 animate-spin" />

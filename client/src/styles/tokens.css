@@ -3,17 +3,18 @@
   --font-sans: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
-  /* Fluid type scale - WCAG AA compliant minimums */
-  --text-xs:      clamp(0.75rem, 0.5vw, 0.8125rem);
-  --text-sm:      clamp(0.875rem, 0.6vw, 0.9375rem);
-  --text-base:    clamp(1rem, 0.7vw, 1rem);
-  --text-lg:      clamp(1.125rem, 0.8vw, 1.125rem);
-  --text-xl:      clamp(1.25rem, 1vw, 1.375rem);
-  --text-2xl:     clamp(1.5rem, 1.3vw, 1.75rem);
-  --text-3xl:     clamp(1.75rem, 1.8vw, 2rem);
-  --text-4xl:     clamp(2rem, 2.2vw, 2.5rem);
-  --text-5xl:     clamp(2.5rem, 3vw, 3.5rem);
-  --text-display: clamp(3rem, 5vw, 4.5rem);
+  /* Fluid type scale — minimum 13px for xs, never below */
+  --text-2xs:     clamp(0.6875rem, 0.4vw, 0.75rem);   /* 11-12px: ONLY for kbd/badges secondary */
+  --text-xs:      clamp(0.8125rem, 0.5vw, 0.8125rem);  /* 13px floor */
+  --text-sm:      clamp(0.875rem, 0.6vw, 0.9375rem);   /* 14-15px */
+  --text-base:    clamp(1rem, 0.7vw, 1rem);             /* 16px */
+  --text-lg:      clamp(1.125rem, 0.8vw, 1.125rem);    /* 18px */
+  --text-xl:      clamp(1.25rem, 1vw, 1.375rem);       /* 20-22px */
+  --text-2xl:     clamp(1.5rem, 1.3vw, 1.75rem);       /* 24-28px */
+  --text-3xl:     clamp(1.75rem, 1.8vw, 2rem);         /* 28-32px */
+  --text-4xl:     clamp(2rem, 2.2vw, 2.5rem);          /* 32-40px */
+  --text-5xl:     clamp(2.5rem, 3vw, 3.5rem);          /* 40-56px */
+  --text-display: clamp(3rem, 5vw, 4.5rem);            /* 48-72px */
 
   --leading-none:    1;
   --leading-tight:   1.15;
@@ -33,20 +34,21 @@
   --tracking-normal:   0em;
   --tracking-wide:     0.04em;
   --tracking-wider:    0.06em;
+  --tracking-widest:   0.1em;
 
-  /* ── Touch & Spacing Polish ── */
+  /* ── Touch & Spacing ── */
   --touch-target-min: 2.75rem;
   --touch-target-opt: 3.125rem;
   --touch-target-lg: 3.5rem;
   --touch-target-xl: 4.25rem;
   --touch-target-mobile: 3rem;
 
-  /* ── POS Mobile Adjustments ── */
+  /* ── POS Mobile ── */
   --pos-header-height-mobile: 3.5rem;
   --pos-cart-height-mobile: 40vh;
   --pos-product-grid-mobile: 120px;
 
-  /* ── 8px Grid Spacing System ── */
+  /* ── 8px Grid Spacing ── */
   --space-0:   0px;
   --space-0-5: 0.125rem;
   --space-1:   0.25rem;
@@ -62,13 +64,10 @@
   --space-8:   2rem;
   --space-9:   2.25rem;
   --space-10:  2.5rem;
-  --space-11:  2.75rem;
   --space-12:  3rem;
   --space-14:  3.5rem;
   --space-16:  4rem;
   --space-20:  5rem;
-  --space-24:  6rem;
-  --space-28:  7rem;
 
   --stack-xs:   0.25rem;
   --stack-sm:   0.5rem;
@@ -82,9 +81,11 @@
   --inset-lg:   1.5rem;
   --inset-xl:   2rem;
 
-  --section-gap: var(--stack-md);
+  --section-gap: 1.5rem;
+  --card-padding: 1.25rem;
+  --modal-padding: 1.5rem;
 
-  /* ── Density Scale ── */
+  /* ── Density ── */
   --density-compact:     0.625rem;
   --density-comfortable: 1rem;
   --density-spacious:    1.5rem;
@@ -94,10 +95,10 @@
   --radius-xs:   0.25rem;
   --radius-sm:   0.5rem;
   --radius-md:   0.75rem;
-  --radius-lg:   1rem;
-  --radius-xl:   1.25rem;
-  --radius-2xl:  1.5rem;
-  --radius-3xl:  2rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.25rem;
+  --radius-3xl:  1.5rem;
   --radius-full: 9999px;
 
   /* ── Enterprise 6-Level Depth ── */
@@ -107,6 +108,8 @@
   --shadow-lg:   0 10px 16px -4px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.04);
   --shadow-xl:   0 20px 28px -6px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.04);
   --shadow-2xl:  0 28px 56px -14px rgb(0 0 0 / 0.18);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.03), 0 0 0 1px rgb(0 0 0 / 0.02);
+  --shadow-card-hover: 0 8px 16px -4px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04), 0 0 0 1px rgb(0 0 0 / 0.04);
   --shadow-glow: 0 0 28px hsl(var(--primary) / 0.15), 0 0 8px hsl(var(--primary) / 0.08);
   --shadow-glow-success: 0 0 28px hsl(var(--success) / 0.15), 0 0 8px hsl(var(--success) / 0.08);
   --shadow-glow-accent: 0 0 24px hsl(var(--accent) / 0.12), 0 0 6px hsl(var(--accent) / 0.06);
@@ -145,7 +148,7 @@
   --control-2xl: 4.25rem;
 
   /* ── Layout ── */
-  --header-height:       3rem;
+  --header-height:       3.5rem;
   --sidebar-width:       14rem;
   --sidebar-collapsed:   4rem;
 
@@ -190,7 +193,7 @@
   --status-pending: var(--warning);
   --status-error:   var(--danger);
 
-  /* ── Gradient Tokens (Theme-Aware) ── */
+  /* ── Gradient Tokens ── */
   --gradient-primary:       linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.88) 50%, hsl(var(--primary) / 0.82) 100%);
   --gradient-primary-hover: linear-gradient(135deg, hsl(var(--primary) / 0.94) 0%, hsl(var(--primary) / 0.82) 100%);
   --gradient-success:       linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.88) 100%);
@@ -208,10 +211,10 @@
   --gradient-metric: linear-gradient(180deg, hsl(var(--surface-metric)) 0%, hsl(var(--card)) 100%);
 
   /* ── Glassmorphism ── */
-  --glass-bg-opacity: 0.68;
-  --glass-border-opacity: 0.15;
-  --glass-blur: 20px;
-  --glass-saturation: 180%;
+  --glass-bg-opacity: 0.72;
+  --glass-border-opacity: 0.12;
+  --glass-blur: 24px;
+  --glass-saturation: 200%;
 
   /* ── Micro-interactions ── */
   --hover-lift-distance: -2px;

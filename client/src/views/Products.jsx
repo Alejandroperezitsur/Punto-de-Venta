@@ -20,18 +20,18 @@ import { cn } from '../utils/cn';
 const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
   const stockPct = Math.min((Number(p.stock) / 50) * 100, 100);
   return (
-    <div className="relative rounded-2xl border border-border/20 bg-card p-4 hover:border-primary/30 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-primary/8 transition-all duration-200 flex flex-col cursor-pointer group overflow-hidden"
+    <div className="relative rounded-xl border border-border/20 bg-card p-5 hover:border-primary/25 hover:-translate-y-1 hover:shadow-card-hover transition-all duration-200 flex flex-col cursor-pointer group overflow-hidden"
       onClick={() => onEdit(p)}
     >
       {/* Edit button */}
-      <button className="absolute top-3 right-3 size-9 rounded-lg bg-muted/40 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted transition-all flex items-center justify-center z-10"
+      <button className="absolute top-3 right-3 size-8 rounded-lg bg-muted/30 backdrop-blur-sm text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-muted/50 transition-all flex items-center justify-center z-10"
         onClick={(e) => { e.stopPropagation(); onEdit(p); }}
         aria-label="Editar producto">
         <Edit3 className="size-4" />
       </button>
 
       {/* Product image */}
-      <div className="size-[4.5rem] rounded-xl bg-muted/30 flex items-center justify-center mb-4 border border-border/12 mx-auto overflow-hidden group-hover:border-primary/20 group-hover:scale-105 transition-all duration-200">
+      <div className="size-16 rounded-xl bg-muted/20 flex items-center justify-center mb-4 border border-border/10 mx-auto overflow-hidden group-hover:border-primary/15 group-hover:scale-105 transition-all duration-200">
         {p.image_url ? (
           <img src={p.image_url} alt={p.name} className="size-full object-cover rounded-xl" loading="lazy" />
         ) : (
@@ -39,7 +39,7 @@ const ProductCard = memo(function ProductCard({ p, onEdit, onDelete }) {
         )}
       </div>
 
-      <h3 className="font-bold text-sm mb-2 line-clamp-2 min-h-[2.2rem] leading-tight text-center text-foreground/90 group-hover:text-foreground transition-colors">{p.name}</h3>
+      <h3 className="font-bold text-sm mb-2 line-clamp-2 min-h-[2.5rem] leading-tight text-center text-foreground group-hover:text-foreground transition-colors">{p.name}</h3>
 
       <div className="mt-auto pt-2 space-y-2 w-full text-center">
         <div className="flex items-baseline justify-center gap-0.5">

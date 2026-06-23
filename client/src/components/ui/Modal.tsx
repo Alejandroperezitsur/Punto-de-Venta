@@ -70,7 +70,7 @@ const Modal = Object.assign(React.memo(function Modal({
       <div
         className={cn(
           'absolute inset-0 transition-all duration-200',
-          animate === 'open' ? 'bg-black/50 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-0',
+          animate === 'open' ? 'bg-black/55 backdrop-blur-md' : 'bg-black/0 backdrop-blur-0',
         )}
         aria-hidden="true"
       />
@@ -81,7 +81,7 @@ const Modal = Object.assign(React.memo(function Modal({
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative w-full bg-card border border-border/35 shadow-2xl overflow-hidden',
+          'relative w-full bg-card border border-border/25 shadow-2xl overflow-hidden',
           'transition-all duration-200',
           animate === 'open' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4',
           isFullscreen ? 'h-full max-w-full rounded-none' : 'rounded-2xl',

@@ -32,7 +32,7 @@ const CheckoutButton = React.memo(function CheckoutButton({
   return (
     <button
       className={cn(
-        'group w-full min-h-[3.5rem] lg:min-h-[4rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98] relative overflow-hidden',
+        'group w-full min-h-[3.5rem] text-base font-extrabold rounded-xl transition-all duration-200 flex items-center justify-center gap-3 uppercase tracking-wide active:scale-[0.98] relative overflow-hidden',
         hasItems && !isProcessing
           ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-0.5'
           : 'bg-muted/20 text-muted-foreground/25 cursor-not-allowed',
@@ -515,7 +515,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
           <button
             onClick={() => setManualModalOpen(true)}
-            className="shrink-0 h-[3.5rem] lg:h-[4rem] px-4 text-sm font-bold rounded-xl bg-warning/10 text-warning border border-warning/20 hover:bg-warning/15 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
+            className="shrink-0 h-[3.5rem] px-4 text-sm font-bold rounded-xl bg-warning/8 text-warning border border-warning/15 hover:bg-warning/12 hover:-translate-y-px transition-all flex items-center gap-2 touch-target active:scale-[0.97]"
             title="Producto manual (F4)"
             aria-label="Agregar producto manual"
           >
@@ -525,14 +525,14 @@ const SalesView = React.memo(function SalesView() {
         </div>
 
         {/* Product catalog grid */}
-        <div className="flex-1 rounded-xl border border-border/15 bg-card p-3 lg:p-4 overflow-y-auto shadow-sm">
+        <div className="flex-1 rounded-xl border border-border/12 bg-card p-3 lg:p-4 overflow-y-auto shadow-xs">
           <QuickProducts onSelect={handleQuickProductSelect} />
         </div>
       </div>
 
       {/* ===== CART PANEL (Right ~40%) ===== */}
       <div
-        className="flex flex-col rounded-xl border border-border/15 bg-card h-full overflow-hidden pos-cart-panel shadow-sm"
+        className="flex flex-col rounded-xl border border-border/12 bg-card h-full overflow-hidden pos-cart-panel shadow-xs"
       >
         {/* Cart handle indicator for mobile */}
         <div className="pos-cart-handle hidden w-full h-2 items-center justify-center cursor-pointer">
@@ -674,7 +674,7 @@ const SalesView = React.memo(function SalesView() {
           </div>
 
           {/* Totals — premium metric card */}
-          <div className="relative overflow-hidden rounded-xl border border-border/15 bg-gradient-to-b from-surface-panel/50 to-card shadow-xs">
+           <div className="relative overflow-hidden rounded-xl border border-border/12 bg-gradient-to-b from-surface-panel/40 to-card shadow-xs">
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-primary/50 to-transparent opacity-50" />
             
             <div className="p-4 space-y-2">

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Sun, Moon } from 'lucide-react';
+import { Store, Sun, Moon, ArrowRight, Shield } from 'lucide-react';
 import { api } from '../lib/api';
 import { useUserStore } from '../store/userStore';
 import { useTheme } from '../context/ThemeContext';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { cn } from '../utils/cn';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,11 +16,17 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
-      setError('Ingrese usuario y contraseña');
+      setError('Ingrese usuario y contrasena');
       return;
     }
     setError('');
@@ -32,7 +39,7 @@ export default function Login() {
       login(res.user, res.token);
       navigate('/ventas');
     } catch (err) {
-      setError(err?.message || 'Error de autenticación');
+      setError(err?.message || 'Error de autenticacion');
     } finally {
       setLoading(false);
     }
@@ -40,51 +47,73 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
-      {/* Background mesh gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-transparent to-accent/[0.03]" />
-      <div className="absolute -top-48 -right-48 w-[700px] h-[700px] rounded-full bg-primary/[0.05] blur-[80px]" />
-      <div className="absolute -bottom-48 -left-48 w-[600px] h-[600px] rounded-full bg-accent/[0.04] blur-[80px]" />
-      <div className="absolute inset-0 dot-pattern opacity-30" />
+      {/* Premium background layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-accent/[0.04]" />
+      <div className="absolute -top-64 -right-64 w-[800px] h-[800px] rounded-full bg-primary/[0.06] blur-[100px]" />
+      <div className="absolute -bottom-64 -left-64 w-[700px] h-[700px] rounded-full bg-accent/[0.05] blur-[100px]" />
+      <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] rounded-full bg-primary/[0.03] blur-[60px]" />
+      <div className="absolute inset-0 dot-pattern opacity-20" />
+
+      {/* Grid lines subtle */}
+      <div className="absolute inset-0 opacity-[0.02]" style={{
+        backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+        backgroundSize: '60px 60px',
+      }} />
 
       {/* Theme toggle */}
       <button
         onClick={toggleDark}
-        className="absolute top-5 right-5 p-3 rounded-xl text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 backdrop-blur-sm border border-border/18 transition-all z-10 shadow-sm"
+        className={cn(
+          'absolute top-6 right-6 p-3 rounded-xl backdrop-blur-md border transition-all z-10',
+          'text-muted-foreground/60 hover:text-foreground hover:bg-surface-glass/60 border-border/15 shadow-sm',
+        )}
         aria-label={isDark ? 'Modo claro' : 'Modo oscuro'}
       >
-        {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        {isDark ? <Sun className="size-4.5" /> : <Moon className="size-4.5" />}
       </button>
 
       {/* Login card */}
-      <div className="relative w-full max-w-md px-4">
-        <div className="glass-card p-8 sm:p-10 shadow-2xl animate-fade-up">
-          {/* Top accent line */}
-          <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+      <div className={cn(
+        'relative w-full max-w-[420px] px-6 transition-all duration-700',
+        mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6',
+      )}>
+        <div className="glass-card p-10 sm:p-12 shadow-2xl relative overflow-hidden">
+          {/* Top gradient accent */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+
+          {/* Subtle inner glow */}
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/[0.04] rounded-full blur-3xl pointer-events-none" />
 
           {/* Logo & Brand */}
-          <div className="text-center mb-8">
-            <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary/12 shadow-sm shadow-primary/8">
-              <Store className="size-7 text-primary" />
+          <div className={cn(
+            'text-center mb-10 transition-all duration-500 delay-100',
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
+          )}>
+            <div className="size-20 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mx-auto mb-5 ring-1 ring-primary/10 shadow-lg shadow-primary/10">
+              <Store className="size-9 text-primary" />
             </div>
-            <h1 className="text-2xl font-extrabold text-foreground tracking-tight">
+            <h1 className="text-3xl font-black text-foreground tracking-tighter">
               POS Pro
             </h1>
-            <p className="text-sm text-muted-foreground/70 mt-1 font-medium">
+            <p className="text-sm text-muted-foreground mt-1.5 font-medium tracking-wide">
               Punto de Venta Enterprise
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-5 px-4 py-3 rounded-xl bg-danger/15 border border-danger/25 text-sm font-medium text-danger flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-danger shrink-0" />
+            <div className="mb-6 px-4 py-3 rounded-xl bg-danger/10 border border-danger/20 text-sm font-semibold text-danger flex items-center gap-2.5">
+              <span className="size-2 rounded-full bg-danger shrink-0" />
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-muted-foreground/80 mb-1.5 ml-0.5">
+            <div className={cn(
+              'transition-all duration-500 delay-200',
+              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
+            )}>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2 ml-0.5">
                 Usuario
               </label>
               <Input
@@ -94,38 +123,56 @@ export default function Login() {
                 placeholder="Ingrese su usuario"
                 autoFocus
                 autoComplete="username"
+                size="lg"
                 icon={<Store className="size-4" />}
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-muted-foreground/80 mb-1.5 ml-0.5">
-                Contraseña
+            <div className={cn(
+              'transition-all duration-500 delay-300',
+              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
+            )}>
+              <label className="block text-sm font-semibold text-foreground/80 mb-2 ml-0.5">
+                Contrasena
               </label>
               <Input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Ingrese su contraseña"
+                placeholder="Ingrese su contrasena"
                 autoComplete="current-password"
+                size="lg"
                 showPasswordToggle
               />
             </div>
 
-            <Button
-              type="submit"
-              isLoading={loading}
-              disabled={loading}
-              size="xl"
-              className="w-full font-bold"
-            >
-              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-            </Button>
+            <div className={cn(
+              'transition-all duration-500 delay-[400ms]',
+              mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
+            )}>
+              <Button
+                type="submit"
+                isLoading={loading}
+                disabled={loading}
+                size="xl"
+                variant="hero"
+                className="w-full font-bold text-base tracking-wide"
+              >
+                {loading ? 'Iniciando sesion...' : 'Iniciar Sesion'}
+                {!loading && <ArrowRight className="size-4 ml-1" />}
+              </Button>
+            </div>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground/50 mt-7 font-medium">
-            POS Pro v2026 · Punto de Venta Enterprise
-          </p>
+          <div className={cn(
+            'mt-8 pt-6 border-t border-border/15 flex items-center justify-center gap-2 transition-all duration-500 delay-500',
+            mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
+          )}>
+            <Shield className="size-3 text-muted-foreground/40" />
+            <p className="text-xs text-muted-foreground/50 font-medium">
+              POS Pro v2026 · Conexion segura
+            </p>
+          </div>
         </div>
       </div>
     </div>

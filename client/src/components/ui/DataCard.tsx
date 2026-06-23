@@ -44,7 +44,6 @@ export function DataCard({ label, value, trend = 'flat', trendValue, icon, accen
         className,
       )}
     >
-      {/* Top accent line uses accentColor via the gradient-primary default; override inline if needed */}
       {accentColor !== 'primary' && (
         <div
           className="absolute top-0 left-0 right-0 h-0.5 rounded-full opacity-60"
@@ -54,11 +53,11 @@ export function DataCard({ label, value, trend = 'flat', trendValue, icon, accen
 
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.08em] text-muted-foreground mb-1 truncate">{label}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 truncate">{label}</p>
           <p className="text-2xl font-black tracking-tighter tabular-nums text-foreground leading-none">{value}</p>
         </div>
         {icon && (
-          <div className="shrink-0 size-9 rounded-xl bg-primary/8 flex items-center justify-center text-primary group-hover:bg-primary/12 transition-colors">
+          <div className="shrink-0 size-10 rounded-xl bg-primary/8 flex items-center justify-center text-primary group-hover:bg-primary/12 transition-colors">
             {icon}
           </div>
         )}
@@ -66,7 +65,7 @@ export function DataCard({ label, value, trend = 'flat', trendValue, icon, accen
 
       <div className="flex items-center justify-between gap-2 mt-1">
         {trendValue && (
-          <div className={cn('flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold', trendClasses.bg, trendClasses.color)}>
+          <div className={cn('flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold', trendClasses.bg, trendClasses.color)}>
             <TrendIcon className="size-3" />
             <span>{trendValue}</span>
           </div>

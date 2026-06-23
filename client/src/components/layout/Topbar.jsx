@@ -150,7 +150,7 @@ export const Topbar = React.memo(function Topbar() {
       {/* Center: Refined clock with date pill — hidden on small/medium to avoid overlap */}
       <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 items-center gap-2.5">
         <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md bg-surface-glass/40 border border-border/12 shadow-sm hover:bg-surface-glass/60 transition-colors">
-          <span className="tabular-nums font-bold text-foreground text-[13px] tracking-tight">{timeStr}</span>
+          <span className="tabular-nums font-bold text-foreground text-sm tracking-tight">{timeStr}</span>
           <span className="w-px h-3 bg-border/25" />
           <span className="text-muted-foreground/60 text-xs font-medium">{dateStrShort}</span>
         </div>
@@ -160,7 +160,7 @@ export const Topbar = React.memo(function Topbar() {
       <div className="flex items-center gap-2">
         {/* Clock on small/medium screens (inline, not centered) */}
         <div className="lg:hidden flex items-center gap-1.5 mr-2">
-          <span className="tabular-nums font-bold text-foreground text-[12px] tracking-tight">{timeStr}</span>
+          <span className="tabular-nums font-bold text-foreground text-xs tracking-tight">{timeStr}</span>
         </div>
 
         {/* Search trigger (Cmd+K) */}
