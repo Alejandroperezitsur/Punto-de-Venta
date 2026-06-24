@@ -1,6 +1,8 @@
 ﻿import React, { useEffect, useRef, memo } from 'react';
 import { Sidebar } from './Sidebar';
-import { Topbar } from './Topbar';
+import { Toolbar } from './Toolbar';
+import { TabStrip } from './TabStrip';
+import { TouchBar } from './TouchBar';
 import { useLocation } from 'react-router-dom';
 import { ToastProvider } from '../ui/Toast';
 import { useUserStore } from '../../store/userStore';
@@ -19,7 +21,9 @@ const MainLayout = memo(function MainLayout({ children }) {
 
   return (
     <ToastProvider>
-      <div className="flex h-screen bg-background text-foreground font-sans antialiased overflow-hidden">
+      <div className="flex h-screen bg-bg-app text-text-primary font-sans antialiased overflow-hidden">
+        <div className="signal-bar" id="signal-bar" aria-hidden="true" />
+
         <a href="#main-content" className="skip-to-content">
           Ir al contenido principal
         </a>
@@ -27,38 +31,48 @@ const MainLayout = memo(function MainLayout({ children }) {
         {/* Mobile overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/45 backdrop-blur-[2px] z-[499] lg:hidden transition-opacity duration-200 animate-fade-in"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[499] lg:hidden transition-opacity duration-200"
             onClick={toggleSidebar}
-            onKeyDown={(e) => { if (e.key === 'Escape') toggleSidebar(); }}
             aria-hidden="true"
           />
         )}
 
-        {/* Sidebar */}
-        <div className={cn(
-          'h-full shrink-0 transition-transform duration-200 ease-out shadow-sm will-change-transform',
-          'max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:shadow-xl',
-          isSidebarOpen ? 'max-lg:translate-x-0 max-lg:z-[500]' : 'max-lg:-translate-x-full max-lg:z-[200]',
-        )}>
-          <Sidebar onNavigate={toggleSidebar} />
-        </div>
+        {/* Sidebar (optional — can be toggled on/off) */}
+        {isSidebarOpen && (
+          <div className={cn(
+            'h-full shrink-0 transition-transform duration-200',
+            'max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:z-[500]',
+            isSidebarOpen ? 'max-lg:translate-x-0' : 'max-lg:-translate-x-full',
+          )}>
+            <Sidebar onNavigate={toggleSidebar} />
+          </div>
+        )}
 
         {/* Main content area */}
-        <div className="flex-1 flex flex-col min-w-0 bg-background">
-          <Topbar />
+        <div className="flex-1 flex flex-col min-w-0 bg-bg-app">
+          {/* Signal Toolbar */}
+          <Toolbar />
+
+          {/* Tab Strip navigation */}
+          <TabStrip />
+
           <main
             id="main-content"
             ref={mainRef}
             className={cn(
               'flex-1 overflow-y-auto overflow-x-hidden',
               isPOS ? 'p-2 sm:p-3 lg:p-4' : 'p-3 sm:p-4 md:p-5 lg:p-6 pb-8 md:pb-10',
+              'pb-[var(--touchbar-height)] md:pb-10',
             )}
             role="main"
           >
-            <div key={location.pathname} className="animate-page-enter">
+            <div key={location.pathname} className="animate-fade-in">
               {children}
             </div>
           </main>
+
+          {/* Touch navigation bar (mobile/tablet only) */}
+          <TouchBar />
         </div>
       </div>
     </ToastProvider>

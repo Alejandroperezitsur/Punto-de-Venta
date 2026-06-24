@@ -1,231 +1,330 @@
-﻿:root,
+﻿/* ═══════════════════════════════════════════════════════════════════
+   SIGNAL DESIGN SYSTEM™ v1.0 — Color Themes
+   Stone (Light) · Obsidian (Dark)
+   APV Labs Design Studio — June 2026
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── STONE (Light Mode) ── */
+:root,
 [data-theme="light"] {
-  /* ── 2026 Retail Enterprise Palette — Navy Premium ── */
-  --primary-h: 222; --primary-s: 82%; --primary-l: 18%;
-  --primary-foreground-h: 210; --primary-foreground-s: 40%; --primary-foreground-l: 98%;
+  /* Neutral palette — warm limestone, never pure gray */
+  --bg-app-h: 40; --bg-app-s: 15%; --bg-app-l: 96%;
+  --bg-surface-h: 0; --bg-surface-s: 0%; --bg-surface-l: 100%;
+  --bg-surface-hover-h: 40; --bg-surface-hover-s: 20%; --bg-surface-hover-l: 97%;
+  --bg-surface-active-h: 40; --bg-surface-active-s: 10%; --bg-surface-active-l: 95%;
+  --bg-inset-h: 40; --bg-inset-s: 8%; --bg-inset-l: 92%;
 
-  --accent-h: 38; --accent-s: 92%; --accent-l: 50%;
-  --accent-foreground-h: 0; --accent-foreground-s: 0%; --accent-foreground-l: 100%;
+  --text-primary-h: 30; --text-primary-s: 12%; --text-primary-l: 9%;
+  --text-secondary-h: 30; --text-secondary-s: 6%; --text-secondary-l: 40%;
+  --text-tertiary-h: 30; --text-tertiary-s: 6%; --text-tertiary-l: 60%;
+  --text-disabled-h: 30; --text-disabled-s: 5%; --text-disabled-l: 75%;
 
-  --success-h: 152; --success-s: 68%; --success-l: 36%;
-  --success-foreground-h: 0; --success-foreground-s: 0%; --success-foreground-l: 100%;
+  --border-subtle-h: 34; --border-subtle-s: 10%; --border-subtle-l: 88%;
+  --border-default-h: 33; --border-default-s: 8%; --border-default-l: 83%;
+  --border-strong-h: 30; --border-strong-s: 5%; --border-strong-l: 75%;
 
-  --warning-h: 38; --warning-s: 92%; --warning-l: 48%;
-  --warning-foreground-h: 30; --warning-s: 80%; --warning-foreground-l: 12%;
+  /* Action colors — near-black, no brand color */
+  --action-primary-h: 216; --action-primary-s: 28%; --action-primary-l: 7%;
+  --action-primary-hover-h: 217; --action-primary-hover-s: 31%; --action-primary-hover-l: 15%;
+  --action-secondary-h: 40; --action-secondary-s: 15%; --action-secondary-l: 96%;
+  --action-ghost-h: 0; --action-ghost-s: 0%; --action-ghost-l: 0%;
 
-  --danger-h: 0; --danger-s: 70%; --danger-l: 46%;
-  --danger-foreground-h: 0; --danger-foreground-s: 0%; --danger-foreground-l: 100%;
+  /* Focus ring */
+  --focus-ring-h: 216; --focus-ring-s: 28%; --focus-ring-l: 7%;
+}
 
-  --info-h: 210; --info-s: 74%; --info-l: 42%;
-  --info-foreground-h: 0; --info-foreground-s: 0%; --info-foreground-l: 100%;
+/* ── OBSIDIAN (Dark Mode) ── */
+[data-theme="dark"] {
+  --bg-app-h: 60; --bg-app-s: 4%; --bg-app-l: 5%;
+  --bg-surface-h: 60; --bg-surface-s: 5%; --bg-surface-l: 7.5%;
+  --bg-surface-hover-h: 60; --bg-surface-hover-s: 4%; --bg-surface-hover-l: 10%;
+  --bg-surface-active-h: 60; --bg-surface-active-s: 4%; --bg-surface-active-l: 12.5%;
+  --bg-inset-h: 60; --bg-inset-s: 5%; --bg-inset-l: 4%;
 
-  --secondary-h: 220; --secondary-s: 14%; --secondary-l: 93%;
-  --secondary-foreground-h: 220; --secondary-s: 30%; --secondary-l: 16%;
+  --text-primary-h: 60; --text-primary-s: 5%; --text-primary-l: 91%;
+  --text-secondary-h: 60; --text-secondary-s: 3%; --text-secondary-l: 52%;
+  --text-tertiary-h: 60; --text-tertiary-s: 3%; --text-tertiary-l: 35%;
+  --text-disabled-h: 60; --text-disabled-s: 3%; --text-disabled-l: 23%;
 
-  /* Warm neutral background — slightly warmer */
-  --background-h: 220; --background-s: 16%; --background-l: 97%;
-  --foreground-h: 220; --foreground-s: 30%; --foreground-l: 9%;
+  --border-subtle-h: 60; --border-subtle-s: 5%; --border-subtle-l: 12%;
+  --border-default-h: 60; --border-default-s: 5%; --border-default-l: 16%;
+  --border-strong-h: 60; --border-strong-s: 3%; --border-strong-l: 23%;
 
-  --surface-h: 0; --surface-s: 0%; --surface-l: 100%;
-  --surface-foreground-h: 220; --surface-foreground-s: 30%; --surface-foreground-l: 9%;
-  --surface-hover-h: 220; --surface-hover-s: 14%; --surface-hover-l: 94%;
-  --surface-elevated-h: 0; --surface-elevated-s: 0%; --surface-elevated-l: 100%;
-  --surface-glass-h: 0; --surface-glass-s: 0%; --surface-glass-l: 100%;
-  --surface-inset-h: 220; --surface-inset-s: 12%; --surface-inset-l: 95%;
-  --surface-accent-h: 220; --surface-accent-s: 24%; --surface-accent-l: 97.5%;
+  --action-primary-h: 60; --action-primary-s: 5%; --action-primary-l: 91%;
+  --action-primary-hover-h: 60; --action-primary-hover-s: 5%; --action-primary-hover-l: 85%;
+  --action-secondary-h: 60; --action-secondary-s: 5%; --action-secondary-l: 10%;
+  --action-ghost-h: 0; --action-ghost-s: 0%; --action-ghost-l: 100%;
 
-  --card-h: 0; --card-s: 0%; --card-l: 100%;
-  --card-foreground-h: 220; --card-foreground-s: 30%; --card-foreground-l: 9%;
+  --focus-ring-h: 60; --focus-ring-s: 5%; --focus-ring-l: 91%;
 
-  --popover-h: 0; --popover-s: 0%; --popover-l: 100%;
-  --popover-foreground-h: 220; --popover-foreground-s: 30%; --popover-foreground-l: 9%;
+  /* Dark mode shadows — deeper */
+  --shadow-overlay:  0 0 0 1px rgba(0,0,0,0.15), 0 8px 32px rgba(0,0,0,0.40);
+  --shadow-dropdown: 0 0 0 1px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.30);
+}
 
-  --border-h: 220; --border-s: 12%; --border-l: 90%;
-  --border-subtle-h: 220; --border-s: 10%; --border-l: 94%;
-  --input-h: 220; --input-s: 12%; --input-l: 88%;
-  --ring-h: 222; --ring-s: 70%; --ring-l: 28%;
+/* ── INVARIANT SEMANTIC COLORS (same in light and dark) ── */
+:root {
+  --semantic-success-h: 160; --semantic-success-s: 75%; --semantic-success-l: 22%;
+  --semantic-success-bg-h: 160; --semantic-success-bg-s: 45%; --semantic-success-bg-l: 93%;
+  --semantic-warning-h: 39; --semantic-warning-s: 87%; --semantic-warning-l: 29%;
+  --semantic-warning-bg-h: 39; --semantic-warning-bg-s: 85%; --semantic-warning-bg-l: 93%;
+  --semantic-danger-h: 0; --semantic-danger-s: 74%; --semantic-danger-l: 42%;
+  --semantic-danger-bg-h: 0; --semantic-danger-bg-s: 80%; --semantic-danger-bg-l: 95%;
+  --semantic-info-h: 221; --semantic-info-s: 79%; --semantic-info-l: 48%;
+  --semantic-info-bg-h: 222; --semantic-info-bg-s: 70%; --semantic-info-bg-l: 95%;
 
-  --muted-h: 220; --muted-s: 12%; --muted-l: 95%;
-  --muted-foreground-h: 220; --muted-s: 10%; --muted-l: 50%;
-
-  /* POS semantic */
-  --pos-checkout-h: 152; --pos-checkout-s: 68%; --pos-checkout-l: 36%;
-  --pos-hold-h: 38; --pos-hold-s: 88%; --pos-hold-l: 50%;
-  --pos-offline-h: 25; --pos-offline-s: 90%; --pos-offline-l: 48%;
-
-  --surface-panel-h: 220; --surface-panel-s: 14%; --surface-panel-l: 98.5%;
-  --border-accent-h: 220; --border-accent-s: 36%; --border-accent-l: 84%;
-
-  --chart-1-h: 222; --chart-1-s: 74%; --chart-1-l: 48%;
-  --chart-2-h: 152; --chart-2-s: 60%; --chart-2-l: 42%;
-  --chart-3-h: 38;  --chart-3-s: 80%; --chart-3-l: 52%;
-  --chart-4-h: 280; --chart-4-s: 60%; --chart-4-l: 54%;
-  --chart-5-h: 350; --chart-5-s: 68%; --chart-5-l: 50%;
+  /* Data visualization palette — daltonism-friendly */
+  --data-ink-h: 216; --data-ink-s: 28%; --data-ink-l: 7%;
+  --data-blue-h: 221; --data-blue-s: 83%; --data-blue-l: 53%;
+  --data-forest-h: 160; --data-forest-s: 75%; --data-forest-l: 22%;
+  --data-ember-h: 21; --data-ember-s: 90%; --data-ember-l: 42%;
+  --data-violet-h: 262; --data-violet-s: 83%; --data-violet-l: 58%;
+  --data-ocean-h: 199; --data-ocean-s: 95%; --data-ocean-l: 32%;
+  --data-clay-h: 28; --data-clay-s: 80%; --data-clay-l: 38%;
+  --data-indigo-h: 243; --data-indigo-s: 75%; --data-indigo-l: 59%;
 }
 
 [data-theme="dark"] {
-  /* ── Deep Dark — charcoal, not pure black ── */
-  --primary-h: 222; --primary-s: 68%; --primary-l: 60%;
-  --primary-foreground-h: 0; --primary-foreground-s: 0%; --primary-foreground-l: 100%;
+  --semantic-success-bg-h: 160; --semantic-success-bg-s: 40%; --semantic-success-bg-l: 12%;
+  --semantic-warning-bg-h: 39; --semantic-warning-bg-s: 75%; --semantic-warning-bg-l: 10%;
+  --semantic-danger-bg-h: 0; --semantic-danger-bg-s: 70%; --semantic-danger-bg-l: 10%;
+  --semantic-info-bg-h: 222; --semantic-info-bg-s: 65%; --semantic-info-bg-l: 10%;
 
-  --accent-h: 38; --accent-s: 78%; --accent-l: 56%;
-  --accent-foreground-h: 0; --accent-foreground-s: 0%; --accent-foreground-l: 100%;
-
-  --success-h: 152; --success-s: 54%; --success-l: 50%;
-  --success-foreground-h: 0; --success-foreground-s: 0%; --success-foreground-l: 100%;
-
-  --warning-h: 38; --warning-s: 78%; --warning-l: 54%;
-  --warning-foreground-h: 30; --warning-s: 80%; --warning-foreground-l: 10%;
-
-  --danger-h: 0; --danger-s: 60%; --danger-l: 52%;
-  --danger-foreground-h: 0; --danger-foreground-s: 0%; --danger-foreground-l: 100%;
-
-  --info-h: 210; --info-s: 60%; --info-l: 56%;
-  --info-foreground-h: 0; --info-foreground-s: 0%; --info-foreground-l: 100%;
-
-  --secondary-h: 222; --secondary-s: 12%; --secondary-l: 14%;
-  --secondary-foreground-h: 210; --secondary-s: 20%; --secondary-l: 90%;
-
-  /* Deep dark background */
-  --background-h: 222; --background-s: 20%; --background-l: 5%;
-  --foreground-h: 210; --foreground-s: 20%; --foreground-l: 95%;
-
-  --surface-h: 222; --surface-s: 16%; --surface-l: 8%;
-  --surface-foreground-h: 210; --surface-foreground-s: 20%; --surface-foreground-l: 95%;
-  --surface-hover-h: 222; --surface-hover-s: 14%; --surface-hover-l: 14%;
-  --surface-elevated-h: 222; --surface-elevated-s: 15%; --surface-elevated-l: 11%;
-  --surface-glass-h: 222; --surface-glass-s: 15%; --surface-glass-l: 10%;
-  --surface-inset-h: 222; --surface-inset-s: 20%; --surface-inset-l: 3.5%;
-  --surface-accent-h: 222; --surface-accent-s: 18%; --surface-accent-l: 7%;
-
-  --card-h: 222; --card-s: 15%; --card-l: 9%;
-  --card-foreground-h: 210; --card-foreground-s: 20%; --card-foreground-l: 95%;
-
-  --popover-h: 222; --popover-s: 15%; --popover-l: 12%;
-  --popover-foreground-h: 210; --popover-foreground-s: 20%; --popover-foreground-l: 95%;
-
-  --border-h: 222; --border-s: 10%; --border-l: 13%;
-  --border-subtle-h: 222; --border-s: 8%; --border-l: 10%;
-  --input-h: 222; --input-s: 10%; --input-l: 16%;
-  --ring-h: 222; --ring-s: 62%; --ring-l: 58%;
-
-  --muted-h: 222; --muted-s: 10%; --muted-l: 11%;
-  --muted-foreground-h: 220; --muted-s: 10%; --muted-l: 58%;
-
-  --pos-checkout-h: 152; --pos-checkout-s: 54%; --pos-checkout-l: 48%;
-  --pos-hold-h: 38; --pos-hold-s: 72%; --pos-hold-l: 55%;
-  --pos-offline-h: 25; --pos-offline-s: 78%; --pos-offline-l: 52%;
-
-  --surface-panel-h: 222; --surface-panel-s: 14%; --surface-panel-l: 7%;
-  --border-accent-h: 222; --border-accent-s: 30%; --border-accent-l: 22%;
-
-  /* Dark mode surface overrides */
-  --surface-command-h: 222; --surface-command-s: 14%; --surface-command-l: 9%;
-  --surface-metric-h: 222; --surface-metric-s: 13%; --surface-metric-l: 8%;
-  --surface-sidebar-active-h: 222; --surface-sidebar-active-s: 50%; --surface-sidebar-active-l: 13%;
-
-  /* Glass — higher opacity for dark */
-  --glass-bg-opacity: 0.68;
-  --glass-border-opacity: 0.15;
-  --glass-blur: 20px;
-  --glass-saturation: 180%;
-
-  --chart-1-h: 222; --chart-1-s: 66%; --chart-1-l: 62%;
-  --chart-2-h: 152; --chart-2-s: 54%; --chart-2-l: 56%;
-  --chart-3-h: 38;  --chart-3-s: 72%; --chart-3-l: 60%;
-  --chart-4-h: 280; --chart-4-s: 54%; --chart-4-l: 64%;
-  --chart-5-h: 350; --chart-5-s: 60%; --chart-5-l: 60%;
-
-  /* Dark gradient overrides */
-  --gradient-checkout: linear-gradient(135deg, hsl(var(--pos-checkout)) 0%, hsl(var(--pos-checkout) / 0.85) 100%);
-  --gradient-success: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.85) 100%);
-  --gradient-surface: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--card)) 100%);
+  /* Brighten semantic for dark mode */
+  --semantic-success-l: 48%;
+  --semantic-warning-l: 52%;
+  --semantic-danger-l: 56%;
+  --semantic-info-l: 58%;
 }
 
-/* ── Composite HSL Variables ── */
+/* ── COMPOSITE VARIABLES ── */
 :root {
-  --primary: var(--primary-h) var(--primary-s) var(--primary-l);
-  --primary-foreground: var(--primary-foreground-h) var(--primary-foreground-s) var(--primary-foreground-l);
-  --accent: var(--accent-h) var(--accent-s) var(--accent-l);
-  --accent-foreground: var(--accent-foreground-h) var(--accent-foreground-s) var(--accent-foreground-l);
-  --success: var(--success-h) var(--success-s) var(--success-l);
-  --success-foreground: var(--success-foreground-h) var(--success-foreground-s) var(--success-foreground-l);
-  --warning: var(--warning-h) var(--warning-s) var(--warning-l);
-  --warning-foreground: var(--warning-foreground-h) var(--warning-foreground-s) var(--warning-foreground-l);
-  --danger: var(--danger-h) var(--danger-s) var(--danger-l);
-  --danger-foreground: var(--danger-foreground-h) var(--danger-foreground-s) var(--danger-foreground-l);
-  --info: var(--info-h) var(--info-s) var(--info-l);
-  --info-foreground: var(--info-foreground-h) var(--info-foreground-s) var(--info-foreground-l);
-  --secondary: var(--secondary-h) var(--secondary-s) var(--secondary-l);
+  /* Backgrounds */
+  --bg-app:            var(--bg-app-h) var(--bg-app-s) var(--bg-app-l);
+  --bg-surface:        var(--bg-surface-h) var(--bg-surface-s) var(--bg-surface-l);
+  --bg-surface-hover:  var(--bg-surface-hover-h) var(--bg-surface-hover-s) var(--bg-surface-hover-l);
+  --bg-surface-active: var(--bg-surface-active-h) var(--bg-surface-active-s) var(--bg-surface-active-l);
+  --bg-inset:          var(--bg-inset-h) var(--bg-inset-s) var(--bg-inset-l);
+
+  /* Text */
+  --text-primary:   var(--text-primary-h) var(--text-primary-s) var(--text-primary-l);
+  --text-secondary: var(--text-secondary-h) var(--text-secondary-s) var(--text-secondary-l);
+  --text-tertiary:  var(--text-tertiary-h) var(--text-tertiary-s) var(--text-tertiary-l);
+  --text-disabled:  var(--text-disabled-h) var(--text-disabled-s) var(--text-disabled-l);
+
+  /* Borders */
+  --border-subtle:  var(--border-subtle-h) var(--border-subtle-s) var(--border-subtle-l);
+  --border-default: var(--border-default-h) var(--border-default-s) var(--border-default-l);
+  --border-strong:  var(--border-strong-h) var(--border-strong-s) var(--border-strong-l);
+
+  /* Actions */
+  --action-primary:       var(--action-primary-h) var(--action-primary-s) var(--action-primary-l);
+  --action-primary-hover: var(--action-primary-hover-h) var(--action-primary-hover-s) var(--action-primary-hover-l);
+  --action-secondary:     var(--action-secondary-h) var(--action-secondary-s) var(--action-secondary-l);
+
+  /* Focus */
+  --focus-ring: var(--focus-ring-h) var(--focus-ring-s) var(--focus-ring-l);
+
+  /* Semantic */
+  --semantic-success:    var(--semantic-success-h) var(--semantic-success-s) var(--semantic-success-l);
+  --semantic-success-bg: var(--semantic-success-bg-h) var(--semantic-success-bg-s) var(--semantic-success-bg-l);
+  --semantic-warning:    var(--semantic-warning-h) var(--semantic-warning-s) var(--semantic-warning-l);
+  --semantic-warning-bg: var(--semantic-warning-bg-h) var(--semantic-warning-bg-s) var(--semantic-warning-bg-l);
+  --semantic-danger:     var(--semantic-danger-h) var(--semantic-danger-s) var(--semantic-danger-l);
+  --semantic-danger-bg:  var(--semantic-danger-bg-h) var(--semantic-danger-bg-s) var(--semantic-danger-bg-l);
+  --semantic-info:       var(--semantic-info-h) var(--semantic-info-s) var(--semantic-info-l);
+  --semantic-info-bg:    var(--semantic-info-bg-h) var(--semantic-info-bg-s) var(--semantic-info-bg-l);
+
+  /* Data viz */
+  --data-ink:    var(--data-ink-h) var(--data-ink-s) var(--data-ink-l);
+  --data-blue:   var(--data-blue-h) var(--data-blue-s) var(--data-blue-l);
+  --data-forest: var(--data-forest-h) var(--data-forest-s) var(--data-forest-l);
+  --data-ember:  var(--data-ember-h) var(--data-ember-s) var(--data-ember-l);
+  --data-violet: var(--data-violet-h) var(--data-violet-s) var(--data-violet-l);
+  --data-ocean:  var(--data-ocean-h) var(--data-ocean-s) var(--data-ocean-l);
+  --data-clay:   var(--data-clay-h) var(--data-clay-s) var(--data-clay-l);
+  --data-indigo: var(--data-indigo-h) var(--data-indigo-s) var(--data-indigo-l);
+
+  /* ═══ LEGACY COMPATIBILITY — maps old tokens to Signal ═══ */
+  /* HSL components */
+  --primary-h:             var(--action-primary-h);
+  --primary-s:             var(--action-primary-s);
+  --primary-l:             var(--action-primary-l);
+  --primary-foreground-h:  0;
+  --primary-foreground-s:  0%;
+  --primary-foreground-l:  100%;
+  --background-h:          var(--bg-app-h);
+  --background-s:          var(--bg-app-s);
+  --background-l:          var(--bg-app-l);
+  --foreground-h:          var(--text-primary-h);
+  --foreground-s:          var(--text-primary-s);
+  --foreground-l:          var(--text-primary-l);
+  --surface-h:             var(--bg-surface-h);
+  --surface-s:             var(--bg-surface-s);
+  --surface-l:             var(--bg-surface-l);
+  --surface-hover-h:       var(--bg-surface-hover-h);
+  --surface-hover-s:       var(--bg-surface-hover-s);
+  --surface-hover-l:       var(--bg-surface-hover-l);
+  --surface-elevated-h:    var(--bg-surface-h);
+  --surface-elevated-s:    var(--bg-surface-s);
+  --surface-elevated-l:    var(--bg-surface-l);
+  --surface-glass-h:       var(--bg-surface-h);
+  --surface-glass-s:       var(--bg-surface-s);
+  --surface-glass-l:       var(--bg-surface-l);
+  --surface-inset-h:       var(--bg-inset-h);
+  --surface-inset-s:       var(--bg-inset-s);
+  --surface-inset-l:       var(--bg-inset-l);
+  --surface-accent-h:      var(--bg-surface-hover-h);
+  --surface-accent-s:      var(--bg-surface-hover-s);
+  --surface-accent-l:      var(--bg-surface-hover-l);
+  --card-h:                var(--bg-surface-h);
+  --card-s:                var(--bg-surface-s);
+  --card-l:                var(--bg-surface-l);
+  --card-foreground-h:     var(--text-primary-h);
+  --card-foreground-s:     var(--text-primary-s);
+  --card-foreground-l:     var(--text-primary-l);
+  --popover-h:             var(--bg-surface-h);
+  --popover-s:             var(--bg-surface-s);
+  --popover-l:             var(--bg-surface-l);
+  --popover-foreground-h:  var(--text-primary-h);
+  --popover-foreground-s:  var(--text-primary-s);
+  --popover-foreground-l:  var(--text-primary-l);
+  --border-h:              var(--border-default-h);
+  --border-s:              var(--border-default-s);
+  --border-l:              var(--border-default-l);
+  --border-subtle-h:       var(--border-subtle-h);
+  --input-h:               var(--border-default-h);
+  --input-s:               var(--border-default-s);
+  --input-l:               var(--border-default-l);
+  --ring-h:                var(--focus-ring-h);
+  --ring-s:                var(--focus-ring-s);
+  --ring-l:                var(--focus-ring-l);
+  --muted-h:               var(--bg-inset-h);
+  --muted-s:               var(--bg-inset-s);
+  --muted-l:               var(--bg-inset-l);
+  --muted-foreground-h:    var(--text-secondary-h);
+  --muted-foreground-s:    var(--text-secondary-s);
+  --muted-foreground-l:    var(--text-secondary-l);
+  --secondary-h:           var(--bg-surface-hover-h);
+  --secondary-s:           var(--bg-surface-hover-s);
+  --secondary-l:           var(--bg-surface-hover-l);
+  --secondary-foreground-h: var(--text-primary-h);
+  --secondary-foreground-s: var(--text-primary-s);
+  --secondary-foreground-l: var(--text-primary-l);
+  --accent-h:              var(--semantic-warning-h);
+  --accent-s:              var(--semantic-warning-s);
+  --accent-l:              var(--semantic-warning-l);
+  --accent-foreground-h:   0;
+  --accent-foreground-s:   0%;
+  --accent-foreground-l:   100%;
+  --success-h:             var(--semantic-success-h);
+  --success-s:             var(--semantic-success-s);
+  --success-l:             var(--semantic-success-l);
+  --success-foreground-h:  0;
+  --success-foreground-s:  0%;
+  --success-foreground-l:  100%;
+  --warning-h:             var(--semantic-warning-h);
+  --warning-s:             var(--semantic-warning-s);
+  --warning-l:             var(--semantic-warning-l);
+  --warning-foreground-h:  0;
+  --warning-foreground-s:  0%;
+  --warning-foreground-l:  100%;
+  --danger-h:              var(--semantic-danger-h);
+  --danger-s:              var(--semantic-danger-s);
+  --danger-l:              var(--semantic-danger-l);
+  --danger-foreground-h:   0;
+  --danger-foreground-s:   0%;
+  --danger-foreground-l:   100%;
+  --info-h:                var(--semantic-info-h);
+  --info-s:                var(--semantic-info-s);
+  --info-l:                var(--semantic-info-l);
+  --info-foreground-h:     0;
+  --info-foreground-s:     0%;
+  --info-foreground-l:     100%;
+  --pos-checkout-h:        var(--semantic-success-h);
+  --pos-checkout-s:        var(--semantic-success-s);
+  --pos-checkout-l:        var(--semantic-success-l);
+  --pos-hold-h:            var(--semantic-warning-h);
+  --pos-hold-s:            var(--semantic-warning-s);
+  --pos-hold-l:            var(--semantic-warning-l);
+  --pos-offline-h:         var(--semantic-warning-h);
+  --pos-offline-s:         var(--semantic-warning-s);
+  --pos-offline-l:         var(--semantic-warning-l);
+  --surface-panel-h:       var(--bg-surface-hover-h);
+  --surface-panel-s:       var(--bg-surface-hover-s);
+  --surface-panel-l:       var(--bg-surface-hover-l);
+  --border-accent-h:       var(--border-default-h);
+  --border-accent-s:       var(--border-default-s);
+  --border-accent-l:       var(--border-default-l);
+  --surface-command-h:     var(--bg-surface-h);
+  --surface-command-s:     var(--bg-surface-s);
+  --surface-command-l:     var(--bg-surface-l);
+  --surface-metric-h:      var(--bg-surface-h);
+  --surface-metric-s:      var(--bg-surface-s);
+  --surface-metric-l:      var(--bg-surface-l);
+  --surface-sidebar-active-h: var(--bg-surface-active-h);
+  --surface-sidebar-active-s: var(--bg-surface-active-s);
+  --surface-sidebar-active-l: var(--bg-surface-active-l);
+  --chart-1-h: var(--data-blue-h);
+  --chart-1-s: var(--data-blue-s);
+  --chart-1-l: var(--data-blue-l);
+  --chart-2-h: var(--data-forest-h);
+  --chart-2-s: var(--data-forest-s);
+  --chart-2-l: var(--data-forest-l);
+  --chart-3-h: var(--data-ember-h);
+  --chart-3-s: var(--data-ember-s);
+  --chart-3-l: var(--data-ember-l);
+  --chart-4-h: var(--data-violet-h);
+  --chart-4-s: var(--data-violet-s);
+  --chart-4-l: var(--data-violet-l);
+  --chart-5-h: var(--data-clay-h);
+  --chart-5-s: var(--data-clay-s);
+  --chart-5-l: var(--data-clay-l);
+
+  /* Legacy composite variables */
+  --primary:              var(--primary-h) var(--primary-s) var(--primary-l);
+  --primary-foreground:   var(--primary-foreground-h) var(--primary-foreground-s) var(--primary-foreground-l);
+  --secondary:            var(--secondary-h) var(--secondary-s) var(--secondary-l);
   --secondary-foreground: var(--secondary-foreground-h) var(--secondary-foreground-s) var(--secondary-foreground-l);
-  --background: var(--background-h) var(--background-s) var(--background-l);
-  --foreground: var(--foreground-h) var(--foreground-s) var(--foreground-l);
-  --surface: var(--surface-h) var(--surface-s) var(--surface-l);
-  --surface-foreground: var(--surface-foreground-h) var(--surface-foreground-s) var(--surface-foreground-l);
-  --surface-hover: var(--surface-hover-h) var(--surface-hover-s) var(--surface-hover-l);
-  --surface-elevated: var(--surface-elevated-h) var(--surface-elevated-s) var(--surface-elevated-l);
-  --surface-glass: var(--surface-glass-h) var(--surface-glass-s) var(--surface-glass-l);
-  --surface-inset: var(--surface-inset-h) var(--surface-inset-s) var(--surface-inset-l);
-  --surface-accent: var(--surface-accent-h) var(--surface-accent-s) var(--surface-accent-l);
-  --card: var(--card-h) var(--card-s) var(--card-l);
-  --card-foreground: var(--card-foreground-h) var(--card-foreground-s) var(--card-foreground-l);
-  --popover: var(--popover-h) var(--popover-s) var(--popover-l);
-  --popover-foreground: var(--popover-foreground-h) var(--popover-foreground-s) var(--popover-foreground-l);
-  --border: var(--border-h) var(--border-s) var(--border-l);
-  --border-subtle: var(--border-subtle-h) var(--border-subtle-s) var(--border-subtle-l);
-  --input: var(--input-h) var(--input-s) var(--input-l);
-  --ring: var(--ring-h) var(--ring-s) var(--ring-l);
-  --muted: var(--muted-h) var(--muted-s) var(--muted-l);
-  --muted-foreground: var(--muted-foreground-h) var(--muted-foreground-s) var(--muted-foreground-l);
-
-  --pos-checkout: var(--pos-checkout-h) var(--pos-checkout-s) var(--pos-checkout-l);
-  --pos-hold: var(--pos-hold-h) var(--pos-hold-s) var(--pos-hold-l);
-  --pos-offline: var(--pos-offline-h) var(--pos-offline-s) var(--pos-offline-l);
-  --surface-panel: var(--surface-panel-h) var(--surface-panel-s) var(--surface-panel-l);
-  --border-accent: var(--border-accent-h) var(--border-accent-s) var(--border-accent-l);
-
-  --surface-command: var(--surface-command-h) var(--surface-command-s) var(--surface-command-l);
-  --surface-metric: var(--surface-metric-h) var(--surface-metric-s) var(--surface-metric-l);
+  --background:           var(--background-h) var(--background-s) var(--background-l);
+  --foreground:           var(--foreground-h) var(--foreground-s) var(--foreground-l);
+  --surface:              var(--surface-h) var(--surface-s) var(--surface-l);
+  --surface-foreground:   var(--foreground-h) var(--foreground-s) var(--foreground-l);
+  --surface-hover:        var(--surface-hover-h) var(--surface-hover-s) var(--surface-hover-l);
+  --surface-elevated:     var(--surface-elevated-h) var(--surface-elevated-s) var(--surface-elevated-l);
+  --surface-glass:        var(--surface-glass-h) var(--surface-glass-s) var(--surface-glass-l);
+  --surface-inset:        var(--surface-inset-h) var(--surface-inset-s) var(--surface-inset-l);
+  --surface-accent:       var(--surface-accent-h) var(--surface-accent-s) var(--surface-accent-l);
+  --card:                 var(--card-h) var(--card-s) var(--card-l);
+  --card-foreground:      var(--card-foreground-h) var(--card-foreground-s) var(--card-foreground-l);
+  --popover:              var(--popover-h) var(--popover-s) var(--popover-l);
+  --popover-foreground:   var(--popover-foreground-h) var(--popover-foreground-s) var(--popover-foreground-l);
+  --border:               var(--border-h) var(--border-s) var(--border-l);
+  --input:                var(--input-h) var(--input-s) var(--input-l);
+  --ring:                 var(--ring-h) var(--ring-s) var(--ring-l);
+  --muted:                var(--muted-h) var(--muted-s) var(--muted-l);
+  --muted-foreground:     var(--muted-foreground-h) var(--muted-foreground-s) var(--muted-foreground-l);
+  --accent:               var(--accent-h) var(--accent-s) var(--accent-l);
+  --accent-foreground:    var(--accent-foreground-h) var(--accent-foreground-s) var(--accent-foreground-l);
+  --success:              var(--success-h) var(--success-s) var(--success-l);
+  --success-foreground:   var(--success-foreground-h) var(--success-foreground-s) var(--success-foreground-l);
+  --warning:              var(--warning-h) var(--warning-s) var(--warning-l);
+  --warning-foreground:   var(--warning-foreground-h) var(--warning-foreground-s) var(--warning-foreground-l);
+  --danger:               var(--danger-h) var(--danger-s) var(--danger-l);
+  --danger-foreground:    var(--danger-foreground-h) var(--danger-foreground-s) var(--danger-foreground-l);
+  --info:                 var(--info-h) var(--info-s) var(--info-l);
+  --info-foreground:      var(--info-foreground-h) var(--info-foreground-s) var(--info-foreground-l);
+  --pos-checkout:         var(--pos-checkout-h) var(--pos-checkout-s) var(--pos-checkout-l);
+  --pos-hold:             var(--pos-hold-h) var(--pos-hold-s) var(--pos-hold-l);
+  --pos-offline:          var(--pos-offline-h) var(--pos-offline-s) var(--pos-offline-l);
+  --surface-panel:        var(--surface-panel-h) var(--surface-panel-s) var(--surface-panel-l);
+  --border-accent:        var(--border-accent-h) var(--border-accent-s) var(--border-accent-l);
+  --surface-command:      var(--surface-command-h) var(--surface-command-s) var(--surface-command-l);
+  --surface-metric:       var(--surface-metric-h) var(--surface-metric-s) var(--surface-metric-l);
   --surface-sidebar-active: var(--surface-sidebar-active-h) var(--surface-sidebar-active-s) var(--surface-sidebar-active-l);
-
   --chart-1: var(--chart-1-h) var(--chart-1-s) var(--chart-1-l);
   --chart-2: var(--chart-2-h) var(--chart-2-s) var(--chart-2-l);
   --chart-3: var(--chart-3-h) var(--chart-3-s) var(--chart-3-l);
   --chart-4: var(--chart-4-h) var(--chart-4-s) var(--chart-4-l);
   --chart-5: var(--chart-5-h) var(--chart-5-s) var(--chart-5-l);
-}
-
-/* ── Corporate Theme ── */
-[data-theme="corporate"] {
-  --primary-h: 222; --primary-s: 85%; --primary-l: 16%;
-  --primary-foreground-h: 210; --primary-foreground-s: 40%; --primary-foreground-l: 98%;
-  --ring-h: 222; --ring-s: 85%; --ring-l: 16%;
-  --accent-h: 28; --accent-s: 92%; --accent-l: 50%;
-  --success-h: 152; --success-s: 72%; --success-l: 34%;
-  --warning-h: 38; --warning-s: 94%; --warning-l: 46%;
-  --background-h: 220; --background-s: 20%; --background-l: 97%;
-  --foreground-h: 220; --foreground-s: 35%; --foreground-l: 9%;
-  --card-h: 0; --card-s: 0%; --card-l: 100%;
-  --border-h: 220; --border-s: 18%; --border-l: 90%;
-  --pos-checkout-h: 152; --pos-checkout-s: 72%; --pos-checkout-l: 34%;
-  --pos-hold-h: 38; --pos-hold-s: 90%; --pos-hold-l: 48%;
-  --pos-offline-h: 25; --pos-offline-s: 92%; --pos-offline-l: 46%;
-}
-
-[data-theme="corporate"][data-mode="dark"],
-[data-theme="corporate"][data-theme="dark"] {
-  --primary-h: 222; --primary-s: 70%; --primary-l: 58%;
-  --ring-h: 222; --ring-s: 70%; --ring-l: 58%;
-  --accent-h: 28; --accent-s: 74%; --accent-l: 56%;
-  --success-h: 152; --success-s: 54%; --success-l: 48%;
-  --warning-h: 38; --warning-s: 78%; --warning-l: 54%;
-  --background-h: 222; --background-s: 22%; --background-l: 4%;
-  --foreground-h: 210; --foreground-s: 26%; --foreground-l: 95%;
-  --card-h: 222; --card-s: 18%; --background-l: 7%;
-  --border-h: 222; --border-s: 14%; --border-l: 13%;
-  --muted-h: 222; --muted-s: 14%; --muted-l: 10%;
-  --muted-foreground-h: 220; --muted-s: 10%; --muted-foreground-l: 55%;
-  --pos-checkout-h: 152; --pos-checkout-s: 54%; --pos-checkout-l: 48%;
-  --pos-hold-h: 38; --pos-hold-s: 72%; --pos-hold-l: 55%;
-  --pos-offline-h: 25; --pos-offline-s: 78%; --pos-offline-l: 52%;
 }

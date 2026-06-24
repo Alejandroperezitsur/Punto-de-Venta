@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown, Search } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, Search, CheckSquare, Square } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Input } from './Input';
 import { EmptyState } from './EmptyState';
@@ -17,8 +17,7 @@ interface TableProps<T> {
   columns: Column<T>[];
   data: T[];
   keyExtractor: (item: T) => string | number;
-  variant?: 'default' | 'glass' | 'bordered';
-  density?: 'compact' | 'comfortable' | 'spacious';
+  density?: 'compact' | 'comfortable';
   searchable?: boolean;
   searchPlaceholder?: string;
   pageSize?: number;
@@ -28,20 +27,22 @@ interface TableProps<T> {
   emptyIcon?: React.ElementType;
   loading?: boolean;
   className?: string;
-  stickyHeader?: boolean;
+  selectable?: boolean;
+  selected?: (keyof T extends 'id' ? string[] : string[]);
+  onSelectionChange?: (keys: string[]) => void;
+  bulkActions?: { label: string; onClick: (keys: string[]) => void; variant?: 'default' | 'danger' }[];
 }
 
 const densityStyles = {
-  compact: 'py-1.5 px-2 text-xs',
-  comfortable: 'py-2.5 px-3 text-sm',
-  spacious: 'py-4 px-4 text-sm',
+  compact: 'py-2 px-3 text-sm',
+  comfortable: 'py-3 px-3 text-[var(--text-body)]',
 };
 
 function Table<T extends Record<string, any>>({
-  columns, data, keyExtractor, variant = 'default', density = 'comfortable',
+  columns, data, keyExtractor, density = 'comfortable',
   searchable = false, searchPlaceholder = 'Buscar...', pageSize = 20,
   sortable = true, onRowClick, emptyMessage, emptyIcon, loading = false,
-  className, stickyHeader = true,
+  className, selectable, selected = [], onSelectionChange, bulkActions,
 }: TableProps<T>) {
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -71,25 +72,28 @@ function Table<T extends Record<string, any>>({
   const paged = filtered.slice(page * pageSize, (page + 1) * pageSize);
 
   const toggleSort = (key: string) => {
-    if (sortKey === key) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortKey(key);
-      setSortDir('asc');
-    }
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
   };
 
-  const variantStyles = {
-    default: 'bg-card border border-border/45 rounded-xl overflow-hidden shadow-xs',
-    glass: 'backdrop-blur-lg bg-surface-glass/45 border border-border/20 rounded-xl overflow-hidden shadow-sm table-glass',
-    bordered: 'border border-border/35 rounded-xl overflow-hidden',
+  const allSelected = paged.length > 0 && paged.every(item => selected.includes(String(keyExtractor(item))));
+  const toggleAll = () => {
+    if (!onSelectionChange) return;
+    const pageKeys = paged.map(item => String(keyExtractor(item)));
+    if (allSelected) onSelectionChange(selected.filter(k => !pageKeys.includes(k)));
+    else onSelectionChange([...new Set([...selected, ...pageKeys])]);
   };
+  const toggleOne = (key: string) => {
+    if (!onSelectionChange) return;
+    onSelectionChange(selected.includes(key) ? selected.filter(k => k !== key) : [...selected, key]);
+  };
+
+  const hasSelection = selected.length > 0;
 
   return (
-    <div className={cn('flex flex-col', variantStyles[variant], className)}>
-      {/* Search */}
+    <div className={cn('flex flex-col rounded-lg bg-bg-surface border border-border-subtle overflow-hidden', className)}>
       {searchable && (
-        <div className="p-3 border-b border-border/20">
+        <div className="p-3 border-b border-border-subtle">
           <Input
             size="sm"
             icon={<Search className="size-3.5" />}
@@ -100,23 +104,24 @@ function Table<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* Table wrapper */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          {/* Header */}
           <thead>
-            <tr className={cn(
-              'border-b border-border/20',
-              stickyHeader && 'sticky top-0 z-10',
-              variant === 'glass' ? 'bg-surface-glass/60 backdrop-blur-md' : 'bg-muted/50',
-            )}>
+            <tr className="border-b border-border-subtle bg-bg-surface-hover/50 sticky top-0 z-10">
+              {selectable && (
+                <th className={cn('w-12 text-left', densityStyles[density], 'text-text-tertiary')}>
+                  <button onClick={toggleAll} className="hover:text-text-primary transition-colors">
+                    {allSelected ? <CheckSquare className="size-[18px]" /> : <Square className="size-[18px]" />}
+                  </button>
+                </th>
+              )}
               {columns.map(col => (
                 <th
                   key={col.key}
                   className={cn(
-                    'text-left font-semibold text-muted-foreground text-xs uppercase tracking-[0.08em] select-none',
+                    'text-left font-semibold text-text-tertiary text-[var(--text-label)] tracking-wider select-none',
                     densityStyles[density],
-                    col.sortable !== false && sortable && 'cursor-pointer hover:text-foreground transition-colors',
+                    col.sortable !== false && sortable && 'cursor-pointer hover:text-text-primary transition-colors',
                     col.hideOnMobile && 'hidden md:table-cell',
                     col.className,
                   )}
@@ -125,7 +130,7 @@ function Table<T extends Record<string, any>>({
                   <div className="flex items-center gap-1.5">
                     <span>{col.label}</span>
                     {col.sortable !== false && sortable && (
-                      <span className="shrink-0 text-muted-foreground/30">
+                      <span className="shrink-0 text-text-disabled">
                         {sortKey === col.key
                           ? (sortDir === 'asc' ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />)
                           : <ChevronsUpDown className="size-3" />
@@ -138,96 +143,132 @@ function Table<T extends Record<string, any>>({
             </tr>
           </thead>
 
-          {/* Body */}
           <tbody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i} className="border-b border-border/10 last:border-0">
+                <tr key={i} className="border-b border-border-subtle last:border-0">
+                  {selectable && <td className={densityStyles[density]}><div className="h-4 rounded bg-bg-inset shimmer w-4" /></td>}
                   {columns.map(col => (
                     <td key={col.key} className={cn(densityStyles[density], col.hideOnMobile && 'hidden md:table-cell')}>
-                      <div className="h-4 rounded bg-muted/50 shimmer w-3/4" />
+                      <div className="h-4 rounded bg-bg-inset shimmer w-3/4" />
                     </td>
                   ))}
                 </tr>
               ))
             ) : paged.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="p-8">
-                  <EmptyState
-                    title={emptyMessage || 'No se encontraron registros'}
-                    icon={emptyIcon}
-                  />
+                <td colSpan={selectable ? columns.length + 1 : columns.length} className="p-8">
+                  <EmptyState title={emptyMessage || 'No se encontraron registros'} icon={emptyIcon} />
                 </td>
               </tr>
             ) : (
-              paged.map((item, idx) => (
-                <tr
-                  key={keyExtractor(item)}
-                  className={cn(
-                    'border-b border-border/10 last:border-0 transition-colors duration-150',
-                    onRowClick && 'cursor-pointer hover:bg-muted/40 active:bg-muted/60',
-                    idx % 2 === 0 ? 'bg-transparent' : 'bg-muted/20',
-                  )}
-                  onClick={() => onRowClick?.(item)}
-                >
-                  {columns.map(col => (
-                    <td
-                      key={col.key}
-                      className={cn(
-                        densityStyles[density],
-                        'text-foreground',
-                        col.hideOnMobile && 'hidden md:table-cell',
-                        col.className,
-                      )}
-                    >
-                      {col.render ? col.render(item) : item[col.key]}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              paged.map(item => {
+                const key = String(keyExtractor(item));
+                const isSelected = selected.includes(key);
+                return (
+                  <tr
+                    key={key}
+                    className={cn(
+                      'border-b border-border-subtle last:border-0 transition-colors duration-[120ms]',
+                      onRowClick && 'cursor-pointer hover:bg-bg-surface-hover',
+                      isSelected && 'bg-bg-surface-active',
+                      !isSelected && !onRowClick && 'hover:bg-bg-surface-hover',
+                    )}
+                    onClick={() => onRowClick?.(item)}
+                  >
+                    {selectable && (
+                      <td className={densityStyles[density]} onClick={e => { e.stopPropagation(); toggleOne(key); }}>
+                        <button className="hover:text-text-primary transition-colors text-text-tertiary">
+                          {isSelected ? <CheckSquare className="size-[18px]" /> : <Square className="size-[18px]" />}
+                        </button>
+                      </td>
+                    )}
+                    {columns.map(col => (
+                      <td
+                        key={col.key}
+                        className={cn(
+                          densityStyles[density],
+                          'text-text-primary',
+                          col.hideOnMobile && 'hidden md:table-cell',
+                          col.className,
+                        )}
+                      >
+                        {col.render ? col.render(item) : item[col.key]}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
       </div>
 
+      {/* Action bar for bulk selection */}
+      {selectable && hasSelection && bulkActions && bulkActions.length > 0 && (
+        <div className="flex items-center gap-3 px-4 py-3 border-t border-border-subtle bg-bg-surface-active">
+          <span className="text-sm font-medium text-text-secondary">{selected.length} seleccionado{selected.length !== 1 ? 's' : ''}</span>
+          <div className="flex-1" />
+          {bulkActions.map((action, i) => (
+            <button
+              key={i}
+              onClick={() => action.onClick(selected)}
+              className={cn(
+                'px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                action.variant === 'danger'
+                  ? 'text-semantic-danger hover:bg-semantic-danger-bg'
+                  : 'text-text-secondary hover:bg-bg-surface-hover',
+              )}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-border/20 bg-muted/30">
-          <span className="text-xs text-muted-foreground/70">
-            {filtered.length} registro{(filtered.length !== 1) ? 's' : ''}
+      {totalPages > 1 && !hasSelection && (
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border-subtle">
+          <span className="text-xs text-text-tertiary">
+            {filtered.length} registro{filtered.length !== 1 ? 's' : ''}
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
               className={cn(
-                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all',
-                'hover:bg-muted/50 active:bg-muted',
+                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                'hover:bg-bg-surface-hover',
                 'disabled:opacity-40 disabled:cursor-not-allowed',
               )}
             >
               Anterior
             </button>
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i)}
-                className={cn(
-                  'size-8 rounded-md text-xs font-medium transition-all',
-                  i === page
-                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                    : 'hover:bg-muted/50 text-muted-foreground',
-                )}
-              >
-                {i + 1}
-              </button>
-            ))}
+            {Array.from({ length: Math.min(totalPages, 7) }).map((_, i) => {
+              const start = Math.max(0, Math.min(page - 3, totalPages - 7));
+              const pageNum = totalPages <= 7 ? i : start + i;
+              if (pageNum >= totalPages) return null;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setPage(pageNum)}
+                  className={cn(
+                    'size-8 rounded-md text-xs font-medium transition-colors',
+                    pageNum === page
+                      ? 'bg-action-primary text-[hsl(var(--bg-surface))]'
+                      : 'hover:bg-bg-surface-hover text-text-tertiary',
+                  )}
+                >
+                  {pageNum + 1}
+                </button>
+              );
+            })}
             <button
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
               className={cn(
-                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-all',
-                'hover:bg-muted/50 active:bg-muted',
+                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                'hover:bg-bg-surface-hover',
                 'disabled:opacity-40 disabled:cursor-not-allowed',
               )}
             >

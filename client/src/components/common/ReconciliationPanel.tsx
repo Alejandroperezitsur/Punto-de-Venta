@@ -77,6 +77,13 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
     loadData();
   }, [loadData]);
 
+  const badgeVariant = (suggestion: RepairSuggestion | undefined): { variant: 'alert'; color: 'success' | 'warning' | 'info' } => {
+    if (!suggestion) return { variant: 'alert', color: 'info' };
+    if (suggestion.suggestedAction === 'merge') return { variant: 'alert', color: 'success' };
+    if (suggestion.suggestedAction === 'manual_review') return { variant: 'alert', color: 'warning' };
+    return { variant: 'alert', color: 'info' };
+  };
+
   const tabs = [
     { key: 'drift', label: 'Drift de Stock' },
     { key: 'conflicts', label: 'Conflictos' },
@@ -84,33 +91,33 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
   ] as const;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]">
-      <div className="bg-card w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border border-border/40 p-6">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]">
+      <div className="bg-bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-overlay p-6">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-info/10 flex items-center justify-center">
-              <Shield className="size-5 text-info" />
+            <div className="size-10 rounded-md bg-semantic-info-bg flex items-center justify-center">
+              <Shield className="size-5 text-semantic-info" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">Reconciliacion de Inventario</h2>
-              <p className="text-xs text-muted-foreground">Detecta y repara divergencias de stock</p>
+              <h2 className="text-[var(--text-heading-sm)] font-semibold text-text-primary">Reconciliacion de Inventario</h2>
+              <p className="text-xs text-text-secondary">Detecta y repara divergencias de stock</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <button onClick={onClose} className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover transition-all">
             <X className="size-5" />
-          </Button>
+          </button>
         </div>
 
-        <div className="flex gap-1 p-1 bg-muted/20 rounded-xl mb-6">
+        <div className="flex gap-1 p-1 bg-bg-inset rounded-lg mb-6">
           {tabs.map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                'flex-1 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all',
+                'flex-1 px-4 py-2.5 rounded-md font-medium text-sm transition-all',
                 tab === t.key
-                  ? 'bg-card text-foreground shadow-sm border border-border/20'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                  ? 'bg-bg-surface text-text-primary shadow-sm'
+                  : 'text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover'
               )}
             >
               {t.label}
@@ -131,14 +138,13 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
             </Button>
 
             {report && report.affectedProducts > 0 && (
-              <Card className={cn('p-5 border-l-4', 
-                report.severity === 'critical' ? 'border-l-danger bg-danger/5' :
-                report.severity === 'high' ? 'border-l-warning bg-warning/5' :
-                'border-l-warning bg-warning/5'
+              <Card className={cn('p-5 border-l-4',
+                report.severity === 'critical' ? 'border-l-semantic-danger bg-semantic-danger-bg/50' :
+                'border-l-semantic-warning bg-semantic-warning-bg/50'
               )}>
                 <div className="flex items-center gap-3 mb-4">
-                  <AlertTriangle className="size-5 text-warning" />
-                  <h3 className="text-lg font-bold text-foreground">
+                  <AlertTriangle className="size-5 text-semantic-warning" />
+                  <h3 className="text-lg font-semibold text-text-primary">
                     {report.affectedProducts} productos con divergencia — Impacto: ${report.estimatedFinancialImpact}
                   </h3>
                 </div>
@@ -146,43 +152,41 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-border/20">
-                        <th className="text-left py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Producto</th>
-                        <th className="text-right py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Local</th>
-                        <th className="text-right py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Servidor</th>
-                        <th className="text-right py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Diferencia</th>
-                        <th className="text-left py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Accion</th>
-                        <th className="text-left py-2 px-3 font-semibold text-muted-foreground text-xs uppercase">Confianza</th>
+                      <tr className="border-b border-border-subtle">
+                        <th className="text-left py-2 px-3 font-semibold text-text-tertiary text-xs uppercase">Producto</th>
+                        <th className="text-right py-2 px-3 font-semibold text-text-tertiary text-xs uppercase">Local</th>
+                        <th className="text-right py-2 px-3 font-semibold text-text-tertiary text-xs uppercase">Servidor</th>
+                        <th className="text-right py-2 px-3 font-semibold text-text-tertiary text-xs uppercase">Diferencia</th>
+                        <th className="text-left py-2 px-3 font-semibold text-text-tertiary text-xs uppercase">Accion</th>
+                        <th className="text-left py-2 px-3 font-semibold text-text-tertiary text-xs uppercase">Confianza</th>
                         <th className="py-2 px-3"></th>
                       </tr>
                     </thead>
                     <tbody>
                       {report.criticalDivergences.map(d => {
                         const suggestion = report.repairSuggestions.find(s => s.productId === d.productId);
+                        const badge = badgeVariant(suggestion);
                         return (
-                          <tr key={d.productId} className="border-b border-border/10 hover:bg-muted/20">
-                            <td className="py-2.5 px-3 font-medium text-foreground">{d.productId}</td>
-                            <td className="py-2.5 px-3 text-right text-foreground">{d.localStock}</td>
-                            <td className="py-2.5 px-3 text-right text-foreground">{d.serverStock}</td>
+                          <tr key={d.productId} className="border-b border-border-subtle hover:bg-bg-surface-hover">
+                            <td className="py-2.5 px-3 font-medium text-text-primary">{d.productId}</td>
+                            <td className="py-2.5 px-3 text-right text-text-primary">{d.localStock}</td>
+                            <td className="py-2.5 px-3 text-right text-text-primary">{d.serverStock}</td>
                             <td className={cn('py-2.5 px-3 text-right font-bold',
-                              Math.abs(d.divergence) > 5 ? 'text-danger' : 'text-warning'
+                              Math.abs(d.divergence) > 5 ? 'text-semantic-danger' : 'text-semantic-warning'
                             )}>{d.divergence > 0 ? '+' : ''}{d.divergence}</td>
                             <td className="py-2.5 px-3">
-                              <Badge variant={
-                                suggestion?.suggestedAction === 'merge' ? 'success' :
-                                suggestion?.suggestedAction === 'manual_review' ? 'danger' : 'info'
-                              } size="xs">
+                              <Badge variant={badge.variant} color={badge.color} size="sm">
                                 {suggestion?.suggestedAction === 'merge' ? 'Auto' :
                                  suggestion?.suggestedAction === 'use_server' ? 'Servidor' :
                                  suggestion?.suggestedAction === 'use_local' ? 'Local' : 'Manual'}
                               </Badge>
                             </td>
-                            <td className="py-2.5 px-3 text-muted-foreground">
+                            <td className="py-2.5 px-3 text-text-secondary">
                               {suggestion ? `${Math.round(suggestion.confidence * 100)}%` : '-'}
                             </td>
                             <td className="py-2.5 px-3">
                               {suggestion && suggestion.suggestedAction !== 'manual_review' && (
-                                <Button size="xs" onClick={() => handleRepair(suggestion)}>
+                                <Button size="sm" onClick={() => handleRepair(suggestion)}>
                                   Aplicar
                                 </Button>
                               )}
@@ -197,10 +201,10 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
             )}
 
             {report && report.affectedProducts === 0 && (
-              <Card className="p-8 text-center border-success/20 bg-success/5">
-                <CheckCircle2 className="size-10 text-success mx-auto mb-3" />
-                <p className="text-lg font-bold text-foreground">Sin divergencias detectadas</p>
-                <p className="text-sm text-muted-foreground mt-1">Stock local y servidor estan sincronizados</p>
+              <Card className="p-8 text-center">
+                <CheckCircle2 className="size-10 text-semantic-success mx-auto mb-3" />
+                <p className="text-lg font-semibold text-text-primary">Sin divergencias detectadas</p>
+                <p className="text-sm text-text-secondary mt-1">Stock local y servidor estan sincronizados</p>
               </Card>
             )}
           </div>
@@ -210,20 +214,20 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
           <div className="space-y-3">
             {conflicts.length === 0 ? (
               <Card className="p-8 text-center">
-                <p className="text-muted-foreground">Sin conflictos registrados</p>
+                <p className="text-text-secondary">Sin conflictos registrados</p>
               </Card>
             ) : (
               conflicts.map(c => (
                 <Card key={c.id || Math.random()} className="p-4">
                   <div className="flex justify-between items-start gap-4">
                     <div>
-                      <p className="font-semibold text-foreground">{c.productId || 'Conflicto'}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{c.type || 'sync'} — {new Date(c.timestamp || Date.now()).toLocaleString()}</p>
+                      <p className="font-semibold text-text-primary">{c.productId || 'Conflicto'}</p>
+                      <p className="text-xs text-text-secondary mt-0.5">{c.type || 'sync'} — {new Date(c.timestamp || Date.now()).toLocaleString()}</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="xs" variant="outline" onClick={() => handleResolveConflict(c.id, 'server_wins')}>Servidor</Button>
-                      <Button size="xs" variant="outline" onClick={() => handleResolveConflict(c.id, 'client_wins')}>Local</Button>
-                      <Button size="xs" variant="outline" onClick={() => handleResolveConflict(c.id, 'merge')}>Merge</Button>
+                      <Button size="sm" variant="secondary" onClick={() => handleResolveConflict(c.id, 'server_wins')}>Servidor</Button>
+                      <Button size="sm" variant="secondary" onClick={() => handleResolveConflict(c.id, 'client_wins')}>Local</Button>
+                      <Button size="sm" variant="secondary" onClick={() => handleResolveConflict(c.id, 'merge')}>Merge</Button>
                     </div>
                   </div>
                 </Card>
@@ -234,12 +238,12 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
 
         {tab === 'repairs' && (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Las reparaciones sugeridas se aplicaran automaticamente segun nivel de confianza.</p>
+            <p className="text-sm text-text-secondary">Las reparaciones sugeridas se aplicaran automaticamente segun nivel de confianza.</p>
             {report?.repairSuggestions.map(s => (
               <Card key={s.productId} className="p-4 flex justify-between items-center">
                 <div>
-                  <p className="font-semibold text-foreground">{s.productId}</p>
-                  <p className="text-xs text-muted-foreground">{s.description}</p>
+                  <p className="font-semibold text-text-primary">{s.productId}</p>
+                  <p className="text-xs text-text-secondary">{s.description}</p>
                 </div>
                 <Button size="sm" onClick={() => handleRepair(s)}>Aplicar</Button>
               </Card>

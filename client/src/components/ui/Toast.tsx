@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Info, X, CloudOff } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
-type ToastVariant = 'success' | 'error' | 'warning' | 'info';
+type ToastVariant = 'success' | 'error' | 'warning' | 'info' | 'offline';
 
 interface Toast {
   id: string;
@@ -19,26 +19,23 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | null>(null);
 
-const ICONS = {
+const ICONS: Record<ToastVariant, React.FC<{ className?: string }>> = {
   success: CheckCircle,
   error: XCircle,
   warning: AlertTriangle,
   info: Info,
+  offline: CloudOff,
 };
 
-const COLORS = {
-  success: 'border-l-success/70',
-  error: 'border-l-danger/70',
-  warning: 'border-l-warning/70',
-  info: 'border-l-info/70',
+const LEFT_COLORS: Record<ToastVariant, string> = {
+  success: 'border-l-semantic-success',
+  error: 'border-l-semantic-danger',
+  warning: 'border-l-semantic-warning',
+  info: 'border-l-semantic-info',
+  offline: 'border-l-semantic-warning',
 };
 
-const BG_COLORS = {
-  success: 'bg-success/5',
-  error: 'bg-danger/5',
-  warning: 'bg-warning/5',
-  info: 'bg-info/5',
-};
+const MAX_VISIBLE = 3;
 
 function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -50,11 +47,15 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  const addToast = useCallback(({ message, variant, duration = 4000, action }: Omit<Toast, 'id'>) => {
+  const addToast = useCallback(({ message, variant, duration, action }: Omit<Toast, 'id'>) => {
     const id = crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
-    setToasts(prev => [...prev, { id, message, variant, duration, action }]);
-    if (duration > 0) {
-      const timer = setTimeout(() => removeToast(id), duration);
+    const autoDuration = variant === 'error' || variant === 'offline' ? 0 : (duration ?? 3000);
+    setToasts(prev => {
+      const next = [...prev, { id, message, variant, duration: autoDuration, action }];
+      return next.slice(-MAX_VISIBLE);
+    });
+    if (autoDuration > 0) {
+      const timer = setTimeout(() => removeToast(id), autoDuration);
       timersRef.current.set(id, timer);
     }
   }, [removeToast]);
@@ -63,53 +64,39 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
       <div
-        className="fixed bottom-4 right-4 z-[var(--z-toast)] flex flex-col-reverse gap-2 max-w-sm w-full pointer-events-none"
+        className="fixed bottom-4 right-4 z-[var(--z-toast)] flex flex-col-reverse gap-2 max-w-[360px] w-full pointer-events-none"
         aria-live="polite"
         aria-label="Notificaciones"
       >
         {toasts.map(toast => {
           const Icon = ICONS[toast.variant];
+          const iconColor = `text-${toast.variant === 'offline' ? 'semantic-warning' : `semantic-${toast.variant === 'error' ? 'danger' : toast.variant}`}`;
           return (
             <div
               key={toast.id}
               className={cn(
-                'pointer-events-auto relative flex items-start gap-3 p-4 rounded-xl shadow-lg border border-border/40',
-                'backdrop-blur-md bg-card/95',
+                'pointer-events-auto relative flex items-start gap-3 p-3 rounded-lg shadow-dropdown border border-border-default',
+                'bg-bg-surface',
                 'animate-slide-up',
-                COLORS[toast.variant],
-                BG_COLORS[toast.variant],
+                LEFT_COLORS[toast.variant],
               )}
               style={{ borderLeftWidth: '3px' }}
             >
-              <Icon className={cn(
-                'size-4 shrink-0 mt-0.5',
-                toast.variant === 'success' && 'text-success',
-                toast.variant === 'error' && 'text-danger',
-                toast.variant === 'warning' && 'text-warning',
-                toast.variant === 'info' && 'text-info',
-              )} />
+              <Icon className={cn('size-4 shrink-0 mt-0.5', iconColor)} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground">{toast.message}</p>
+                <p className="text-sm font-medium text-text-primary">{toast.message}</p>
                 {toast.action && (
                   <button
                     onClick={toast.action.onClick}
-                    className="text-xs font-semibold text-primary hover:text-primary/80 mt-1 transition-colors"
+                    className="text-xs font-semibold text-action-primary hover:opacity-80 mt-1 transition-opacity"
                   >
                     {toast.action.label}
                   </button>
                 )}
-                {toast.duration && toast.duration > 0 && (
-                  <div className="mt-2 h-0.5 rounded-full bg-border/30 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-foreground/10 progress-dismiss"
-                      style={{ '--dismiss-duration': `${toast.duration}ms` } as React.CSSProperties}
-                    />
-                  </div>
-                )}
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="size-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-muted/50 transition-all shrink-0"
+                className="size-5 rounded flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover transition-all shrink-0"
                 aria-label="Cerrar"
               >
                 <X className="size-3" />

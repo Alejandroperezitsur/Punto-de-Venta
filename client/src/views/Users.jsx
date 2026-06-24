@@ -103,11 +103,10 @@ const UsersView = () => {
 
             {showForm && (
                 <div className="animate-fade-slide-in">
-                    <Card variant="glass" className="p-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
-                        <h3 className="font-semibold mb-4 flex items-center gap-2">
-                            <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                                {editingId ? <Edit2 className="size-3.5 text-primary" /> : <Plus className="size-3.5 text-primary" />}
+                    <Card className="p-6">
+                        <h3 className="font-semibold mb-4 flex items-center gap-2 text-text-primary">
+                            <div className="size-7 rounded-md bg-bg-inset flex items-center justify-center">
+                                {editingId ? <Edit2 className="size-3.5 text-text-secondary" /> : <Plus className="size-3.5 text-text-secondary" />}
                             </div>
                             {editingId ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
                         </h3>
@@ -148,7 +147,7 @@ const UsersView = () => {
                 </div>
             )}
 
-            <Card variant="glass" className="p-0 overflow-hidden">
+            <Card className="p-0 overflow-hidden">
                 {loading ? (
                     <div className="p-8 space-y-4">
                         {[1, 2, 3, 4, 5].map(i => (
@@ -169,14 +168,14 @@ const UsersView = () => {
                         columns={[
                             { key: 'username', label: 'Usuario', render: (row) => (
                                 <div className="flex items-center gap-3">
-                                    <div className="size-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold text-xs shadow-sm">
+                                    <div className="size-8 rounded-full bg-bg-inset flex items-center justify-center text-text-secondary font-semibold text-xs">
                                         {row.username.charAt(0).toUpperCase()}
                                     </div>
                                     <span className="font-medium">{row.username}</span>
                                 </div>
                             )},
-                            { key: 'role', label: 'Rol', render: (row) => <Badge variant={row.role === 'admin' ? 'danger' : row.role === 'supervisor' ? 'info' : 'success'}>{row.role === 'admin' ? 'Administrador' : row.role === 'supervisor' ? 'Supervisor' : 'Cajero'}</Badge> },
-                            { key: 'active', label: 'Estado', render: (row) => <Badge variant={row.active !== 0 ? 'success' : 'neutral'} dot>{row.active !== 0 ? 'Activo' : 'Inactivo'}</Badge> },
+                            { key: 'role', label: 'Rol', render: (row) => <Badge variant="alert" color={row.role === 'admin' ? 'danger' : row.role === 'supervisor' ? 'info' : 'success'}>{row.role === 'admin' ? 'Administrador' : row.role === 'supervisor' ? 'Supervisor' : 'Cajero'}</Badge> },
+                            { key: 'active', label: 'Estado', render: (row) => <Badge variant="status" color={row.active !== 0 ? 'success' : 'neutral'} dot>{row.active !== 0 ? 'Activo' : 'Inactivo'}</Badge> },
                             { key: 'actions', label: 'Acciones', render: (row) => (
                                 <div className="flex justify-end gap-2">
                                     <Button variant="ghost" size="sm" onClick={() => handleEdit(row)}>

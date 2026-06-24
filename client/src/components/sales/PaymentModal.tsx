@@ -37,11 +37,11 @@ const NumpadKey = memo(function NumpadKey({ label, onClick, disabled, variant }:
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'rounded-lg border text-base font-semibold transition-all duration-100 flex items-center justify-center active:scale-[0.94] haptic-press touch-target',
+        'rounded-md border text-base font-semibold transition-all duration-100 flex items-center justify-center active:scale-[0.94] haptic-press',
         'min-h-[44px] min-w-[44px]',
         variant === 'danger'
-          ? 'bg-danger/10 text-danger border-danger/20'
-          : 'backdrop-blur-sm bg-surface/80 border-border/20 text-foreground hover:bg-muted/40 active:bg-muted/50',
+          ? 'bg-semantic-danger-bg text-semantic-danger border-semantic-danger/20'
+          : 'bg-bg-surface text-text-primary border-border-subtle hover:bg-bg-surface-hover active:bg-bg-surface-active',
         disabled && 'opacity-40 cursor-not-allowed',
       )}
       aria-label={typeof label === 'string' && label === 'DEL' ? 'Borrar' : String(label)}
@@ -63,18 +63,17 @@ const PaymentMethodButton = memo(function PaymentMethodButton({ method, isSelect
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'min-h-[44px] rounded-xl border text-sm font-semibold transition-all duration-200 flex flex-col items-center justify-center gap-1.5 active:scale-[0.96]',
+        'min-h-[48px] rounded-md border text-sm font-medium transition-all duration-150 flex flex-col items-center justify-center gap-1 active:scale-[0.96]',
         isSelected
-          ? 'text-primary-foreground shadow-md shadow-primary/20'
-          : 'bg-card border-border/25 text-muted-foreground hover:border-border/40 hover:-translate-y-px',
+          ? 'bg-action-primary text-[hsl(var(--bg-surface))] border-action-primary'
+          : 'bg-bg-surface text-text-secondary border-border-subtle hover:border-border-default hover:bg-bg-surface-hover',
         disabled && 'opacity-40 cursor-not-allowed',
       )}
-      style={isSelected ? { background: 'var(--gradient-primary)' } : undefined}
       aria-label={`Pago con ${method.label}`}
       aria-pressed={isSelected}
     >
-      <Icon className="size-5 stroke-[2]" />
-      <span className="text-xs font-semibold">{method.label}</span>
+      <Icon className="size-5" strokeWidth={2} />
+      <span className="text-xs font-medium">{method.label}</span>
     </button>
   );
 });
@@ -90,10 +89,10 @@ const QuickAmountButton = memo(function QuickAmountButton({ amount, isSelected, 
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'min-h-[var(--touch-target-min)] rounded-xl text-xs font-bold transition-all duration-100 px-3.5 py-2',
+        'min-h-[44px] rounded-md text-xs font-semibold transition-all duration-100 px-3.5 py-2',
         isSelected
-          ? 'bg-primary/15 text-primary border-2 border-primary/30'
-          : 'bg-muted/15 text-muted-foreground border border-border/15 hover:bg-muted/30',
+          ? 'bg-action-primary/10 text-action-primary border-2 border-action-primary/30'
+          : 'bg-bg-inset text-text-secondary border border-border-subtle hover:bg-bg-surface-hover',
         disabled && 'opacity-50 cursor-not-allowed',
       )}
     >
@@ -186,14 +185,14 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
   return (
     <Modal open={true} onClose={onClose} size="xl" hideClose={submitLocked.current}>
       <div className="flex flex-col gap-5">
-         {/* Total header — premium gradient panel with larger total */}
-         <div className="text-center py-5 rounded-2xl" style={{ background: 'var(--gradient-checkout)' }}>
-           <p className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.15em] mb-2">Total a pagar</p>
-           <p className="text-5xl lg:text-6xl font-black tracking-tighter tabular-nums font-mono text-foreground leading-none">{formatMoney(total)}</p>
-           <p className="text-xs text-muted-foreground/55 mt-2">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
+         {/* Total header */}
+         <div className="text-center py-5 rounded-lg bg-bg-inset">
+           <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Total a pagar</p>
+           <p className="text-[var(--text-display)] font-semibold tracking-tight tabular-nums text-text-primary leading-none">{formatMoney(total)}</p>
+           <p className="text-xs text-text-tertiary mt-2">{items.length} {items.length === 1 ? 'producto' : 'productos'}</p>
          </div>
 
-        {/* Payment method selection — larger, more visual */}
+        {/* Payment method selection */}
         <div className="grid grid-cols-4 gap-3">
           {PAYMENT_METHODS.map(m => (
             <PaymentMethodButton
@@ -209,35 +208,35 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         {isCashOrMixed && (
           <>
             {/* Received amount display */}
-            <div className="rounded-2xl border border-border/18 backdrop-blur-sm bg-surface-glass/35 p-4 shadow-sm">
+            <div className="rounded-lg bg-bg-surface border border-border-subtle p-4">
               <div className="flex justify-between items-baseline mb-3">
-                <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-[0.1em]">Recibido</span>
+                <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Recibido</span>
                 {receivedNum > 0 && (
-                  <span className="text-[11px] font-medium text-muted-foreground/50">
+                  <span className="text-xs font-medium text-text-tertiary">
                     {isShort ? `Falta ${formatMoney(total - receivedNum)}` : ''}
                   </span>
                 )}
               </div>
               <p className={cn(
-                'text-3xl lg:text-4xl font-bold tracking-tight tabular-nums font-mono',
-                receivedNum <= 0 ? 'text-muted-foreground/25' : 'text-foreground',
+                'text-4xl font-semibold tracking-tight tabular-nums',
+                receivedNum <= 0 ? 'text-text-disabled' : 'text-text-primary',
               )}>
-                <span className="text-muted-foreground/30 mr-1 text-xl lg:text-2xl">$</span>{received || '0'}
+                <span className="text-text-tertiary mr-1 text-2xl">$</span>{received || '0'}
               </p>
               {receivedNum > 0 && (
                 <div className={cn(
                   'mt-4 pt-4 border-t text-right',
-                  change >= 0 && !isShort ? 'border-success/18' : 'border-danger/18',
+                  change >= 0 && !isShort ? 'border-semantic-success/20' : 'border-semantic-danger/20',
                 )}>
                   {change > 0 && !isShort && (
-                    <div className="rounded-lg bg-success/10 px-3 py-2 inline-block">
-                      <span className="text-sm font-bold tabular-nums text-success">
+                    <div className="rounded-md bg-semantic-success-bg px-3 py-2 inline-block">
+                      <span className="text-sm font-bold tabular-nums text-semantic-success">
                         Cambio: {formatMoney(change)}
                       </span>
                     </div>
                   )}
                   {isShort && (
-                    <span className="text-sm font-bold tabular-nums text-danger">
+                    <span className="text-sm font-bold tabular-nums text-semantic-danger">
                       Faltan {formatMoney(total - receivedNum)}
                     </span>
                   )}
@@ -245,19 +244,18 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               )}
             </div>
 
-            {/* Quick amounts — horizontal scroll row */}
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+            {/* Quick amounts */}
+            <div className="flex gap-2 overflow-x-auto pb-1">
               <button
                 onClick={exactAmount}
                 disabled={submitLocked.current}
                 className={cn(
-                  'shrink-0 min-h-[var(--touch-target-min)] rounded-xl font-bold text-xs transition-all duration-150 flex items-center justify-center gap-1.5 px-4 active:scale-[0.97]',
+                  'shrink-0 min-h-[44px] rounded-md font-bold text-xs transition-all duration-150 flex items-center justify-center gap-1.5 px-4 active:scale-[0.97]',
                   isExactCash
-                    ? 'text-success-foreground shadow-lg shadow-success/20 success-pulse'
-                    : 'bg-success/8 text-success border border-success/15 hover:bg-success/15',
+                    ? 'bg-semantic-success text-[hsl(var(--bg-surface))]'
+                    : 'bg-semantic-success-bg text-semantic-success border border-semantic-success/20 hover:bg-semantic-success-bg/80',
                   submitLocked.current && 'opacity-50 cursor-not-allowed',
                 )}
-                style={isExactCash ? { background: 'var(--gradient-success)' } : undefined}
               >
                 <Check className="size-4" /> Exacto
               </button>
@@ -272,7 +270,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               ))}
             </div>
 
-            {/* Numpad — larger keys with haptic feel */}
+            {/* Numpad */}
             <div className="grid grid-cols-3 gap-2.5 pb-2">
               {numpadKeys.map(k => (
                 <NumpadKey
@@ -288,43 +286,42 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
         )}
 
         {!isCashOrMixed && (
-          <div className="flex flex-col items-center justify-center text-center py-10 rounded-2xl border border-dashed border-primary/15" style={{ background: 'var(--gradient-surface)' }}>
-            <div className="size-16 rounded-2xl bg-card flex items-center justify-center mb-4 border border-border/18 shadow-sm">
-              <Check className="size-7 text-primary" />
+          <div className="flex flex-col items-center justify-center text-center py-10 rounded-lg bg-bg-surface border border-dashed border-border-subtle">
+            <div className="size-16 rounded-md bg-bg-inset flex items-center justify-center mb-4">
+              <Check className="size-7 text-semantic-success" />
             </div>
-            <h3 className="text-sm font-bold">Pago con {method === 'card' ? 'tarjeta' : 'transferencia'}</h3>
-            <p className="text-xs text-muted-foreground/60 font-medium mt-2">
+            <h3 className="text-sm font-semibold text-text-primary">Pago con {method === 'card' ? 'tarjeta' : 'transferencia'}</h3>
+            <p className="text-xs text-text-secondary font-medium mt-2">
               {method === 'card' ? 'Cobra primero en la terminal.' : 'Solicita la transferencia.'}
             </p>
-            <p className="font-black text-3xl mt-4 text-primary tabular-nums tracking-tight">{formatMoney(total)}</p>
+            <p className="font-semibold text-3xl mt-4 text-text-primary tabular-nums tracking-tight">{formatMoney(total)}</p>
           </div>
         )}
 
         {confirmError && (
-          <div className="p-3 rounded-xl bg-danger/8 border border-danger/15 text-danger text-xs font-semibold text-center" role="alert">
+          <div className="p-3 rounded-md bg-semantic-danger-bg border border-semantic-danger/20 text-semantic-danger text-xs font-semibold text-center" role="alert">
             {confirmError}
           </div>
         )}
 
-        {/* Confirm button — commanding green gradient */}
+        {/* Confirm button */}
         <button
           onClick={handleConfirm}
           disabled={!isReady || submitLocked.current}
           className={cn(
-            'w-full min-h-[4.5rem] lg:min-h-[5rem] text-base font-extrabold rounded-2xl transition-all duration-200 flex items-center justify-center gap-2.5 uppercase tracking-wide active:scale-[0.98]',
+            'w-full min-h-[4.5rem] lg:min-h-[5rem] text-base font-semibold rounded-md transition-all duration-150 flex items-center justify-center gap-2.5 active:scale-[0.98]',
             isReady && !submitLocked.current
-              ? 'text-success-foreground shadow-xl shadow-success/20 hover:shadow-2xl hover:shadow-success/25 hover:-translate-y-px'
-              : 'bg-muted/50 text-muted-foreground/40 cursor-not-allowed',
+              ? 'bg-action-primary text-[hsl(var(--bg-surface))] hover:bg-action-primary-hover'
+              : 'bg-bg-inset text-text-disabled cursor-not-allowed',
           )}
-          style={isReady && !submitLocked.current ? { background: 'var(--gradient-checkout)' } : undefined}
           aria-label="Confirmar cobro"
         >
           {submitLocked.current ? (
             <><span className="size-2.5 rounded-full bg-current animate-pulse" />{getButtonLabel()}</>
           ) : (
             <>
-              <span className="text-lg tracking-wider">{getButtonLabel()}</span>
-              <span className="text-[10px] opacity-50 bg-black/10 px-2 py-0.5 rounded-lg tracking-wider font-bold">Enter ↵</span>
+              <span className="text-lg">{getButtonLabel()}</span>
+              <span className="text-[10px] opacity-50 bg-black/10 px-2 py-0.5 rounded-md tracking-wide font-bold">Enter ↵</span>
             </>
           )}
         </button>

@@ -80,22 +80,22 @@ const CustomersView = () => {
   const columns = [
     { label: 'Nombre', key: 'name', sortable: true, className: 'font-semibold min-w-[160px]', render: (row) => (
       <div className="flex items-center gap-3">
-        <div className={cn('size-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-xs shrink-0', getAvatarColor(row.name))}>
+        <div className="size-8 rounded-full bg-bg-inset flex items-center justify-center text-text-secondary font-semibold text-xs shrink-0">
           {(row.name || '?').charAt(0).toUpperCase()}
         </div>
         <span>{row.name}</span>
       </div>
     )},
     { label: 'Email', key: 'email', sortable: true, hideOnMobile: true, render: (row) =>
-      row.email ? <span className="flex items-center gap-1.5 text-muted-foreground"><Mail className="size-3 text-muted-foreground/60" />{row.email}</span> : <span className="text-muted-foreground/40">—</span>
+      row.email ? <span className="flex items-center gap-1.5 text-text-secondary"><Mail className="size-3 text-text-tertiary" />{row.email}</span> : <span className="text-text-disabled">—</span>
     },
-    { label: 'Teléfono', key: 'phone', render: (row) =>
-      row.phone ? <span className="flex items-center gap-1.5 text-muted-foreground"><Phone className="size-3 text-muted-foreground/60" />{row.phone}</span> : <span className="text-muted-foreground/40">—</span>
+    { label: 'Telefono', key: 'phone', render: (row) =>
+      row.phone ? <span className="flex items-center gap-1.5 text-text-secondary"><Phone className="size-3 text-text-tertiary" />{row.phone}</span> : <span className="text-text-disabled">—</span>
     },
-    { label: 'RFC', key: 'rfc', hideOnMobile: true, render: (row) => row.rfc || <span className="text-muted-foreground/40">—</span> },
+    { label: 'RFC', key: 'rfc', hideOnMobile: true, render: (row) => row.rfc || <span className="text-text-disabled">—</span> },
     { label: '', key: 'actions', width: '48px', render: (row) => (
       <button onClick={(e) => { e.stopPropagation(); handleDeleteRequest(row.id); }}
-        className="size-9 flex items-center justify-center rounded-lg text-muted-foreground/50 hover:text-danger hover:bg-danger/10 transition-all duration-200 touch-target opacity-0 group-hover:opacity-100"
+        className="size-9 flex items-center justify-center rounded-md text-text-tertiary hover:text-semantic-danger hover:bg-semantic-danger-bg transition-colors opacity-0 group-hover:opacity-100"
         aria-label="Eliminar cliente">
         <Trash2 className="size-4" />
       </button>
@@ -109,10 +109,10 @@ const CustomersView = () => {
         description={customers.length > 0 ? `${customers.length} registrados` : 'Gestiona tus clientes'}
         icon={<Users className="size-5 text-primary" />}
       >
-        <Button variant="ghost" size="icon" onClick={loadCustomers} isLoading={loading} className="rounded-lg border border-border/30">
+        <Button variant="ghost" size="sm" onClick={loadCustomers} isLoading={loading}>
           <RefreshCw className="size-4" />
         </Button>
-        <Button onClick={() => setShowForm(!showForm)} size="md" className="font-bold">
+        <Button onClick={() => setShowForm(!showForm)} size="md">
           <Plus className="size-4 mr-1" /> Nuevo Cliente
         </Button>
       </ViewHeader>
@@ -127,11 +127,10 @@ const CustomersView = () => {
       )}
 
       {showForm && (
-        <Card variant="glass" className="p-6 shadow-lg relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/60 to-primary/30" />
-          <h3 className="text-base font-bold mb-5 flex items-center gap-2.5">
-            <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
-              <UserPlus className="size-3.5 text-primary" />
+        <Card className="p-6">
+          <h3 className="text-base font-semibold mb-5 flex items-center gap-2.5 text-text-primary">
+            <div className="size-7 rounded-md bg-bg-inset flex items-center justify-center">
+              <UserPlus className="size-3.5 text-text-secondary" />
             </div>
             Registrar Cliente
           </h3>

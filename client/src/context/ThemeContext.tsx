@@ -7,15 +7,13 @@ interface ThemeContextValue {
   setTheme: (name: string) => Promise<void>;
   toggleDark: () => Promise<void>;
   themes: string[];
-  darkOverride: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const STORAGE_KEY = 'theme';
-const DARK_KEY = 'theme_dark_override';
 const DEFAULT_THEME = 'light';
-const THEMES = ['light', 'dark', 'corporate'];
+const THEMES = ['light', 'dark'];
 
 async function persistTheme(name: string) {
   try {
@@ -34,36 +32,18 @@ function getInitialTheme(): string {
   return DEFAULT_THEME;
 }
 
-function getDarkOverride(): boolean {
-  try { return localStorage.getItem(DARK_KEY) === '1'; } catch { return false; }
-}
-
-function isDarkTheme(name: string, darkOverride?: boolean): boolean {
-  if (name === 'dark') return true;
-  if (darkOverride !== undefined) return darkOverride;
-  return getDarkOverride();
-}
-
-function applyTheme(name: string, darkOverride?: boolean) {
+function applyTheme(name: string) {
   const root = document.documentElement;
-  const dark = isDarkTheme(name, darkOverride);
   root.setAttribute('data-theme', name);
-  root.setAttribute('data-mode', dark ? 'dark' : 'light');
-  root.style.colorScheme = dark ? 'dark' : 'light';
-  root.style.setProperty('--motion-duration', '0.01ms');
+  root.style.colorScheme = name === 'dark' ? 'dark' : 'light';
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState(getInitialTheme);
-  const [darkOverride, setDarkOverride] = useState(getDarkOverride);
 
-  const syncTheme = useCallback(async (name: string, dark?: boolean) => {
-    applyTheme(name, dark);
+  const syncTheme = useCallback(async (name: string) => {
+    applyTheme(name);
     setThemeState(name);
-    if (dark !== undefined) {
-      setDarkOverride(dark);
-      try { localStorage.setItem(DARK_KEY, dark ? '1' : '0'); } catch {}
-    }
     await persistTheme(name);
   }, []);
 
@@ -73,26 +53,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [syncTheme]);
 
   const toggleDark = useCallback(async () => {
-    if (theme === 'dark') {
-      await syncTheme('light', false);
-    } else if (theme === 'light') {
-      await syncTheme('dark', true);
-    } else {
-      // Corporate or other theme: toggle dark mode overlay
-      const newDark = !darkOverride;
-      await syncTheme(theme, newDark);
-    }
-  }, [theme, darkOverride, syncTheme]);
+    await syncTheme(theme === 'dark' ? 'light' : 'dark');
+  }, [theme, syncTheme]);
 
   useEffect(() => {
-    applyTheme(theme, darkOverride);
+    applyTheme(theme);
   }, []);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored || stored === 'light' || stored === 'dark') {
+      if (!stored) {
         syncTheme(mq.matches ? 'dark' : 'light');
       }
     };
@@ -102,12 +74,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(() => ({
     theme,
-    isDark: isDarkTheme(theme, darkOverride),
+    isDark: theme === 'dark',
     setTheme,
     toggleDark,
     themes: THEMES,
-    darkOverride,
-  }), [theme, darkOverride, setTheme, toggleDark]);
+  }), [theme, setTheme, toggleDark]);
 
   return (
     <ThemeContext.Provider value={value}>

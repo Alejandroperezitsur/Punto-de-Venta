@@ -1,26 +1,18 @@
 ﻿import React from 'react';
 import { cn } from '../../utils/cn';
 
-const variants = {
-  default: 'bg-card border border-border/25 shadow-card',
-  glass: 'backdrop-blur-lg bg-surface-glass/60 border border-white/10 shadow-sm card-glass',
-  elevated: 'bg-card border border-border/20 shadow-md',
-  flat: 'bg-muted/20 border border-transparent',
-};
-
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: keyof typeof variants;
   hover?: boolean;
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', hover = false, ...props }, ref) => (
+  ({ className, hover = false, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        'rounded-xl p-[var(--card-padding)] transition-all duration-200',
-        variants[variant],
-        hover && 'hover:shadow-card-hover hover:-translate-y-0.5 hover:border-border/40 cursor-pointer',
+        'rounded-lg bg-bg-surface p-[var(--padding-card)]',
+        'transition-colors duration-150',
+        hover && 'cursor-pointer hover:bg-bg-surface-hover',
         className,
       )}
       {...props}
@@ -34,11 +26,11 @@ function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement
 }
 
 function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('text-lg font-bold text-foreground', className)} {...props} />;
+  return <h3 className={cn('text-[var(--text-heading-sm)] font-semibold text-text-primary tracking-tight', className)} {...props} />;
 }
 
 function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn('text-sm text-muted-foreground mt-0.5', className)} {...props} />;
+  return <p className={cn('text-sm text-text-secondary mt-1', className)} {...props} />;
 }
 
 export { Card, CardHeader, CardTitle, CardDescription };

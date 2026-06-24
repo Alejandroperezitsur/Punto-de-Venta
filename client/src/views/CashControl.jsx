@@ -166,20 +166,19 @@ const CashControlView = () => {
             </ViewHeader>
 
             {loading ? (
-                <Card variant="glass" className="p-12 text-center text-muted-foreground">
+                <Card className="p-12 text-center text-text-secondary">
                     Cargando estado de caja...
                 </Card>
             ) : !session ? (
                 <div className="animate-fade-slide-in">
-                    <Card variant="glass" className="p-8 space-y-6 border-l-4 border-l-warning relative overflow-hidden">
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-warning to-warning/40" />
+                    <Card className="p-8 space-y-6 border-l-4 border-l-semantic-warning">
                         <div className="flex items-center gap-4">
-                            <div className="p-3.5 bg-warning/10 text-warning rounded-xl">
+                            <div className="p-3.5 bg-semantic-warning-bg text-semantic-warning rounded-md">
                                 <AlertCircle className="h-7 w-7" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg">Caja Cerrada</h3>
-                                <p className="text-sm text-muted-foreground">No hay sesión de caja activa. Abre una para comenzar.</p>
+                                <h3 className="font-semibold text-lg text-text-primary">Caja Cerrada</h3>
+                                <p className="text-sm text-text-secondary">No hay sesion de caja activa. Abre una para comenzar.</p>
                             </div>
                         </div>
                         <div className="flex items-end gap-4">
@@ -203,21 +202,20 @@ const CashControlView = () => {
             ) : (
                 <div className="animate-fade-slide-in space-y-6">
                     {/* Status Banner */}
-                    <Card variant="glass" className="p-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-success to-success/40" />
+                    <Card className="p-6">
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
-                                <div className="p-3.5 bg-success/10 text-success rounded-xl">
+                                <div className="p-3.5 bg-semantic-success-bg text-semantic-success rounded-md">
                                     <Wallet className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-lg text-success">Caja Abierta</h3>
-                                    <p className="text-sm text-muted-foreground">
+                                    <h3 className="font-semibold text-lg text-semantic-success">Caja Abierta</h3>
+                                    <p className="text-sm text-text-secondary">
                                         Abierta: {new Date(session.opened_at).toLocaleString()} &bull; Inicial: {formatMoney(session.opening_balance)}
                                     </p>
                                 </div>
                             </div>
-                            <Button variant="outline" onClick={handleCloseStart} className="border-danger/20 text-danger hover:bg-danger/5">
+                            <Button variant="danger" onClick={handleCloseStart}>
                                 <DoorClosed className="h-4 w-4 mr-2" /> Cerrar Caja
                             </Button>
                         </div>
@@ -233,11 +231,10 @@ const CashControlView = () => {
                     )}
 
                     {/* Movement Form */}
-                    <Card variant="glass" className="p-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
-                        <h4 className="font-semibold mb-4 flex items-center gap-2.5">
-                            <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <ArrowDownCircle className="size-3.5 text-primary" />
+                    <Card className="p-6">
+                        <h4 className="font-semibold mb-4 flex items-center gap-2.5 text-text-primary">
+                            <div className="size-7 rounded-md bg-bg-inset flex items-center justify-center">
+                                <ArrowDownCircle className="size-3.5 text-text-secondary" />
                             </div>
                             Registrar Movimiento
                         </h4>
@@ -276,13 +273,13 @@ const CashControlView = () => {
                     </Card>
 
                     {/* Movements History */}
-                    <Card variant="glass" className="p-6">
+                    <Card className="p-6">
                         <div className="flex items-center gap-2.5 mb-4">
-                            <div className="size-7 rounded-lg bg-muted/30 flex items-center justify-center">
-                                <History className="size-3.5 text-muted-foreground" />
+                            <div className="size-7 rounded-md bg-bg-inset flex items-center justify-center">
+                                <History className="size-3.5 text-text-secondary" />
                             </div>
-                            <h4 className="font-semibold">Movimientos de esta Sesión</h4>
-                            <Badge variant="glass" size="sm">{movements.length}</Badge>
+                            <h4 className="font-semibold text-text-primary">Movimientos de esta Sesion</h4>
+                            <Badge variant="counter" size="sm">{movements.length}</Badge>
                         </div>
                         <Table
                             data={movements}
@@ -292,21 +289,21 @@ const CashControlView = () => {
                             emptyMessage="Sin movimientos registrados."
                             columns={[
                                 { key: 'type', label: 'Tipo', render: (m) => (
-                                    <Badge variant={
+                                    <Badge variant="alert" color={
                                         m.type === 'sale' ? 'success' :
                                         m.type === 'deposit' || m.type === 'opening' ? 'info' :
                                         'danger'
                                     } size="sm">
-                                        {m.type === 'sale' ? 'Venta' : m.type === 'opening' ? 'Apertura' : m.type === 'deposit' ? 'Depósito' : 'Retiro'}
+                                        {m.type === 'sale' ? 'Venta' : m.type === 'opening' ? 'Apertura' : m.type === 'deposit' ? 'Deposito' : 'Retiro'}
                                     </Badge>
                                 )},
-                                { key: 'reference', label: 'Referencia', render: (m) => <span className="text-muted-foreground">{m.reference || '-'}</span> },
+                                { key: 'reference', label: 'Referencia', render: (m) => <span className="text-text-secondary">{m.reference || '-'}</span> },
                                 { key: 'amount', label: 'Monto', className: 'text-right', render: (m) => (
-                                    <span className={`font-semibold ${m.amount >= 0 ? 'text-success' : 'text-danger'}`}>
+                                    <span className={`font-semibold ${m.amount >= 0 ? 'text-semantic-success' : 'text-semantic-danger'}`}>
                                         {m.amount >= 0 ? '+' : ''}{formatMoney(m.amount)}
                                     </span>
                                 )},
-                                { key: 'created_at', label: 'Fecha', render: (m) => <span className="text-muted-foreground font-mono text-xs">{new Date(m.created_at).toLocaleString()}</span> },
+                                { key: 'created_at', label: 'Fecha', render: (m) => <span className="text-text-secondary font-mono text-xs">{new Date(m.created_at).toLocaleString()}</span> },
                             ]}
                             keyExtractor={(m) => m.id}
                         />
@@ -326,18 +323,18 @@ const CashControlView = () => {
                         <p className="text-sm text-muted-foreground">Cuenta tu efectivo físicamente antes de continuar.</p>
 
                         {closeError && (
-                            <div className="bg-danger/12 border border-danger/20 rounded-xl text-danger font-semibold p-3 text-sm">
+                            <div className="bg-semantic-danger-bg border border-semantic-danger/20 rounded-md text-semantic-danger font-semibold p-3 text-sm">
                                 {closeError}
                             </div>
                         )}
 
                         <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-foreground/50">$</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-text-tertiary">$</span>
                             <input
                                 type="number"
                                 step="0.01"
                                 autoFocus
-                                className="w-full h-14 bg-muted/50 border-2 border-border/30 rounded-xl text-2xl font-bold text-center focus:outline-none focus:border-primary/40 transition-all"
+                                className="w-full h-14 bg-bg-inset border border-border-default rounded-md text-2xl font-bold text-center focus:outline-none focus:border-border-strong transition-colors"
                                 value={countedCash}
                                 onChange={(e) => setCountedCash(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') handleCloseSubmit(); }}

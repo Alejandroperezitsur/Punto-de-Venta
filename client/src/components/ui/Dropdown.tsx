@@ -19,8 +19,7 @@ interface DropdownProps {
 
 function Dropdown({ trigger, items, align = 'end', className }: DropdownProps) {
   const [open, setOpen] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,34 +32,30 @@ function Dropdown({ trigger, items, align = 'end', className }: DropdownProps) {
 
   useEffect(() => {
     if (open) {
-      setShouldRender(true);
-      requestAnimationFrame(() => setIsOpen(true));
+      setVisible(true);
     } else {
-      setIsOpen(false);
-      const timer = setTimeout(() => setShouldRender(false), 80);
+      const timer = setTimeout(() => setVisible(false), 100);
       return () => clearTimeout(timer);
     }
   }, [open]);
 
   return (
     <div ref={ref} className={cn('relative inline-block', className)}>
-      <div onClick={() => setOpen(!open)}>
-        {trigger}
-      </div>
-      {shouldRender && (
+      <div onClick={() => setOpen(!open)}>{trigger}</div>
+      {visible && (
         <div
           className={cn(
-            'absolute z-[var(--z-dropdown)] mt-1 min-w-[200px] rounded-lg border border-border bg-card shadow-md overflow-hidden p-1',
-            'transition-all duration-80',
-            isOpen
-              ? 'opacity-100 translate-y-0 pointer-events-auto'
-              : 'opacity-0 translate-y-[-2px] pointer-events-none',
+            'absolute z-[var(--z-dropdown)] mt-1 min-w-[180px] max-w-[280px] rounded-lg bg-bg-surface shadow-dropdown border border-border-subtle overflow-hidden p-1',
+            'transition-all duration-100',
+            open
+              ? 'opacity-100 scale-100 pointer-events-auto'
+              : 'opacity-0 scale-95 pointer-events-none',
             align === 'end' ? 'right-0' : 'left-0',
           )}
         >
           {items.map((item, i) => {
             if (item.divider) {
-              return <div key={`div-${i}`} className="h-px bg-border my-1 mx-2" />;
+              return <div key={`div-${i}`} className="h-px bg-border-subtle my-1 mx-2" />;
             }
             const Icon = item.icon;
             return (
@@ -69,11 +64,11 @@ function Dropdown({ trigger, items, align = 'end', className }: DropdownProps) {
                 onClick={() => { if (!item.disabled) { item.onClick(); setOpen(false); } }}
                 disabled={item.disabled}
                 className={cn(
-                  'flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-colors',
+                  'flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-sm font-medium text-left transition-colors',
                   item.danger
-                    ? 'text-danger hover:bg-danger/10'
-                    : 'text-foreground hover:bg-muted',
-                  item.disabled && 'opacity-50 cursor-not-allowed',
+                    ? 'text-semantic-danger hover:bg-semantic-danger-bg'
+                    : 'text-text-primary hover:bg-bg-surface-hover',
+                  item.disabled && 'opacity-40 cursor-not-allowed',
                 )}
               >
                 {Icon && <Icon className="size-4 shrink-0" />}

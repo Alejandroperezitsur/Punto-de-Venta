@@ -117,10 +117,10 @@ const BusinessSettings = () => {
           <div className="h-10 w-40 bg-muted/30 rounded animate-pulse" />
         </div>
         {[1, 2, 3].map(i => (
-          <Card key={i} variant="glass" className="p-6 space-y-4">
-            <div className="flex items-center gap-3 border-b border-border pb-3 mb-2">
-              <div className="h-5 w-5 bg-muted/30 rounded animate-pulse" />
-              <div className="h-6 w-48 bg-muted/30 rounded animate-pulse" />
+          <Card key={i} className="p-6 space-y-4">
+            <div className="flex items-center gap-3 border-b border-border-subtle pb-3 mb-2">
+              <div className="h-5 w-5 bg-bg-inset rounded animate-pulse" />
+              <div className="h-6 w-48 bg-bg-inset rounded animate-pulse" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="h-10 w-full bg-muted/30 rounded animate-pulse" />

@@ -278,13 +278,13 @@ const ProductSearch = React.memo(function ProductSearch() {
                 <Plus className="size-5 text-warning" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-warning truncate">Producto no encontrado</p>
-                <p className="text-xs font-medium text-warning/60 font-mono">{error}</p>
+                <p className="text-xs font-bold text-semantic-warning truncate">Producto no encontrado</p>
+                <p className="text-xs font-medium text-text-tertiary font-mono">{error}</p>
               </div>
             </div>
             <Button
               size="sm"
-              variant="warning"
+              variant="secondary"
               onClick={handleQuickCreate}
               className="shrink-0 font-bold text-xs h-[var(--control-sm)]"
               aria-label={`Agregar "${error}" como producto manual`}

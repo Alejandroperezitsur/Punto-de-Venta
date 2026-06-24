@@ -1,163 +1,101 @@
-﻿:root {
-  /* ── Enterprise 2026 Typography ── */
-  --font-sans: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+﻿/* ═══════════════════════════════════════════════════════════════════
+   SIGNAL DESIGN SYSTEM™ v1.0 — Design Tokens
+   APV Labs Design Studio — June 2026
+   ═══════════════════════════════════════════════════════════════════ */
 
-  /* Fluid type scale — minimum 13px for xs, never below */
-  --text-2xs:     clamp(0.6875rem, 0.4vw, 0.75rem);   /* 11-12px: ONLY for kbd/badges secondary */
-  --text-xs:      clamp(0.8125rem, 0.5vw, 0.8125rem);  /* 13px floor */
-  --text-sm:      clamp(0.875rem, 0.6vw, 0.9375rem);   /* 14-15px */
-  --text-base:    clamp(1rem, 0.7vw, 1rem);             /* 16px */
-  --text-lg:      clamp(1.125rem, 0.8vw, 1.125rem);    /* 18px */
-  --text-xl:      clamp(1.25rem, 1vw, 1.375rem);       /* 20-22px */
-  --text-2xl:     clamp(1.5rem, 1.3vw, 1.75rem);       /* 24-28px */
-  --text-3xl:     clamp(1.75rem, 1.8vw, 2rem);         /* 28-32px */
-  --text-4xl:     clamp(2rem, 2.2vw, 2.5rem);          /* 32-40px */
-  --text-5xl:     clamp(2.5rem, 3vw, 3.5rem);          /* 40-56px */
-  --text-display: clamp(3rem, 5vw, 4.5rem);            /* 48-72px */
+:root {
+  /* ── Typography ── */
+  --font-sans: 'Inter Display', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
 
-  --leading-none:    1;
-  --leading-tight:   1.15;
-  --leading-snug:    1.3;
-  --leading-normal:  1.5;
-  --leading-relaxed: 1.625;
+  /* Modular scale based on minor golden ratio (1.25) with optical adjustments */
+  --text-caption:   0.6875rem;  /* 11px — badges, extreme metadata, keyboard shortcuts */
+  --text-label:     0.75rem;    /* 12px — labels, column headers, states */
+  --text-body-sm:   0.8125rem;  /* 13px — secondary text, descriptions, help text */
+  --text-body:      0.9375rem;  /* 15px — primary text, paragraphs, menu options */
+  --text-body-lg:   1.0625rem;  /* 17px — featured text, summaries */
+  --text-ui:        0.875rem;   /* 14px — button labels, chips, tabs */
+  --text-heading-xs: 1.125rem;  /* 18px — small section titles */
+  --text-heading-sm: 1.375rem;  /* 22px — card titles, panel headers */
+  --text-heading-md: 1.75rem;   /* 28px — page titles, modal headers */
+  --text-heading-lg: 2.25rem;   /* 36px — dashboard titles, main screens */
+  --text-heading-xl: 2.875rem;  /* 46px — hero numbers, primary KPI */
+  --text-display:   3.625rem;   /* 58px — sale total, cobro screen */
+  --text-mega:      4.5rem;     /* 72px — full-screen total mode for touch */
 
-  --weight-normal:    400;
-  --weight-medium:    500;
-  --weight-semibold:  600;
-  --weight-bold:      700;
-  --weight-extrabold: 800;
-  --weight-black:     900;
+  --leading-none:   1;
+  --leading-tight:  1.2;
+  --leading-snug:   1.3;
+  --leading-normal: 1.5;
 
-  --tracking-tighter:  -0.04em;
-  --tracking-tight:    -0.025em;
-  --tracking-normal:   0em;
-  --tracking-wide:     0.04em;
-  --tracking-wider:    0.06em;
-  --tracking-widest:   0.1em;
+  /* Weights: only 400, 500, 600, 700 */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
 
-  /* ── Touch & Spacing ── */
-  --touch-target-min: 2.75rem;
-  --touch-target-opt: 3.125rem;
-  --touch-target-lg: 3.5rem;
-  --touch-target-xl: 4.25rem;
-  --touch-target-mobile: 3rem;
+  --tracking-tighter: -0.04em;
+  --tracking-tight:   -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+  --tracking-wider:   0.04em;
 
-  /* ── POS Mobile ── */
-  --pos-header-height-mobile: 3.5rem;
-  --pos-cart-height-mobile: 40vh;
-  --pos-product-grid-mobile: 120px;
+  /* ── Spacing — 4px base grid ── */
+  --space-0:  0;
+  --space-1:  0.25rem;   /* 4px */
+  --space-2:  0.5rem;    /* 8px */
+  --space-3:  0.75rem;   /* 12px */
+  --space-4:  1rem;      /* 16px */
+  --space-5:  1.25rem;   /* 20px */
+  --space-6:  1.5rem;    /* 24px */
+  --space-8:  2rem;      /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
 
-  /* ── 8px Grid Spacing ── */
-  --space-0:   0px;
-  --space-0-5: 0.125rem;
-  --space-1:   0.25rem;
-  --space-1-5: 0.375rem;
-  --space-2:   0.5rem;
-  --space-2-5: 0.625rem;
-  --space-3:   0.75rem;
-  --space-3-5: 0.875rem;
-  --space-4:   1rem;
-  --space-5:   1.25rem;
-  --space-6:   1.5rem;
-  --space-7:   1.75rem;
-  --space-8:   2rem;
-  --space-9:   2.25rem;
-  --space-10:  2.5rem;
-  --space-12:  3rem;
-  --space-14:  3.5rem;
-  --space-16:  4rem;
-  --space-20:  5rem;
+  /* Contextual spacing */
+  --gap-card-grid:   var(--space-3);   /* 12px — dense card grid */
+  --gap-section:     var(--space-4);   /* 16px — standard gap */
+  --gap-form:        var(--space-4);   /* 16px — between form fields */
+  --gap-list:        var(--space-1);   /* 4px — continuous list items */
+  --gap-list-group:  var(--space-2);   /* 8px — between list groups */
+  --padding-input:   10px 12px;
+  --padding-button:  8px 16px;
+  --padding-card:    var(--space-5);   /* 20px */
+  --padding-modal:   var(--space-6);   /* 24px */
+  --page-margin:     var(--space-6);   /* 24px tablet */
+  --page-margin-lg:  var(--space-10);  /* 40px desktop */
+  --page-max-width:  1400px;
+  --table-row-height: 40px;
+  --table-header-height: 36px;
+  --max-line-length: 65ch;
 
-  --stack-xs:   0.25rem;
-  --stack-sm:   0.5rem;
-  --stack-md:   1rem;
-  --stack-lg:   1.5rem;
-  --stack-xl:   2rem;
+  /* ── Border Radii ── */
+  --radius-none: 0;
+  --radius-sm:   4px;    /* inputs, selects, form fields */
+  --radius-md:   6px;    /* buttons, chips, badges, small cards */
+  --radius-lg:   8px;    /* cards, modals, sheets, drawers, panels */
+  --radius-full: 9999px; /* pills only: status badges, filter chips, counters */
 
-  --inset-xs:   0.5rem;
-  --inset-sm:   0.75rem;
-  --inset-md:   1rem;
-  --inset-lg:   1.5rem;
-  --inset-xl:   2rem;
+  /* ── Shadows — overlaid elements only ── */
+  --shadow-overlay:  0 0 0 1px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-dropdown: 0 0 0 1px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-none: none;
 
-  --section-gap: 1.5rem;
-  --card-padding: 1.25rem;
-  --modal-padding: 1.5rem;
+  /* ── Elevation by background color (not shadow) ── */
+  /* Level 0 = --bg-app, Level 1 = --bg-surface, Level 2 = --bg-inset, Level 3 = overlay */
 
-  /* ── Density ── */
-  --density-compact:     0.625rem;
-  --density-comfortable: 1rem;
-  --density-spacious:    1.5rem;
-  --pos-grid-gap:        0.75rem;
-
-  /* ── 2026 Retail Radius ── */
-  --radius-xs:   0.25rem;
-  --radius-sm:   0.5rem;
-  --radius-md:   0.75rem;
-  --radius-lg:   0.75rem;
-  --radius-xl:   1rem;
-  --radius-2xl:  1.25rem;
-  --radius-3xl:  1.5rem;
-  --radius-full: 9999px;
-
-  /* ── Enterprise 6-Level Depth ── */
-  --shadow-xs:   0 1px 2px 0 rgb(0 0 0 / 0.04), 0 0 1px 0 rgb(0 0 0 / 0.02);
-  --shadow-sm:   0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.03);
-  --shadow-md:   0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
-  --shadow-lg:   0 10px 16px -4px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.04);
-  --shadow-xl:   0 20px 28px -6px rgb(0 0 0 / 0.09), 0 8px 10px -6px rgb(0 0 0 / 0.04);
-  --shadow-2xl:  0 28px 56px -14px rgb(0 0 0 / 0.18);
-  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.03), 0 0 0 1px rgb(0 0 0 / 0.02);
-  --shadow-card-hover: 0 8px 16px -4px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04), 0 0 0 1px rgb(0 0 0 / 0.04);
-  --shadow-glow: 0 0 28px hsl(var(--primary) / 0.15), 0 0 8px hsl(var(--primary) / 0.08);
-  --shadow-glow-success: 0 0 28px hsl(var(--success) / 0.15), 0 0 8px hsl(var(--success) / 0.08);
-  --shadow-glow-accent: 0 0 24px hsl(var(--accent) / 0.12), 0 0 6px hsl(var(--accent) / 0.06);
-  --shadow-inner-sm: inset 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-inner-md: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
-
-  --elevation-1: var(--shadow-xs);
-  --elevation-2: var(--shadow-sm);
-  --elevation-3: var(--shadow-md);
-  --elevation-4: var(--shadow-lg);
-  --elevation-5: var(--shadow-xl);
-  --elevation-6: var(--shadow-2xl);
-
-  /* ── Motion & Easing ── */
-  --ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in:         cubic-bezier(0.4, 0, 1, 1);
-  --ease-linear:     cubic-bezier(0, 0, 1, 1);
-  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth:     cubic-bezier(0.25, 0.1, 0.25, 1);
-  --ease-out-expo:   cubic-bezier(0.19, 1, 0.22, 1);
-  --ease-out-back:   cubic-bezier(0.34, 1.2, 0.64, 1);
-
-  --duration-instant: 60ms;
-  --duration-fast:    100ms;
-  --duration-normal:  150ms;
-  --duration-slow:    200ms;
-  --duration-slower:  300ms;
-  --duration-deliberate: 450ms;
-
-  /* ── Control Sizes ── */
-  --control-xs:  1.75rem;
-  --control-sm:  2.25rem;
-  --control-md:  2.75rem;
-  --control-lg:  3.125rem;
-  --control-xl:  3.5rem;
-  --control-2xl: 4.25rem;
+  /* ── Control Heights ── */
+  --control-sm: 1.75rem;  /* 28px */
+  --control-md: 2.25rem;  /* 36px */
+  --control-lg: 2.75rem;  /* 44px */
+  --control-xl: 3.5rem;   /* 56px — primary CTAs like Cobrar */
 
   /* ── Layout ── */
-  --header-height:       3.5rem;
-  --sidebar-width:       14rem;
-  --sidebar-collapsed:   4rem;
-
-  --pos-total-height: 4.75rem;
-  --pos-cart-width: 40%;
-  --pos-catalog-width: 60%;
-  --pos-btn-checkout-height: 3.25rem;
-  --pos-kiosk-min-width: 1024px;
-  --pos-kiosk-min-height: 768px;
+  --toolbar-height: 3rem;      /* 48px */
+  --touchbar-height: 3.5rem;   /* 56px — bottom nav for touch */
+  --signal-bar-height: 2px;
 
   /* ── Z-Index Scale ── */
   --z-dropdown:  100;
@@ -167,69 +105,26 @@
   --z-overlay:   500;
   --z-max:       9999;
 
-  /* ── Glass Effects ── */
-  --blur-sm:  4px;
-  --blur-md:  8px;
-  --blur-lg:  16px;
-  --blur-xl:  24px;
-  --blur-2xl: 40px;
+  /* ── Motion & Easing ── */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 
-  /* ── Surface Tokens (HSL) ── */
-  --surface-command-h: 220; --surface-command-s: 16%; --surface-command-l: 97%;
-  --surface-metric-h:  215; --surface-metric-s: 18%; --surface-metric-l: 98%;
-  --surface-sidebar-active-h: 220; --surface-sidebar-active-s: 60%; --surface-sidebar-active-l: 94%;
-  --surface-panel-h: 220; --surface-panel-s: 15%; --surface-panel-l: 98%;
-  --border-accent-h: 220; --border-accent-s: 42%; --border-accent-l: 80%;
+  --duration-instant:  60ms;
+  --duration-fast:    100ms;
+  --duration-normal:  150ms;
+  --duration-slow:    200ms;
+  --duration-slower:  300ms;
+  --duration-deliberate: 450ms;
 
-  /* ── Chart / Data-Viz ── */
-  --chart-1-h: 220; --chart-1-s: 72%; --chart-1-l: 50%;
-  --chart-2-h: 152; --chart-2-s: 60%; --chart-2-l: 44%;
-  --chart-3-h: 32;  --chart-3-s: 80%; --chart-3-l: 52%;
-  --chart-4-h: 280; --chart-4-s: 60%; --chart-4-l: 55%;
-  --chart-5-h: 350; --chart-5-s: 68%; --chart-5-l: 52%;
+  /* ── Touch Targets ── */
+  --touch-target-min: 2.75rem;  /* 44px — minimum */
+  --touch-target-opt: 3rem;     /* 48px — optimal */
+  --touch-target-lg:  3.5rem;   /* 56px — large */
+  --touch-target-xl:  5rem;     /* 80px — kiosk Cobrar button */
 
-  /* ── Status ── */
-  --status-live:    var(--success);
-  --status-pending: var(--warning);
-  --status-error:   var(--danger);
-
-  /* ── Gradient Tokens ── */
-  --gradient-primary:       linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.88) 50%, hsl(var(--primary) / 0.82) 100%);
-  --gradient-primary-hover: linear-gradient(135deg, hsl(var(--primary) / 0.94) 0%, hsl(var(--primary) / 0.82) 100%);
-  --gradient-success:       linear-gradient(135deg, hsl(var(--success)) 0%, hsl(var(--success) / 0.88) 100%);
-  --gradient-accent:        linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--accent) / 0.85) 100%);
-  --gradient-sidebar:       linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-hover) / 0.3) 100%);
-  --gradient-checkout:      linear-gradient(135deg, hsl(var(--pos-checkout)) 0%, hsl(var(--pos-checkout) / 0.85) 100%);
-  --gradient-hero:          linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--accent) / 0.05) 40%, hsl(var(--primary) / 0.03) 100%);
-  --gradient-mesh:          radial-gradient(ellipse 80% 60% at 20% 30%, hsl(var(--primary) / 0.06) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 70%, hsl(var(--accent) / 0.04) 0%, transparent 60%);
-  --gradient-panel:         linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--surface-elevated)) 100%);
-  --gradient-sidebar-active: linear-gradient(90deg, hsl(var(--primary) / 0.08) 0%, transparent 100%);
-  --gradient-shimmer:       linear-gradient(90deg, transparent 0%, hsl(var(--primary) / 0.04) 50%, transparent 100%);
-  --gradient-glass:         linear-gradient(135deg, hsl(var(--surface) / 0.5) 0%, hsl(var(--surface) / 0.2) 100%);
-  --gradient-premium-border: linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--accent) / 0.1) 50%, hsl(var(--primary) / 0.08) 100%);
-  --gradient-surface: linear-gradient(180deg, hsl(var(--surface-panel)) 0%, hsl(var(--card)) 100%);
-  --gradient-metric: linear-gradient(180deg, hsl(var(--surface-metric)) 0%, hsl(var(--card)) 100%);
-
-  /* ── Glassmorphism ── */
-  --glass-bg-opacity: 0.72;
-  --glass-border-opacity: 0.12;
-  --glass-blur: 24px;
-  --glass-saturation: 200%;
-
-  /* ── Micro-interactions ── */
-  --hover-lift-distance: -2px;
-  --press-depth: scale(0.97);
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 3px;
-
-  /* ── Data Viz ── */
-  --sparkline-height: 32px;
-  --bar-chart-radius: 3px;
-  --kpi-trend-up: var(--success);
-  --kpi-trend-down: var(--danger);
-  --kpi-trend-neutral: var(--muted-foreground);
-
-  --gradient-chart-area: linear-gradient(180deg, hsl(var(--chart-1) / 0.10) 0%, transparent 100%);
-  --gradient-success-area: linear-gradient(180deg, hsl(var(--success) / 0.08) 0%, transparent 100%);
-  --gradient-danger-area: linear-gradient(180deg, hsl(var(--danger) / 0.08) 0%, transparent 100%);
+  /* ── Blur ── */
+  --blur-backdrop: 4px;
+  --blur-overlay:  8px;
 }

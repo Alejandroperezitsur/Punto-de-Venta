@@ -8,105 +8,117 @@ interface ModalProps {
   title?: string;
   description?: string;
   children?: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
-  variant?: 'default' | 'fullscreen' | 'sheet' | 'drawer';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'default' | 'sheet' | 'drawer';
   hideClose?: boolean;
-  showClose?: boolean;
   className?: string;
   footer?: React.ReactNode;
 }
 
 const sizeStyles = {
   sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  '2xl': 'max-w-2xl',
-  full: 'max-w-[95vw] max-h-[95vh]',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
 };
 
 const Modal = Object.assign(React.memo(function Modal({
   open, onClose, title, description, children, size = 'md',
-  variant = 'default', hideClose = false, showClose, className, footer,
+  variant = 'default', hideClose = false, className, footer,
 }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const [animate, setAnimate] = useState<'entering' | 'open' | 'closing' | 'closed'>('closed');
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setAnimate('entering');
-      const raf = requestAnimationFrame(() => requestAnimationFrame(() => setAnimate('open')));
-      return () => cancelAnimationFrame(raf);
-    } else if (animate === 'open') {
-      setAnimate('closing');
-      const timeout = setTimeout(() => setAnimate('closed'), 200);
-      return () => clearTimeout(timeout);
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      setVisible(true);
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => panelRef.current?.focus());
+    } else {
+      document.body.style.overflow = '';
+      const timer = setTimeout(() => setVisible(false), 200);
+      previousFocusRef.current?.focus();
+      return () => clearTimeout(timer);
     }
+    return () => { document.body.style.overflow = ''; };
   }, [open]);
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) onClose();
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) onClose();
   };
 
-  if (animate === 'closed') return null;
+  useEffect(() => {
+    if (!open || !panelRef.current) return;
+    const panel = panelRef.current;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key !== 'Tab') return;
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
 
-  const isFullscreen = variant === 'fullscreen';
+  if (!open && !visible) return null;
+
   const isSheet = variant === 'sheet';
   const isDrawer = variant === 'drawer';
 
   return (
     <div
-      ref={overlayRef}
       className={cn(
-        'fixed inset-0 z-[var(--z-modal)] flex items-center justify-center',
-        'transition-all duration-200',
-        isFullscreen ? 'p-0' : 'p-4 sm:p-6',
+        'fixed inset-0 z-[var(--z-modal)] flex',
+        isSheet ? 'justify-end' : isDrawer ? 'items-end justify-center' : 'items-center justify-center',
+        isDrawer ? 'p-0' : 'p-4 sm:p-6',
       )}
-      onClick={handleOverlayClick}
-      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+      onClick={handleBackdropClick}
       role="presentation"
     >
-      {/* Backdrop */}
       <div
         className={cn(
           'absolute inset-0 transition-all duration-200',
-          animate === 'open' ? 'bg-black/55 backdrop-blur-md' : 'bg-black/0 backdrop-blur-0',
+          open ? 'bg-black/40 backdrop-blur-[var(--blur-backdrop)]' : 'bg-black/0 backdrop-blur-0',
         )}
         aria-hidden="true"
       />
 
-      {/* Modal panel */}
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         className={cn(
-          'relative w-full bg-card border border-border/25 shadow-2xl overflow-hidden',
+          'relative bg-bg-surface shadow-overlay overflow-hidden',
           'transition-all duration-200',
-          animate === 'open' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4',
-          isFullscreen ? 'h-full max-w-full rounded-none' : 'rounded-2xl',
-          isSheet ? 'fixed right-0 top-0 bottom-0 max-w-lg rounded-l-2xl rounded-r-none translate-x-0' : '',
-          isDrawer ? 'fixed bottom-0 left-0 right-0 max-h-[85vh] rounded-b-none rounded-t-2xl translate-y-0' : '',
-          !isFullscreen && !isSheet && !isDrawer && sizeStyles[size],
-          isSheet && animate === 'open' ? 'translate-x-0' : isSheet ? 'translate-x-full' : '',
-          isDrawer && animate === 'open' ? 'translate-y-0' : isDrawer ? 'translate-y-full' : '',
+          open ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
+          isSheet
+            ? cn('fixed right-0 top-0 bottom-0 w-full max-w-md rounded-l-lg', open ? 'translate-x-0' : 'translate-x-4')
+            : isDrawer
+              ? cn('fixed bottom-0 left-0 right-0 max-h-[85vh] rounded-t-lg', open ? 'translate-y-0' : 'translate-y-4')
+              : cn('rounded-lg w-full', sizeStyles[size], open ? 'translate-y-0' : 'translate-y-4'),
           className,
         )}
       >
-        {/* Header */}
         {(title || !hideClose) && (
-          <div className={cn(
-            'flex items-center justify-between',
-            'px-6 py-4 border-b border-border/25',
-          )}>
+          <div className="flex items-center justify-between px-[var(--padding-modal)] py-4 border-b border-border-subtle">
             <div className="min-w-0 flex-1">
-              {title && <h2 className="text-base font-bold text-foreground truncate">{title}</h2>}
-              {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
+              {title && <h2 className="text-[var(--text-heading-sm)] font-semibold text-text-primary truncate">{title}</h2>}
+              {description && <p className="text-sm text-text-secondary mt-0.5">{description}</p>}
             </div>
             {!hideClose && (
               <button
                 onClick={onClose}
-                className="size-8 rounded-lg flex items-center justify-center text-muted-foreground/60 hover:text-foreground hover:bg-muted/50 transition-all shrink-0 ml-3"
+                className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover transition-all shrink-0 ml-3"
                 aria-label="Cerrar"
               >
                 <X className="size-4" />
@@ -115,18 +127,12 @@ const Modal = Object.assign(React.memo(function Modal({
           </div>
         )}
 
-        {/* Body */}
-        <div className={cn(
-          'overflow-y-auto',
-          isFullscreen ? 'flex-1' : 'max-h-[70vh]',
-          'px-6 py-5',
-        )}>
+        <div className={cn('overflow-y-auto', isDrawer ? 'max-h-[60vh]' : 'max-h-[65vh]', 'px-[var(--padding-modal)] py-5')}>
           {children}
         </div>
 
-        {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-border/25 flex items-center justify-end gap-2">
+          <div className="px-[var(--padding-modal)] py-4 border-t border-border-subtle flex items-center justify-end gap-2">
             {footer}
           </div>
         )}
@@ -144,21 +150,21 @@ function ModalSteps({ current, steps, children }: { current: number; steps: stri
           <React.Fragment key={i}>
             <div className={cn(
               'flex items-center gap-2',
-              i <= current ? 'text-foreground' : 'text-muted-foreground/40',
+              i <= current ? 'text-text-primary' : 'text-text-disabled',
             )}>
               <span className={cn(
                 'size-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all',
                 i === current
-                  ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
+                  ? 'bg-action-primary text-[hsl(var(--bg-surface))]'
                   : i < current
-                    ? 'bg-success/20 text-success border border-success/20'
-                    : 'bg-muted border border-border/30',
+                    ? 'bg-semantic-success-bg text-semantic-success border border-semantic-success/20'
+                    : 'bg-bg-inset border border-border-subtle',
               )}>
                 {i < current ? '✓' : i + 1}
               </span>
               <span className={cn(
                 'text-xs font-medium hidden sm:inline',
-                i === current ? 'text-foreground font-semibold' : 'text-muted-foreground/50',
+                i === current ? 'text-text-primary font-semibold' : 'text-text-tertiary',
               )}>
                 {step}
               </span>
@@ -166,15 +172,13 @@ function ModalSteps({ current, steps, children }: { current: number; steps: stri
             {i < steps.length - 1 && (
               <div className={cn(
                 'flex-1 h-px min-w-[24px]',
-                i < current ? 'bg-success/40' : 'bg-border/30',
+                i < current ? 'bg-semantic-success/40' : 'bg-border-subtle',
               )} />
             )}
           </React.Fragment>
         ))}
       </div>
-      <div>
-        {children}
-      </div>
+      <div>{children}</div>
     </div>
   );
 }

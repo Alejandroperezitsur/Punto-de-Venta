@@ -20,41 +20,41 @@ function ErrorState({
   variant = 'default',
   className = '',
 }: ErrorStateProps) {
-  const variants = {
-    default: 'bg-card',
-    danger: 'bg-danger/5',
-    warning: 'bg-warning/5',
+  const variantStyles = {
+    default: 'bg-bg-surface',
+    danger: 'bg-semantic-danger-bg/50',
+    warning: 'bg-semantic-warning-bg/50',
   };
 
   return (
     <div
       className={cn(
         'flex flex-col items-center justify-center py-16 px-8 text-center',
-        'rounded-lg border border-border',
-        variants[variant],
+        'rounded-lg border border-border-subtle',
+        variantStyles[variant],
         className,
       )}
       role="alert"
     >
       <div className={cn(
-        'size-14 rounded-2xl flex items-center justify-center mb-5',
-        variant === 'danger' ? 'bg-danger/10' : variant === 'warning' ? 'bg-warning/10' : 'bg-muted',
+        'size-14 rounded-lg flex items-center justify-center mb-5',
+        variant === 'danger' ? 'bg-semantic-danger-bg' : variant === 'warning' ? 'bg-semantic-warning-bg' : 'bg-bg-inset',
       )}>
         <AlertTriangle className={cn(
           'size-7',
-          variant === 'danger' ? 'text-danger' : variant === 'warning' ? 'text-warning' : 'text-muted-foreground/60',
+          variant === 'danger' ? 'text-semantic-danger' : variant === 'warning' ? 'text-semantic-warning' : 'text-text-tertiary',
         )} strokeWidth={1.5} />
       </div>
-      <h3 className="text-lg font-bold mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground max-w-sm mb-2">{description}</p>
+      <h3 className="text-[var(--text-heading-sm)] font-semibold mb-1 text-text-primary">{title}</h3>
+      <p className="text-sm text-text-secondary max-w-sm mb-2">{description}</p>
       {error && (
-        <p className="text-xs text-muted-foreground/60 max-w-sm mb-5 font-mono bg-muted px-3 py-1.5 rounded-md">
+        <p className="text-xs text-text-tertiary max-w-sm mb-5 font-mono bg-bg-inset px-3 py-1.5 rounded-md">
           {error}
         </p>
       )}
       {onRetry && (
-        <Button variant="outline" onClick={onRetry}>
-          <RefreshCw className="size-4 mr-2" />
+        <Button variant="secondary" onClick={onRetry}>
+          <RefreshCw className="size-4" />
           Reintentar
         </Button>
       )}

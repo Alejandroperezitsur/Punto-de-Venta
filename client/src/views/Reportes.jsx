@@ -158,21 +158,20 @@ const ReportesView = () => {
             </div>
 
             {/* Trend Comparison */}
-            <Card variant="glass" className="p-6 relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-primary/40" />
+            <Card className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="text-center md:text-right md:pr-8 md:border-r md:border-border/10">
-                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Efectivo en caja</p>
-                        <p className="text-4xl font-black text-foreground tracking-tighter tabular-nums">${data.cash.toLocaleString()}</p>
+                    <div className="text-center md:text-right md:pr-8 md:border-r md:border-border-subtle">
+                        <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-2">Efectivo en caja</p>
+                        <p className="text-4xl font-semibold text-text-primary tracking-tight tabular-nums">${data.cash.toLocaleString()}</p>
                     </div>
                     <div className="text-center md:text-left md:pl-8 flex flex-col items-center md:items-start">
-                        <p className="text-[11px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em] mb-2">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
+                        <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mb-2">Vs. el {new Date().toLocaleDateString('es-ES', { weekday: 'long' })} pasado</p>
                         <div className="flex items-center gap-3">
-                            <p className="text-4xl font-black text-foreground uppercase tracking-tight">{data.status}</p>
+                            <p className="text-4xl font-semibold text-text-primary uppercase tracking-tight">{data.status}</p>
                             {data.status === 'mejor' ? (
-                                <ArrowUpRight className="h-7 w-7 text-success stroke-[3]" />
+                                <ArrowUpRight className="h-7 w-7 text-semantic-success" strokeWidth={2.5} />
                             ) : (
-                                <ArrowDownRight className="h-7 w-7 text-warning stroke-[3]" />
+                                <ArrowDownRight className="h-7 w-7 text-semantic-warning" strokeWidth={2.5} />
                             )}
                         </div>
                     </div>
@@ -181,21 +180,21 @@ const ReportesView = () => {
 
             {/* Insight Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card variant="glass" className="flex items-center gap-4 p-5 hover:border-primary/15 hover:shadow-md transition-all duration-200">
-                    <div className="size-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
-                        <Sun className="size-5 text-primary" />
+                <Card className="flex items-center gap-4 p-5">
+                    <div className="size-12 rounded-md bg-bg-inset flex items-center justify-center shrink-0">
+                        <Sun className="size-5 text-text-secondary" />
                     </div>
-                    <p className="text-sm font-semibold leading-tight text-foreground">
-                        Tu mejor hora fue a las 2:00 PM. Mañana podrías vender más si refuerzas esa hora.
+                    <p className="text-sm font-medium leading-tight text-text-primary">
+                        Tu mejor hora fue a las 2:00 PM. Manana podrias vender mas si refuerzas esa hora.
                     </p>
                 </Card>
 
-                <Card variant="glass" className="flex items-center gap-4 p-5 hover:border-warning/15 hover:shadow-md transition-all duration-200">
-                    <div className="size-12 bg-warning/10 rounded-xl flex items-center justify-center shrink-0">
-                        <Coffee className="size-5 text-warning" />
+                <Card className="flex items-center gap-4 p-5">
+                    <div className="size-12 rounded-md bg-bg-inset flex items-center justify-center shrink-0">
+                        <Coffee className="size-5 text-text-secondary" />
                     </div>
-                    <p className="text-sm font-semibold leading-tight text-foreground">
-                        Tu producto estrella hoy fue <span className="underline decoration-2 decoration-primary/40">{data.topProduct}</span>.
+                    <p className="text-sm font-medium leading-tight text-text-primary">
+                        Tu producto estrella hoy fue <span className="font-semibold">{data.topProduct}</span>.
                     </p>
                 </Card>
             </div>
@@ -204,11 +203,11 @@ const ReportesView = () => {
             <div className="pt-2">
                 <Button
                     onClick={() => { setIsClosing(true); setClosingStep(1); setCountedCash(''); setCloseResult(null); setCloseError(''); }}
-                    size="2xl"
-                    className="w-full font-bold bg-foreground text-background hover:bg-foreground/90 shadow-lg active:scale-[0.98]"
+                    size="xl"
+                    className="w-full"
                 >
                     <DoorClosed className="h-6 w-6 mr-3" />
-                    CERRAR CAJA Y TERMINAR DÍA
+                    CERRAR CAJA Y TERMINAR DIA
                 </Button>
             </div>
 
@@ -224,18 +223,18 @@ const ReportesView = () => {
                         <p className="text-sm text-muted-foreground font-medium italic">Cuenta tu efectivo físicamente ahora mismo.</p>
 
                         {closeError && (
-                            <div className="p-3 bg-danger/10 border border-danger/15 rounded-xl text-danger text-sm font-semibold">
+                            <div className="p-3 bg-semantic-danger-bg border border-semantic-danger/15 rounded-md text-semantic-danger text-sm font-semibold">
                                 {closeError}
                             </div>
                         )}
 
                         <div className="relative">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-3xl font-bold text-muted-foreground/50 z-10">$</span>
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-3xl font-bold text-text-tertiary z-10">$</span>
                             <Input
                                 type="number"
                                 step="0.01"
                                 autoFocus
-                                className="w-full h-24 bg-muted/50 border border-border rounded-lg text-4xl font-bold text-center focus-visible:border-foreground transition-colors pl-16 pr-4"
+                                className="w-full h-24 bg-bg-inset border border-border-default rounded-md text-4xl font-bold text-center focus:border-border-strong transition-colors pl-16 pr-4"
                                 value={countedCash}
                                 onChange={(e) => setCountedCash(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') handleCloseDay(); }}
@@ -247,8 +246,8 @@ const ReportesView = () => {
                             onClick={handleCloseDay}
                             disabled={!countedCash || closeLoading}
                             isLoading={closeLoading}
-                            size="xl"
-                            className="w-full font-bold"
+                            size="lg"
+                            className="w-full"
                         >
                             VERIFICAR Y CERRAR
                         </Button>
@@ -257,28 +256,28 @@ const ReportesView = () => {
                     <div className="w-full text-center space-y-6">
                         {Math.abs(closeResult.difference) < 0.01 ? (
                             <>
-                                <div className="h-20 w-20 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto shadow-lg">
-                                    <CheckCircle2 className="h-10 w-10 stroke-[3]" />
+                                <div className="h-20 w-20 bg-semantic-success-bg text-semantic-success rounded-full flex items-center justify-center mx-auto">
+                                    <CheckCircle2 className="h-10 w-10" strokeWidth={2.5} />
                                 </div>
-                                <h2 className="text-3xl font-bold tracking-tight text-foreground">¡Caja Cerrada!</h2>
-                                <p className="text-base text-muted-foreground font-medium">
+                                <h2 className="text-3xl font-semibold tracking-tight text-text-primary">Caja Cerrada!</h2>
+                                <p className="text-base text-text-secondary font-medium">
                                     Todo cuadra perfectamente.
                                 </p>
-                                <p className="text-xs text-muted-foreground/60">
+                                <p className="text-xs text-text-tertiary">
                                     Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}
                                 </p>
                             </>
                         ) : (
                             <>
-                                <div className="h-20 w-20 bg-warning/10 text-warning rounded-full flex items-center justify-center mx-auto shadow-lg">
-                                    <AlertCircle className="h-10 w-10 stroke-[3]" />
+                                <div className="h-20 w-20 bg-semantic-warning-bg text-semantic-warning rounded-full flex items-center justify-center mx-auto">
+                                    <AlertCircle className="h-10 w-10" strokeWidth={2.5} />
                                 </div>
-                                <h2 className="text-3xl font-bold tracking-tight text-foreground">Discrepancia Detectada</h2>
-                                <p className="text-base text-muted-foreground font-medium">
+                                <h2 className="text-3xl font-semibold tracking-tight text-text-primary">Discrepancia Detectada</h2>
+                                <p className="text-base text-text-secondary font-medium">
                                     {closeResult.difference > 0 ? (
-                                        <>Sobran <span className="text-success font-bold">${closeResult.difference.toFixed(2)}</span></>
+                                        <>Sobran <span className="text-semantic-success font-bold">${closeResult.difference.toFixed(2)}</span></>
                                     ) : (
-                                        <>Faltan <span className="text-danger font-bold">${Math.abs(closeResult.difference).toFixed(2)}</span></>
+                                        <>Faltan <span className="text-semantic-danger font-bold">${Math.abs(closeResult.difference).toFixed(2)}</span></>
                                     )}
                                     <br />
                                     <span className="text-xs">Esperado: ${closeResult.expected_cash.toFixed(2)} &bull; Contado: ${closeResult.counted_cash.toFixed(2)}</span>
@@ -289,8 +288,8 @@ const ReportesView = () => {
                         <div className="pt-6">
                             <Button
                                 onClick={() => navigate('/caja')}
-                                size="xl"
-                                className="w-full font-bold bg-foreground text-background hover:brightness-110"
+                                size="lg"
+                                className="w-full"
                             >
                                 IR A CONTROL DE CAJA
                             </Button>

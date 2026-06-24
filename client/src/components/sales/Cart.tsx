@@ -52,10 +52,10 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     <div
       ref={rowRef}
       className={cn(
-        'flex items-center gap-3 py-3 px-3 rounded-xl transition-all duration-150 cart-item-enter relative',
-        isRecent && 'bg-success/[0.05]',
+        'flex items-center gap-3 py-3 px-3 rounded-md transition-all duration-150 cart-item-enter relative',
+        isRecent && 'bg-semantic-success-bg/30',
         isOutOfStock && 'opacity-40',
-        'hover:bg-muted/15',
+        'hover:bg-bg-surface-hover',
       )}
       role="listitem"
       tabIndex={0}
@@ -64,40 +64,40 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
     >
       {/* Recent item accent bar */}
       {isRecent && (
-        <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-success/50" />
+        <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full bg-semantic-success/40" />
       )}
 
       {/* Product info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate leading-tight text-foreground" title={item.name}>{item.name}</p>
+        <p className="text-sm font-semibold truncate leading-tight text-text-primary" title={item.name}>{item.name}</p>
         <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-muted-foreground/60 tabular-nums font-medium">@ {formatMoney(item.price)}</span>
+          <span className="text-xs text-text-tertiary tabular-nums font-medium">@ {formatMoney(item.price)}</span>
           {isLowStock && (
-            <span className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/12 px-1.5 py-0.5 rounded-md">
-              <span className="size-1.5 rounded-full bg-warning" />
+            <span className="flex items-center gap-1 text-xs font-semibold text-semantic-warning bg-semantic-warning-bg/50 px-1.5 py-0.5 rounded-md">
+              <span className="size-1.5 rounded-full bg-semantic-warning" />
               stock bajo
             </span>
           )}
         </div>
       </div>
 
-      {/* Quantity stepper — refined pill design */}
-      <div className="flex items-center gap-0.5 bg-muted/20 rounded-xl border border-border/15 shadow-xs">
+      {/* Quantity stepper */}
+      <div className="flex items-center gap-0.5 bg-bg-inset rounded-md border border-border-subtle">
         <button
           className={cn(
-            'size-10 flex items-center justify-center rounded-l-xl transition-all duration-100',
-            'text-muted-foreground hover:bg-muted/30 active:scale-90 active:bg-muted/50',
+            'size-10 flex items-center justify-center rounded-l-md transition-all duration-100',
+            'text-text-secondary hover:bg-bg-surface-active active:scale-90',
           )}
           onClick={() => item.quantity <= 1 ? onRemove(item.id) : onUpdateQuantity(item.id, item.quantity - 1)}
           aria-label={item.quantity <= 1 ? `Eliminar ${item.name}` : `Reducir cantidad de ${item.name}`}
         >
-          {item.quantity <= 1 ? <Trash2 className="size-4 text-danger/50" /> : <Minus className="size-4" />}
+          {item.quantity <= 1 ? <Trash2 className="size-4 text-semantic-danger/60" /> : <Minus className="size-4" />}
         </button>
-        <span className="w-12 text-center text-sm font-bold tabular-nums select-none text-foreground">{item.quantity}</span>
+        <span className="w-12 text-center text-sm font-bold tabular-nums select-none text-text-primary">{item.quantity}</span>
         <button
           className={cn(
-            'size-10 flex items-center justify-center rounded-r-xl transition-all duration-100',
-            'text-muted-foreground hover:bg-muted/30 active:scale-90 active:bg-muted/50',
+            'size-10 flex items-center justify-center rounded-r-md transition-all duration-100',
+            'text-text-secondary hover:bg-bg-surface-active active:scale-90',
           )}
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           aria-label={`Aumentar cantidad de ${item.name}`}
@@ -110,7 +110,7 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       <div className="text-right w-[80px] shrink-0">
         <span className={cn(
           'text-sm font-bold tabular-nums',
-          isRecent ? 'text-success' : 'text-foreground'
+          isRecent ? 'text-semantic-success' : 'text-text-primary'
         )}>{formatMoney(lineTotal)}</span>
       </div>
     </div>
@@ -153,20 +153,20 @@ export const Cart = memo(function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground py-8" role="status">
-        <div className="size-16 rounded-xl bg-primary/8 flex items-center justify-center mb-4 border border-border/12 shadow-sm">
-          <ShoppingBag className="size-8 text-primary/30" />
+      <div className="flex flex-col items-center justify-center h-full text-text-secondary py-8" role="status">
+        <div className="size-16 rounded-md bg-bg-inset flex items-center justify-center mb-4">
+          <ShoppingBag className="size-8 text-text-disabled" />
         </div>
-        <p className="text-base font-bold text-foreground/70 mb-2">Carrito vacío</p>
-        <p className="text-sm text-muted-foreground/60 max-w-xs text-center leading-relaxed">
-          Escanee un código de barras o busque productos para agregarlos a la venta
+        <p className="text-base font-semibold text-text-primary mb-2">Carrito vacio</p>
+        <p className="text-sm text-text-tertiary max-w-xs text-center">
+          Escanee un codigo de barras o busque productos para agregarlos a la venta
         </p>
         <button
           onClick={() => {
             const input = document.querySelector('[data-scan-input]');
             if (input instanceof HTMLElement) input.focus();
           }}
-          className="mt-4 px-4 py-2 rounded-lg text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/15 transition-colors"
+          className="mt-4 px-4 py-2 rounded-md text-sm font-medium text-action-primary bg-bg-surface-hover hover:bg-bg-surface-active transition-colors"
         >
           Escanear producto
         </button>

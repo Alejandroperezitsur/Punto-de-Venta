@@ -12,7 +12,6 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   placeholder?: string;
   size?: 'sm' | 'md' | 'lg';
   error?: string;
-  icon?: React.ReactNode;
   label?: string;
 }
 
@@ -23,29 +22,23 @@ const sizeStyles = {
 };
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, options, placeholder, size = 'md', error, icon, label, ...props }, ref) => {
+  ({ className, options, placeholder, size = 'md', error, label, ...props }, ref) => {
     return (
       <div className="relative w-full">
         {label && (
-          <label className="block text-sm font-semibold text-muted-foreground mb-1.5 ml-0.5">
+          <label className="block text-xs font-semibold text-text-tertiary mb-1.5 ml-0.5">
             {label}
           </label>
         )}
         <div className="relative">
-          {icon && (
-            <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none z-10">
-              {icon}
-            </div>
-          )}
           <select
             ref={ref}
             className={cn(
-              'w-full appearance-none rounded-xl border bg-card text-foreground',
-              'transition-all duration-200',
-              'focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring/40',
+              'w-full appearance-none rounded-sm border bg-bg-inset text-text-primary',
+              'transition-all duration-150',
+              'focus:outline-none focus:ring-2 focus:ring-focus-ring/30 focus:border-border-strong',
               'disabled:opacity-40 disabled:cursor-not-allowed',
-              error ? 'border-danger/40 focus:border-danger/50 focus:ring-danger/20' : 'border-border/30 hover:border-border/50',
-              icon && 'pl-9',
+              error ? 'border-semantic-danger/50 focus:border-semantic-danger' : 'border-border-default',
               sizeStyles[size],
               className,
             )}
@@ -58,12 +51,12 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
-          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none">
             <ChevronDown className="size-3.5" />
           </div>
         </div>
         {error && (
-          <p className="text-xs font-medium text-danger/80 mt-1 ml-0.5">{error}</p>
+          <p className="text-xs font-medium text-semantic-danger mt-1 ml-0.5">{error}</p>
         )}
       </div>
     );
