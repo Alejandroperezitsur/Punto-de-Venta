@@ -22,7 +22,7 @@ export function Support() {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <nav className="border-b border-border/40 bg-card/80 backdrop-blur-md sticky top-0 z-[var(--z-sticky)]">
+            <nav className="border-b border-border-subtle bg-bg-surface sticky top-0 z-[var(--z-sticky)]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                     <Link to="/" className="text-2xl font-bold text-primary">POS Pro</Link>
                 </div>

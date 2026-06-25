@@ -1,54 +1,26 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-interface SkeletonProps {
-  className?: string;
-  variant?: 'text' | 'card' | 'avatar' | 'table-row' | 'chart';
+const variants = {
+  text: 'h-3 rounded w-3/4',
+  card: 'h-32 rounded-lg w-full',
+  'table-row': 'h-[var(--table-row-height)] rounded w-full',
+  chart: 'h-48 rounded-lg w-full',
+};
+
+interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: keyof typeof variants;
 }
 
-function Skeleton({ className, variant = 'text' }: SkeletonProps) {
-  return (
+const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+  ({ className, variant = 'text', ...props }, ref) => (
     <div
-      className={cn(
-        'shimmer rounded-md',
-        variant === 'text' && 'h-4 w-full',
-        variant === 'card' && 'h-48 w-full rounded-lg',
-        variant === 'avatar' && 'size-12 rounded-full',
-        variant === 'table-row' && 'h-12 w-full',
-        variant === 'chart' && 'h-32 w-full rounded-lg',
-        className,
-      )}
+      ref={ref}
+      className={cn('bg-bg-inset shimmer', variants[variant], className)}
+      {...props}
     />
-  );
-}
+  ),
+);
+Skeleton.displayName = 'Skeleton';
 
-function SkeletonCard() {
-  return (
-    <div className="space-y-4 p-5 rounded-lg border border-border bg-card">
-      <Skeleton variant="avatar" className="size-14" />
-      <div className="space-y-2">
-        <Skeleton className="h-5 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-      </div>
-      <Skeleton className="h-10 w-full" />
-    </div>
-  );
-}
-
-function SkeletonTable({ rows = 5 }: { rows?: number }) {
-  return (
-    <div className="space-y-3">
-      <div className="flex gap-4 p-4">
-        {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-4 flex-1" />)}
-      </div>
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex gap-4 p-4 border-t border-border">
-          {[1, 2, 3, 4].map(j => <Skeleton key={j} className="h-4 flex-1" />)}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export { Skeleton, SkeletonCard, SkeletonTable };
-export type { SkeletonProps };
+export { Skeleton };

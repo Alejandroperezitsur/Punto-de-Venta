@@ -1,75 +1,58 @@
-﻿import React, { useState } from 'react';
-import { cn } from '../../utils/cn';
+﻿import React from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
-  size?: 'sm' | 'md' | 'lg';
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ReactNode;
   error?: string;
-  success?: boolean;
-  label?: string;
-  showPasswordToggle?: boolean;
+  success?: string;
 }
 
-const sizeStyles = {
-  sm: 'h-[var(--control-sm)] text-sm px-3',
-  md: 'h-[var(--control-md)] text-sm px-3.5',
-  lg: 'h-12 text-[var(--text-body)] px-4',
-};
-
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size = 'md', icon, error, success, label, showPasswordToggle, type, ...props }, ref) => {
-    const [showPassword, setShowPassword] = useState(false);
-    const resolvedType = showPasswordToggle ? (showPassword ? 'text' : 'password') : type;
+  ({ className, type, icon, error, success, ...props }, ref) => {
+    const [showPassword, setShowPassword] = React.useState(false);
+    const isPassword = type === 'password';
+    const inputType = isPassword && showPassword ? 'text' : type;
 
     return (
-      <div className="relative w-full">
-        {label && (
-          <label className="block text-xs font-semibold text-text-tertiary mb-1.5 ml-0.5">
-            {label}
-          </label>
+      <div className="relative">
+        {icon && (
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary">
+            {icon}
+          </span>
         )}
-        <div className="relative">
-          {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none">
-              {icon}
-            </div>
+        <input
+          ref={ref}
+          type={inputType}
+          className={cn(
+            'w-full h-[var(--control-lg)] rounded-md border bg-bg-surface px-3 text-sm',
+            'text-text-primary placeholder:text-text-tertiary',
+            'transition-all duration-150',
+            'focus:outline-none focus:ring-2 focus:ring-focus-ring/20 focus:border-focus-ring/40',
+            icon && 'pl-9',
+            isPassword && 'pr-10',
+            error
+              ? 'border-danger/40 focus:border-danger focus:ring-danger/20'
+              : success
+                ? 'border-success/40 focus:border-success focus:ring-success/20'
+                : 'border-border-default hover:border-border-strong',
+            className,
           )}
-          <input
-            ref={ref}
-            type={resolvedType || 'text'}
-            className={cn(
-              'w-full rounded-sm border bg-bg-inset text-text-primary placeholder:text-text-tertiary',
-              'transition-all duration-150',
-              'focus:outline-none focus:ring-2 focus:ring-focus-ring/30 focus:border-border-strong',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-              'file:border-0 file:bg-transparent file:text-sm file:font-medium',
-              icon && 'pl-10',
-              showPasswordToggle && 'pr-10',
-              error ? 'border-semantic-danger/50 focus:border-semantic-danger' : 'border-border-default',
-              success && 'border-semantic-success/50 focus:border-semantic-success',
-              sizeStyles[size],
-              className,
-            )}
-            {...props}
-          />
-
-          {showPasswordToggle && (
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors p-0.5"
-              tabIndex={-1}
-              aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
-            >
-              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          )}
-        </div>
-
-        {error && (
-          <p className="text-xs font-medium text-semantic-danger mt-1.5 ml-0.5">{error}</p>
+          {...props}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-text-tertiary hover:text-text-primary transition-colors"
+            tabIndex={-1}
+            aria-label={showPassword ? 'Ocultar' : 'Mostrar'}
+          >
+            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
         )}
+        {error && <p className="mt-1 text-xs text-danger font-medium">{error}</p>}
+        {success && <p className="mt-1 text-xs text-success font-medium">{success}</p>}
       </div>
     );
   },

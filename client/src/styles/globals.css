@@ -1,140 +1,107 @@
 ﻿@import "tailwindcss";
 @import "./tokens.css";
-@import "./themes.css";
+@import "./colors.css";
 
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ═══════════════════════════════════════════════════════════════════
-   SIGNAL DESIGN SYSTEM™ v1.0 — Tailwind Bridge & Global Styles
-   APV Labs Design Studio — June 2026
+   APEX DESIGN SYSTEM™ v2.0 — Tailwind Bridge & Global Styles
+   POS Pro — June 2026
    ═══════════════════════════════════════════════════════════════════ */
 
 @theme inline {
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
-  /* Background surfaces */
-  --color-bg-app:            hsl(var(--bg-app));
-  --color-bg-surface:        hsl(var(--bg-surface));
-  --color-bg-surface-hover:  hsl(var(--bg-surface-hover));
-  --color-bg-surface-active: hsl(var(--bg-surface-active));
-  --color-bg-inset:          hsl(var(--bg-inset));
+  /* Backgrounds */
+  --color-bg-app:            var(--bg-app);
+  --color-bg-surface:        var(--bg-surface);
+  --color-bg-surface-raised: var(--bg-surface-raised);
+  --color-bg-surface-hover:  var(--bg-surface-hover);
+  --color-bg-surface-active: var(--bg-surface-active);
+  --color-bg-inset:          var(--bg-inset);
 
   /* Text */
-  --color-text-primary:   hsl(var(--text-primary));
-  --color-text-secondary: hsl(var(--text-secondary));
-  --color-text-tertiary:  hsl(var(--text-tertiary));
-  --color-text-disabled:  hsl(var(--text-disabled));
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary:  var(--text-tertiary);
+  --color-text-disabled:  var(--text-disabled);
 
   /* Borders */
-  --color-border-subtle:  hsl(var(--border-subtle));
-  --color-border-default: hsl(var(--border-default));
-  --color-border-strong:  hsl(var(--border-strong));
+  --color-border-subtle:  var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong:  var(--border-strong);
 
   /* Actions */
-  --color-action-primary:       hsl(var(--action-primary));
-  --color-action-primary-hover: hsl(var(--action-primary-hover));
-  --color-action-secondary:     hsl(var(--action-secondary));
+  --color-action-primary:        var(--action-primary);
+  --color-action-primary-hover:  var(--action-primary-hover);
+  --color-action-secondary:      var(--action-secondary);
+  --color-action-secondary-hover: var(--action-secondary-hover);
 
-  /* Focus */
-  --color-focus-ring: hsl(var(--focus-ring));
+  /* Focus ring */
+  --color-focus-ring: var(--focus-ring);
+
+  /* Accent */
+  --color-accent:       var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-bg:    var(--accent-bg);
+  --color-accent-text:  var(--accent-text);
 
   /* Semantic */
-  --color-semantic-success:    hsl(var(--semantic-success));
-  --color-semantic-success-bg: hsl(var(--semantic-success-bg));
-  --color-semantic-warning:    hsl(var(--semantic-warning));
-  --color-semantic-warning-bg: hsl(var(--semantic-warning-bg));
-  --color-semantic-danger:     hsl(var(--semantic-danger));
-  --color-semantic-danger-bg:  hsl(var(--semantic-danger-bg));
-  --color-semantic-info:       hsl(var(--semantic-info));
-  --color-semantic-info-bg:    hsl(var(--semantic-info-bg));
-
-  /* Data viz */
-  --color-data-ink:    hsl(var(--data-ink));
-  --color-data-blue:   hsl(var(--data-blue));
-  --color-data-forest: hsl(var(--data-forest));
-  --color-data-ember:  hsl(var(--data-ember));
-  --color-data-violet: hsl(var(--data-violet));
-  --color-data-ocean:  hsl(var(--data-ocean));
-  --color-data-clay:   hsl(var(--data-clay));
-  --color-data-indigo: hsl(var(--data-indigo));
-
-  /* Legacy compatibility aliases — maps old Tailwind utility classes to Signal */
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-surface: hsl(var(--surface));
-  --color-surface-foreground: hsl(var(--surface-foreground));
-  --color-surface-hover: hsl(var(--surface-hover));
-  --color-surface-elevated: hsl(var(--surface-elevated));
-  --color-surface-glass: hsl(var(--surface-glass));
-  --color-surface-inset: hsl(var(--surface-inset));
-  --color-surface-accent: hsl(var(--surface-accent));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-border: hsl(var(--border));
-  --color-border-subtle: hsl(var(--border-subtle));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-success: hsl(var(--success));
-  --color-success-foreground: hsl(var(--success-foreground));
-  --color-warning: hsl(var(--warning));
-  --color-warning-foreground: hsl(var(--warning-foreground));
-  --color-danger: hsl(var(--danger));
-  --color-danger-foreground: hsl(var(--danger-foreground));
-  --color-info: hsl(var(--info));
-  --color-info-foreground: hsl(var(--info-foreground));
-  --color-pos-checkout: hsl(var(--pos-checkout));
-  --color-pos-hold: hsl(var(--pos-hold));
-  --color-pos-offline: hsl(var(--pos-offline));
-  --color-surface-panel: hsl(var(--surface-panel));
-  --color-border-accent: hsl(var(--border-accent));
-  --color-surface-command: hsl(var(--surface-command));
-  --color-surface-metric: hsl(var(--surface-metric));
-  --color-surface-sidebar-active: hsl(var(--surface-sidebar-active));
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
+  --color-success:       var(--success);
+  --color-success-bg:    var(--success-bg);
+  --color-success-text:  var(--success-text);
+  --color-warning:       var(--warning);
+  --color-warning-bg:    var(--warning-bg);
+  --color-warning-text:  var(--warning-text);
+  --color-danger:        var(--danger);
+  --color-danger-bg:     var(--danger-bg);
+  --color-danger-text:   var(--danger-text);
+  --color-info:          var(--info);
+  --color-info-bg:       var(--info-bg);
+  --color-info-text:     var(--info-text);
 
   /* Radii */
-  --radius-none: var(--radius-none);
   --radius-sm:   var(--radius-sm);
   --radius-md:   var(--radius-md);
   --radius-lg:   var(--radius-lg);
+  --radius-xl:   var(--radius-xl);
   --radius-full: var(--radius-full);
 
-  /* Shadows */
-  --shadow-overlay:  var(--shadow-overlay);
+  /* Shadows — only two */
+  --shadow-dialog:   var(--shadow-dialog);
   --shadow-dropdown: var(--shadow-dropdown);
-  --shadow-none: none;
-  --shadow-xs:  none;
-  --shadow-sm:  none;
-  --shadow-md:  none;
-  --shadow-lg:  none;
-  --shadow-xl:  none;
-  --shadow-2xl: none;
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-glow: none;
+  --shadow-none:     var(--shadow-none);
+  --shadow-xs:       none;
+  --shadow-sm:       none;
+  --shadow-md:       none;
+  --shadow-lg:       none;
+  --shadow-xl:       none;
+  --shadow-2xl:      none;
+
+  /* Legacy aliases — for pages and modals that use old token names */
+  --color-card:              var(--bg-surface);
+  --color-card-foreground:   var(--text-primary);
+  --color-foreground:        var(--text-primary);
+  --color-muted-foreground:  var(--text-secondary);
+  --color-muted:             var(--bg-inset);
+  --color-primary:           var(--action-primary);
+  --color-primary-foreground: var(--bg-surface);
+  --color-background:        var(--bg-app);
+  --color-secondary:         var(--bg-surface-hover);
+  --color-secondary-foreground: var(--text-primary);
+  --color-popover:           var(--bg-surface);
+  --color-popover-foreground: var(--text-primary);
+  --color-ring:              var(--focus-ring);
+  --color-input:             var(--border-default);
+  --color-border:            var(--border-default);
+  --color-surface-hover:     var(--bg-surface-hover);
 }
 
 /* ── Reset & Base ── */
-*,
-*::before,
-*::after {
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -149,8 +116,8 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: hsl(var(--bg-app));
-  color: hsl(var(--text-primary));
+  background: var(--bg-app);
+  color: var(--text-primary);
   font-size: var(--text-body);
   line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
@@ -166,27 +133,22 @@ body {
 }
 
 ::selection {
-  background: hsl(var(--action-primary) / 0.12);
-  color: hsl(var(--text-primary));
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--text-primary);
 }
 
-/* ── Focus Ring™ — Signal Design System ── */
+/* ── Focus Ring ── */
 :focus-visible {
-  outline: 2px solid hsl(var(--focus-ring) / 0.40);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-  border-radius: 1px;
+  border-radius: 2px;
 }
 
-/* ── Scrollbar — minimal, OS-respecting ── */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* ── Scrollbar minimal ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--text-tertiary) / 0.15);
+  background: var(--text-disabled);
   border-radius: var(--radius-full);
 }
 
@@ -194,19 +156,11 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
-  color: hsl(var(--text-primary));
+  color: var(--text-primary);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; height: auto; display: block; }
 
 /* ── Accessibility ── */
 .skip-to-content {
@@ -215,23 +169,13 @@ img {
   left: var(--space-3);
   z-index: var(--z-max);
   padding: var(--space-1) var(--space-3);
-  background: hsl(var(--action-primary));
-  color: hsl(var(--bg-surface));
+  background: var(--action-primary);
+  color: var(--bg-surface);
   border-radius: var(--radius-md);
   font-size: var(--text-label);
   font-weight: var(--weight-medium);
 }
-.skip-to-content:focus {
-  top: var(--space-3);
-}
-
-[data-motion="reduced"] *,
-[data-motion="reduced"] *::before,
-[data-motion="reduced"] *::after {
-  animation-duration: 0.01ms !important;
-  animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
-}
+.skip-to-content:focus { top: var(--space-3); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -251,8 +195,7 @@ img {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   SIGNAL BAR™ — APV Labs visual signature
-   2px contextual bar at top of the viewport
+   SIGNAL BAR™ — 2px contextual status bar
    ═══════════════════════════════════════════════════════════════════ */
 
 .signal-bar {
@@ -267,22 +210,10 @@ img {
   pointer-events: none;
 }
 
-.signal-bar--operating {
-  background: hsl(var(--semantic-success));
-}
-
-.signal-bar--offline {
-  background: hsl(var(--semantic-warning));
-  animation: signalBreathe 2s ease infinite;
-}
-
-.signal-bar--syncing {
-  background: hsl(var(--semantic-info));
-}
-
-.signal-bar--error {
-  background: hsl(var(--semantic-danger));
-}
+.signal-bar--operating { background: var(--success); }
+.signal-bar--offline   { background: var(--warning); animation: signalBreathe 2s ease infinite; }
+.signal-bar--syncing   { background: var(--info); }
+.signal-bar--error     { background: var(--danger); }
 
 @keyframes signalBreathe {
   0%, 100% { opacity: 1; }
@@ -290,19 +221,9 @@ img {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   ANIMATIONS — Purposeful, minimal, fast
+   ANIMATIONS
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Number tick — odometer effect for monetary values */
-@keyframes numberTick {
-  from { transform: translateY(-6px); opacity: 0.4; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-.animate-number-tick {
-  animation: numberTick 0.18s var(--ease-spring) forwards;
-}
-
-/* Fade in — for modals, overlays */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -311,7 +232,6 @@ img {
   animation: fadeIn var(--duration-slow) var(--ease-out) forwards;
 }
 
-/* Scale in — for dropdowns, popovers */
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.95); }
   to   { opacity: 1; transform: scale(1); }
@@ -320,40 +240,36 @@ img {
   animation: scaleIn var(--duration-fast) var(--ease-spring) forwards;
 }
 
-/* Slide up — for sheets, toasts */
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-slide-up {
   animation: slideUp var(--duration-slow) var(--ease-out-expo) forwards;
 }
 
-/* Slide in right — for sheets from right */
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(16px); }
-  to   { opacity: 1; transform: translateX(0); }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.animate-slide-in-right {
-  animation: slideInRight var(--duration-slower) var(--ease-out-expo) forwards;
+.animate-slide-down {
+  animation: slideDown var(--duration-slow) var(--ease-out-expo) forwards;
 }
 
-/* Shimmer — loading skeleton */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, hsl(var(--bg-inset)) 25%, hsl(var(--bg-surface-hover)) 50%, hsl(var(--bg-inset)) 75%);
+  background: linear-gradient(90deg, var(--bg-inset) 25%, var(--bg-surface-hover) 50%, var(--bg-inset) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s ease infinite;
 }
 
-/* Success pulse — scan feedback, payment success */
 @keyframes successPulse {
-  0%   { box-shadow: 0 0 0 0 hsl(var(--semantic-success) / 0.3); }
-  50%  { box-shadow: 0 0 0 8px hsl(var(--semantic-success) / 0); }
-  100% { box-shadow: 0 0 0 0 hsl(var(--semantic-success) / 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.3); }
+  50%  { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
 }
 .animate-success-pulse {
   animation: successPulse 0.6s var(--ease-out) forwards;
@@ -365,26 +281,6 @@ img {
 }
 .press-effect:active {
   transform: scale(0.97);
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   LAYOUT UTILITIES
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* Breathing content container */
-.content-container {
-  width: 100%;
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-  padding-left: var(--page-margin);
-  padding-right: var(--page-margin);
-}
-
-@media (min-width: 1024px) {
-  .content-container {
-    padding-left: var(--page-margin-lg);
-    padding-right: var(--page-margin-lg);
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════

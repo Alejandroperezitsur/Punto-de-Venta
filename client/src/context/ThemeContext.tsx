@@ -6,14 +6,12 @@ interface ThemeContextValue {
   isDark: boolean;
   setTheme: (name: string) => Promise<void>;
   toggleDark: () => Promise<void>;
-  themes: string[];
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const STORAGE_KEY = 'theme';
 const DEFAULT_THEME = 'light';
-const THEMES = ['light', 'dark'];
 
 async function persistTheme(name: string) {
   try {
@@ -26,7 +24,7 @@ async function persistTheme(name: string) {
 function getInitialTheme(): string {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored && THEMES.includes(stored)) return stored;
+    if (stored === 'light' || stored === 'dark') return stored;
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
   } catch {}
   return DEFAULT_THEME;
@@ -48,7 +46,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setTheme = useCallback(async (name: string) => {
-    const normalized = THEMES.includes(name) ? name : DEFAULT_THEME;
+    const normalized = name === 'dark' ? 'dark' : 'light';
     await syncTheme(normalized);
   }, [syncTheme]);
 
@@ -77,7 +75,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     isDark: theme === 'dark',
     setTheme,
     toggleDark,
-    themes: THEMES,
   }), [theme, setTheme, toggleDark]);
 
   return (

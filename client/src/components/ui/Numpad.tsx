@@ -1,55 +1,59 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { cn } from '../../utils/cn';
 
 interface NumpadProps {
-  onKey: (val: string) => void;
+  onInput: (value: string) => void;
+  onDelete: () => void;
+  onSubmit?: () => void;
   disabled?: boolean;
-  showDecimal?: boolean;
   className?: string;
 }
 
-const KEYS = [
-  ['7', '8', '9'],
-  ['4', '5', '6'],
-  ['1', '2', '3'],
-  ['0', '.', 'DEL'],
-];
+const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '\u232B'];
 
-export function Numpad({ onKey, disabled = false, showDecimal = true, className }: NumpadProps) {
-  const handlePress = (key: string) => {
-    if (!disabled) {
-      onKey(key);
-      navigator.vibrate?.(10);
+const Numpad = React.memo(function Numpad({ onInput, onDelete, onSubmit, disabled, className }: NumpadProps) {
+  const handleClick = useCallback((key: string) => {
+    if (disabled) return;
+    if (key === '\u232B') {
+      onDelete();
+      try { navigator.vibrate?.(10); } catch {}
+    } else {
+      onInput(key);
+      try { navigator.vibrate?.(8); } catch {}
     }
-  };
+  }, [onInput, onDelete, disabled]);
 
   return (
-    <div className={cn('grid grid-cols-3 gap-2', className)} aria-label="Teclado numerico">
-      {KEYS.map((row, ri) => (
-        row.map((key) => {
-          if (key === '.' && !showDecimal) return null;
-          const isSpecial = key === 'DEL';
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handlePress(key)}
-              disabled={disabled}
-              className={cn(
-                'min-h-[48px] rounded-md border text-lg font-semibold transition-all duration-100 flex items-center justify-center active:scale-[0.94]',
-                isSpecial
-                  ? 'bg-semantic-danger-bg text-semantic-danger border-semantic-danger/20'
-                  : 'bg-bg-surface text-text-primary border-border-subtle hover:bg-bg-surface-hover active:bg-bg-surface-active',
-                disabled && 'opacity-40 cursor-not-allowed',
-                key === '0' && ri === 3 && !showDecimal && 'col-span-3',
-              )}
-              aria-label={isSpecial ? 'Borrar' : key}
-            >
-              {isSpecial ? '\u232B' : key}
-            </button>
-          );
-        })
+    <div className={cn('grid grid-cols-3 gap-2', className)}>
+      {KEYS.map(k => (
+        <button
+          key={k}
+          onClick={() => handleClick(k)}
+          disabled={disabled}
+          className={cn(
+            'rounded-md border text-lg font-semibold transition-all duration-100 flex items-center justify-center press-effect',
+            'min-h-[48px]',
+            k === '\u232B'
+              ? 'bg-danger-bg text-danger border-danger/20 hover:bg-danger/10'
+              : 'bg-bg-surface text-text-primary border-border-subtle hover:bg-bg-surface-hover active:bg-bg-surface-active',
+            disabled && 'opacity-40 cursor-not-allowed',
+          )}
+          aria-label={k === '\u232B' ? 'Borrar' : k}
+        >
+          {k}
+        </button>
       ))}
+      {onSubmit && (
+        <button
+          onClick={onSubmit}
+          disabled={disabled}
+          className="col-span-3 rounded-md bg-action-primary text-[var(--bg-surface)] text-base font-semibold h-12 transition-all duration-150 press-effect disabled:opacity-40"
+        >
+          Aceptar
+        </button>
+      )}
     </div>
   );
-}
+});
+
+export { Numpad };

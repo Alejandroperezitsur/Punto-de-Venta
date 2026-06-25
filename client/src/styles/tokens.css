@@ -1,100 +1,94 @@
 ﻿/* ═══════════════════════════════════════════════════════════════════
-   SIGNAL DESIGN SYSTEM™ v1.0 — Design Tokens
-   APV Labs Design Studio — June 2026
+   APEX DESIGN SYSTEM™ v2.0 — Design Tokens
+   POS Pro — June 2026
    ═══════════════════════════════════════════════════════════════════ */
 
 :root {
   /* ── Typography ── */
-  --font-sans: 'Inter Display', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
 
-  /* Modular scale based on minor golden ratio (1.25) with optical adjustments */
-  --text-caption:   0.6875rem;  /* 11px — badges, extreme metadata, keyboard shortcuts */
-  --text-label:     0.75rem;    /* 12px — labels, column headers, states */
-  --text-body-sm:   0.8125rem;  /* 13px — secondary text, descriptions, help text */
-  --text-body:      0.9375rem;  /* 15px — primary text, paragraphs, menu options */
-  --text-body-lg:   1.0625rem;  /* 17px — featured text, summaries */
-  --text-ui:        0.875rem;   /* 14px — button labels, chips, tabs */
-  --text-heading-xs: 1.125rem;  /* 18px — small section titles */
-  --text-heading-sm: 1.375rem;  /* 22px — card titles, panel headers */
-  --text-heading-md: 1.75rem;   /* 28px — page titles, modal headers */
-  --text-heading-lg: 2.25rem;   /* 36px — dashboard titles, main screens */
-  --text-heading-xl: 2.875rem;  /* 46px — hero numbers, primary KPI */
-  --text-display:   3.625rem;   /* 58px — sale total, cobro screen */
-  --text-mega:      4.5rem;     /* 72px — full-screen total mode for touch */
+  --text-caption:   0.6875rem;  /* 11px — badges, keyboard shortcuts */
+  --text-label:     0.75rem;    /* 12px — labels, column headers, metadata */
+  --text-body-sm:   0.8125rem;  /* 13px — secondary text, descriptions */
+  --text-body:      0.875rem;   /* 14px — primary UI text, paragraphs */
+  --text-body-lg:   1rem;       /* 16px — featured text, summaries */
+  --text-heading-sm: 1.125rem;  /* 18px — card titles, section headers */
+  --text-heading-md: 1.25rem;   /* 20px — modal headers, panel titles */
+  --text-heading-lg: 1.5rem;    /* 24px — page titles */
+  --text-display:   2rem;       /* 32px — hero numbers, KPIs, totals */
 
   --leading-none:   1;
   --leading-tight:  1.2;
   --leading-snug:   1.3;
   --leading-normal: 1.5;
 
-  /* Weights: only 400, 500, 600, 700 */
   --weight-regular:  400;
   --weight-medium:   500;
   --weight-semibold: 600;
   --weight-bold:     700;
 
-  --tracking-tighter: -0.04em;
   --tracking-tight:   -0.02em;
-  --tracking-normal:  0;
-  --tracking-wide:    0.02em;
-  --tracking-wider:   0.04em;
+  --tracking-normal:   0;
+  --tracking-wide:     0.02em;
+  --tracking-wider:    0.04em;
 
   /* ── Spacing — 4px base grid ── */
   --space-0:  0;
-  --space-1:  0.25rem;   /* 4px */
-  --space-2:  0.5rem;    /* 8px */
-  --space-3:  0.75rem;   /* 12px */
-  --space-4:  1rem;      /* 16px */
-  --space-5:  1.25rem;   /* 20px */
-  --space-6:  1.5rem;    /* 24px */
-  --space-8:  2rem;      /* 32px */
-  --space-10: 2.5rem;    /* 40px */
-  --space-12: 3rem;      /* 48px */
-  --space-16: 4rem;      /* 64px */
-  --space-20: 5rem;      /* 80px */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
 
-  /* Contextual spacing */
-  --gap-card-grid:   var(--space-3);   /* 12px — dense card grid */
-  --gap-section:     var(--space-4);   /* 16px — standard gap */
-  --gap-form:        var(--space-4);   /* 16px — between form fields */
-  --gap-list:        var(--space-1);   /* 4px — continuous list items */
-  --gap-list-group:  var(--space-2);   /* 8px — between list groups */
-  --padding-input:   10px 12px;
+  --gap-card-grid:   var(--space-3);
+  --gap-section:     var(--space-4);
+  --gap-form:        var(--space-4);
+  --gap-list:        var(--space-1);
+
+  --padding-input:   8px 12px;
   --padding-button:  8px 16px;
-  --padding-card:    var(--space-5);   /* 20px */
-  --padding-modal:   var(--space-6);   /* 24px */
-  --page-margin:     var(--space-6);   /* 24px tablet */
-  --page-margin-lg:  var(--space-10);  /* 40px desktop */
+  --padding-card:    var(--space-5);
+  --padding-modal:   var(--space-6);
+
+  --page-margin:     var(--space-6);
+  --page-margin-lg:  var(--space-10);
   --page-max-width:  1400px;
+
   --table-row-height: 40px;
   --table-header-height: 36px;
-  --max-line-length: 65ch;
 
   /* ── Border Radii ── */
-  --radius-none: 0;
-  --radius-sm:   4px;    /* inputs, selects, form fields */
-  --radius-md:   6px;    /* buttons, chips, badges, small cards */
-  --radius-lg:   8px;    /* cards, modals, sheets, drawers, panels */
-  --radius-full: 9999px; /* pills only: status badges, filter chips, counters */
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
 
-  /* ── Shadows — overlaid elements only ── */
-  --shadow-overlay:  0 0 0 1px rgba(0,0,0,0.05), 0 8px 32px rgba(0,0,0,0.12);
-  --shadow-dropdown: 0 0 0 1px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-none: none;
+  /* ── Shadows — only for elevated overlays ── */
+  --shadow-dialog:   0 0 0 1px rgba(0,0,0,0.06), 0 8px 40px rgba(0,0,0,0.12);
+  --shadow-dropdown: 0 0 0 1px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-none:     0 0 0 0 transparent;
 
-  /* ── Elevation by background color (not shadow) ── */
-  /* Level 0 = --bg-app, Level 1 = --bg-surface, Level 2 = --bg-inset, Level 3 = overlay */
+  /* Dark mode shadows */
+  --shadow-dialog-dark:   0 0 0 1px rgba(255,255,255,0.05), 0 8px 40px rgba(0,0,0,0.50);
+  --shadow-dropdown-dark: 0 0 0 1px rgba(255,255,255,0.03), 0 4px 16px rgba(0,0,0,0.35);
 
   /* ── Control Heights ── */
-  --control-sm: 1.75rem;  /* 28px */
-  --control-md: 2.25rem;  /* 36px */
-  --control-lg: 2.75rem;  /* 44px */
-  --control-xl: 3.5rem;   /* 56px — primary CTAs like Cobrar */
+  --control-sm: 1.75rem;
+  --control-md: 2.25rem;
+  --control-lg: 2.75rem;
+  --control-xl: 3.5rem;
 
   /* ── Layout ── */
-  --toolbar-height: 3rem;      /* 48px */
-  --touchbar-height: 3.5rem;   /* 56px — bottom nav for touch */
+  --toolbar-height: 3rem;
+  --touchbar-height: 3.5rem;
   --signal-bar-height: 2px;
 
   /* ── Z-Index Scale ── */
@@ -111,20 +105,14 @@
   --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
 
-  --duration-instant:  60ms;
-  --duration-fast:    100ms;
+  --duration-instant:  80ms;
+  --duration-fast:    120ms;
   --duration-normal:  150ms;
   --duration-slow:    200ms;
   --duration-slower:  300ms;
-  --duration-deliberate: 450ms;
 
   /* ── Touch Targets ── */
-  --touch-target-min: 2.75rem;  /* 44px — minimum */
-  --touch-target-opt: 3rem;     /* 48px — optimal */
-  --touch-target-lg:  3.5rem;   /* 56px — large */
-  --touch-target-xl:  5rem;     /* 80px — kiosk Cobrar button */
-
-  /* ── Blur ── */
-  --blur-backdrop: 4px;
-  --blur-overlay:  8px;
+  --touch-target-min: 2.75rem;
+  --touch-target-opt: 3rem;
+  --touch-target-lg:  3.5rem;
 }

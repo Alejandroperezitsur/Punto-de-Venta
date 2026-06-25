@@ -4,8 +4,7 @@ import { cn } from '../../utils/cn';
 interface Segment {
   key: string;
   label: string;
-  icon?: React.ComponentType<{ className?: string }>;
-  count?: number;
+  icon?: React.ElementType;
 }
 
 interface SegmentedControlProps {
@@ -16,37 +15,37 @@ interface SegmentedControlProps {
   className?: string;
 }
 
-export function SegmentedControl({ segments, value, onChange, size = 'sm', className }: SegmentedControlProps) {
+const SegmentedControl = React.memo(function SegmentedControl({
+  segments, value, onChange, size = 'md', className,
+}: SegmentedControlProps) {
   return (
-    <div className={cn('flex items-center rounded-xl border border-border/15 bg-muted/10 p-0.5 overflow-hidden shrink-0', className)}>
-      {segments.map(({ key, label, icon: Icon, count }) => {
-        const isActive = value === key;
+    <div className={cn(
+      'inline-flex rounded-lg bg-bg-inset p-0.5',
+      size === 'sm' ? 'h-8' : 'h-9',
+      className,
+    )}>
+      {segments.map(s => {
+        const active = value === s.key;
+        const Icon = s.icon;
         return (
           <button
-            key={key}
-            onClick={() => onChange(key)}
+            key={s.key}
+            onClick={() => onChange(s.key)}
             className={cn(
-              'flex items-center gap-1.5 font-semibold transition-all duration-150 whitespace-nowrap rounded-lg',
-              size === 'sm' ? 'px-2.5 h-[var(--control-sm)] text-xs' : 'px-3 h-[var(--control-md)] text-sm',
-              isActive
-                ? 'bg-card text-foreground shadow-sm border border-border/20'
-                : 'text-muted-foreground/50 hover:text-foreground hover:bg-muted/20 border border-transparent',
+              'flex items-center gap-1.5 rounded-md font-medium transition-all duration-150',
+              size === 'sm' ? 'px-2.5 text-xs' : 'px-3 text-sm',
+              active
+                ? 'bg-bg-surface text-text-primary'
+                : 'text-text-tertiary hover:text-text-secondary',
             )}
-            aria-pressed={isActive}
           >
-            {Icon && <Icon className={cn('size-3.5 shrink-0', isActive ? 'text-primary' : '')} />}
-            <span>{label}</span>
-            {count !== undefined && (
-              <span className={cn(
-                'text-xs tabular-nums font-bold px-1.5 py-0.5 rounded-md min-w-[1.25rem] text-center',
-                isActive ? 'bg-primary/10 text-primary' : 'bg-muted/40 text-muted-foreground/50',
-              )}>
-                {count}
-              </span>
-            )}
+            {Icon && <Icon className={size === 'sm' ? 'size-3.5' : 'size-4'} />}
+            {s.label}
           </button>
         );
       })}
     </div>
   );
-}
+});
+
+export { SegmentedControl };

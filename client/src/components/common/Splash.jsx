@@ -1,17 +1,20 @@
 import React from 'react';
-import { Loader2, Store } from 'lucide-react';
+import { Store, AlertTriangle } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
-export const Splash = () => {
-    return (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background animate-in fade-in duration-300">
-            <div className="relative mb-8">
-                <div className="size-24 rounded-lg bg-primary/10 flex items-center justify-center text-5xl font-black text-primary shadow-lg">
-                    <Store className="size-12" />
-                </div>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">POS Pro</h1>
-            <p className="text-sm text-muted-foreground mb-8">Cargando sistema...</p>
-            <Loader2 className="size-6 animate-spin text-primary" />
+export function Splash() {
+  return (
+    <div className="fixed inset-0 bg-bg-app flex items-center justify-center z-[var(--z-max)]">
+      <div className="text-center">
+        <div className="size-16 rounded-xl bg-action-primary flex items-center justify-center mx-auto mb-4">
+          <Store className="size-8 text-[var(--bg-surface)]" />
         </div>
-    );
-};
+        <h1 className="text-xl font-bold text-text-primary tracking-tight">POS Pro</h1>
+        <p className="text-sm text-text-tertiary mt-2">Cargando...</p>
+        <div className="mt-4 w-32 h-1 rounded-full bg-bg-inset mx-auto overflow-hidden">
+          <div className="h-full rounded-full bg-action-primary animate-pulse w-2/3" />
+        </div>
+      </div>
+    </div>
+  );
+}

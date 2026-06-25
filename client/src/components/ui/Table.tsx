@@ -28,14 +28,14 @@ interface TableProps<T> {
   loading?: boolean;
   className?: string;
   selectable?: boolean;
-  selected?: (keyof T extends 'id' ? string[] : string[]);
+  selected?: string[];
   onSelectionChange?: (keys: string[]) => void;
   bulkActions?: { label: string; onClick: (keys: string[]) => void; variant?: 'default' | 'danger' }[];
 }
 
 const densityStyles = {
   compact: 'py-2 px-3 text-sm',
-  comfortable: 'py-3 px-3 text-[var(--text-body)]',
+  comfortable: 'py-3 px-4 text-sm',
 };
 
 function Table<T extends Record<string, any>>({
@@ -95,7 +95,6 @@ function Table<T extends Record<string, any>>({
       {searchable && (
         <div className="p-3 border-b border-border-subtle">
           <Input
-            size="sm"
             icon={<Search className="size-3.5" />}
             placeholder={searchPlaceholder}
             value={search}
@@ -107,11 +106,11 @@ function Table<T extends Record<string, any>>({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-border-subtle bg-bg-surface-hover/50 sticky top-0 z-10">
+            <tr className="border-b border-border-subtle bg-bg-surface-raised sticky top-0 z-10">
               {selectable && (
-                <th className={cn('w-12 text-left', densityStyles[density], 'text-text-tertiary')}>
-                  <button onClick={toggleAll} className="hover:text-text-primary transition-colors">
-                    {allSelected ? <CheckSquare className="size-[18px]" /> : <Square className="size-[18px]" />}
+                <th className={cn('w-12 text-left', densityStyles[density])}>
+                  <button onClick={toggleAll} className="text-text-tertiary hover:text-text-primary transition-colors">
+                    {allSelected ? <CheckSquare className="size-4" /> : <Square className="size-4" />}
                   </button>
                 </th>
               )}
@@ -169,17 +168,16 @@ function Table<T extends Record<string, any>>({
                   <tr
                     key={key}
                     className={cn(
-                      'border-b border-border-subtle last:border-0 transition-colors duration-[120ms]',
+                      'border-b border-border-subtle last:border-0 transition-colors duration-150',
                       onRowClick && 'cursor-pointer hover:bg-bg-surface-hover',
-                      isSelected && 'bg-bg-surface-active',
-                      !isSelected && !onRowClick && 'hover:bg-bg-surface-hover',
+                      isSelected && 'bg-accent-bg/30',
                     )}
                     onClick={() => onRowClick?.(item)}
                   >
                     {selectable && (
                       <td className={densityStyles[density]} onClick={e => { e.stopPropagation(); toggleOne(key); }}>
                         <button className="hover:text-text-primary transition-colors text-text-tertiary">
-                          {isSelected ? <CheckSquare className="size-[18px]" /> : <Square className="size-[18px]" />}
+                          {isSelected ? <CheckSquare className="size-4" /> : <Square className="size-4" />}
                         </button>
                       </td>
                     )}
@@ -204,9 +202,8 @@ function Table<T extends Record<string, any>>({
         </table>
       </div>
 
-      {/* Action bar for bulk selection */}
       {selectable && hasSelection && bulkActions && bulkActions.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-3 border-t border-border-subtle bg-bg-surface-active">
+        <div className="flex items-center gap-3 px-4 py-3 border-t border-border-subtle bg-bg-surface-raised">
           <span className="text-sm font-medium text-text-secondary">{selected.length} seleccionado{selected.length !== 1 ? 's' : ''}</span>
           <div className="flex-1" />
           {bulkActions.map((action, i) => (
@@ -216,7 +213,7 @@ function Table<T extends Record<string, any>>({
               className={cn(
                 'px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                 action.variant === 'danger'
-                  ? 'text-semantic-danger hover:bg-semantic-danger-bg'
+                  ? 'text-danger hover:bg-danger-bg'
                   : 'text-text-secondary hover:bg-bg-surface-hover',
               )}
             >
@@ -226,7 +223,6 @@ function Table<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* Pagination */}
       {totalPages > 1 && !hasSelection && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-border-subtle">
           <span className="text-xs text-text-tertiary">
@@ -236,11 +232,7 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => setPage(p => Math.max(0, p - 1))}
               disabled={page === 0}
-              className={cn(
-                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-                'hover:bg-bg-surface-hover',
-                'disabled:opacity-40 disabled:cursor-not-allowed',
-              )}
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium hover:bg-bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed text-text-secondary"
             >
               Anterior
             </button>
@@ -255,7 +247,7 @@ function Table<T extends Record<string, any>>({
                   className={cn(
                     'size-8 rounded-md text-xs font-medium transition-colors',
                     pageNum === page
-                      ? 'bg-action-primary text-[hsl(var(--bg-surface))]'
+                      ? 'bg-action-primary text-[var(--bg-surface)]'
                       : 'hover:bg-bg-surface-hover text-text-tertiary',
                   )}
                 >
@@ -266,11 +258,7 @@ function Table<T extends Record<string, any>>({
             <button
               onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
-              className={cn(
-                'px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-                'hover:bg-bg-surface-hover',
-                'disabled:opacity-40 disabled:cursor-not-allowed',
-              )}
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium hover:bg-bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed text-text-secondary"
             >
               Siguiente
             </button>

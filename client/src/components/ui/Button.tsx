@@ -3,20 +3,22 @@ import { cn } from '../../utils/cn';
 
 const variants = {
   primary:
-    'bg-action-primary text-[hsl(var(--bg-surface))] hover:bg-action-primary-hover active:scale-[0.98] font-medium',
+    'bg-action-primary text-[var(--bg-surface)] hover:bg-action-primary-hover font-medium',
   secondary:
-    'bg-bg-surface text-text-primary border border-border-default hover:bg-bg-surface-hover active:bg-bg-surface-active font-medium',
+    'bg-bg-surface text-text-primary border border-border-default hover:bg-bg-surface-hover font-medium',
   ghost:
-    'text-text-secondary hover:text-text-primary hover:bg-bg-surface-hover active:bg-bg-surface-active font-medium',
+    'text-text-secondary hover:text-text-primary hover:bg-bg-surface-hover font-medium',
   danger:
-    'bg-semantic-danger-bg text-semantic-danger border border-semantic-danger/20 hover:bg-semantic-danger hover:text-[hsl(var(--semantic-danger-bg))] active:scale-[0.98] font-medium',
+    'bg-danger-bg text-danger border border-danger/20 hover:bg-danger hover:text-white font-medium',
+  accent:
+    'bg-accent text-white hover:bg-accent-hover font-medium',
 };
 
 const sizes = {
   sm: 'h-[var(--control-sm)] px-3 text-xs rounded-md gap-1.5',
   md: 'h-[var(--control-md)] px-4 text-sm rounded-md gap-2',
-  lg: 'h-[var(--control-lg)] px-6 text-[var(--text-body)] rounded-md gap-2',
-  xl: 'h-[var(--control-xl)] px-8 text-[var(--text-heading-sm)] rounded-md gap-2.5',
+  lg: 'h-[var(--control-lg)] px-6 text-sm rounded-md gap-2',
+  xl: 'h-[var(--control-xl)] px-8 text-base rounded-lg gap-2.5',
 };
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -33,8 +35,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-          'inline-flex items-center justify-center transition-all duration-150 select-none',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--bg-app))]',
+          'inline-flex items-center justify-center transition-all duration-150 select-none press-effect',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring/40 focus-visible:ring-offset-2',
           'disabled:pointer-events-none disabled:opacity-40',
           variants[variant],
           sizes[size],

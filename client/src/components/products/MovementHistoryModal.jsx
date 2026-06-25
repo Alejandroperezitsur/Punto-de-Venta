@@ -26,7 +26,7 @@ export const MovementHistoryModal = ({ product, onClose }) => {
     }, [product]);
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)] animate-fade-in">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[var(--z-modal)] animate-fade-in">
             <Card className="w-full max-w-2xl overflow-hidden border border-border/40 flex flex-col max-h-[80vh]">
                 <div className="p-5 border-b border-border/20 flex justify-between items-center bg-muted/10">
                     <div className="flex items-center gap-3">

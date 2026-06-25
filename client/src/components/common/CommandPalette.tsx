@@ -1,52 +1,56 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, ShoppingCart, Package, Users, DollarSign, FileText, Settings,
-  LogOut, HelpCircle, Zap, X, ArrowRight, Command,
+  Search, ShoppingCart, Package, Users, Wallet, BarChart3, Settings,
+  LogOut, HelpCircle, Zap, X, ArrowRight, Command, Keyboard,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { SHORTCUTS, PAYMENT_SHORTCUTS } from '../../config/shortcuts';
 
 interface Command {
-  id: string; label: string; description: string; icon: React.ReactNode;
-  action: () => void; shortcut?: string; keywords: string[];
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ElementType;
+  action: () => void;
+  shortcut?: string;
+  keywords: string[];
 }
 
-interface CommandPaletteProps { open: boolean; onClose: () => void; }
-
-export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
+export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const focusSearch = useCallback(() => {
-    const input = document.querySelector('input[placeholder*="Escanear"]');
+  const focusScan = useCallback(() => {
+    const input = document.querySelector('input[data-scan-input]');
     if (input) (input as HTMLInputElement).focus();
   }, []);
 
   const commands = useMemo<Command[]>(() => [
-    { id: 'sales', label: 'Ir a Ventas', description: 'Pantalla principal de ventas', icon: <ShoppingCart className="h-4 w-4" />, action: () => { navigate('/ventas'); onClose(); }, shortcut: 'G,V', keywords: ['ventas', 'cobrar', 'vender', 'punto de venta'] },
-    { id: 'products', label: 'Buscar Producto', description: 'Buscar producto por nombre o SKU', icon: <Package className="h-4 w-4" />, action: () => { navigate('/ventas'); onClose(); setTimeout(() => focusSearch(), 100); }, shortcut: 'F3', keywords: ['producto', 'buscar', 'sku', 'codigo', 'scanner'] },
-    { id: 'manual', label: 'Producto Manual', description: 'Agregar producto no registrado', icon: <Zap className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-manual-product')); onClose(); }, shortcut: 'F4', keywords: ['manual', 'generico', 'no registrado'] },
-    { id: 'customers', label: 'Clientes', description: 'Gestionar clientes', icon: <Users className="h-4 w-4" />, action: () => { navigate('/clientes'); onClose(); }, shortcut: 'G,C', keywords: ['cliente', 'clientes', 'persona'] },
-    { id: 'cash', label: 'Abrir/Cerrar Caja', description: 'Control de caja', icon: <DollarSign className="h-4 w-4" />, action: () => { navigate('/caja'); onClose(); }, shortcut: 'G,X', keywords: ['caja', 'efectivo', 'dinero', 'apertura', 'cierre'] },
-    { id: 'reports', label: 'Reportes', description: 'Reportes de ventas', icon: <FileText className="h-4 w-4" />, action: () => { navigate('/reportes'); onClose(); }, shortcut: 'G,R', keywords: ['reporte', 'reportes', 'graficos', 'estadisticas'] },
-    { id: 'settings', label: 'Configuración', description: 'Configuración del negocio', icon: <Settings className="h-4 w-4" />, action: () => { navigate('/config'); onClose(); }, shortcut: 'G,S', keywords: ['configuracion', 'ajustes', 'settings'] },
-    { id: 'help', label: 'Ayuda', description: 'Atajos de teclado y ayuda', icon: <HelpCircle className="h-4 w-4" />, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('show-shortcuts')), 100); }, shortcut: 'F1', keywords: ['ayuda', 'help', 'atajos', 'shortcuts', 'teclas'] },
-    { id: 'logout', label: 'Cerrar Sesión', description: 'Salir del sistema', icon: <LogOut className="h-4 w-4" />, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('trigger-logout')), 100); }, shortcut: 'G,Q', keywords: ['salir', 'cerrar', 'sesion', 'logout', 'exit'] },
-    { id: 'clear-cart', label: 'Vaciar Carrito', description: 'Eliminar todos los productos del carrito', icon: <X className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-clear-cart')); onClose(); }, shortcut: 'F7', keywords: ['vaciar', 'carrito', 'limpiar', 'clear'] },
-    { id: 'checkout', label: 'Cobrar', description: 'Procesar pago del carrito actual', icon: <ArrowRight className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-checkout')); onClose(); }, shortcut: 'F2', keywords: ['cobrar', 'pago', 'pagar', 'checkout', 'payment', 'total'] },
-    { id: 'discount', label: 'Descuento', description: 'Aplicar descuento a la venta', icon: <DollarSign className="h-4 w-4" />, action: () => { document.dispatchEvent(new CustomEvent('trigger-discount')); onClose(); }, shortcut: 'F5', keywords: ['descuento', 'discount', 'rebaja', 'promocion'] },
-  ], [navigate, onClose, focusSearch]);
+    { id: 'checkout', label: 'Cobrar', description: 'Procesar pago del carrito actual', icon: ShoppingCart, action: () => { document.dispatchEvent(new CustomEvent('trigger-checkout')); onClose(); }, shortcut: 'F2', keywords: ['cobrar', 'pago', 'pagar', 'checkout', 'total'] },
+    { id: 'sales', label: 'Ventas', description: 'Pantalla principal de punto de venta', icon: ShoppingCart, action: () => { navigate('/ventas'); onClose(); }, shortcut: 'Ctrl+1', keywords: ['ventas', 'pos', 'vender'] },
+    { id: 'products-search', label: 'Buscar Producto', description: 'Buscar por nombre, SKU o codigo de barras', icon: Package, action: () => { navigate('/ventas'); onClose(); setTimeout(() => focusScan(), 100); }, shortcut: 'F3', keywords: ['producto', 'buscar', 'sku', 'scanner'] },
+    { id: 'manual', label: 'Producto Manual', description: 'Agregar producto sin registro', icon: Zap, action: () => { document.dispatchEvent(new CustomEvent('trigger-manual-product')); onClose(); }, shortcut: 'F4', keywords: ['manual', 'generico'] },
+    { id: 'discount', label: 'Descuento', description: 'Aplicar descuento a la venta', icon: Zap, action: () => { document.dispatchEvent(new CustomEvent('trigger-discount')); onClose(); }, shortcut: 'F5', keywords: ['descuento', 'discount', 'rebaja'] },
+    { id: 'clear-cart', label: 'Vaciar Carrito', description: 'Eliminar todos los productos', icon: X, action: () => { document.dispatchEvent(new CustomEvent('trigger-clear-cart')); onClose(); }, shortcut: 'F7', keywords: ['vaciar', 'limpiar', 'clear'] },
+    { id: 'inventory', label: 'Inventario', description: 'Gestion de productos y stock', icon: Package, action: () => { navigate('/productos'); onClose(); }, shortcut: 'Ctrl+2', keywords: ['inventario', 'productos', 'stock'] },
+    { id: 'customers', label: 'Clientes', description: 'Gestion de clientes', icon: Users, action: () => { navigate('/clientes'); onClose(); }, shortcut: 'Ctrl+3', keywords: ['cliente', 'clientes', 'persona'] },
+    { id: 'cash', label: 'Caja', description: 'Apertura, cierre y movimientos', icon: Wallet, action: () => { navigate('/caja'); onClose(); }, shortcut: 'Ctrl+5', keywords: ['caja', 'efectivo', 'dinero', 'apertura', 'cierre'] },
+    { id: 'reports', label: 'Reportes', description: 'Analitica de ventas y negocio', icon: BarChart3, action: () => { navigate('/reportes'); onClose(); }, shortcut: 'Ctrl+4', keywords: ['reporte', 'graficos', 'estadisticas', 'analitica'] },
+    { id: 'settings', label: 'Configuracion', description: 'Ajustes del negocio', icon: Settings, action: () => { navigate('/config'); onClose(); }, shortcut: 'F10', keywords: ['configuracion', 'ajustes', 'settings'] },
+    { id: 'shortcuts', label: 'Atajos de Teclado', description: 'Ver todos los atajos', icon: Keyboard, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('show-shortcuts')), 100); }, shortcut: 'F1', keywords: ['ayuda', 'help', 'atajos', 'shortcuts', 'teclas'] },
+    { id: 'logout', label: 'Cerrar Sesion', description: 'Salir del sistema', icon: LogOut, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('trigger-logout')), 100); }, shortcut: 'Ctrl+Q', keywords: ['salir', 'cerrar', 'sesion', 'logout', 'exit'] },
+  ], [navigate, onClose, focusScan]);
 
   const filtered = useMemo(() =>
     query.trim() === ''
       ? commands
-      : commands.filter((cmd) => {
+      : commands.filter(cmd => {
           const q = query.toLowerCase();
           return cmd.label.toLowerCase().includes(q) ||
-            cmd.keywords.some((k) => k.toLowerCase().includes(q));
+            cmd.keywords.some(k => k.toLowerCase().includes(q));
         }),
     [commands, query],
   );
@@ -56,8 +60,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   }, [open]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedIndex((i) => Math.min(i + 1, filtered.length - 1)); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedIndex((i) => Math.max(i - 1, 0)); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedIndex(i => Math.min(i + 1, filtered.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedIndex(i => Math.max(i - 1, 0)); }
     else if (e.key === 'Enter' && filtered[selectedIndex]) { e.preventDefault(); filtered[selectedIndex].action(); }
     else if (e.key === 'Escape') { onClose(); }
   }, [filtered, selectedIndex, onClose]);
@@ -65,60 +69,65 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose })
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[15vh]" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-xl bg-card rounded-xl shadow-2xl border border-border overflow-hidden">
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
-          <Command className="h-5 w-5 text-muted-foreground" />
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[12vh]" role="dialog" aria-modal="true" aria-label="Centro de comandos">
+      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-xl bg-bg-surface rounded-xl shadow-dialog border border-border-subtle overflow-hidden animate-scale-in">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
+          <Search className="size-5 text-text-tertiary" />
           <input
-            ref={inputRef} type="text" placeholder="Buscar comandos..."
+            ref={inputRef}
+            type="text"
+            placeholder="Buscar productos, clientes, comandos..."
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
+            onChange={e => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleKeyDown}
-            className="flex-1 text-lg outline-none bg-transparent placeholder:text-muted-foreground/50 text-foreground"
+            className="flex-1 text-base outline-none bg-transparent placeholder:text-text-tertiary text-text-primary font-medium"
             autoFocus
           />
-          <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted-foreground bg-muted rounded-md">
-            <Command className="h-3 w-3" />K
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-1 text-[10px] font-medium text-text-tertiary bg-bg-inset rounded-md border border-border-subtle">
+            <Command className="size-3" />K
           </kbd>
         </div>
+
         <div className="max-h-80 overflow-y-auto p-2">
           {filtered.length === 0 && (
-            <div className="py-8 text-center text-muted-foreground">
-              <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No se encontraron comandos para "{query}"</p>
+            <div className="py-10 text-center">
+              <Search className="size-10 mx-auto mb-3 text-text-disabled" />
+              <p className="text-sm text-text-tertiary font-medium">Sin resultados para "{query}"</p>
             </div>
           )}
-          {filtered.map((cmd, index) => (
-            <button
-              key={cmd.id}
-              onClick={cmd.action}
-              className={cn(
-                'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all',
-                index === selectedIndex
-                  ? 'bg-primary/10 text-primary shadow-sm'
-                  : 'hover:bg-muted text-foreground',
-              )}
-            >
-              <span className={cn('shrink-0', index === selectedIndex ? 'text-primary' : 'text-muted-foreground')}>
-                {cmd.icon}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm">{cmd.label}</div>
-                <div className="text-xs text-muted-foreground truncate">{cmd.description}</div>
-              </div>
-              {cmd.shortcut && (
-                <kbd className="shrink-0 px-2 py-1 text-[10px] font-bold text-muted-foreground bg-muted rounded-md">
-                  {cmd.shortcut}
-                </kbd>
-              )}
-            </button>
-          ))}
+          {filtered.map((cmd, index) => {
+            const Icon = cmd.icon;
+            return (
+              <button
+                key={cmd.id}
+                onClick={cmd.action}
+                className={cn(
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-100',
+                  index === selectedIndex
+                    ? 'bg-bg-surface-active text-text-primary'
+                    : 'text-text-secondary hover:bg-bg-surface-hover',
+                )}
+              >
+                <Icon className={cn('size-4 shrink-0', index === selectedIndex ? 'text-text-primary' : 'text-text-tertiary')} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold">{cmd.label}</div>
+                  <div className="text-xs text-text-tertiary truncate">{cmd.description}</div>
+                </div>
+                {cmd.shortcut && (
+                  <kbd className="shrink-0 px-2 py-0.5 text-[10px] font-bold text-text-tertiary bg-bg-inset rounded-md border border-border-subtle">
+                    {cmd.shortcut}
+                  </kbd>
+                )}
+              </button>
+            );
+          })}
         </div>
-        <div className="px-5 py-3 border-t border-border flex items-center gap-4 text-[10px] text-muted-foreground">
-          <span>↑↓ Navegar</span>
-          <span>↵ Seleccionar</span>
-          <span>Esc Cerrar</span>
+
+        <div className="px-5 py-2.5 border-t border-border-subtle flex items-center gap-5 text-[10px] text-text-tertiary font-medium">
+          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">↑↓</kbd> Navegar</span>
+          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">↵</kbd> Seleccionar</span>
+          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">Esc</kbd> Cerrar</span>
         </div>
       </div>
     </div>
@@ -159,21 +168,31 @@ export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> 
   ];
 
   return (
-    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div className="bg-card rounded-xl border border-border p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Atajos de teclado">
-        <h2 className="text-lg font-bold mb-4 text-foreground">Atajos de Teclado</h2>
-        <div className="space-y-1">
-          {allShortcuts.map((s) => (
-            <div key={s.key} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted">
-              <span className="text-sm text-foreground">{s.label}</span>
-              <kbd className="px-3 py-1.5 text-xs font-bold bg-muted text-muted-foreground rounded-lg">{s.key}</kbd>
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="bg-bg-surface rounded-xl border border-border-subtle shadow-dialog p-6 w-full max-w-md animate-scale-in"
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-label="Atajos de teclado"
+      >
+        <h2 className="text-lg font-bold mb-4 text-text-primary">Atajos de Teclado</h2>
+        <div className="space-y-0.5">
+          {allShortcuts.map(s => (
+            <div key={s.key} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-bg-surface-hover transition-colors">
+              <span className="text-sm text-text-primary">{s.label}</span>
+              <kbd className="px-3 py-1 text-xs font-bold bg-bg-inset text-text-secondary rounded-md border border-border-subtle">{s.key}</kbd>
             </div>
           ))}
         </div>
-        <button onClick={onClose} className="w-full mt-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:brightness-110 transition-all">
+        <button
+          onClick={onClose}
+          className="w-full mt-5 py-2.5 rounded-md bg-action-primary text-[var(--bg-surface)] font-semibold text-sm hover:bg-action-primary-hover transition-colors"
+        >
           Cerrar
         </button>
       </div>
     </div>
   );
 };
+
+export { CommandCenter as CommandPalette };

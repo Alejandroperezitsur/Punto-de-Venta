@@ -2,63 +2,39 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 
 const variants = {
-  label: 'bg-bg-surface-hover text-text-secondary',
-  status: 'gap-1.5',
-  counter: 'bg-bg-inset text-text-secondary',
-  alert: 'border',
-};
-
-const statusColors = {
-  success: 'text-semantic-success',
-  warning: 'text-semantic-warning',
-  danger: 'text-semantic-danger',
-  info: 'text-semantic-info',
-  neutral: 'text-text-tertiary',
-};
-
-const alertColors = {
-  success: 'bg-semantic-success-bg text-semantic-success border-semantic-success/20',
-  warning: 'bg-semantic-warning-bg text-semantic-warning border-semantic-warning/20',
-  danger: 'bg-semantic-danger-bg text-semantic-danger border-semantic-danger/20',
-  info: 'bg-semantic-info-bg text-semantic-info border-semantic-info/20',
-  neutral: 'bg-bg-surface-hover text-text-secondary border-border-subtle',
+  neutral: 'bg-bg-inset text-text-secondary',
+  success: 'bg-success-bg text-success-text',
+  warning: 'bg-warning-bg text-warning-text',
+  danger: 'bg-danger-bg text-danger-text',
+  info: 'bg-info-bg text-info-text',
+  accent: 'bg-accent-bg text-accent-text',
 };
 
 const sizes = {
-  sm: 'px-2 py-0.5 text-[var(--text-caption)]',
-  md: 'px-2.5 py-0.5 text-[var(--text-caption)]',
-  lg: 'px-3 py-1 text-[var(--text-label)]',
+  xs: 'text-[10px] px-1.5 py-0.5',
+  sm: 'text-xs px-2 py-0.5',
+  md: 'text-sm px-2.5 py-1',
 };
 
-interface BadgeProps {
-  variant?: 'label' | 'status' | 'counter' | 'alert';
-  color?: 'success' | 'warning' | 'danger' | 'info' | 'neutral';
-  size?: 'sm' | 'md' | 'lg';
-  dot?: boolean;
-  className?: string;
-  children?: React.ReactNode;
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: keyof typeof variants;
+  size?: keyof typeof sizes;
 }
 
-function Badge({ variant = 'label', color = 'neutral', size = 'sm', dot, className, children }: BadgeProps) {
-  const colorClass = variant === 'alert' ? alertColors[color] : variant === 'status' ? statusColors[color] : '';
-
-  return (
+const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
+  ({ className, variant = 'neutral', size = 'sm', ...props }, ref) => (
     <span
+      ref={ref}
       className={cn(
-        'inline-flex items-center gap-1.5 font-medium rounded-full whitespace-nowrap select-none',
+        'inline-flex items-center gap-1 rounded-md font-semibold select-none',
         variants[variant],
-        colorClass,
         sizes[size],
         className,
       )}
-    >
-      {dot && variant === 'status' && (
-        <span className={cn('size-1.5 rounded-full shrink-0', colorClass)} />
-      )}
-      {children}
-    </span>
-  );
-}
+      {...props}
+    />
+  ),
+);
+Badge.displayName = 'Badge';
 
 export { Badge };
-export type { BadgeProps };

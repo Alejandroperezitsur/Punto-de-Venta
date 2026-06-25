@@ -86,7 +86,7 @@ const Modal = Object.assign(React.memo(function Modal({
       <div
         className={cn(
           'absolute inset-0 transition-all duration-200',
-          open ? 'bg-black/40 backdrop-blur-[var(--blur-backdrop)]' : 'bg-black/0 backdrop-blur-0',
+          open ? 'bg-black/40' : 'bg-black/0',
         )}
         aria-hidden="true"
       />
@@ -98,7 +98,7 @@ const Modal = Object.assign(React.memo(function Modal({
         aria-label={title}
         tabIndex={-1}
         className={cn(
-          'relative bg-bg-surface shadow-overlay overflow-hidden',
+          'relative bg-bg-surface shadow-dialog overflow-hidden',
           'transition-all duration-200',
           open ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
           isSheet
@@ -112,13 +112,13 @@ const Modal = Object.assign(React.memo(function Modal({
         {(title || !hideClose) && (
           <div className="flex items-center justify-between px-[var(--padding-modal)] py-4 border-b border-border-subtle">
             <div className="min-w-0 flex-1">
-              {title && <h2 className="text-[var(--text-heading-sm)] font-semibold text-text-primary truncate">{title}</h2>}
+              {title && <h2 className="text-[var(--text-heading-md)] font-semibold text-text-primary truncate">{title}</h2>}
               {description && <p className="text-sm text-text-secondary mt-0.5">{description}</p>}
             </div>
             {!hideClose && (
               <button
                 onClick={onClose}
-                className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover transition-all shrink-0 ml-3"
+                className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover transition-colors shrink-0 ml-3"
                 aria-label="Cerrar"
               >
                 <X className="size-4" />
@@ -127,7 +127,7 @@ const Modal = Object.assign(React.memo(function Modal({
           </div>
         )}
 
-        <div className={cn('overflow-y-auto', isDrawer ? 'max-h-[60vh]' : 'max-h-[65vh]', 'px-[var(--padding-modal)] py-5')}>
+        <div className={cn('overflow-y-auto', isDrawer ? 'max-h-[60vh]' : 'max-h-[70vh]', 'px-[var(--padding-modal)] py-5')}>
           {children}
         </div>
 
@@ -141,44 +141,40 @@ const Modal = Object.assign(React.memo(function Modal({
   );
 }), { displayName: 'Modal' });
 
-/* Multi-step modal helper */
-function ModalSteps({ current, steps, children }: { current: number; steps: string[]; children?: React.ReactNode }) {
+function ModalSteps({ current, steps }: { current: number; steps: string[] }) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        {steps.map((step, i) => (
-          <React.Fragment key={i}>
-            <div className={cn(
-              'flex items-center gap-2',
-              i <= current ? 'text-text-primary' : 'text-text-disabled',
+    <div className="flex items-center gap-2 mb-6">
+      {steps.map((step, i) => (
+        <React.Fragment key={i}>
+          <div className={cn(
+            'flex items-center gap-2',
+            i <= current ? 'text-text-primary' : 'text-text-disabled',
+          )}>
+            <span className={cn(
+              'size-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all',
+              i === current
+                ? 'bg-action-primary text-[var(--bg-surface)]'
+                : i < current
+                  ? 'bg-success-bg text-success border border-success/20'
+                  : 'bg-bg-inset border border-border-subtle',
             )}>
-              <span className={cn(
-                'size-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all',
-                i === current
-                  ? 'bg-action-primary text-[hsl(var(--bg-surface))]'
-                  : i < current
-                    ? 'bg-semantic-success-bg text-semantic-success border border-semantic-success/20'
-                    : 'bg-bg-inset border border-border-subtle',
-              )}>
-                {i < current ? '✓' : i + 1}
-              </span>
-              <span className={cn(
-                'text-xs font-medium hidden sm:inline',
-                i === current ? 'text-text-primary font-semibold' : 'text-text-tertiary',
-              )}>
-                {step}
-              </span>
-            </div>
-            {i < steps.length - 1 && (
-              <div className={cn(
-                'flex-1 h-px min-w-[24px]',
-                i < current ? 'bg-semantic-success/40' : 'bg-border-subtle',
-              )} />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-      <div>{children}</div>
+              {i < current ? '\u2713' : i + 1}
+            </span>
+            <span className={cn(
+              'text-xs font-medium hidden sm:inline',
+              i === current ? 'font-semibold' : '',
+            )}>
+              {step}
+            </span>
+          </div>
+          {i < steps.length - 1 && (
+            <div className={cn(
+              'flex-1 h-px min-w-[24px]',
+              i < current ? 'bg-success/40' : 'bg-border-subtle',
+            )} />
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 }

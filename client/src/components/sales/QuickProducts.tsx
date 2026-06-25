@@ -5,7 +5,7 @@ import { ErrorState } from '../ui/ErrorState';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { cn } from '../../utils/cn';
 import { formatMoney } from '../../utils/format';
-import { Search, TrendingUp, Clock, Grid3X3 } from 'lucide-react';
+import { Search, TrendingUp, Clock, Grid3X3, ShoppingBag } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 40;
 const RECENT_MAX = 8;
@@ -18,14 +18,12 @@ interface QuickProduct {
   category?: string;
   sales_count?: number;
   barcode?: string;
+  image?: string;
 }
 
-interface QuickProductButtonProps {
-  product: QuickProduct;
-  onSelect: (p: QuickProduct) => void;
-}
-
-const QuickProductButton = memo(function QuickProductButton({ product, onSelect }: QuickProductButtonProps) {
+const QuickProductCard = memo(function QuickProductCard({ product, onSelect }: {
+  product: QuickProduct; onSelect: (p: QuickProduct) => void;
+}) {
   const isOutOfStock = product.stock !== undefined && product.stock <= 0;
   const isLowStock = product.stock !== undefined && product.stock <= 5 && product.stock > 0;
 
@@ -34,48 +32,51 @@ const QuickProductButton = memo(function QuickProductButton({ product, onSelect 
       onClick={() => !isOutOfStock && onSelect(product)}
       disabled={isOutOfStock}
       className={cn(
-        'rounded-xl border bg-card flex flex-col justify-between gap-2 transition-all duration-200 group relative overflow-hidden',
-        'hover:border-primary/30 hover:bg-primary/[0.015] hover:shadow-md',
-        'active:bg-primary/[0.03] active:border-primary/20 active:scale-[0.98]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-1',
-        'min-h-[4.5rem] sm:min-h-[5rem] lg:min-h-[5.5rem] px-3 py-2.5 border-border/20',
-        isOutOfStock && 'pointer-events-none opacity-40',
+        'rounded-lg bg-bg-surface border border-border-subtle flex flex-col overflow-hidden',
+        'transition-all duration-150 group press-effect',
+        'hover:border-accent/40 hover:bg-accent-bg/30',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring/30',
+        isOutOfStock && 'opacity-40 cursor-not-allowed',
       )}
-      title={`${product.name} — ${formatMoney(product.price)}`}
-      aria-label={`Agregar ${product.name} - ${formatMoney(product.price)}`}
+      title={`${product.name} - ${formatMoney(product.price)}`}
+      aria-label={`${product.name}, ${formatMoney(product.price)}`}
     >
-      {/* Out of stock overlay */}
-      {isOutOfStock && (
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-xl">
-          <span className="text-xs font-bold text-danger/70 uppercase tracking-wider">Agotado</span>
-        </div>
-      )}
+      {/* Product image */}
+      <div className="aspect-[4/3] bg-bg-inset flex items-center justify-center overflow-hidden">
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="size-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        ) : (
+          <ShoppingBag className="size-8 text-text-disabled" />
+        )}
+      </div>
 
-      {/* Stock indicator bar at top */}
-      {product.stock !== undefined && product.stock > 0 && (
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-muted/15">
-          <div
-            className={cn(
-              'h-full rounded-r-full transition-all duration-300',
-              isLowStock ? 'bg-warning' : 'bg-success/40',
-            )}
-            style={{ width: `${Math.min((Math.max(product.stock, 0) / 50) * 100, 100)}%` }}
-          />
-        </div>
-      )}
-
-      <div className="flex-1 flex flex-col justify-center min-w-0 pt-1">
-        <span className="text-sm font-bold truncate leading-tight text-left text-foreground/95 group-hover:text-foreground transition-colors">{product.name}</span>
-        <div className="flex items-baseline gap-1 mt-2">
-          <span className="text-xs font-semibold text-primary/60">$</span>
-          <span className="text-lg font-black text-primary tabular-nums leading-none tracking-tight">
+      {/* Info */}
+      <div className="p-2.5 flex flex-col gap-1 min-w-0">
+        <span className="text-xs font-semibold truncate text-text-primary">{product.name}</span>
+        <div className="flex items-baseline gap-1">
+          <span className="text-xs text-text-tertiary">$</span>
+          <span className="text-base font-bold tabular-nums text-text-primary tracking-tight leading-none">
             {formatMoney(product.price)}
           </span>
         </div>
-        {isLowStock && (
-          <span className="mt-1.5 text-xs font-bold text-warning bg-warning/12 px-2 py-0.5 rounded-md w-fit leading-none">
-            {product.stock} uds
-          </span>
+
+        {/* Stock indicator */}
+        {product.stock !== undefined && product.stock > 0 && (
+          <div className="flex items-center gap-1 mt-0.5">
+            <div className="flex-1 h-1 rounded-full bg-bg-inset overflow-hidden">
+              <div
+                className={cn('h-full rounded-full transition-all', isLowStock ? 'bg-warning' : 'bg-success/50')}
+                style={{ width: `${Math.min((Math.max(product.stock, 0) / 50) * 100, 100)}%` }}
+              />
+            </div>
+            {isLowStock && (
+              <span className="text-[10px] font-bold text-warning-text">{product.stock}</span>
+            )}
+          </div>
+        )}
+
+        {isOutOfStock && (
+          <span className="text-[10px] font-bold text-danger-text uppercase tracking-wider mt-0.5">Agotado</span>
         )}
       </div>
     </button>
@@ -142,12 +143,9 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
   }, [products, deferredQuery, activeCategory]);
 
   const { recentProducts, topProducts } = useMemo(() => {
-    const recent = recentIds
-      .map(id => products.find(p => p.id === id))
-      .filter(Boolean) as QuickProduct[];
+    const recent = recentIds.map(id => products.find(p => p.id === id)).filter(Boolean) as QuickProduct[];
     const sorted = [...products].sort((a, b) => (b.sales_count || 0) - (a.sales_count || 0));
-    const top = sorted.slice(0, 8);
-    return { recentProducts: recent, topProducts: top };
+    return { recentProducts: recent, topProducts: sorted.slice(0, 8) };
   }, [products, recentIds]);
 
   const displayProducts = useMemo(() => {
@@ -160,33 +158,21 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
   const paginatedProducts = displayProducts.slice(0, page * ITEMS_PER_PAGE);
   const hasMore = paginatedProducts.length < displayProducts.length;
 
-  const handleRetry = useCallback(() => {
-    setPage(1);
-    load();
-  }, [load]);
+  const handleRetry = useCallback(() => { setPage(1); load(); }, [load]);
 
   if (loading) {
     return (
       <div className="space-y-3">
-        <div className="flex gap-1.5">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-8 w-20 rounded-full shrink-0" />)}</div>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(140px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <Skeleton key={i} className="h-[7rem] rounded-2xl" />
-          ))}
+        <div className="flex gap-1.5">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-8 w-20 rounded-full" />)}</div>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
+          {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} variant="card" className="h-[160px]" />)}
         </div>
       </div>
     );
   }
 
   if (error) {
-    return (
-      <ErrorState
-        title="Error al cargar productos"
-        description={error}
-        onRetry={handleRetry}
-        variant="default"
-      />
-    );
+    return <ErrorState title="Error al cargar productos" description={error} onRetry={handleRetry} />;
   }
 
   const sortSegments = [
@@ -197,12 +183,10 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
 
   return (
     <div className="flex flex-col gap-3 h-full">
-      {/* Top toolbar: search + sort segmented control */}
       {products.length > 0 && (
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Compact search */}
           <div className="flex-1 relative max-w-[260px]">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/30" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-text-tertiary" />
             <input
               ref={searchInputRef}
               type="text"
@@ -214,99 +198,80 @@ export const QuickProducts = React.memo(function QuickProducts({ onSelect }: { o
                 if (debounceRef.current) clearTimeout(debounceRef.current);
                 debounceRef.current = setTimeout(() => setDeferredQuery(val), 120);
               }}
-              placeholder="Buscar en catálogo..."
-              className="w-full h-[var(--control-sm)] pl-8 pr-3 text-xs rounded-lg border border-border/15 bg-muted/10 font-medium text-foreground placeholder:text-muted-foreground/30 focus-visible:outline-none focus-visible:border-primary/30 focus-visible:ring-1 focus-visible:ring-primary/8 transition-all"
-              aria-label="Buscar productos rápidos"
+              placeholder="Buscar..."
+              className="w-full h-8 pl-8 pr-3 text-xs rounded-lg border border-border-subtle bg-bg-inset font-medium text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-focus-ring/20 focus:border-focus-ring/40 transition-all"
+              aria-label="Buscar productos"
               autoComplete="off"
             />
           </div>
-
-          {/* SegmentedControl for sort */}
-          <SegmentedControl
-            segments={sortSegments}
-            value={sortMode}
-            onChange={(key) => { setSortMode(key); setPage(1); }}
-            size="sm"
-          />
+          <SegmentedControl segments={sortSegments} value={sortMode} onChange={key => { setSortMode(key); setPage(1); }} size="sm" />
         </div>
       )}
 
-      {/* Category pills — horizontal scrollable with edge fade */}
       {categories.length > 1 && (
         <div className="relative shrink-0">
-          {/* Edge fade */}
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-card to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-bg-surface to-transparent z-10 pointer-events-none" />
           <div className="flex gap-1.5 overflow-x-auto pb-1.5 shrink-0 scrollbar-none">
             <button
               onClick={() => { setActiveCategory(null); setPage(1); }}
               className={cn(
-                'shrink-0 px-4 py-2 rounded-full text-[11px] font-semibold transition-all duration-200 whitespace-nowrap',
+                'shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-150',
                 !activeCategory
-                  ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/15'
-                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/15',
+                  ? 'bg-action-primary text-[var(--bg-surface)]'
+                  : 'text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover border border-border-subtle',
               )}
             >
               Todos
-              <span className="ml-1.5 text-[9px] opacity-60 font-bold">{products.length}</span>
+              <span className="ml-1.5 text-[9px] opacity-60">{products.length}</span>
             </button>
             {categories.map(([cat, count]) => (
               <button
                 key={cat}
                 onClick={() => { setActiveCategory(cat === activeCategory ? null : cat); setPage(1); }}
                 className={cn(
-                  'shrink-0 px-4 py-2 rounded-full text-[11px] font-semibold transition-all duration-200 truncate max-w-[130px] whitespace-nowrap',
+                  'shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-150 truncate max-w-[140px]',
                   activeCategory === cat
-                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/15'
-                    : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/30 border border-border/15',
+                    ? 'bg-action-primary text-[var(--bg-surface)]'
+                    : 'text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover border border-border-subtle',
                 )}
                 title={`${cat} (${count})`}
               >
                 {cat}
-                <span className="ml-1 text-[9px] opacity-60 font-bold">{count}</span>
+                <span className="ml-1 text-[9px] opacity-60">{count}</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Empty states */}
       {filteredProducts.length === 0 && deferredQuery && (
-        <div className="flex-1 flex items-center justify-center text-muted-foreground">
-          <p className="text-xs font-medium">Sin resultados para &quot;{deferredQuery}&quot;</p>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs font-medium text-text-tertiary">Sin resultados para "{deferredQuery}"</p>
         </div>
       )}
 
       {displayProducts.length === 0 && !searchQuery && !activeCategory && (
-        <div className="flex-1 flex items-center justify-center text-muted-foreground">
-          <p className="text-xs font-semibold">No hay productos disponibles</p>
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs font-semibold text-text-tertiary">No hay productos disponibles</p>
         </div>
       )}
 
-      {/* Product grid — responsive inside catalog panel */}
       {displayProducts.length > 0 && (
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
-        {paginatedProducts.map((p) => (
-          <QuickProductButton
-            key={p.id}
-            product={p}
-            onSelect={handleSelect}
-          />
-        ))}
-      </div>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(150px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5">
+          {paginatedProducts.map(p => (
+            <QuickProductCard key={p.id} product={p} onSelect={handleSelect} />
+          ))}
+        </div>
       )}
 
-      {/* Load more */}
       {hasMore && !deferredQuery && (
         <button
           onClick={() => setPage(p => p + 1)}
-          className="text-[10px] font-bold text-primary/50 hover:text-primary transition-colors py-2 touch-target uppercase tracking-wider"
+          className="text-[10px] font-bold text-text-tertiary hover:text-text-primary transition-colors py-2 uppercase tracking-wider"
         >
-          + {displayProducts.length - paginatedProducts.length} más
+          + {displayProducts.length - paginatedProducts.length} mas
         </button>
       )}
     </div>
   );
 });
-
-export { QuickProductButton };
-export type { QuickProduct };

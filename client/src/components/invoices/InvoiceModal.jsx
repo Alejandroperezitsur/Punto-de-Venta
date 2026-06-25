@@ -35,37 +35,31 @@ export function InvoiceModal({ sale, onClose }) {
 
     if (success) {
         return (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]">
-                <Card className="p-6 max-w-md w-full text-center">
-                    <div className="size-16 rounded-2xl bg-success/10 flex items-center justify-center mx-auto mb-4">
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[var(--z-modal)]">
+                <div className="bg-bg-surface rounded-xl shadow-dialog p-6 max-w-md w-full text-center">
+                    <div className="size-16 rounded-xl bg-success-bg flex items-center justify-center mx-auto mb-4">
                         <CheckCircle2 className="size-8 text-success" />
                     </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">¡Factura Timbrada!</h2>
-                    <p className="text-sm text-muted-foreground mb-1">Folio Fiscal (UUID):</p>
-                    <p className="font-mono text-xs bg-muted/30 rounded-lg px-3 py-2 mb-6 break-all">{success.uuid}</p>
+                    <h2 className="text-xl font-bold text-text-primary mb-2">Factura Timbrada</h2>
+                    <p className="text-sm text-text-secondary mb-1">Folio Fiscal (UUID):</p>
+                    <p className="font-mono text-xs bg-bg-inset rounded-lg px-3 py-2 mb-6 break-all">{success.uuid}</p>
                     <div className="flex gap-3">
-                        <Button asChild variant="outline" className="flex-1">
-                            <a href={success.pdf_url} target="_blank" rel="noreferrer">
-                                <FileText className="size-4 mr-2" />
-                                PDF
-                            </a>
-                        </Button>
-                        <Button asChild variant="outline" className="flex-1">
-                            <a href={success.xml_url} target="_blank" rel="noreferrer">
-                                <Download className="size-4 mr-2" />
-                                XML
-                            </a>
-                        </Button>
+                        <a href={success.pdf_url} target="_blank" rel="noreferrer" className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-bg-inset text-sm font-medium text-text-primary hover:bg-bg-surface-hover transition-colors">
+                        <FileText className="size-4" /> PDF
+                      </a>
+                      <a href={success.xml_url} target="_blank" rel="noreferrer" className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-bg-inset text-sm font-medium text-text-primary hover:bg-bg-surface-hover transition-colors">
+                        <Download className="size-4" /> XML
+                      </a>
                     </div>
                     <Button variant="ghost" onClick={onClose} className="w-full mt-4">Cerrar</Button>
-                </Card>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]">
-            <Card className="p-6 max-w-md w-full">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[var(--z-modal)]">
+            <div className="bg-bg-surface rounded-xl shadow-dialog p-6 max-w-md w-full">
                 <div className="flex justify-between items-center mb-5">
                     <div className="flex items-center gap-3">
                         <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -148,7 +142,7 @@ export function InvoiceModal({ sale, onClose }) {
                         {loading ? 'Timbrando...' : 'Timbrar Factura'}
                     </Button>
                 </div>
-            </Card>
+            </div>
         </div>
     );
 }

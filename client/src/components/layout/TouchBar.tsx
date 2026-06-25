@@ -5,7 +5,7 @@ import { cn } from '../../utils/cn';
 
 const TABS = [
   { to: '/ventas', icon: ShoppingCart, label: 'Ventas' },
-  { to: '/productos', icon: Package, label: 'Prod' },
+  { to: '/productos', icon: Package, label: 'Inventario' },
   { to: '/clientes', icon: Users, label: 'Clientes' },
   { to: '/reportes', icon: BarChart3, label: 'Reportes' },
   { to: '/caja', icon: Wallet, label: 'Caja' },
@@ -22,16 +22,12 @@ export const TouchBar = React.memo(function TouchBar() {
           key={tab.to}
           to={tab.to}
           className={({ isActive }) => cn(
-            'flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 h-full',
+            'flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 h-full transition-colors',
             isActive ? 'text-action-primary' : 'text-text-tertiary',
           )}
         >
-          {({ isActive }) => (
-            <>
-              <tab.icon className="size-6" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-medium leading-none">{tab.label}</span>
-            </>
-          )}
+          <tab.icon className="size-6" strokeWidth={2} />
+          <span className="text-[10px] font-medium leading-none">{tab.label}</span>
         </NavLink>
       ))}
     </nav>

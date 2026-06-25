@@ -91,7 +91,7 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
   ] as const;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-[var(--z-modal)]">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-[var(--z-modal)]">
       <div className="bg-bg-surface w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-overlay p-6">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ export const ReconciliationPanel: React.FC<{ storeId: string; onClose: () => voi
                               Math.abs(d.divergence) > 5 ? 'text-semantic-danger' : 'text-semantic-warning'
                             )}>{d.divergence > 0 ? '+' : ''}{d.divergence}</td>
                             <td className="py-2.5 px-3">
-                              <Badge variant={badge.variant} color={badge.color} size="sm">
+                              <Badge variant={badge.variant === 'alert' ? 'danger' : badge.variant as any} size="sm">
                                 {suggestion?.suggestedAction === 'merge' ? 'Auto' :
                                  suggestion?.suggestedAction === 'use_server' ? 'Servidor' :
                                  suggestion?.suggestedAction === 'use_local' ? 'Local' : 'Manual'}
