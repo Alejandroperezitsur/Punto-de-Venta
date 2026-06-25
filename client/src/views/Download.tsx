@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download as DownloadIcon, Monitor, Globe, CheckCircle } from 'lucide-react';
+import { Download as DownloadIcon, Monitor, Globe, CheckCircle, ExternalLink } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 
 const GITHUB_REPO = 'https://github.com/Alejandroperezitsur/Punto-de-Venta';
