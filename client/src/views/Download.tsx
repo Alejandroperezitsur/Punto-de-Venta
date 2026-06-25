@@ -1,9 +1,9 @@
 import React from 'react';
-import { Download as DownloadIcon, Monitor, Smartphone, Globe, CheckCircle, ExternalLink } from 'lucide-react';
+import { Download as DownloadIcon, Monitor, Globe, CheckCircle } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 
 const GITHUB_REPO = 'https://github.com/Alejandroperezitsur/Punto-de-Venta';
-const RELEASE_URL = `${GITHUB_REPO}/releases/latest`;
+const DOWNLOAD_URL = `${GITHUB_REPO}/releases/download/v1.0.0/POS.Pro.Setup.1.0.0.exe`;
 
 export default function DownloadView() {
   return (
@@ -32,14 +32,11 @@ export default function DownloadView() {
               </ul>
               <div className="mt-4 flex flex-wrap gap-3">
                 <a
-                  href={RELEASE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                  href={DOWNLOAD_URL}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-primary text-[var(--bg-surface)] text-sm font-semibold hover:opacity-90 transition-opacity"
                 >
                   <DownloadIcon className="size-4" />
                   Descargar para Windows
-                  <ExternalLink className="size-3 opacity-60" />
                 </a>
                 <span className="inline-flex items-center text-xs text-text-tertiary">
                   v1.0.0 · ~73 MB · NSIS Installer

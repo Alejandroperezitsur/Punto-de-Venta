@@ -1,11 +1,12 @@
-import React, { useMemo } from 'react';
-import { Sun, Moon, Search, Command, LogOut } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Sun, Moon, Search, Command, LogOut, Heart } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../store/userStore';
 import { ConnectionStatus } from '../common/ConnectionStatus';
 import { Dropdown } from '../ui/Dropdown';
+import { Modal } from '../ui/Modal';
 import { cn } from '../../utils/cn';
 
 const ROUTE_TITLES: Record<string, string> = {
@@ -33,6 +34,7 @@ export const AppHeader = React.memo(function AppHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useUserStore();
+  const [donateOpen, setDonateOpen] = useState(false);
 
   const title = useMemo(() => ROUTE_TITLES[location.pathname] || 'Inicio', [location.pathname]);
 
@@ -81,6 +83,36 @@ export const AppHeader = React.memo(function AppHeader() {
         >
           {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>
+
+        <button
+          onClick={() => setDonateOpen(true)}
+          className="p-2 rounded-md text-text-tertiary hover:text-danger transition-colors"
+          aria-label="Apoyar proyecto"
+          title="Apoyar POS Pro"
+        >
+          <Heart className="size-4" />
+        </button>
+
+        <Modal open={donateOpen} onClose={() => setDonateOpen(false)} title="Apoya POS Pro" size="sm">
+          <div className="text-center space-y-4">
+            <div className="size-14 rounded-full bg-danger/10 flex items-center justify-center mx-auto">
+              <Heart className="size-7 text-danger" />
+            </div>
+            <p className="text-sm text-text-secondary">
+              Si te está siendo util, considera apoyar el proyecto para seguir mejorandolo.
+            </p>
+            <a
+              href="https://paypal.me/APVLabs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#0070BA] hover:bg-[#005ea6] text-white text-sm font-bold transition-colors w-full justify-center"
+            >
+              <svg className="size-5" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.93 4.778-4.405 7.201-9.263 7.201h-2.19a.563.563 0 0 0-.556.479l-1.187 7.527h-.506l-.24 1.516a.56.56 0 0 0 .554.647h3.882c.46 0 .85-.334.922-.788.06-.26.76-4.852.816-5.09a.932.932 0 0 1 .923-.788h.58c3.76 0 6.705-1.528 7.565-5.946.36-1.847.174-3.388-.777-4.471z"/></svg>
+              Donar con PayPal
+            </a>
+            <p className="text-[10px] text-text-tertiary">@APVLabs</p>
+          </div>
+        </Modal>
 
         <Dropdown
           align="right"
