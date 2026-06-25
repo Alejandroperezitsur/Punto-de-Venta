@@ -6,7 +6,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts",
-    "dev": "nodemon index.ts",
+    "dev": "nodemon --exec node dist/index.js --watch dist",
     "build": "tsc"
   },
   "dependencies": {
