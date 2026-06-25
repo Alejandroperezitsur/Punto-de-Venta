@@ -29,17 +29,30 @@ export default function ProductsView() {
   const [form, setForm] = useState({ name: '', price: '', cost: '', stock: '', min_stock: '', category: '', barcode: '' });
   const toast = useToast();
   const [movementModal, setMovementModal] = useState<{ open: boolean; productId: number | null }>({ open: false, productId: null });
+  const [hasMore, setHasMore] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (reset = true) => {
     setLoading(true);
     try {
-      const data = await api('/products');
-      setProducts(Array.isArray(data) ? data : data.data || []);
+      if (reset) {
+        const data = await api('/products?take=200');
+        const result = Array.isArray(data) ? data : data?.data || [];
+        setProducts(result);
+        setHasMore(data?.pagination?.hasMore || false);
+        setCursor(data?.pagination?.nextCursor || null);
+      } else if (cursor) {
+        const data = await api(`/products?take=200&cursor=${cursor}`);
+        const result = Array.isArray(data) ? data : data?.data || [];
+        setProducts(prev => [...prev, ...result]);
+        setHasMore(data?.pagination?.hasMore || false);
+        setCursor(data?.pagination?.nextCursor || null);
+      }
     } catch { toast('Error al cargar productos', 'error'); }
     finally { setLoading(false); }
-  }, [toast]);
+  }, [toast, cursor]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(true); }, []);
 
   const openCreate = () => {
     setForm({ name: '', price: '', cost: '', stock: '0', min_stock: '5', category: '', barcode: '' });

@@ -44,6 +44,7 @@ const AuditsView = React.lazy(() => import('./views/Audits'));
 const OnboardingWizard = React.lazy(() => import('./views/OnboardingWizard'));
 const AboutView = React.lazy(() => import('./views/About'));
 const BackupsView = React.lazy(() => import('./views/Backups'));
+const DownloadView = React.lazy(() => import('./views/Download'));
 const MetricsDashboard = React.lazy(() => import('./views/admin/MetricsDashboard'));
 const SupportTickets = React.lazy(() => import('./views/SupportTickets'));
 const Subscription = React.lazy(() => import('./views/Subscription'));
@@ -272,6 +273,7 @@ function App() {
           <Route path="/insights" element={<RequireAuth><AiInsights /></RequireAuth>} />
           <Route path="/theme-studio" element={<RequireAuth><ThemeStudio /></RequireAuth>} />
           <Route path="/branding" element={<RequireAuth requiredPermission="settings:view"><Branding /></RequireAuth>} />
+          <Route path="/download" element={<RequireAuth><DownloadView /></RequireAuth>} />
 
           <Route path="*" element={<Navigate to="/ventas" replace />} />
         </Routes>

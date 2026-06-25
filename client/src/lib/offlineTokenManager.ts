@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'auth_token';
+const TOKEN_KEY = 'token';
 const ISSUED_AT_KEY = 'token_issued_at';
 const TOKEN_DURATION_MS = 12 * 60 * 60 * 1000;
 

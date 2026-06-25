@@ -64,6 +64,9 @@ async function createSale({ customer_id = null, items = [], discount = 0, paymen
 
     const tax = toDecimal(totalTax);
     const discountVal = Math.max(0, typeof discount === 'number' ? discount : 0);
+    if (discountVal > toDecimal(subtotal + tax)) {
+      throw Object.assign(new Error('El descuento no puede exceder el subtotal + impuestos'), { status: 400 });
+    }
     const total = toDecimal(Math.max(0, subtotal + tax - discountVal));
     const created_at = new Date();
 

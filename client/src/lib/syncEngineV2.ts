@@ -65,7 +65,7 @@ async function sendBatch(endpoint: string, items: Array<{ id: string; payload: u
     if (!response.ok) {
       const text = await response.text().catch(() => 'Unknown error');
       if (response.status === 409) {
-        return items.map((i) => ({ id: i.id, ok: true }));
+        return items.map((i) => ({ id: i.id, ok: true, conflict: true }));
       }
       if (response.status >= 500) {
         return items.map((i) => ({ id: i.id, ok: false, error: `Server error ${response.status}` }));
@@ -84,7 +84,7 @@ async function sendBatch(endpoint: string, items: Array<{ id: string; payload: u
       if (r) {
         results.push({ id: item.id, ...r });
       } else {
-        results.push({ id: item.id, ok: true });
+        results.push({ id: item.id, ok: false, error: 'Item not found in server response' });
       }
     }
   } catch (e) {

@@ -74,7 +74,7 @@ async function closeSession({ userId, storeId, countedCash }) {
 
     let expectedCash = Number(session.opening_balance);
     for (const m of movements) {
-      if (m.type === 'sale' || m.type === 'deposit' || m.type === 'opening') {
+      if (m.type === 'sale' || m.type === 'deposit') {
         expectedCash += Number(m.amount);
       } else if (m.type === 'withdraw') {
         expectedCash -= Math.abs(Number(m.amount));
@@ -136,6 +136,18 @@ async function addMovement({ userId, storeId, type, amount, reference }) {
 
     if (!session) {
       throw Object.assign(new Error('No hay sesión de caja abierta'), { status: 400 });
+    }
+
+    if (type === 'withdraw') {
+      const movements = await tx.cashMovement.findMany({ where: { session_id: session.id } });
+      let currentBalance = Number(session.opening_balance);
+      for (const m of movements) {
+        if (m.type === 'sale' || m.type === 'deposit') currentBalance += Number(m.amount);
+        else if (m.type === 'withdraw') currentBalance -= Math.abs(Number(m.amount));
+      }
+      if (Math.abs(toDecimal(amount)) > currentBalance + 0.001) {
+        throw Object.assign(new Error(`Fondos insuficientes. Disponible: $${currentBalance.toFixed(2)}, solicitado: $${Math.abs(toDecimal(amount)).toFixed(2)}`), { status: 400 });
+      }
     }
 
     const movement = await tx.cashMovement.create({

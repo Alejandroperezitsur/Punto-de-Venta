@@ -16,17 +16,20 @@ const ProductSearch = memo(function ProductSearch() {
   const handleScan = useCallback(async (barcode: string) => {
     setScanning(true);
     try {
-      const res = await api(`/products?barcode=${encodeURIComponent(barcode)}`);
-      const data = Array.isArray(res) ? res : res?.data || [];
-      if (data.length === 1) {
-        addItem(data[0]);
-        toast(`${data[0].name} agregado`, 'success');
-      } else if (data.length > 1) {
-        addItem(data[0]);
-        toast(`${data[0].name} agregado`, 'success');
+      const res = await api(`/products/scan/${encodeURIComponent(barcode)}`);
+      if (res && (res.id || res.sku)) {
+        addItem(res);
+        toast(`${res.name} agregado`, 'success');
       } else {
-        toast('Producto no encontrado. Use F4 para agregar manual', 'warning');
-        document.dispatchEvent(new CustomEvent('trigger-manual-product'));
+        const listRes = await api(`/products?q=${encodeURIComponent(barcode)}`);
+        const data = Array.isArray(listRes) ? listRes : listRes?.data || [];
+        if (data.length > 0) {
+          addItem(data[0]);
+          toast(`${data[0].name} agregado`, 'success');
+        } else {
+          toast('Producto no encontrado. Use F4 para agregar manual', 'warning');
+          document.dispatchEvent(new CustomEvent('trigger-manual-product'));
+        }
       }
     } catch {
       toast('Error al buscar producto', 'error');

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   ShoppingCart, Package, Users, BarChart3, Settings, Wallet,
-  Shield, ClipboardList, Store, Palette, ChevronRight, ChevronLeft,
+  Shield, ClipboardList, Store, Palette, ChevronRight, ChevronLeft, Download,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
@@ -28,6 +28,7 @@ const SECONDARY_ITEMS: NavItemData[] = [
   { to: '/audits', icon: ClipboardList, label: 'Auditoría', permission: PERMISSIONS.AUDITS_VIEW },
   { to: '/config', icon: Settings, label: 'Configuración', permission: PERMISSIONS.SETTINGS_VIEW },
   { to: '/branding', icon: Palette, label: 'Marca', permission: PERMISSIONS.SETTINGS_VIEW },
+  { to: '/download', icon: Download, label: 'Descargar', permission: 'sales:view' },
 ];
 
 export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?: () => void }) {

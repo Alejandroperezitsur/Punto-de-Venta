@@ -285,11 +285,18 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
       const existing = await db.get('products', id);
       if (!existing) throw new Error('Producto no encontrado.');
 
+      const newPrice = body.price !== undefined ? Number(body.price) : existing.price;
+      if (newPrice !== undefined && (isNaN(newPrice) || newPrice < 0)) {
+        throw new Error('Precio inválido.');
+      }
+
+      const newStock = body.stock !== undefined ? Math.max(0, Number(body.stock)) : existing.stock;
+
       const updated = {
         ...existing,
         name: body.name !== undefined ? body.name : existing.name,
-        price: body.price !== undefined ? Number(body.price) : existing.price,
-        stock: body.stock !== undefined ? Number(body.stock) : existing.stock,
+        price: newPrice,
+        stock: newStock,
         sku: body.sku !== undefined ? body.sku : existing.sku,
         barcodes: body.barcodes !== undefined ? body.barcodes : (existing.barcodes || []),
         image_url: body.image_url !== undefined ? body.image_url : existing.image_url,
@@ -304,13 +311,14 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
       const id = path.split('/').pop() || '';
       const existing = await db.get('products', id);
       if (!existing) throw new Error('Producto no encontrado.');
-      await db.delete('products', id);
+      const softDeleted = { ...existing, active: 0, deleted_at: new Date().toISOString() };
+      await db.put('products', softDeleted);
       return { success: true };
     }
   }
 
   // ─── CLIENTES ───
-  if (path.startsWith('/customers')) {
+  if (path.startsWith('/customers') && !path.startsWith('/auth/')) {
     const customers: OfflineCustomer[] = JSON.parse(localStorage.getItem(CUSTOMERS_KEY) || '[]');
     
     if (method === 'GET') {
@@ -328,6 +336,15 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
       customers.push(newCust);
       localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
       return newCust;
+    }
+
+    if (method === 'PUT') {
+      const id = path.split('/').pop() || '';
+      const idx = customers.findIndex(c => c.id === id);
+      if (idx === -1) throw new Error('Cliente no encontrado.');
+      customers[idx] = { ...customers[idx], ...body };
+      localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
+      return customers[idx];
     }
 
     if (method === 'DELETE') {
@@ -443,6 +460,20 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
       const type = path.endsWith('deposit') ? 'deposit' : 'withdraw';
       const amount = Number(body.amount) || 0;
       
+      if (amount <= 0) throw new Error('El monto debe ser mayor a cero.');
+
+      if (type === 'withdraw') {
+        const movements = JSON.parse(localStorage.getItem(CASH_MOVEMENTS_KEY) || '[]');
+        let currentBalance = session.opening_balance || 0;
+        for (const m of movements) {
+          if (m.type === 'sale' || m.type === 'deposit') currentBalance += m.amount || 0;
+          else if (m.type === 'withdraw') currentBalance -= Math.abs(m.amount || 0);
+        }
+        if (amount > currentBalance + 0.001) {
+          throw new Error(`Fondos insuficientes. Disponible: $${currentBalance.toFixed(2)}, solicitado: $${amount.toFixed(2)}`);
+        }
+      }
+      
       const newMovement = {
         id: `mov-${Date.now()}`,
         type,
@@ -532,21 +563,27 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
       const { items: cartItems, discount, payment_method, payments } = body;
       const totals = { subtotal: 0, tax: 0, discount: discount || 0, total: 0 };
       
-      const productsToUpdate = [];
+      // Single readwrite transaction for stock validation + decrement
+      const tx = db.transaction('products', 'readwrite');
+      const productsToUpdate: any[] = [];
 
-      // Validar stock y recopilar datos
-      const tx = db.transaction('products', 'readonly');
       for (const item of cartItems) {
         const prod = await tx.store.get(item.product_id);
         if (!prod) throw new Error(`El producto con ID ${item.product_id} no existe.`);
+        if ((prod.active === 0) || prod.deleted_at) throw new Error(`El producto "${prod.name}" no está activo.`);
         if (prod.stock < item.quantity) {
           throw new Error(`Stock insuficiente para "${prod.name}". Disponible: ${prod.stock}`);
         }
-        totals.subtotal += prod.price * item.quantity;
+        totals.subtotal += (Number(prod.price) || 0) * (Number(item.quantity) || 0);
         productsToUpdate.push({
           ...prod,
-          stock: prod.stock - item.quantity
+          stock: Math.max(0, prod.stock - item.quantity)
         });
+      }
+
+      // Write stock decrements within same transaction
+      for (const p of productsToUpdate) {
+        await tx.store.put(p);
       }
       await tx.done;
 
@@ -563,16 +600,15 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
         totals.total = totals.subtotal - totals.discount + totals.tax;
       }
 
-      // Descontar stock
-      const updateTx = db.transaction('products', 'readwrite');
-      for (const p of productsToUpdate) {
-        await updateTx.store.put(p);
-      }
-      await updateTx.done;
+      // Round to 2 decimals
+      totals.subtotal = Math.round(totals.subtotal * 100) / 100;
+      totals.tax = Math.round(totals.tax * 100) / 100;
+      totals.total = Math.round(totals.total * 100) / 100;
 
       // Guardar venta
+      const saleId = `ticket-${Date.now()}`;
       const newSale = {
-        id: `ticket-${Date.now()}`,
+        id: saleId,
         items: await Promise.all(cartItems.map(async (i: any) => {
           const original = await db.get('products', i.product_id);
           return {
@@ -593,7 +629,7 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
 
       await db.put('sales', newSale);
 
-      // Si la caja está abierta, registrar el cobro en efectivo/tarjeta
+      // Register cash movement atomically with sale
       const session = JSON.parse(localStorage.getItem(CASH_SESSION_KEY) || 'null');
       if (session && session.status === 'open') {
         const cashAmount = newSale.payments
@@ -604,8 +640,8 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
           const cashMov = {
             id: `mov-${Date.now()}`,
             type: 'sale',
-            reference: `Venta #${newSale.id}`,
-            amount: cashAmount,
+            reference: `Venta #${saleId}`,
+            amount: Math.round(cashAmount * 100) / 100,
             created_at: new Date().toISOString()
           };
           const movements = JSON.parse(localStorage.getItem(CASH_MOVEMENTS_KEY) || '[]');
@@ -700,6 +736,23 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
         details: a.metadata || '{}'
       })).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
+  }
+
+  // ─── AUTH LOGOUT ───
+  if (path.startsWith('/auth/logout')) {
+    return { success: true };
+  }
+
+  // ─── METRICS ───
+  if (path.startsWith('/metrics')) {
+    const sales = await db.getAll('sales');
+    const products = await db.getAll('products');
+    return {
+      totalSales: sales.length,
+      totalRevenue: sales.reduce((acc: number, s: any) => acc + (s.totals?.total || s.total || 0), 0),
+      totalProducts: products.length,
+      activeProducts: products.filter((p: any) => p.active !== 0).length,
+    };
   }
 
   throw new Error(`Ruta offline no emulada para ${method} ${path}`);

@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/Punto-de-Venta/',
+  base: process.env.ELECTRON_BUILD === 'true' ? './' : '/Punto-de-Venta/',
   server: {
     port: 5173,
   },
@@ -60,6 +60,7 @@ export default defineConfig({
         name: 'Punto de Venta Pro',
         short_name: 'POS Pro',
         description: 'Sistema Profesional de Punto de Venta',
+        lang: 'es',
         theme_color: '#1e88e5',
         background_color: '#0a0a0a',
         display: 'standalone',

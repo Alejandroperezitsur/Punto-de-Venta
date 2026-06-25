@@ -1,5 +1,6 @@
 import { cacheApiResponse, getApiCache, getApiCacheByTag, getApiCacheByPrefix } from './db';
 import { persistOfflineLogin, signInOffline } from './offlineAuth';
+import { isStaticEnv } from '../utils/env';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const DEFAULT_TIMEOUT_MS = 12000;
@@ -126,11 +127,6 @@ async function tryOfflineLoginFallback(options) {
 }
 
 export async function api(path, options = {}) {
-  const isStaticEnv = typeof window !== 'undefined' && (
-    window.location.hostname.includes('github.io') || 
-    window.location.hostname.includes('github.com')
-  );
-
   if (isStaticEnv) {
     try {
       const { handleOfflineRequest } = await import('./offlineDB');

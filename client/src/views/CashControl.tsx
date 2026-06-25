@@ -100,20 +100,20 @@ export default function CashControlView() {
 
   const stats = useMemo(() => {
     const totalDeposits = movements.filter(m => m.type === 'deposit').reduce((a, m) => a + (m.amount || 0), 0);
-    const totalWithdrawals = movements.filter(m => m.type === 'withdrawal').reduce((a, m) => a + (m.amount || 0), 0);
+    const totalWithdrawals = movements.filter(m => m.type === 'withdraw').reduce((a, m) => a + Math.abs(m.amount || 0), 0);
     const currentAmount = session?.current_amount || 0;
     return { totalDeposits, totalWithdrawals, currentAmount };
   }, [movements, session]);
 
   const columns: Column<any>[] = useMemo(() => [
     { key: 'type', label: 'Tipo', render: m => (
-      <Badge variant={m.type === 'deposit' ? 'success' : m.type === 'withdrawal' ? 'danger' : m.type === 'opening' ? 'info' : 'neutral'} size="xs">
-        {m.type === 'deposit' ? 'Deposito' : m.type === 'withdrawal' ? 'Retiro' : m.type === 'opening' ? 'Apertura' : 'Cierre'}
+      <Badge variant={m.type === 'deposit' ? 'success' : m.type === 'withdraw' ? 'danger' : m.type === 'opening' ? 'info' : 'neutral'} size="xs">
+        {m.type === 'deposit' ? 'Deposito' : m.type === 'withdraw' ? 'Retiro' : m.type === 'opening' ? 'Apertura' : 'Venta'}
       </Badge>
     )},
     { key: 'amount', label: 'Monto', render: m => (
-      <span className={`font-bold tabular-nums ${m.type === 'deposit' || m.type === 'opening' ? 'text-success-text' : m.type === 'withdrawal' ? 'text-danger-text' : 'text-text-primary'}`}>
-        {m.type === 'deposit' || m.type === 'opening' ? '+' : '-'}{formatMoney(m.amount)}
+      <span className={`font-bold tabular-nums ${m.type === 'deposit' || m.type === 'opening' ? 'text-success-text' : m.type === 'withdraw' ? 'text-danger-text' : 'text-text-primary'}`}>
+        {m.type === 'deposit' || m.type === 'opening' ? '+' : '-'}{formatMoney(Math.abs(m.amount))}
       </span>
     )},
     { key: 'reason', label: 'Motivo', hideOnMobile: true },
