@@ -14,6 +14,7 @@ export function Splash() {
         <div className="mt-4 w-32 h-1 rounded-full bg-bg-inset mx-auto overflow-hidden">
           <div className="h-full rounded-full bg-action-primary animate-pulse w-2/3" />
         </div>
+        <p className="text-[9px] text-text-tertiary/30 mt-4 select-none">APV Labs</p>
       </div>
     </div>
   );

@@ -18,6 +18,7 @@ export function Footer() {
                 </div>
                 <div className="mt-8 border-t border-border/30 pt-8 text-center">
                     <p className="text-xs text-muted-foreground/70">&copy; {new Date().getFullYear()} POS Pro. Todos los derechos reservados.</p>
+                    <p className="text-[10px] text-muted-foreground/40 mt-1">Desarrollado por APV Labs</p>
                 </div>
             </div>
         </footer>

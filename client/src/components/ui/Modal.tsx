@@ -132,8 +132,9 @@ const Modal = Object.assign(React.memo(function Modal({
         </div>
 
         {footer && (
-          <div className="px-[var(--padding-modal)] py-4 border-t border-border-subtle flex items-center justify-end gap-2">
-            {footer}
+          <div className="px-[var(--padding-modal)] py-4 border-t border-border-subtle flex items-center justify-between gap-2">
+            <span className="text-[8px] text-text-tertiary/30 select-none hidden sm:inline">POS Pro</span>
+            <div className="flex items-center gap-2">{footer}</div>
           </div>
         )}
       </div>

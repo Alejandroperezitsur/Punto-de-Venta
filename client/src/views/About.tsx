@@ -29,6 +29,7 @@ export default function AboutView() {
           </div>
         </div>
         <p className="text-xs text-text-tertiary text-center">Build 2026.1 · APV Labs</p>
+        <p className="text-[10px] text-text-tertiary/50 text-center">Alejandro Perez Vasquez</p>
       </div>
     </div>
   );

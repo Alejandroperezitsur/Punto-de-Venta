@@ -1,13 +1,9 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell, nativeImage } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
 
 let mainWindow;
-let serverProcess;
 
 const isDev = !app.isPackaged;
-const PORT = process.env.PORT || 3001;
-const CLIENT_PORT = 5173;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -18,46 +14,50 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
+            enableRemoteModule: false,
+            sandbox: true,
         },
         icon: path.join(__dirname, 'assets', 'icon.png'),
-        title: 'POS Pro by APV Labs',
+        title: 'POS Pro',
         show: false,
+        backgroundColor: '#0a0a0a',
     });
 
-    // Load the app
     const startUrl = isDev
-        ? `http://localhost:${CLIENT_PORT}`
+        ? `http://localhost:5173`
         : `file://${path.join(__dirname, '../client/dist/index.html')}`;
 
     mainWindow.loadURL(startUrl);
 
-    // Show when ready
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
     });
 
-    // Dev tools in development
     if (isDev) {
-        mainWindow.webContents.openDevTools();
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
 
-    // Menu
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        shell.openExternal(url);
+        return { action: 'deny' };
+    });
+
     const template = [
         {
             label: 'POS Pro',
             submenu: [
-                { 
+                {
                     label: 'Acerca de POS Pro',
                     click: async () => {
                         const { dialog } = require('electron');
                         dialog.showMessageBox(mainWindow, {
                             type: 'info',
                             title: 'Acerca de POS Pro',
-                            message: 'POS Pro 2026\n\nDesarrollado por Alejandro Pérez Vázquez (APV Labs)\n\nSistema de Punto de Venta Profesional\n© 2026 APV Labs. Todos los derechos reservados.',
+                            message: 'POS Pro v1.0\n\nSistema Profesional de Punto de Venta\nDesarrollado por Alejandro Perez Vasquez\n\nAPV Labs - 2026\nTodos los derechos reservados.',
                             buttons: ['OK']
                         });
                     }
@@ -97,9 +97,9 @@ function createWindow() {
             label: 'Ayuda',
             submenu: [
                 {
-                    label: 'Documentación',
+                    label: 'Documentacion',
                     click: async () => {
-                        await shell.openExternal('https://github.com/your-repo/pos-pro');
+                        await shell.openExternal('https://github.com/Alejandroperezitsur/Punto-de-Venta');
                     }
                 }
             ]
@@ -110,26 +110,7 @@ function createWindow() {
     Menu.setApplicationMenu(menu);
 }
 
-function startServer() {
-    if (isDev) return; // In dev, server runs separately
-
-    const serverPath = path.join(__dirname, '../server/index.js');
-    serverProcess = spawn('node', [serverPath], {
-        env: { ...process.env, PORT },
-        cwd: path.join(__dirname, '../server')
-    });
-
-    serverProcess.stdout.on('data', (data) => {
-        console.log(`Server: ${data}`);
-    });
-
-    serverProcess.stderr.on('data', (data) => {
-        console.error(`Server Error: ${data}`);
-    });
-}
-
 app.whenReady().then(() => {
-    startServer();
     createWindow();
 
     app.on('activate', () => {
@@ -140,16 +121,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-    if (serverProcess) {
-        serverProcess.kill();
-    }
     if (process.platform !== 'darwin') {
         app.quit();
-    }
-});
-
-app.on('before-quit', () => {
-    if (serverProcess) {
-        serverProcess.kill();
     }
 });

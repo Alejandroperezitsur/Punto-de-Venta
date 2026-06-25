@@ -1,0 +1,5 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="48" fill="#1e88e5"/>
+  <text x="128" y="145" text-anchor="middle" font-family="Arial,sans-serif" font-size="100" font-weight="bold" fill="white">P</text>
+  <text x="128" y="210" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" font-weight="bold" fill="rgba(255,255,255,0.85)">POS PRO</text>
+</svg>

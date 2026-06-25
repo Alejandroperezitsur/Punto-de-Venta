@@ -47,6 +47,11 @@ const AppShell = memo(function AppShell({ children }: { children: React.ReactNod
           </main>
 
           <TouchBar />
+
+          {/* Subtle branding watermark */}
+          <div className="hidden md:block fixed bottom-2 right-3 z-0 pointer-events-none select-none">
+            <span className="text-[9px] text-text-tertiary/30 font-medium tracking-wide">POS Pro · APV Labs</span>
+          </div>
         </div>
       </div>
     </ToastProvider>

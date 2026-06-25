@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useUserStore } from '../store/userStore';
+import { api } from '../lib/api';
 import { Store, LogIn, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
@@ -19,13 +20,10 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/auth/login', {
+      const data = await api('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || data.message || 'Credenciales invalidas');
       login(data.user, data.token);
       navigate('/ventas');
     } catch (e: any) {

@@ -53,6 +53,7 @@ export const AppHeader = React.memo(function AppHeader() {
     >
       <div className="flex items-center gap-3 min-w-0">
         <span className="text-sm font-semibold text-text-primary truncate">{title}</span>
+        <span className="text-[9px] text-text-tertiary/40 hidden lg:inline select-none">v1.0</span>
       </div>
 
       <div className="flex-1 flex justify-center px-4">

@@ -459,10 +459,61 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
       return { success: true };
     }
 
+    // GET /cash/movements
+    if (path.startsWith('/cash/movements')) {
+      const movements = JSON.parse(localStorage.getItem(CASH_MOVEMENTS_KEY) || '[]');
+      return movements;
+    }
+
     // GET /cash/history
     if (path.startsWith('/cash/history')) {
       const history = JSON.parse(localStorage.getItem(CASH_HISTORY_KEY) || '[]');
       return { data: history };
+    }
+  }
+
+  // ─── USUARIOS (ruta /users, alias de /auth/users) ───
+  if (path.startsWith('/users') && !path.startsWith('/auth/')) {
+    const users: OfflineUser[] = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    if (method === 'GET') {
+      return users.map(({ id, username, role, active }) => ({ id, username, role, active: active ?? 1 }));
+    }
+    if (method === 'POST') {
+      const { username, password, role } = body;
+      if (users.some(u => u.username === username.trim())) {
+        throw new Error('El nombre de usuario ya existe.');
+      }
+      const newUser: OfflineUser = {
+        id: Date.now(),
+        username: username.trim(),
+        passwordHash: password,
+        role: role || 'cajero',
+        active: 1
+      };
+      users.push(newUser);
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      return { success: true, user: { id: newUser.id, username: newUser.username, role: newUser.role } };
+    }
+    if (method === 'PUT') {
+      const idStr = path.split('/').pop() || '';
+      const userId = parseInt(idStr);
+      const { role, password } = body;
+      const userIndex = users.findIndex(u => u.id === userId);
+      if (userIndex === -1) throw new Error('Usuario no encontrado.');
+      if (role) users[userIndex].role = role;
+      if (password) users[userIndex].passwordHash = password;
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      return { success: true };
+    }
+    if (method === 'DELETE') {
+      const idStr = path.split('/').pop() || '';
+      const userId = parseInt(idStr);
+      const user = users.find(u => u.id === userId);
+      if (!user) throw new Error('Usuario no encontrado.');
+      if (user.username === 'admin') throw new Error('No se puede eliminar al administrador principal.');
+      const filtered = users.filter(u => u.id !== userId);
+      localStorage.setItem(USERS_KEY, JSON.stringify(filtered));
+      return { success: true };
     }
   }
 
@@ -568,7 +619,44 @@ export async function handleOfflineRequest(path: string, options: any = {}): Pro
     }
   }
 
-  // ─── REPORTES (SUMMARY) ───
+  // ─── REPORTES ───
+  if (path.startsWith('/reports/top-products')) {
+    const products = await db.getAll('products');
+    const sales = await db.getAll('sales');
+    const productSales: Record<string, { name: string; qty: number; total: number }> = {};
+    for (const sale of sales) {
+      for (const item of sale.items || []) {
+        const key = item.product_id;
+        if (!productSales[key]) productSales[key] = { name: item.name, qty: 0, total: 0 };
+        productSales[key].qty += item.quantity;
+        productSales[key].total += (item.price || 0) * item.quantity;
+      }
+    }
+    const url = new URL(path, 'http://localhost');
+    const limit = parseInt(url.searchParams.get('limit') || '5');
+    return Object.entries(productSales)
+      .sort((a, b) => b[1].total - a[1].total)
+      .slice(0, limit)
+      .map(([id, data]) => ({ product_id: id, ...data }));
+  }
+
+  if (path.startsWith('/reports/sales')) {
+    const sales = await db.getAll('sales');
+    const url = new URL(path, 'http://localhost');
+    const days = parseInt(url.searchParams.get('days') || '30');
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const filtered = sales.filter((s: any) => new Date(s.created_at) >= cutoff);
+    const byDate: Record<string, { date: string; count: number; total: number }> = {};
+    for (const s of filtered) {
+      const d = s.created_at?.slice(0, 10) || 'unknown';
+      if (!byDate[d]) byDate[d] = { date: d, count: 0, total: 0 };
+      byDate[d].count++;
+      byDate[d].total += s.totals?.total || s.total || 0;
+    }
+    return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
   if (path.startsWith('/reports/summary')) {
     const url = new URL(path, 'http://localhost');
     const fromStr = url.searchParams.get('from') || '';

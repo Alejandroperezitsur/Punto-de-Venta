@@ -119,6 +119,11 @@ export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?
       >
         {expanded ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
       </button>
+      {expanded && (
+        <div className="px-3 py-2 border-t border-border-subtle">
+          <p className="text-[9px] text-text-tertiary/50 text-center leading-tight">POS Pro v1.0<br/>APV Labs</p>
+        </div>
+      )}
     </nav>
   );
 });

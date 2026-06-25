@@ -14,7 +14,10 @@
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
     "build:pwa": "cd client && npm run build",
-    "build:desktop": "npm run build && electron-builder",
+    "build:desktop": "cd client && npm install && npm run build && cd .. && electron-builder --win --mac --linux",
+    "build:desktop:win": "cd client && npm install && npm run build && cd .. && electron-builder --win",
+    "build:desktop:mac": "cd client && npm install && npm run build && cd .. && electron-builder --mac",
+    "build:desktop:linux": "cd client && npm install && npm run build && cd .. && electron-builder --linux",
     "electron:dev": "concurrently \"npm run server\" \"npm run client\" \"wait-on http://localhost:5173 && electron .\"",
     "setup": "npm install && cd client && npm install && cd ../server && npm install",
     "reset-db": "cd server && npx prisma migrate reset --force",
@@ -22,36 +25,60 @@
     "deploy:web": "cd client && npm install && npm run deploy"
   },
   "build": {
-    "appId": "com.pospro.app",
+    "appId": "com.apvlabs.pospro",
     "productName": "POS Pro",
+    "copyright": "Copyright 2026 Alejandro Perez Vasquez - APV Labs",
     "directories": {
       "output": "dist-electron"
     },
     "files": [
       "electron/**/*",
-      "client/dist/**/*",
-      "server/**/*",
-      "!server/node_modules",
-      "!client/node_modules"
+      "client/dist/**/*"
     ],
+    "extraResources": [],
     "win": {
-      "target": ["nsis", "portable"],
-      "icon": "electron/assets/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "electron/assets/icon.png"
     },
     "mac": {
-      "target": ["dmg"],
-      "icon": "electron/assets/icon.icns"
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "electron/assets/icon.png",
+      "category": "public.app-category.business"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
-      "icon": "electron/assets/icon.png"
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "electron/assets/icon.png",
+      "category": "Office"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "electron/assets/icon.ico",
-      "uninstallerIcon": "electron/assets/icon.ico",
-      "installerHeaderIcon": "electron/assets/icon.ico"
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "POS Pro"
     }
   },
   "devDependencies": {
