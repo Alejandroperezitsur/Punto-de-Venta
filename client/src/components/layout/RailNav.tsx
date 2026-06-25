@@ -4,35 +4,37 @@ import {
   ShoppingCart, Package, Users, BarChart3, Settings, Wallet,
   Shield, ClipboardList, Store, Palette, ChevronRight, ChevronLeft, Download,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../utils/cn';
 import { usePermissions, PERMISSIONS } from '../../hooks/usePermissions';
 
 interface NavItemData {
   to: string;
   icon: React.ElementType;
-  label: string;
+  labelKey: string;
   shortcut?: string;
   permission: string;
 }
 
 const MAIN_ITEMS: NavItemData[] = [
-  { to: '/ventas', icon: ShoppingCart, label: 'Ventas', shortcut: '1', permission: PERMISSIONS.SALES_VIEW },
-  { to: '/productos', icon: Package, label: 'Inventario', shortcut: '2', permission: PERMISSIONS.PRODUCTS_VIEW },
-  { to: '/clientes', icon: Users, label: 'Clientes', shortcut: '3', permission: PERMISSIONS.CUSTOMERS_VIEW },
-  { to: '/reportes', icon: BarChart3, label: 'Reportes', shortcut: '4', permission: PERMISSIONS.REPORTS_VIEW },
-  { to: '/caja', icon: Wallet, label: 'Caja', shortcut: '5', permission: PERMISSIONS.CASH_VIEW },
+  { to: '/ventas', icon: ShoppingCart, labelKey: 'nav.sales', shortcut: '1', permission: PERMISSIONS.SALES_VIEW },
+  { to: '/productos', icon: Package, labelKey: 'nav.inventory', shortcut: '2', permission: PERMISSIONS.PRODUCTS_VIEW },
+  { to: '/clientes', icon: Users, labelKey: 'nav.customers', shortcut: '3', permission: PERMISSIONS.CUSTOMERS_VIEW },
+  { to: '/reportes', icon: BarChart3, labelKey: 'nav.reports', shortcut: '4', permission: PERMISSIONS.REPORTS_VIEW },
+  { to: '/caja', icon: Wallet, labelKey: 'nav.cash', shortcut: '5', permission: PERMISSIONS.CASH_VIEW },
 ];
 
 const SECONDARY_ITEMS: NavItemData[] = [
-  { to: '/usuarios', icon: Shield, label: 'Usuarios', permission: PERMISSIONS.USERS_VIEW },
-  { to: '/audits', icon: ClipboardList, label: 'Auditoría', permission: PERMISSIONS.AUDITS_VIEW },
-  { to: '/config', icon: Settings, label: 'Configuración', permission: PERMISSIONS.SETTINGS_VIEW },
-  { to: '/branding', icon: Palette, label: 'Marca', permission: PERMISSIONS.SETTINGS_VIEW },
-  { to: '/download', icon: Download, label: 'Descargar', permission: 'sales:view' },
+  { to: '/usuarios', icon: Shield, labelKey: 'nav.users', permission: PERMISSIONS.USERS_VIEW },
+  { to: '/audits', icon: ClipboardList, labelKey: 'nav.audits', permission: PERMISSIONS.AUDITS_VIEW },
+  { to: '/config', icon: Settings, labelKey: 'nav.settings', permission: PERMISSIONS.SETTINGS_VIEW },
+  { to: '/branding', icon: Palette, labelKey: 'nav.branding', permission: PERMISSIONS.SETTINGS_VIEW },
+  { to: '/download', icon: Download, labelKey: 'nav.download', permission: 'sales:view' },
 ];
 
 export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?: () => void }) {
   const { hasPermission } = usePermissions();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [branding, setBranding] = React.useState({ logo: null as string | null, businessName: 'POS Pro' });
 
@@ -49,6 +51,7 @@ export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?
   const NavItem = React.memo(function NavItem({ item }: { item: NavItemData }) {
     if (!hasPermission(item.permission)) return null;
     const Icon = item.icon;
+    const label = t(item.labelKey);
     return (
       <NavLink
         to={item.to}
@@ -60,7 +63,7 @@ export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?
             ? 'bg-bg-surface-active text-text-primary font-semibold'
             : 'text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover',
         )}
-        title={!expanded ? item.label : undefined}
+        title={!expanded ? label : undefined}
       >
         {({ isActive }) => (
           <>
@@ -71,7 +74,7 @@ export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?
               <Icon className="size-[18px]" strokeWidth={isActive ? 2.5 : 2} />
             </div>
             {expanded && (
-              <span className="truncate text-sm">{item.label}</span>
+              <span className="truncate text-sm">{label}</span>
             )}
           </>
         )}
@@ -86,7 +89,7 @@ export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?
         'border-r border-border-subtle bg-bg-surface',
         expanded ? 'w-[220px]' : 'w-[56px]',
       )}
-      aria-label="Navegación principal"
+      aria-label="Main navigation"
     >
       {/* Logo */}
       <div className={cn(
@@ -116,7 +119,7 @@ export const RailNav = React.memo(function RailNav({ onNavigate }: { onNavigate?
       <button
         onClick={() => setExpanded(!expanded)}
         className="h-10 flex items-center justify-center border-t border-border-subtle text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover transition-colors"
-        aria-label={expanded ? 'Colapsar menú' : 'Expandir menú'}
+        aria-label={expanded ? 'Collapse menu' : 'Expand menu'}
       >
         {expanded ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
       </button>

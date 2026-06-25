@@ -4,31 +4,31 @@
  */
 export interface ShortcutDef {
   key: string;
-  label: string;
+  labelKey: string;
   action: string;
   scope: 'global' | 'sales' | 'modal';
   description: string;
 }
 
 export const SHORTCUTS: ShortcutDef[] = [
-  { key: 'F1',  label: 'Ayuda',              action: 'show-shortcuts',   scope: 'global', description: 'Mostrar atajos de teclado' },
-  { key: 'F2',  label: 'Cobrar',             action: 'checkout',         scope: 'sales',  description: 'Abrir panel de cobro' },
-  { key: 'F3',  label: 'Buscar',             action: 'focus-search',     scope: 'sales',  description: 'Enfocar buscador/escáner' },
-  { key: 'F4',  label: 'Manual',             action: 'manual-product',   scope: 'sales',  description: 'Agregar producto manual' },
-  { key: 'F5',  label: 'Descuento',          action: 'discount',         scope: 'sales',  description: 'Aplicar descuento a la venta' },
-  { key: 'F6',  label: 'Cliente',            action: 'customer',         scope: 'sales',  description: 'Buscar y asignar cliente' },
-  { key: 'F7',  label: 'Vaciar',             action: 'clear-cart',       scope: 'sales',  description: 'Vaciar carrito completo' },
-  { key: 'F8',  label: 'Pausar',             action: 'hold-ticket',      scope: 'sales',  description: 'Pausar ticket actual' },
-  { key: '⌘K',  label: 'Comandos',           action: 'command-palette',  scope: 'global', description: 'Paleta de comandos' },
-  { key: 'F10', label: 'Config',             action: 'navigate-settings',scope: 'global', description: 'Ir a configuración' },
-  { key: 'Esc', label: 'Cerrar',             action: 'escape',           scope: 'modal',  description: 'Cerrar modal o panel activo' },
+  { key: 'F1',  labelKey: 'shortcuts.help',       action: 'show-shortcuts',   scope: 'global', description: 'Show keyboard shortcuts' },
+  { key: 'F2',  labelKey: 'shortcuts.charge',     action: 'checkout',         scope: 'sales',  description: 'Open checkout panel' },
+  { key: 'F3',  labelKey: 'shortcuts.search',     action: 'focus-search',     scope: 'sales',  description: 'Focus search/scanner' },
+  { key: 'F4',  labelKey: 'shortcuts.manual',     action: 'manual-product',   scope: 'sales',  description: 'Add manual product' },
+  { key: 'F5',  labelKey: 'shortcuts.discount',   action: 'discount',         scope: 'sales',  description: 'Apply discount to sale' },
+  { key: 'F6',  labelKey: 'shortcuts.customer',   action: 'customer',         scope: 'sales',  description: 'Search and assign customer' },
+  { key: 'F7',  labelKey: 'shortcuts.clear',      action: 'clear-cart',       scope: 'sales',  description: 'Clear entire cart' },
+  { key: 'F8',  labelKey: 'shortcuts.pause',      action: 'hold-ticket',      scope: 'sales',  description: 'Hold current ticket' },
+  { key: '⌘K',  labelKey: 'shortcuts.commands',   action: 'command-palette',  scope: 'global', description: 'Command palette' },
+  { key: 'F10', labelKey: 'shortcuts.config',     action: 'navigate-settings',scope: 'global', description: 'Go to settings' },
+  { key: 'Esc', labelKey: 'shortcuts.close',      action: 'escape',           scope: 'modal',  description: 'Close modal or active panel' },
 ];
 
 /** Payment-specific shortcuts (active inside PaymentModal) */
 export const PAYMENT_SHORTCUTS: ShortcutDef[] = [
-  { key: 'C', label: 'Efectivo',       action: 'pay-cash',     scope: 'modal', description: 'Seleccionar pago en efectivo' },
-  { key: 'T', label: 'Tarjeta',        action: 'pay-card',     scope: 'modal', description: 'Seleccionar pago con tarjeta' },
-  { key: 'R', label: 'Transferencia',  action: 'pay-transfer', scope: 'modal', description: 'Seleccionar transferencia' },
+  { key: 'C', labelKey: 'shortcuts.cash',       action: 'pay-cash',     scope: 'modal', description: 'Select cash payment' },
+  { key: 'T', labelKey: 'shortcuts.card',       action: 'pay-card',     scope: 'modal', description: 'Select card payment' },
+  { key: 'R', labelKey: 'shortcuts.transfer',   action: 'pay-transfer', scope: 'modal', description: 'Select transfer payment' },
 ];
 
 export function getShortcutByAction(action: string): ShortcutDef | undefined {

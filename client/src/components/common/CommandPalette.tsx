@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Search, ShoppingCart, Package, Users, Wallet, BarChart3, Settings,
-  LogOut, HelpCircle, Zap, X, ArrowRight, Command, Keyboard,
+  LogOut, Zap, X, Command, Keyboard,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { SHORTCUTS, PAYMENT_SHORTCUTS } from '../../config/shortcuts';
 
 interface Command {
   id: string;
-  label: string;
-  description: string;
+  labelKey: string;
+  descKey: string;
   icon: React.ElementType;
   action: () => void;
   shortcut?: string;
@@ -22,6 +23,7 @@ export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = (
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const focusScan = useCallback(() => {
     const input = document.querySelector('input[data-scan-input]');
@@ -29,30 +31,32 @@ export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = (
   }, []);
 
   const commands = useMemo<Command[]>(() => [
-    { id: 'checkout', label: 'Cobrar', description: 'Procesar pago del carrito actual', icon: ShoppingCart, action: () => { document.dispatchEvent(new CustomEvent('trigger-checkout')); onClose(); }, shortcut: 'F2', keywords: ['cobrar', 'pago', 'pagar', 'checkout', 'total'] },
-    { id: 'sales', label: 'Ventas', description: 'Pantalla principal de punto de venta', icon: ShoppingCart, action: () => { navigate('/ventas'); onClose(); }, shortcut: 'Ctrl+1', keywords: ['ventas', 'pos', 'vender'] },
-    { id: 'products-search', label: 'Buscar Producto', description: 'Buscar por nombre, SKU o codigo de barras', icon: Package, action: () => { navigate('/ventas'); onClose(); setTimeout(() => focusScan(), 100); }, shortcut: 'F3', keywords: ['producto', 'buscar', 'sku', 'scanner'] },
-    { id: 'manual', label: 'Producto Manual', description: 'Agregar producto sin registro', icon: Zap, action: () => { document.dispatchEvent(new CustomEvent('trigger-manual-product')); onClose(); }, shortcut: 'F4', keywords: ['manual', 'generico'] },
-    { id: 'discount', label: 'Descuento', description: 'Aplicar descuento a la venta', icon: Zap, action: () => { document.dispatchEvent(new CustomEvent('trigger-discount')); onClose(); }, shortcut: 'F5', keywords: ['descuento', 'discount', 'rebaja'] },
-    { id: 'clear-cart', label: 'Vaciar Carrito', description: 'Eliminar todos los productos', icon: X, action: () => { document.dispatchEvent(new CustomEvent('trigger-clear-cart')); onClose(); }, shortcut: 'F7', keywords: ['vaciar', 'limpiar', 'clear'] },
-    { id: 'inventory', label: 'Inventario', description: 'Gestion de productos y stock', icon: Package, action: () => { navigate('/productos'); onClose(); }, shortcut: 'Ctrl+2', keywords: ['inventario', 'productos', 'stock'] },
-    { id: 'customers', label: 'Clientes', description: 'Gestion de clientes', icon: Users, action: () => { navigate('/clientes'); onClose(); }, shortcut: 'Ctrl+3', keywords: ['cliente', 'clientes', 'persona'] },
-    { id: 'cash', label: 'Caja', description: 'Apertura, cierre y movimientos', icon: Wallet, action: () => { navigate('/caja'); onClose(); }, shortcut: 'Ctrl+5', keywords: ['caja', 'efectivo', 'dinero', 'apertura', 'cierre'] },
-    { id: 'reports', label: 'Reportes', description: 'Analitica de ventas y negocio', icon: BarChart3, action: () => { navigate('/reportes'); onClose(); }, shortcut: 'Ctrl+4', keywords: ['reporte', 'graficos', 'estadisticas', 'analitica'] },
-    { id: 'settings', label: 'Configuracion', description: 'Ajustes del negocio', icon: Settings, action: () => { navigate('/config'); onClose(); }, shortcut: 'F10', keywords: ['configuracion', 'ajustes', 'settings'] },
-    { id: 'shortcuts', label: 'Atajos de Teclado', description: 'Ver todos los atajos', icon: Keyboard, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('show-shortcuts')), 100); }, shortcut: 'F1', keywords: ['ayuda', 'help', 'atajos', 'shortcuts', 'teclas'] },
-    { id: 'logout', label: 'Cerrar Sesion', description: 'Salir del sistema', icon: LogOut, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('trigger-logout')), 100); }, shortcut: 'Ctrl+Q', keywords: ['salir', 'cerrar', 'sesion', 'logout', 'exit'] },
-  ], [navigate, onClose, focusScan]);
+    { id: 'checkout', labelKey: 'shortcuts.charge', descKey: 'payment.totalToCharge', icon: ShoppingCart, action: () => { document.dispatchEvent(new CustomEvent('trigger-checkout')); onClose(); }, shortcut: 'F2', keywords: ['cobrar', 'pago', 'pagar', 'checkout', 'total', 'charge', 'pay'] },
+    { id: 'sales', labelKey: 'nav.sales', descKey: 'nav.sales', icon: ShoppingCart, action: () => { navigate('/ventas'); onClose(); }, shortcut: 'Ctrl+1', keywords: ['ventas', 'pos', 'vender', 'sales'] },
+    { id: 'products-search', labelKey: 'shortcuts.search', descKey: 'products.searchPlaceholder', icon: Package, action: () => { navigate('/ventas'); onClose(); setTimeout(() => focusScan(), 100); }, shortcut: 'F3', keywords: ['producto', 'buscar', 'sku', 'scanner', 'product', 'search'] },
+    { id: 'manual', labelKey: 'sales.manualProduct', descKey: 'sales.manualProduct', icon: Zap, action: () => { document.dispatchEvent(new CustomEvent('trigger-manual-product')); onClose(); }, shortcut: 'F4', keywords: ['manual', 'generico', 'manual'] },
+    { id: 'discount', labelKey: 'shortcuts.discount', descKey: 'sales.discount', icon: Zap, action: () => { document.dispatchEvent(new CustomEvent('trigger-discount')); onClose(); }, shortcut: 'F5', keywords: ['descuento', 'discount', 'rebaja'] },
+    { id: 'clear-cart', labelKey: 'shortcuts.clear', descKey: 'sales.clearCart', icon: X, action: () => { document.dispatchEvent(new CustomEvent('trigger-clear-cart')); onClose(); }, shortcut: 'F7', keywords: ['vaciar', 'limpiar', 'clear'] },
+    { id: 'inventory', labelKey: 'nav.inventory', descKey: 'nav.inventory', icon: Package, action: () => { navigate('/productos'); onClose(); }, shortcut: 'Ctrl+2', keywords: ['inventario', 'productos', 'stock', 'inventory'] },
+    { id: 'customers', labelKey: 'nav.customers', descKey: 'nav.customers', icon: Users, action: () => { navigate('/clientes'); onClose(); }, shortcut: 'Ctrl+3', keywords: ['cliente', 'clientes', 'persona', 'customer'] },
+    { id: 'cash', labelKey: 'nav.cash', descKey: 'nav.cash', icon: Wallet, action: () => { navigate('/caja'); onClose(); }, shortcut: 'Ctrl+5', keywords: ['caja', 'efectivo', 'dinero', 'cash'] },
+    { id: 'reports', labelKey: 'nav.reports', descKey: 'nav.reports', icon: BarChart3, action: () => { navigate('/reportes'); onClose(); }, shortcut: 'Ctrl+4', keywords: ['reporte', 'graficos', 'reports'] },
+    { id: 'settings', labelKey: 'nav.settings', descKey: 'nav.settings', icon: Settings, action: () => { navigate('/config'); onClose(); }, shortcut: 'F10', keywords: ['configuracion', 'ajustes', 'settings'] },
+    { id: 'shortcuts', labelKey: 'shortcuts.help', descKey: 'shortcuts.help', icon: Keyboard, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('show-shortcuts')), 100); }, shortcut: 'F1', keywords: ['ayuda', 'help', 'atajos', 'shortcuts'] },
+    { id: 'logout', labelKey: 'header.logout', descKey: 'header.logout', icon: LogOut, action: () => { onClose(); setTimeout(() => document.dispatchEvent(new CustomEvent('trigger-logout')), 100); }, shortcut: 'Ctrl+Q', keywords: ['salir', 'cerrar', 'logout', 'exit'] },
+  ], [navigate, onClose, focusScan, t]);
 
   const filtered = useMemo(() =>
     query.trim() === ''
       ? commands
       : commands.filter(cmd => {
           const q = query.toLowerCase();
-          return cmd.label.toLowerCase().includes(q) ||
+          const label = t(cmd.labelKey).toLowerCase();
+          const desc = t(cmd.descKey).toLowerCase();
+          return label.includes(q) || desc.includes(q) ||
             cmd.keywords.some(k => k.toLowerCase().includes(q));
         }),
-    [commands, query],
+    [commands, query, t],
   );
 
   useEffect(() => {
@@ -69,7 +73,7 @@ export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = (
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[12vh]" role="dialog" aria-modal="true" aria-label="Centro de comandos">
+    <div className="fixed inset-0 z-[var(--z-modal)] flex items-start justify-center pt-[12vh]" role="dialog" aria-modal="true" aria-label={t('commandPalette.title')}>
       <div className="fixed inset-0 bg-black/40" onClick={onClose} />
       <div className="relative w-full max-w-xl bg-bg-surface rounded-xl shadow-dialog border border-border-subtle overflow-hidden animate-scale-in">
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle">
@@ -77,7 +81,7 @@ export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = (
           <input
             ref={inputRef}
             type="text"
-            placeholder="Buscar productos, clientes, comandos..."
+            placeholder={t('commandPalette.placeholder')}
             value={query}
             onChange={e => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleKeyDown}
@@ -93,7 +97,7 @@ export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = (
           {filtered.length === 0 && (
             <div className="py-10 text-center">
               <Search className="size-10 mx-auto mb-3 text-text-disabled" />
-              <p className="text-sm text-text-tertiary font-medium">Sin resultados para "{query}"</p>
+              <p className="text-sm text-text-tertiary font-medium">{t('commandPalette.noResults')} "{query}"</p>
             </div>
           )}
           {filtered.map((cmd, index) => {
@@ -111,8 +115,8 @@ export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = (
               >
                 <Icon className={cn('size-4 shrink-0', index === selectedIndex ? 'text-text-primary' : 'text-text-tertiary')} />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold">{cmd.label}</div>
-                  <div className="text-xs text-text-tertiary truncate">{cmd.description}</div>
+                  <div className="text-sm font-semibold">{t(cmd.labelKey)}</div>
+                  <div className="text-xs text-text-tertiary truncate">{t(cmd.descKey)}</div>
                 </div>
                 {cmd.shortcut && (
                   <kbd className="shrink-0 px-2 py-0.5 text-[10px] font-bold text-text-tertiary bg-bg-inset rounded-md border border-border-subtle">
@@ -125,9 +129,9 @@ export const CommandCenter: React.FC<{ open: boolean; onClose: () => void }> = (
         </div>
 
         <div className="px-5 py-2.5 border-t border-border-subtle flex items-center gap-5 text-[10px] text-text-tertiary font-medium">
-          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">↑↓</kbd> Navegar</span>
-          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">↵</kbd> Seleccionar</span>
-          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">Esc</kbd> Cerrar</span>
+          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">↑↓</kbd> {t('commandPalette.navigate')}</span>
+          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">↵</kbd> {t('commandPalette.select')}</span>
+          <span><kbd className="px-1 py-0.5 rounded bg-bg-inset mr-1">Esc</kbd> {t('commandPalette.close')}</span>
         </div>
       </div>
     </div>
@@ -160,11 +164,12 @@ export function useKeyboardShortcuts(onAction: (action: string) => void): void {
 }
 
 export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   if (!open) return null;
 
   const allShortcuts = [
-    ...SHORTCUTS.map(s => ({ key: s.key, label: s.label })),
-    ...PAYMENT_SHORTCUTS.map(s => ({ key: s.key, label: s.label + ' (en cobro)' })),
+    ...SHORTCUTS.map(s => ({ key: s.key, label: t(`shortcuts.${s.labelKey}`) || s.label })),
+    ...PAYMENT_SHORTCUTS.map(s => ({ key: s.key, label: (t(`shortcuts.${s.labelKey}`) || s.label) + (t('payment.cash') === 'Efectivo' ? ' (en cobro)' : ' (at checkout)') })),
   ];
 
   return (
@@ -173,9 +178,9 @@ export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> 
         className="bg-bg-surface rounded-xl border border-border-subtle shadow-dialog p-6 w-full max-w-md animate-scale-in"
         onClick={e => e.stopPropagation()}
         role="dialog"
-        aria-label="Atajos de teclado"
+        aria-label={t('shortcuts.help')}
       >
-        <h2 className="text-lg font-bold mb-4 text-text-primary">Atajos de Teclado</h2>
+        <h2 className="text-lg font-bold mb-4 text-text-primary">{t('shortcuts.help')}</h2>
         <div className="space-y-0.5">
           {allShortcuts.map(s => (
             <div key={s.key} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-bg-surface-hover transition-colors">
@@ -186,9 +191,9 @@ export const ShortcutsOverlay: React.FC<{ open: boolean; onClose: () => void }> 
         </div>
         <button
           onClick={onClose}
-          className="w-full mt-5 py-2.5 rounded-md bg-action-primary text-[var(--bg-surface)] font-semibold text-sm hover:bg-action-primary-hover transition-colors"
+          className="w-full mt-5 py-2.5 rounded-md bg-action-primary text-[var(--action-primary-text)] font-semibold text-sm hover:bg-action-primary-hover transition-colors"
         >
-          Cerrar
+          {t('common.close')}
         </button>
       </div>
     </div>

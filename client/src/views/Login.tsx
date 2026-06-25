@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useUserStore } from '../store/userStore';
 import { api } from '../lib/api';
-import { Store, LogIn, Eye, EyeOff } from 'lucide-react';
+import { Store, LogIn } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -13,6 +14,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const login = useUserStore(s => s.login);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +29,7 @@ export default function Login() {
       login(data.user, data.token);
       navigate('/ventas');
     } catch (e: any) {
-      setError(e.message || 'Error al iniciar sesion');
+      setError(e.message || t('login.error'));
     } finally { setLoading(false); }
   };
 
@@ -38,14 +40,14 @@ export default function Login() {
           <div className="size-12 rounded-xl bg-action-primary flex items-center justify-center mx-auto mb-4">
             <Store className="size-6 text-[var(--bg-surface)]" />
           </div>
-          <h1 className="text-[var(--text-heading-lg)] font-bold text-text-primary tracking-tight">POS Pro</h1>
-          <p className="text-sm text-text-secondary mt-1">Inicia sesion para continuar</p>
+          <h1 className="text-[var(--text-heading-lg)] font-bold text-text-primary tracking-tight">{t('login.title')}</h1>
+          <p className="text-sm text-text-secondary mt-1">{t('login.subtitle')}</p>
         </div>
 
         <div className="bg-bg-surface border border-border-subtle rounded-xl p-6 shadow-dialog">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Usuario</label>
+              <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">{t('login.username')}</label>
               <Input
                 value={username}
                 onChange={e => setUsername(e.target.value)}
@@ -55,7 +57,7 @@ export default function Login() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Contrasena</label>
+              <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">{t('login.password')}</label>
               <Input
                 type="password"
                 value={password}
@@ -73,7 +75,7 @@ export default function Login() {
 
             <Button type="submit" className="w-full" size="lg" isLoading={loading}>
               <LogIn className="size-4" />
-              Iniciar Sesion
+              {t('login.submit')}
             </Button>
           </form>
         </div>
