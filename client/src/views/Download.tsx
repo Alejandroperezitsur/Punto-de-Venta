@@ -33,7 +33,7 @@ export default function DownloadView() {
               <div className="mt-4 flex flex-wrap gap-3">
                 <a
                   href={DOWNLOAD_URL}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-primary text-[var(--bg-surface)] text-sm font-semibold hover:opacity-90 transition-opacity"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-action-primary text-[var(--action-primary-text)] text-sm font-semibold hover:opacity-90 transition-opacity"
                 >
                   <DownloadIcon className="size-4" />
                   Descargar para Windows
