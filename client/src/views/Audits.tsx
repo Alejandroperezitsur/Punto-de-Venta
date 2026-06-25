@@ -1,15 +1,16 @@
 ﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Table, Column } from '../components/ui/Table';
-import { Badge } from '../components/ui/Badge';
 import { PageHeader } from '../components/ui/PageHeader';
 import { useToast } from '../components/ui/Toast';
 import { api } from '../lib/api';
 import { ClipboardList } from 'lucide-react';
 
 export default function AuditsView() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('');
   const toast = useToast();
 
   const load = useCallback(async () => {
@@ -17,75 +18,44 @@ export default function AuditsView() {
     try {
       const data = await api('/audits');
       setLogs(Array.isArray(data) ? data : data.data || []);
-    } catch { toast('Error al cargar auditoria', 'error'); }
+    } catch { toast(t('audits.loadError'), 'error'); }
     finally { setLoading(false); }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { load(); }, [load]);
 
   const filteredLogs = useMemo(() => {
-    if (filter === 'all') return logs;
-    return logs.filter(l => l.action?.includes(filter) || l.entity === filter);
+    if (!filter) return logs;
+    return logs.filter(l => l.action?.includes(filter) || l.entity_type?.includes(filter));
   }, [logs, filter]);
 
-  const actionColors: Record<string, 'success' | 'danger' | 'warning' | 'info' | 'neutral'> = {
-    create: 'success',
-    update: 'info',
-    delete: 'danger',
-    login: 'info',
-    logout: 'neutral',
-    open: 'success',
-    close: 'warning',
-    sale: 'success',
-  };
-
-  const FILTERS = [
-    { key: 'all', label: 'Todos' },
-    { key: 'sale', label: 'Ventas' },
-    { key: 'create', label: 'Creacion' },
-    { key: 'delete', label: 'Eliminacion' },
-    { key: 'login', label: 'Accesos' },
+  const filters = [
+    { key: '', label: t('audits.all') },
+    { key: 'sale', label: t('audits.sales') },
+    { key: 'create', label: t('audits.creation') },
+    { key: 'delete', label: t('audits.deletion') },
+    { key: 'auth', label: t('audits.access') },
   ];
 
   const columns: Column<any>[] = useMemo(() => [
-    { key: 'action', label: 'Accion', render: l => (
-      <Badge variant={actionColors[l.action] || 'neutral'} size="xs">{l.action || 'unknown'}</Badge>
-    )},
-    { key: 'entity', label: 'Entidad', render: l => <span className="text-sm font-medium">{l.entity || '-'}</span> },
-    { key: 'description', label: 'Descripcion', render: l => <span className="text-text-secondary text-sm">{l.description || l.details || '-'}</span> },
-    { key: 'user', label: 'Usuario', render: l => <span className="font-semibold text-sm">{l.user?.username || l.username || '-'}</span> },
-    { key: 'created_at', label: 'Fecha', hideOnMobile: true, render: l => l.created_at ? new Date(l.created_at).toLocaleString() : '-' },
-  ], []);
+    { key: 'action', label: t('audits.action'), render: l => <span className="font-semibold text-sm">{l.action}</span> },
+    { key: 'entity_type', label: t('audits.entity'), hideOnMobile: true },
+    { key: 'details', label: t('audits.description'), hideOnMobile: true, render: l => <span className="text-xs text-text-tertiary">{l.details?.slice(0, 80)}</span> },
+    { key: 'user_id', label: t('audits.user'), render: l => <span className="text-xs font-medium">{l.user_id}</span> },
+    { key: 'created_at', label: t('audits.date'), render: l => new Date(l.created_at).toLocaleString() },
+  ], [t]);
 
   return (
     <div>
-      <PageHeader title="Auditoria" description="Registro de acciones del sistema" icon={ClipboardList} />
-
-      {/* Filter pills */}
-      <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-        {FILTERS.map(f => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-150 ${
-              filter === f.key
-                ? 'bg-action-primary text-[var(--bg-surface)]'
-                : 'text-text-tertiary hover:text-text-primary hover:bg-bg-surface-hover border border-border-subtle'
-            }`}
-          >
+      <PageHeader title={t('audits.title')} description={t('audits.description')} icon={ClipboardList} />
+      <div className="flex gap-1 mb-4 flex-wrap">
+        {filters.map(f => (
+          <button key={f.key} onClick={() => setFilter(f.key)} className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${filter === f.key ? 'bg-action-primary text-[var(--bg-surface)]' : 'bg-bg-inset text-text-secondary hover:text-text-primary'}`}>
             {f.label}
           </button>
         ))}
       </div>
-
-      <Table
-        columns={columns}
-        data={filteredLogs}
-        keyExtractor={l => String(l.id)}
-        loading={loading}
-        emptyMessage="No hay registros de auditoria"
-        density="comfortable"
-      />
+      <Table columns={columns} data={filteredLogs} keyExtractor={l => String(l.id)} loading={loading} emptyMessage={t('audits.noRecords')} density="comfortable" />
     </div>
   );
 }

@@ -90,7 +90,17 @@
     "decrease": "Reducir",
     "increase": "Aumentar",
     "itemsInCart": "Productos en el carrito",
-    "units": "uds"
+    "units": "uds",
+    "discountExceedsSubtotal": "El descuento no puede superar el subtotal de {{amount}}",
+    "printSubtotal": "Subtotal:",
+    "printTax": "IVA (16%):",
+    "printDiscount": "Descuento:",
+    "printTotal": "TOTAL:",
+    "printPayment": "Pago",
+    "printChange": "Cambio:",
+    "printThankYou": "¡Gracias por su compra!",
+    "discardTicket": "Descartar ticket",
+    "manualProductHint": "Producto manual (F4)"
   },
   "payment": {
     "cash": "Efectivo",
@@ -229,10 +239,14 @@
     "openError": "Error al abrir caja",
     "depositError": "Error al registrar depósito",
     "withdrawError": "Error al registrar retiro",
-    "closeError": "Error al cerrar caja"
+    "closeError": "Error al cerrar caja",
+    "reason": "Motivo",
+    "registerDeposit": "Registrar Depósito",
+    "registerWithdraw": "Registrar Retiro"
   },
   "users": {
     "title": "Usuarios",
+    "description": "Gestión de cuentas de acceso al sistema",
     "user": "Usuario",
     "role": "Rol",
     "edit": "Editar",
@@ -250,7 +264,13 @@
     "saveError": "Error al guardar",
     "deleted": "Usuario eliminado",
     "deleteError": "Error al eliminar",
-    "confirmDelete": "¿Eliminar este usuario?"
+    "confirmDelete": "¿Eliminar este usuario?",
+    "password": "Contraseña",
+    "passwordHint": "(dejar vacía para no cambiar)",
+    "admin": "Administrador",
+    "supervisor": "Supervisor",
+    "cashier": "Cajero",
+    "noUsers": "No hay usuarios registrados"
   },
   "settings": {
     "title": "Configuración del Sistema",
@@ -277,7 +297,8 @@
     "settingsSaved": "Configuración guardada",
     "saveError": "Error al guardar:",
     "settings": "Configuración",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "copyrightFooter": "Copyright Footer"
   },
   "audits": {
     "title": "Auditoría",
@@ -407,12 +428,28 @@
     "prioritySupport": "Soporte prioritario",
     "autoBackups": "Backups automáticos",
     "upgrade": "Actualizar",
-    "current": "Actual"
+    "current": "Actual",
+    "freePrice": "$0",
+    "proPrice": "$29/mes",
+    "upTo100Products": "Hasta 100 productos",
+    "oneUser": "1 usuario",
+    "basicSales": "Ventas básicas",
+    "communitySupport": "Soporte comunitario",
+    "fiveUsers": "5 usuarios"
   },
   "backups": {
     "title": "Respaldos",
     "description": "Gestión de copias de seguridad",
     "createBackup": "Crear Respaldo",
     "download": "Descargar"
+  },
+  "branding": {
+    "title": "Personalización de Marca",
+    "description": "Cambia logo, nombre y colores",
+    "businessName": "Nombre del Negocio",
+    "subtitle": "Subtítulo",
+    "logo": "Logo",
+    "uploadLogo": "Subir Logo",
+    "saved": "Marca guardada"
   }
 }

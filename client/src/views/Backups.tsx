@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -6,6 +7,7 @@ import { useToast } from '../components/ui/Toast';
 import { HardDrive, Download, Upload, Clock } from 'lucide-react';
 
 export default function BackupsView() {
+  const { t } = useTranslation();
   const [backups] = useState([
     { id: 1, name: 'backup_2026-06-24.db', size: '2.4 MB', date: '2026-06-24 15:30' },
     { id: 2, name: 'backup_2026-06-23.db', size: '2.3 MB', date: '2026-06-23 12:00' },
@@ -14,9 +16,8 @@ export default function BackupsView() {
 
   return (
     <div>
-      <PageHeader title="Respaldos" description="Gestion de copias de seguridad" icon={HardDrive}
-        actions={<Button size="sm"><Upload className="size-3.5" /> Crear Respaldo</Button>}
-      />
+      <PageHeader title={t('backups.title')} description={t('backups.description')} icon={HardDrive}
+        actions={<Button size="sm"><Upload className="size-3.5" /> {t('backups.createBackup')}</Button>} />
       <div className="space-y-3">
         {backups.map(b => (
           <Card key={b.id}>
@@ -28,7 +29,7 @@ export default function BackupsView() {
                   <p className="text-xs text-text-tertiary flex items-center gap-1"><Clock className="size-3" />{b.date} · {b.size}</p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm"><Download className="size-3.5" /> Descargar</Button>
+              <Button variant="ghost" size="sm"><Download className="size-3.5" /> {t('backups.download')}</Button>
             </div>
           </Card>
         ))}

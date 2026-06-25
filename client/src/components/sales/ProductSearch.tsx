@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { Search, Barcode } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { useCartStore } from '../../store/cartStore';
 import { useToast } from '../ui/Toast';
 import { cn } from '../../utils/cn';
 
 const ProductSearch = memo(function ProductSearch() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [scanning, setScanning] = useState(false);
   const addItem = useCartStore(s => s.addItem);
@@ -19,27 +21,27 @@ const ProductSearch = memo(function ProductSearch() {
       const res = await api(`/products/scan/${encodeURIComponent(barcode)}`);
       if (res && (res.id || res.sku)) {
         addItem(res);
-        toast(`${res.name} agregado`, 'success');
+        toast(`${res.name} ${t('sales.productAdded')}`, 'success');
       } else {
         const listRes = await api(`/products?q=${encodeURIComponent(barcode)}`);
         const data = Array.isArray(listRes) ? listRes : listRes?.data || [];
         if (data.length > 0) {
           addItem(data[0]);
-          toast(`${data[0].name} agregado`, 'success');
+          toast(`${data[0].name} ${t('sales.productAdded')}`, 'success');
         } else {
-          toast('Producto no encontrado. Use F4 para agregar manual', 'warning');
+          toast(t('sales.productNotFound'), 'warning');
           document.dispatchEvent(new CustomEvent('trigger-manual-product'));
         }
       }
     } catch {
-      toast('Error al buscar producto', 'error');
+      toast(t('sales.searchError'), 'error');
     } finally {
       setScanning(false);
       setQuery('');
       if (scanTimer.current) clearTimeout(scanTimer.current);
       scanTimer.current = setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [addItem, toast]);
+  }, [addItem, toast, t]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +64,7 @@ const ProductSearch = memo(function ProductSearch() {
         <button
           type="button"
           className="shrink-0 size-12 flex items-center justify-center text-text-tertiary"
-          aria-label="Escanear"
+          aria-label={t('sales.scanning')}
         >
           {scanning ? (
             <Barcode className="size-5 text-success animate-pulse" />
@@ -76,7 +78,7 @@ const ProductSearch = memo(function ProductSearch() {
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Escanear codigo de barras o buscar producto..."
+          placeholder={t('sales.searchPlaceholder')}
           className="flex-1 h-full outline-none bg-transparent text-sm font-medium text-text-primary placeholder:text-text-tertiary"
           autoComplete="off"
           autoFocus

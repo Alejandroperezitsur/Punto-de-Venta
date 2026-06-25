@@ -1,4 +1,5 @@
 ﻿import React, { useMemo, useState, useEffect, useCallback, useRef, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Check, CreditCard, Banknote, Smartphone, ShoppingBag } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -19,13 +20,6 @@ const getQuickAmounts = (total: number): number[] => {
   return Array.from(amounts).sort((a, b) => a - b).slice(0, 6);
 };
 
-const PAYMENT_METHODS = [
-  { id: 'cash', label: 'Efectivo', icon: Banknote, key: 'C' },
-  { id: 'card', label: 'Tarjeta', icon: CreditCard, key: 'T' },
-  { id: 'transfer', label: 'Transferencia', icon: Smartphone, key: 'R' },
-  { id: 'mixed', label: 'Mixto', icon: ShoppingBag },
-] as const;
-
 const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfirm, isLoading }: {
   total: number;
   items: any[];
@@ -33,11 +27,19 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
   onConfirm: (data: any) => Promise<void>;
   isLoading: boolean;
 }) {
+  const { t } = useTranslation();
   const [received, setReceived] = useState(total <= 0 ? '' : total.toString());
   const [method, setMethod] = useState('cash');
   const [confirmError, setConfirmError] = useState('');
   const submitLocked = useRef(false);
   const [submitState, setSubmitState] = useState<'idle' | 'locking' | 'saving' | 'done'>('idle');
+
+  const PAYMENT_METHODS = [
+    { id: 'cash', label: t('payment.cash'), icon: Banknote, key: 'C' },
+    { id: 'card', label: t('payment.card'), icon: CreditCard, key: 'T' },
+    { id: 'transfer', label: t('payment.transfer'), icon: Smartphone, key: 'R' },
+    { id: 'mixed', label: t('payment.mixed'), icon: ShoppingBag },
+  ] as const;
 
   const receivedNum = parseFloat(received) || 0;
   const change = Math.max(0, receivedNum - total);
@@ -73,11 +75,11 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
       setSubmitState('done');
       onClose();
     } catch (e) {
-      setConfirmError(e instanceof Error ? e.message : 'Error al procesar el pago');
+      setConfirmError(e instanceof Error ? e.message : t('payment.paymentError'));
       submitLocked.current = false;
       setSubmitState('idle');
     }
-  }, [isReady, method, receivedNum, change, total, onConfirm, onClose]);
+  }, [isReady, method, receivedNum, change, total, onConfirm, onClose, t]);
 
   const exactAmount = useCallback(() => { setReceived(total.toString()); }, [total]);
 
@@ -103,10 +105,10 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
   }, [isReady, handleConfirm, onClose, handleKeypress]);
 
   const getButtonLabel = () => {
-    if (submitState === 'saving') return 'Procesando...';
-    if (submitState === 'locking') return 'Preparando...';
-    if (isExactCash) return 'Cobrar (Efectivo exacto)';
-    return 'Cobrar';
+    if (submitState === 'saving') return t('payment.processing');
+    if (submitState === 'locking') return t('payment.preparing');
+    if (isExactCash) return t('payment.cashExact');
+    return t('payment.charge');
   };
 
   const numpadKeys = useMemo(() => [1, 2, 3, 4, 5, 6, 7, 8, 9, '.', 0, 'DEL'], []);
@@ -114,18 +116,16 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
   return (
     <Modal open={true} onClose={onClose} size="xl" hideClose={submitLocked.current}>
       <div className="flex flex-col gap-5">
-        {/* Total header */}
         <div className="text-center py-5 rounded-xl bg-bg-inset border border-border-subtle">
-          <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-2">Total a cobrar</p>
+          <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest mb-2">{t('payment.totalToCharge')}</p>
           <p className="text-[var(--text-display)] font-bold tracking-tight tabular-nums text-text-primary leading-none">
             {formatMoney(total)}
           </p>
           <p className="text-xs text-text-tertiary mt-2 font-medium">
-            {items.length} {items.length === 1 ? 'producto' : 'productos'}
+            {items.length} {items.length === 1 ? t('payment.product') : t('payment.products')}
           </p>
         </div>
 
-        {/* Payment method grid */}
         <div className="grid grid-cols-4 gap-2">
           {PAYMENT_METHODS.map(m => {
             const Icon = m.icon;
@@ -141,7 +141,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
                     : 'bg-bg-surface text-text-secondary border-border-subtle hover:border-border-default hover:bg-bg-surface-hover',
                   submitLocked.current && 'opacity-40 cursor-not-allowed',
                 )}
-                aria-label={`Pago con ${m.label}`}
+                aria-label={`${t('payment.charge')} ${m.label}`}
                 aria-pressed={method === m.id}
               >
                 <Icon className="size-5" strokeWidth={2} />
@@ -153,12 +153,11 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
 
         {isCashOrMixed && (
           <>
-            {/* Received amount */}
             <div className="rounded-xl bg-bg-surface border border-border-subtle p-5">
               <div className="flex justify-between items-baseline mb-3">
-                <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">Recibido</span>
+                <span className="text-xs font-semibold text-text-tertiary uppercase tracking-wider">{t('payment.received')}</span>
                 {receivedNum > 0 && isShort && (
-                  <span className="text-xs font-bold text-danger">Falta {formatMoney(total - receivedNum)}</span>
+                  <span className="text-xs font-bold text-danger">{t('payment.missing')} {formatMoney(total - receivedNum)}</span>
                 )}
               </div>
               <div className={cn(
@@ -173,14 +172,13 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
                   <div className="rounded-lg bg-success-bg px-3 py-2 inline-flex items-center gap-2">
                     <Check className="size-4 text-success" />
                     <span className="text-sm font-bold tabular-nums text-success-text">
-                      Cambio: {formatMoney(change)}
+                      {t('payment.change')} {formatMoney(change)}
                     </span>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Quick amounts */}
             <div className="flex gap-2 overflow-x-auto pb-1">
               <button
                 onClick={exactAmount}
@@ -193,7 +191,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
                   submitLocked.current && 'opacity-50 cursor-not-allowed',
                 )}
               >
-                <Check className="size-3.5" /> Exacto
+                <Check className="size-3.5" /> {t('payment.exact')}
               </button>
               {quickAmounts.filter(a => Math.abs(a - total) > 0.01).map(amt => (
                 <button
@@ -213,7 +211,6 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               ))}
             </div>
 
-            {/* Numpad */}
             <div className="grid grid-cols-3 gap-2 pb-1">
               {numpadKeys.map(k => (
                 <button
@@ -228,7 +225,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
                       : 'bg-bg-surface text-text-primary border-border-subtle hover:bg-bg-surface-hover active:bg-bg-surface-active',
                     submitLocked.current && 'opacity-40 cursor-not-allowed',
                   )}
-                  aria-label={k === 'DEL' ? 'Borrar' : String(k)}
+                  aria-label={k === 'DEL' ? t('payment.clear') : String(k)}
                 >
                   {k === 'DEL' ? '\u232B' : k}
                 </button>
@@ -243,10 +240,10 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               <Check className="size-8 text-success" />
             </div>
             <h3 className="text-sm font-semibold text-text-primary">
-              Pago con {method === 'card' ? 'tarjeta' : 'transferencia'}
+              {method === 'card' ? t('payment.cardPayment') : t('payment.transferPayment')}
             </h3>
             <p className="text-xs text-text-secondary font-medium mt-2">
-              {method === 'card' ? 'Cobra en la terminal bancaria.' : 'Solicita la transferencia.'}
+              {method === 'card' ? t('payment.cardInstruction') : t('payment.transferInstruction')}
             </p>
             <p className="font-bold text-4xl mt-4 text-text-primary tabular-nums tracking-tight">
               {formatMoney(total)}
@@ -260,7 +257,6 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
           </div>
         )}
 
-        {/* Confirm CTA */}
         <button
           onClick={handleConfirm}
           disabled={!isReady || submitLocked.current}
@@ -270,7 +266,7 @@ const PaymentModal = memo(function PaymentModal({ total, items, onClose, onConfi
               ? 'bg-action-primary text-[var(--bg-surface)] hover:bg-action-primary-hover'
               : 'bg-bg-inset text-text-disabled cursor-not-allowed',
           )}
-          aria-label="Confirmar cobro"
+          aria-label={t('payment.confirmCharge')}
         >
           {submitLocked.current ? (
             <><span className="size-2.5 rounded-full bg-current animate-pulse" />{getButtonLabel()}</>

@@ -90,7 +90,17 @@
     "decrease": "Decrease",
     "increase": "Increase",
     "itemsInCart": "Products in cart",
-    "units": "pcs"
+    "units": "pcs",
+    "discountExceedsSubtotal": "Discount cannot exceed subtotal of {{amount}}",
+    "printSubtotal": "Subtotal:",
+    "printTax": "VAT (16%):",
+    "printDiscount": "Discount:",
+    "printTotal": "TOTAL:",
+    "printPayment": "Payment",
+    "printChange": "Change:",
+    "printThankYou": "Thank you for your purchase!",
+    "discardTicket": "Discard ticket",
+    "manualProductHint": "Manual product (F4)"
   },
   "payment": {
     "cash": "Cash",
@@ -229,10 +239,14 @@
     "openError": "Error opening cash register",
     "depositError": "Error registering deposit",
     "withdrawError": "Error registering withdrawal",
-    "closeError": "Error closing cash register"
+    "closeError": "Error closing cash register",
+    "reason": "Reason",
+    "registerDeposit": "Register Deposit",
+    "registerWithdraw": "Register Withdrawal"
   },
   "users": {
     "title": "Users",
+    "description": "System access account management",
     "user": "User",
     "role": "Role",
     "edit": "Edit",
@@ -250,7 +264,13 @@
     "saveError": "Error saving",
     "deleted": "User deleted",
     "deleteError": "Error deleting",
-    "confirmDelete": "Delete this user?"
+    "confirmDelete": "Delete this user?",
+    "password": "Password",
+    "passwordHint": "(leave blank to keep current)",
+    "admin": "Admin",
+    "supervisor": "Supervisor",
+    "cashier": "Cashier",
+    "noUsers": "No users registered"
   },
   "settings": {
     "title": "System Settings",
@@ -277,7 +297,8 @@
     "settingsSaved": "Settings saved",
     "saveError": "Error saving:",
     "settings": "Settings",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "copyrightFooter": "Copyright Footer"
   },
   "audits": {
     "title": "Audits",
@@ -407,12 +428,28 @@
     "prioritySupport": "Priority support",
     "autoBackups": "Automatic backups",
     "upgrade": "Upgrade",
-    "current": "Current"
+    "current": "Current",
+    "freePrice": "$0",
+    "proPrice": "$29/mo",
+    "upTo100Products": "Up to 100 products",
+    "oneUser": "1 user",
+    "basicSales": "Basic sales",
+    "communitySupport": "Community support",
+    "fiveUsers": "5 users"
   },
   "backups": {
     "title": "Backups",
     "description": "Backup management",
     "createBackup": "Create Backup",
     "download": "Download"
+  },
+  "branding": {
+    "title": "Brand Customization",
+    "description": "Change logo, name and colors",
+    "businessName": "Business Name",
+    "subtitle": "Subtitle",
+    "logo": "Logo",
+    "uploadLogo": "Upload Logo",
+    "saved": "Brand saved"
   }
 }

@@ -1,66 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { PageHeader } from '../components/ui/PageHeader';
-import { Card } from '../components/ui/Card';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { PageHeader } from '../components/ui/PageHeader';
 import { useToast } from '../components/ui/Toast';
-import { Palette, Upload, Check } from 'lucide-react';
+import { Palette, Save } from 'lucide-react';
 
 export default function BrandingView() {
-  const [branding, setBranding] = useState({ businessName: 'POS Pro', businessSubtitle: 'Punto de Venta', logo: null as string | null });
+  const { t } = useTranslation();
   const toast = useToast();
+  const saved = JSON.parse(localStorage.getItem('app_branding') || '{}');
+  const [branding, setBranding] = useState({ businessName: saved.businessName || 'POS Pro', logo: saved.logo || null as string | null });
 
-  useEffect(() => {
-    const stored = localStorage.getItem('app_branding');
-    if (stored) {
-      try { setBranding(b => ({ ...b, ...JSON.parse(stored) })); } catch {}
-    }
-  }, []);
-
-  const handleSave = () => {
-    localStorage.setItem('app_branding', JSON.stringify(branding));
-    window.dispatchEvent(new Event('storage'));
-    toast('Marca guardada', 'success');
-  };
-
-  const handleLogo = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setBranding(b => ({ ...b, logo: reader.result as string }));
+    reader.onload = () => { setBranding({ ...branding, logo: reader.result as string }); };
     reader.readAsDataURL(file);
+  };
+
+  const handleSave = () => {
+    localStorage.setItem('app_branding', JSON.stringify(branding));
+    window.dispatchEvent(new CustomEvent('branding-updated'));
+    toast(t('branding.saved'), 'success');
   };
 
   return (
     <div>
-      <PageHeader title="Personalizacion de Marca" description="Cambia logo, nombre y colores" icon={Palette}
-        actions={<Button onClick={handleSave} size="sm"><Check className="size-3.5" /> Guardar</Button>}
-      />
-      <div className="max-w-lg space-y-4">
-        <Card>
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Nombre del Negocio</label>
-              <Input value={branding.businessName} onChange={e => setBranding(b => ({ ...b, businessName: e.target.value }))} />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Subtitulo</label>
-              <Input value={branding.businessSubtitle} onChange={e => setBranding(b => ({ ...b, businessSubtitle: e.target.value }))} />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Logo</label>
-              <div className="flex items-center gap-4">
-                {branding.logo && <img src={branding.logo} alt="Logo" className="size-16 object-contain rounded-lg border border-border-subtle" />}
-                <label className="cursor-pointer">
-                  <input type="file" accept="image/*" onChange={handleLogo} className="hidden" />
-                  <span className="px-4 py-2 rounded-lg bg-bg-inset text-sm font-medium text-text-secondary hover:bg-bg-surface-hover transition-colors inline-flex items-center gap-2">
-                    <Upload className="size-3.5" /> Subir Logo
-                  </span>
-                </label>
-              </div>
+      <PageHeader title={t('branding.title')} description={t('branding.description')} icon={Palette}
+        actions={<Button onClick={handleSave} size="sm"><Save className="size-3.5" /> {t('common.save')}</Button>} />
+      <div className="max-w-md space-y-6">
+        <div className="rounded-xl bg-bg-surface border border-border-subtle p-6 space-y-4">
+          <div className="space-y-1"><label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">{t('branding.businessName')}</label>
+            <Input value={branding.businessName} onChange={e => setBranding({ ...branding, businessName: e.target.value })} /></div>
+          <div className="space-y-1"><label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">{t('branding.logo')}</label>
+            <div className="flex items-center gap-3">
+              {branding.logo && <img src={branding.logo} alt="Logo" className="size-12 rounded-lg object-contain bg-bg-inset border border-border-subtle" />}
+              <label className="px-4 py-2 rounded-md bg-bg-inset border border-border-subtle text-sm font-medium text-text-secondary hover:bg-bg-surface-hover cursor-pointer transition-colors">{t('branding.uploadLogo')}
+                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" /></label>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

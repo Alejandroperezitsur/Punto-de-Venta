@@ -1,6 +1,7 @@
 ﻿import React, { useRef, useCallback, memo, useEffect, useMemo, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Trash2, Minus, Plus, ShoppingBag } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCartStore } from '../../store/cartStore';
 import { formatMoney } from '../../utils/format';
 import { cn } from '../../utils/cn';
@@ -17,6 +18,7 @@ interface CartItemRowProps {
 }
 
 const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity, onRemove }: CartItemRowProps) {
+  const { t } = useTranslation();
   const isLowStock = item.stock !== undefined && item.stock <= LOW_STOCK_THRESHOLD;
   const isOutOfStock = item.stock !== undefined && item.stock <= 0;
   const lineTotal = useMemo(() => item.price * item.quantity, [item.price, item.quantity]);
@@ -32,9 +34,8 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
       )}
       role="listitem"
       tabIndex={0}
-      aria-label={`${item.name}, ${item.quantity} unidades, ${formatMoney(lineTotal)}`}
+      aria-label={`${item.name}, ${item.quantity} ${t('sales.units')}, ${formatMoney(lineTotal)}`}
     >
-      {/* Product image placeholder */}
       <div className="size-10 rounded-md bg-bg-inset flex items-center justify-center shrink-0 overflow-hidden">
         {item.image ? (
           <img src={item.image} alt={item.name} className="size-full object-cover" />
@@ -43,25 +44,23 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
         )}
       </div>
 
-      {/* Product info */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold truncate text-text-primary">{item.name}</p>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-xs text-text-tertiary tabular-nums">{formatMoney(item.price)} c/u</span>
           {isLowStock && (
             <span className="text-[10px] font-semibold text-warning-text bg-warning-bg px-1.5 py-0.5 rounded">
-              {item.stock} uds
+              {item.stock} {t('sales.units')}
             </span>
           )}
         </div>
       </div>
 
-      {/* Quantity control */}
       <div className="flex items-center gap-0.5 bg-bg-inset rounded-md border border-border-subtle">
         <button
           onClick={() => item.quantity <= 1 ? onRemove(item.id) : onUpdateQuantity(item.id, item.quantity - 1)}
           className="size-8 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-surface-active transition-colors rounded-l-md"
-          aria-label={item.quantity <= 1 ? 'Eliminar' : 'Reducir'}
+          aria-label={item.quantity <= 1 ? t('sales.remove') : t('sales.decrease')}
         >
           {item.quantity <= 1 ? <Trash2 className="size-3.5 text-danger/60" /> : <Minus className="size-3.5" />}
         </button>
@@ -69,13 +68,12 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
         <button
           onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
           className="size-8 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-surface-active transition-colors rounded-r-md"
-          aria-label="Aumentar"
+          aria-label={t('sales.increase')}
         >
           <Plus className="size-3.5" />
         </button>
       </div>
 
-      {/* Line total */}
       <span className={cn(
         'w-[80px] text-right shrink-0 text-sm font-bold tabular-nums',
         isRecent ? 'text-success-text' : 'text-text-primary',
@@ -87,6 +85,7 @@ const CartItemRow = memo(function CartItemRow({ item, isRecent, onUpdateQuantity
 });
 
 export const Cart = memo(function Cart() {
+  const { t } = useTranslation();
   const items = useCartStore(s => s.items);
   const removeItem = useCartStore(s => s.removeItem);
   const updateQuantity = useCartStore(s => s.updateQuantity);
@@ -126,9 +125,9 @@ export const Cart = memo(function Cart() {
         <div className="size-20 rounded-xl bg-bg-inset border border-dashed border-border-default flex items-center justify-center mb-4">
           <ShoppingBag className="size-10 text-text-disabled" />
         </div>
-        <p className="text-base font-semibold text-text-primary mb-1">Carrito vacio</p>
+        <p className="text-base font-semibold text-text-primary mb-1">{t('sales.empty')}</p>
         <p className="text-sm text-text-tertiary max-w-[240px] text-center">
-          Escanee un producto o busque en el catalogo para comenzar
+          {t('sales.emptyHint')}
         </p>
       </div>
     );
@@ -136,7 +135,7 @@ export const Cart = memo(function Cart() {
 
   if (shouldVirtualize) {
     return (
-      <div ref={scrollContainerRef} className="h-full overflow-y-auto" role="list" aria-label="Productos en el carrito">
+      <div ref={scrollContainerRef} className="h-full overflow-y-auto" role="list" aria-label={t('sales.itemsInCart')}>
         <div style={{ height: virtualizer.getTotalSize(), position: 'relative', width: '100%' }}>
           {virtualizer.getVirtualItems().map(virtualRow => (
             <div
@@ -160,7 +159,7 @@ export const Cart = memo(function Cart() {
   }
 
   return (
-    <div className="flex flex-col gap-1" role="list" aria-label="Productos en el carrito">
+    <div className="flex flex-col gap-1" role="list" aria-label={t('sales.itemsInCart')}>
       {items.map(item => (
         <CartItemRow
           key={item.id}

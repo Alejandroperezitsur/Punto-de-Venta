@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Table, Column } from '../components/ui/Table';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -22,6 +23,7 @@ interface Customer {
 }
 
 export default function CustomersView() {
+  const { t } = useTranslation();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -34,9 +36,9 @@ export default function CustomersView() {
     try {
       const data = await api('/customers');
       setCustomers(Array.isArray(data) ? data : data.data || []);
-    } catch { toast('Error al cargar clientes', 'error'); }
+    } catch { toast(t('customers.loadError'), 'error'); }
     finally { setLoading(false); }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -56,20 +58,20 @@ export default function CustomersView() {
       const payload = { name: form.name, email: form.email || undefined, phone: form.phone || undefined };
       if (editModal.customer) {
         await api(`/customers/${editModal.customer.id}`, { method: 'PUT', body: JSON.stringify(payload) });
-        toast('Cliente actualizado', 'success');
+        toast(t('customers.updated'), 'success');
       } else {
         await api('/customers', { method: 'POST', body: JSON.stringify(payload) });
-        toast('Cliente creado', 'success');
+        toast(t('customers.created'), 'success');
       }
       setEditModal({ open: false, customer: null });
       load();
-    } catch { toast('Error al guardar', 'error'); }
+    } catch { toast(t('customers.saveError'), 'error'); }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Eliminar este cliente?')) return;
-    try { await api(`/customers/${id}`, { method: 'DELETE' }); toast('Cliente eliminado', 'success'); load(); setSelectedCustomer(null); }
-    catch { toast('Error al eliminar', 'error'); }
+    if (!confirm(t('customers.confirmDelete'))) return;
+    try { await api(`/customers/${id}`, { method: 'DELETE' }); toast(t('customers.deleted'), 'success'); load(); setSelectedCustomer(null); }
+    catch { toast(t('customers.deleteError'), 'error'); }
   };
 
   const stats = useMemo(() => {
@@ -80,7 +82,7 @@ export default function CustomersView() {
   }, [customers]);
 
   const columns: Column<Customer>[] = useMemo(() => [
-    { key: 'name', label: 'Cliente', render: c => (
+    { key: 'name', label: t('customers.customer'), render: c => (
       <div className="flex items-center gap-3">
         <div className="size-9 rounded-full bg-bg-inset flex items-center justify-center shrink-0">
           <span className="text-xs font-bold text-text-secondary">{c.name?.charAt(0)?.toUpperCase()}</span>
@@ -91,52 +93,31 @@ export default function CustomersView() {
         </div>
       </div>
     )},
-    { key: 'phone', label: 'Telefono', hideOnMobile: true, render: c => c.phone || <span className="text-text-disabled">-</span> },
-    { key: 'total_purchases', label: 'Compras', render: c => <span className="font-semibold tabular-nums">{c.total_purchases || 0}</span> },
+    { key: 'phone', label: t('customers.phone'), hideOnMobile: true, render: c => c.phone || <span className="text-text-disabled">-</span> },
+    { key: 'total_purchases', label: t('customers.purchases'), render: c => <span className="font-semibold tabular-nums">{c.total_purchases || 0}</span> },
     { key: 'actions', label: '', render: c => (
       <div className="flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
-        <button onClick={() => openEdit(c)} className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-accent hover:bg-accent-bg transition-colors" aria-label="Editar"><Pencil className="size-3.5" /></button>
-        <button onClick={() => handleDelete(c.id)} className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-danger hover:bg-danger-bg transition-colors" aria-label="Eliminar"><Trash2 className="size-3.5" /></button>
+        <button onClick={() => openEdit(c)} className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-accent hover:bg-accent-bg transition-colors" aria-label={t('customers.edit')}><Pencil className="size-3.5" /></button>
+        <button onClick={() => handleDelete(c.id)} className="size-8 rounded-md flex items-center justify-center text-text-tertiary hover:text-danger hover:bg-danger-bg transition-colors" aria-label={t('customers.delete')}><Trash2 className="size-3.5" /></button>
       </div>
     ), className: 'w-[80px] text-right' },
-  ], []);
+  ], [t]);
 
   return (
     <div>
-      <PageHeader
-        title="Clientes"
-        description="Gestion de clientes y contacto"
-        icon={Users}
-        actions={<Button onClick={openCreate} size="sm"><Plus className="size-3.5" />Nuevo Cliente</Button>}
-      />
-
-      {/* KPI Row */}
+      <PageHeader title={t('customers.title')} description={t('customers.description')} icon={Users}
+        actions={<Button onClick={openCreate} size="sm"><Plus className="size-3.5" />{t('customers.newCustomer')}</Button>} />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        <KpiCard label="Total Clientes" value={stats.total} />
-        <KpiCard label="Con Compras" value={stats.withPurchases} />
-        <KpiCard label="Total Vendido" value={`$${stats.totalSpent.toLocaleString()}`} />
+        <KpiCard label={t('customers.totalCustomers')} value={stats.total} />
+        <KpiCard label={t('customers.withPurchases')} value={stats.withPurchases} />
+        <KpiCard label={t('customers.totalSold')} value={`$${stats.totalSpent.toLocaleString()}`} />
       </div>
-
-      {/* Split view: list + detail */}
       <div className="flex gap-0 rounded-lg border border-border-subtle bg-bg-surface overflow-hidden">
-        {/* Left: Customer list */}
         <div className="w-[400px] shrink-0 border-r border-border-subtle">
-          <Table
-            columns={columns}
-            data={customers}
-            keyExtractor={c => String(c.id)}
-            loading={loading}
-            searchable
-            searchPlaceholder="Buscar clientes..."
-            emptyMessage="No hay clientes registrados"
-            emptyIcon={Users}
-            density="comfortable"
-            onRowClick={c => setSelectedCustomer(c)}
-            selected={selectedCustomer ? [String(selectedCustomer.id)] : []}
-          />
+          <Table columns={columns} data={customers} keyExtractor={c => String(c.id)} loading={loading} searchable
+            searchPlaceholder={t('customers.searchPlaceholder')} emptyMessage={t('customers.noCustomers')} emptyIcon={Users}
+            density="comfortable" onRowClick={c => setSelectedCustomer(c)} selected={selectedCustomer ? [String(selectedCustomer.id)] : []} />
         </div>
-
-        {/* Right: Customer detail */}
         <div className="flex-1 p-6">
           {selectedCustomer ? (
             <div>
@@ -152,47 +133,34 @@ export default function CustomersView() {
                   </div>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <KpiCard label="Total Compras" value={selectedCustomer.total_purchases || 0} />
-                <KpiCard label="Total Gastado" value={`$${(selectedCustomer.total_spent || 0).toLocaleString()}`} />
+                <KpiCard label={t('customers.totalPurchases')} value={selectedCustomer.total_purchases || 0} />
+                <KpiCard label={t('customers.totalSpent')} value={`$${(selectedCustomer.total_spent || 0).toLocaleString()}`} />
               </div>
-
               <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={() => openEdit(selectedCustomer)}>
-                  <Pencil className="size-3.5" /> Editar
-                </Button>
-                <Button variant="danger" size="sm" onClick={() => handleDelete(selectedCustomer.id)}>
-                  <Trash2 className="size-3.5" /> Eliminar
-                </Button>
+                <Button variant="secondary" size="sm" onClick={() => openEdit(selectedCustomer)}><Pencil className="size-3.5" /> {t('customers.edit')}</Button>
+                <Button variant="danger" size="sm" onClick={() => handleDelete(selectedCustomer.id)}><Trash2 className="size-3.5" /> {t('customers.delete')}</Button>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-text-tertiary py-12">
               <ShoppingBag className="size-12 mb-3 opacity-30" />
-              <p className="text-sm font-medium">Selecciona un cliente para ver detalles</p>
+              <p className="text-sm font-medium">{t('customers.selectCustomer')}</p>
             </div>
           )}
         </div>
       </div>
-
-      <Modal open={editModal.open} onClose={() => setEditModal({ open: false, customer: null })} title={editModal.customer ? 'Editar Cliente' : 'Nuevo Cliente'} size="sm">
+      <Modal open={editModal.open} onClose={() => setEditModal({ open: false, customer: null })} title={editModal.customer ? t('customers.editCustomer') : t('customers.newCustomer')} size="sm">
         <form onSubmit={handleSave} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Nombre</label>
-            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required autoFocus />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Email</label>
-            <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-          </div>
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">Telefono</label>
-            <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
-          </div>
+          <div className="space-y-1"><label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">{t('customers.name')}</label>
+            <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required autoFocus /></div>
+          <div className="space-y-1"><label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">{t('customers.email')}</label>
+            <Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
+          <div className="space-y-1"><label className="text-xs font-bold text-text-tertiary uppercase tracking-wider">{t('customers.phone')}</label>
+            <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
           <div className="flex gap-2 pt-2">
-            <Button variant="secondary" type="button" className="flex-1" onClick={() => setEditModal({ open: false, customer: null })}>Cancelar</Button>
-            <Button type="submit" className="flex-1">{editModal.customer ? 'Guardar' : 'Crear'}</Button>
+            <Button variant="secondary" type="button" className="flex-1" onClick={() => setEditModal({ open: false, customer: null })}>{t('common.cancel')}</Button>
+            <Button type="submit" className="flex-1">{editModal.customer ? t('common.save') : t('common.create')}</Button>
           </div>
         </form>
       </Modal>
